@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -17,7 +17,7 @@ model Church {
   email                 String   @unique
   stripeCustomerId      String?  @unique
   twilioAccountSid      String?
-  twilioAuthToken       String?  @db.Text
+  twilioAuthToken       String?
   twilioPhoneNumber     String?
   twilioVerified        Boolean  @default(false)
   trialEndsAt           DateTime
@@ -66,7 +66,7 @@ model Group {
   name                    String
   description             String?
   welcomeMessageEnabled   Boolean  @default(false)
-  welcomeMessageText      String?  @db.Text
+  welcomeMessageText      String?
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 
@@ -119,7 +119,7 @@ model GroupMember {
 model Message {
   id                  String   @id @default(cuid())
   churchId            String
-  content             String   @db.Text
+  content             String
   status              String   @default("pending") // pending, sent, failed
   targetType          String   // individual, groups, branches, all
   targetIds           String   @default("") // JSON array of IDs
@@ -164,7 +164,7 @@ model MessageTemplate {
   id        String   @id @default(cuid())
   churchId  String
   name      String
-  content   String   @db.Text
+  content   String
   category  String   // service_reminder, event, prayer, thank_you, welcome, offering
   isDefault Boolean  @default(false)
   usageCount Int     @default(0)
@@ -183,7 +183,7 @@ model RecurringMessage {
   id          String   @id @default(cuid())
   churchId    String
   name        String
-  content     String   @db.Text
+  content     String
   targetType  String   // individual, groups, branches, all
   targetIds   String   @default("") // JSON array
   frequency   String   // daily, weekly, monthly
@@ -249,7 +249,7 @@ model AnalyticsEvent {
   id        String   @id @default(cuid())
   churchId  String?
   eventName String
-  properties String? @db.Text // JSON
+  properties String? // JSON
   createdAt DateTime @default(now())
 
   @@index([churchId])

@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git push:*)",
+      "Bash(npm install)",
+      "Bash(npx prisma generate:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
