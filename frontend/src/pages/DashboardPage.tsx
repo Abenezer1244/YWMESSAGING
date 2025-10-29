@@ -1,10 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../stores/authStore';
+import useBranchStore from '../stores/branchStore';
 import BranchSelector from '../components/BranchSelector';
 
 export function DashboardPage() {
   const navigate = useNavigate();
   const { user, church, logout } = useAuthStore();
+  const { currentBranchId } = useBranchStore();
 
   const handleLogout = () => {
     logout();
@@ -44,6 +46,22 @@ export function DashboardPage() {
             >
               📍 Branches
             </button>
+            {currentBranchId && (
+              <>
+                <button
+                  onClick={() => navigate(`/branches/${currentBranchId}/groups`)}
+                  className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition"
+                >
+                  👥 Groups
+                </button>
+                <button
+                  onClick={() => navigate(`/members?groupId=`)}
+                  className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition"
+                >
+                  👤 Members
+                </button>
+              </>
+            )}
             <BranchSelector />
           </div>
         </div>

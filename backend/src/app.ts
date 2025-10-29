@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import { csrfProtection, generateCsrfToken } from './middleware/csrf.middleware.js';
 import authRoutes from './routes/auth.routes.js';
 import branchRoutes from './routes/branch.routes.js';
+import groupRoutes from './routes/group.routes.js';
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.get('/api/csrf-token', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api', branchRoutes);
+app.use('/api', groupRoutes);
 
 // 404 handler
 app.use((req, res) => {

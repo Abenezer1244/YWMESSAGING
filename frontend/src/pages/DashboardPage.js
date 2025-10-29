@@ -1,10 +1,12 @@
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../stores/authStore';
+import useBranchStore from '../stores/branchStore';
 import BranchSelector from '../components/BranchSelector';
 export function DashboardPage() {
     const navigate = useNavigate();
     const { user, church, logout } = useAuthStore();
+    const { currentBranchId } = useBranchStore();
     const handleLogout = () => {
         logout();
         navigate('/login');
@@ -12,7 +14,7 @@ export function DashboardPage() {
     const daysUntilTrialEnd = church ? Math.ceil((new Date(church.trialEndsAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : 0;
     const trialStatus = daysUntilTrialEnd > 0 ? 'active' : 'expired';
     const trialColor = daysUntilTrialEnd >= 8 ? 'green' : daysUntilTrialEnd >= 4 ? 'yellow' : 'red';
-    return (_jsxs("div", { className: "min-h-screen bg-gray-50", children: [_jsx("header", { className: "bg-white shadow", children: _jsxs("div", { className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4", children: [_jsxs("div", { className: "flex justify-between items-center mb-4", children: [_jsxs("div", { children: [_jsx("h1", { className: "text-3xl font-bold text-gray-900", children: "Connect YW Dashboard" }), _jsx("p", { className: "text-gray-600", children: church?.name })] }), _jsx("button", { onClick: handleLogout, className: "bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition", children: "Logout" })] }), _jsxs("div", { className: "flex gap-4 items-center", children: [_jsx("button", { onClick: () => navigate('/branches'), className: "px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition", children: "\uD83D\uDCCD Branches" }), _jsx(BranchSelector, {})] })] }) }), _jsxs("main", { className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8", children: [_jsx("div", { className: `rounded-lg p-4 mb-8 text-white ${trialColor === 'green'
+    return (_jsxs("div", { className: "min-h-screen bg-gray-50", children: [_jsx("header", { className: "bg-white shadow", children: _jsxs("div", { className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4", children: [_jsxs("div", { className: "flex justify-between items-center mb-4", children: [_jsxs("div", { children: [_jsx("h1", { className: "text-3xl font-bold text-gray-900", children: "Connect YW Dashboard" }), _jsx("p", { className: "text-gray-600", children: church?.name })] }), _jsx("button", { onClick: handleLogout, className: "bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition", children: "Logout" })] }), _jsxs("div", { className: "flex gap-4 items-center", children: [_jsx("button", { onClick: () => navigate('/branches'), className: "px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition", children: "\uD83D\uDCCD Branches" }), currentBranchId && (_jsxs(_Fragment, { children: [_jsx("button", { onClick: () => navigate(`/branches/${currentBranchId}/groups`), className: "px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition", children: "\uD83D\uDC65 Groups" }), _jsx("button", { onClick: () => navigate(`/members?groupId=`), className: "px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition", children: "\uD83D\uDC64 Members" })] })), _jsx(BranchSelector, {})] })] }) }), _jsxs("main", { className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8", children: [_jsx("div", { className: `rounded-lg p-4 mb-8 text-white ${trialColor === 'green'
                             ? 'bg-green-500'
                             : trialColor === 'yellow'
                                 ? 'bg-yellow-500'

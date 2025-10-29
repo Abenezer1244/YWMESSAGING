@@ -5,6 +5,8 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import BranchesPage from './pages/dashboard/BranchesPage';
+import GroupsPage from './pages/dashboard/GroupsPage';
+import MembersPage from './pages/dashboard/MembersPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import useAuthStore from './stores/authStore';
 import useBranchStore from './stores/branchStore';
@@ -60,6 +62,22 @@ function App() {
           element={
             <ProtectedRoute>
               <BranchesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/branches/:branchId/groups"
+          element={
+            <ProtectedRoute>
+              <GroupsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/members"
+          element={
+            <ProtectedRoute>
+              <MembersPage />
             </ProtectedRoute>
           }
         />
