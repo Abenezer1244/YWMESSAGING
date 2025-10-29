@@ -1,0 +1,257 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Church account
+model Church {
+  id                    String   @id @default(cuid())
+  name                  String
+  email                 String   @unique
+  stripeCustomerId      String?  @unique
+  twilioAccountSid      String?
+  twilioAuthToken       String?  @db.Text
+  twilioPhoneNumber     String?
+  twilioVerified        Boolean  @default(false)
+  trialEndsAt           DateTime
+  subscriptionStatus    String   @default("trial") // trial, active, cancelled, expired
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relations
+  branches              Branch[]
+  admins                Admin[]
+  groups                Group[]
+  messages              Message[]
+  messageTemplates      MessageTemplate[]
+  subscriptions         Subscription[]
+  recurringMessages     RecurringMessage[]
+
+  @@index([subscriptionStatus])
+  @@index([trialEndsAt])
+}
+
+// Physical locations within a church
+model Branch {
+  id          String   @id @default(cuid())
+  churchId    String
+  name        String
+  address     String?
+  phone       String?
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  church      Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  groups      Group[]
+
+  @@index([churchId])
+  @@index([isActive])
+}
+
+// Groups within a branch (e.g., "Sunday School", "Praise Team")
+model Group {
+  id                      String   @id @default(cuid())
+  branchId                String
+  churchId                String
+  name                    String
+  description             String?
+  welcomeMessageEnabled   Boolean  @default(false)
+  welcomeMessageText      String?  @db.Text
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  // Relations
+  branch                  Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  church                  Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  members                 GroupMember[]
+
+  @@index([branchId])
+  @@index([churchId])
+}
+
+// Individual members
+model Member {
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  phone     String   @unique // E.164 format
+  email     String?  @unique
+  optInSms  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  groups          GroupMember[]
+  messageRecipients MessageRecipient[]
+
+  @@index([phone])
+  @@index([email])
+}
+
+// Join table for Group-Member many-to-many
+model GroupMember {
+  id                  String   @id @default(cuid())
+  groupId             String
+  memberId            String
+  welcomeMessageSent  Boolean  @default(false)
+  joinedAt            DateTime @default(now())
+
+  // Relations
+  group               Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  member              Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, memberId])
+  @@index([groupId])
+  @@index([memberId])
+}
+
+// SMS messages sent by church
+model Message {
+  id                  String   @id @default(cuid())
+  churchId            String
+  content             String   @db.Text
+  status              String   @default("pending") // pending, sent, failed
+  targetType          String   // individual, groups, branches, all
+  targetIds           String   @default("") // JSON array of IDs
+  totalRecipients     Int      @default(0)
+  deliveredCount      Int      @default(0)
+  failedCount         Int      @default(0)
+  sentAt              DateTime?
+  createdAt           DateTime @default(now())
+
+  // Relations
+  church              Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  recipients          MessageRecipient[]
+
+  @@index([churchId])
+  @@index([status])
+  @@index([sentAt])
+}
+
+// Track delivery status per recipient
+model MessageRecipient {
+  id                String   @id @default(cuid())
+  messageId         String
+  memberId          String
+  status            String   @default("pending") // pending, sent, delivered, failed
+  twilioMessageSid  String?
+  deliveredAt       DateTime?
+  failedAt          DateTime?
+  failureReason     String?
+
+  // Relations
+  message           Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  member            Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, memberId])
+  @@index([messageId])
+  @@index([memberId])
+  @@index([status])
+}
+
+// Reusable message templates
+model MessageTemplate {
+  id        String   @id @default(cuid())
+  churchId  String
+  name      String
+  content   String   @db.Text
+  category  String   // service_reminder, event, prayer, thank_you, welcome, offering
+  isDefault Boolean  @default(false)
+  usageCount Int     @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  church    Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+
+  @@index([churchId])
+  @@index([category])
+}
+
+// Recurring/scheduled messages
+model RecurringMessage {
+  id          String   @id @default(cuid())
+  churchId    String
+  name        String
+  content     String   @db.Text
+  targetType  String   // individual, groups, branches, all
+  targetIds   String   @default("") // JSON array
+  frequency   String   // daily, weekly, monthly
+  dayOfWeek   Int?     // 0-6 for weekly
+  timeOfDay   String?  // HH:MM format
+  nextSendAt  DateTime
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  church      Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+
+  @@index([churchId])
+  @@index([isActive])
+  @@index([nextSendAt])
+}
+
+// Church administrators
+model Admin {
+  id            String   @id @default(cuid())
+  churchId      String
+  email         String   @unique
+  passwordHash  String
+  firstName     String
+  lastName      String
+  role          String   @default("CO_ADMIN") // PRIMARY, CO_ADMIN
+  invitationToken String?
+  invitationExpiresAt DateTime?
+  lastLoginAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  church        Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+
+  @@index([churchId])
+  @@index([role])
+}
+
+// Subscription details (Stripe)
+model Subscription {
+  id              String   @id @default(cuid())
+  churchId        String   @unique
+  stripeSubId     String?  @unique
+  plan            String   @default("starter") // starter, growth, pro
+  status          String   @default("active") // active, cancelled, past_due
+  currentPeriodStart DateTime?
+  currentPeriodEnd DateTime?
+  cancelledAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  church          Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+
+  @@index([plan])
+  @@index([status])
+}
+
+// Analytics events (PostHog backup)
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  churchId  String?
+  eventName String
+  properties String? @db.Text // JSON
+  createdAt DateTime @default(now())
+
+  @@index([churchId])
+  @@index([eventName])
+}
