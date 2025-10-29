@@ -11,6 +11,31 @@ const client = axios.create({
   withCredentials: true, // Enable sending cookies with requests
 });
 
+// Fetch and cache CSRF token
+let csrfToken = '';
+
+export async function fetchCsrfToken(): Promise<string> {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/csrf-token`, {
+      withCredentials: true,
+    });
+    csrfToken = response.data.csrfToken;
+    return csrfToken;
+  } catch (error) {
+    console.error('Failed to fetch CSRF token:', error);
+    throw error;
+  }
+}
+
+// Request interceptor - attach CSRF token for state-changing requests
+client.interceptors.request.use((config) => {
+  // Add CSRF token to POST, PUT, DELETE, PATCH requests
+  if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(config.method?.toUpperCase() || '')) {
+    config.headers['X-CSRF-Token'] = csrfToken;
+  }
+  return config;
+});
+
 // Response interceptor - handle token refresh
 client.interceptors.response.use(
   (response) => response,
