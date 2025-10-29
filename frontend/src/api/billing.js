@@ -46,4 +46,13 @@ export async function cancelSubscription() {
     const response = await client.delete('/billing/cancel');
     return response.data;
 }
+/**
+ * Create payment intent for subscription
+ */
+export async function createPaymentIntent(planName) {
+    const response = await client.post('/billing/payment-intent', {
+        planName,
+    });
+    return response.data;
+}
 //# sourceMappingURL=billing.js.map

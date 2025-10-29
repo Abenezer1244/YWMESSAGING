@@ -2,7 +2,6 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { subscribe } from '../api/billing';
 const PLANS = [
     {
         id: 'starter',
@@ -17,7 +16,7 @@ const PLANS = [
             'Basic analytics',
             'Email support',
         ],
-        cta: 'Start Free Trial',
+        cta: 'Get Started',
         highlighted: false,
     },
     {
@@ -35,7 +34,7 @@ const PLANS = [
             'Message templates',
             'Recurring messages',
         ],
-        cta: 'Start Free Trial',
+        cta: 'Get Started',
         highlighted: true,
     },
     {
@@ -55,7 +54,7 @@ const PLANS = [
             'Custom integrations',
             'API access',
         ],
-        cta: 'Start Free Trial',
+        cta: 'Get Started',
         highlighted: false,
     },
 ];
@@ -65,12 +64,11 @@ export function SubscribePage() {
     const handleSubscribe = async (planId) => {
         try {
             setIsLoading(true);
-            await subscribe(planId);
-            toast.success('Subscription created successfully!');
-            navigate('/dashboard');
+            // Navigate to checkout page with plan parameter
+            navigate(`/checkout?plan=${planId}`);
         }
         catch (error) {
-            toast.error(error.message || 'Failed to subscribe');
+            toast.error(error.message || 'Failed to start checkout');
         }
         finally {
             setIsLoading(false);

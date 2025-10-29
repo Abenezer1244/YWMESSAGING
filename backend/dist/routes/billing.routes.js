@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticateToken } from '../middleware/auth.middleware.js';
-import { getUsageHandler, getPlanHandler, getTrialHandler, subscribeHandler, upgradeHandler, cancelHandler, } from '../controllers/billing.controller.js';
+import { getUsageHandler, getPlanHandler, getTrialHandler, subscribeHandler, upgradeHandler, cancelHandler, createPaymentIntentHandler, } from '../controllers/billing.controller.js';
 const router = Router();
 // All billing routes require authentication
 router.use(authenticateToken);
@@ -16,5 +16,7 @@ router.post('/billing/subscribe', subscribeHandler);
 router.put('/billing/upgrade', upgradeHandler);
 // Cancel subscription
 router.delete('/billing/cancel', cancelHandler);
+// Create payment intent
+router.post('/billing/payment-intent', createPaymentIntentHandler);
 export default router;
 //# sourceMappingURL=billing.routes.js.map

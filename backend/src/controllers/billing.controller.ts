@@ -289,3 +289,50 @@ export async function cancelHandler(req: Request, res: Response) {
     res.status(500).json({ error: 'Failed to cancel subscription' });
   }
 }
+
+/**
+ * POST /api/billing/payment-intent
+ * Create a Stripe payment intent for subscription payment
+ * Body: { planName: 'starter' | 'growth' | 'pro' }
+ */
+export async function createPaymentIntentHandler(req: Request, res: Response) {
+  try {
+    const churchId = req.user?.churchId;
+    if (!churchId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { planName } = req.body;
+
+    if (!planName || !(planName in PLANS)) {
+      return res.status(400).json({ error: 'Invalid plan name' });
+    }
+
+    // Get church details
+    const church = await prisma.church.findUnique({
+      where: { id: churchId },
+    });
+
+    if (!church) {
+      return res.status(404).json({ error: 'Church not found' });
+    }
+
+    const plan = PLANS[planName as 'starter' | 'growth' | 'pro'];
+    const amountInCents = plan.price; // Already in cents
+
+    // Create Stripe payment intent
+    // Note: In production, use proper Stripe client from service
+    // For now, return mock client secret
+    const clientSecret = `pi_${Date.now()}_secret_${Math.random().toString(36).substr(2, 9)}`;
+
+    res.json({
+      clientSecret,
+      amount: amountInCents,
+      currency: 'usd',
+      plan: planName,
+    });
+  } catch (error) {
+    console.error('Failed to create payment intent:', error);
+    res.status(500).json({ error: 'Failed to create payment intent' });
+  }
+}

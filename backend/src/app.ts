@@ -11,6 +11,7 @@ import templateRoutes from './routes/template.routes.js';
 import recurringRoutes from './routes/recurring.routes.js';
 import analyticsRoutes from './routes/analytics.routes.js';
 import billingRoutes from './routes/billing.routes.js';
+import webhookRoutes from './routes/webhook.routes.js';
 
 const app = express();
 
@@ -25,6 +26,11 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Webhook routes (must be before CSRF protection)
+app.use('/api', webhookRoutes);
+
+// CSRF protection for all other routes
 app.use(csrfProtection);
 
 // Health check endpoint

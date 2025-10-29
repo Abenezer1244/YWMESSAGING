@@ -98,3 +98,15 @@ export async function cancelSubscription(): Promise<{ success: boolean; message:
   const response = await client.delete('/billing/cancel');
   return response.data;
 }
+
+/**
+ * Create payment intent for subscription
+ */
+export async function createPaymentIntent(
+  planName: 'starter' | 'growth' | 'pro'
+): Promise<{ clientSecret: string; amount: number; currency: string; plan: string }> {
+  const response = await client.post('/billing/payment-intent', {
+    planName,
+  });
+  return response.data;
+}

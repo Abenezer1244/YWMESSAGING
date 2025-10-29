@@ -39,4 +39,10 @@ export declare function upgradeHandler(req: Request, res: Response): Promise<Res
  * Cancel subscription
  */
 export declare function cancelHandler(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+/**
+ * POST /api/billing/payment-intent
+ * Create a Stripe payment intent for subscription payment
+ * Body: { planName: 'starter' | 'growth' | 'pro' }
+ */
+export declare function createPaymentIntentHandler(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 //# sourceMappingURL=billing.controller.d.ts.map

@@ -61,4 +61,13 @@ export declare function cancelSubscription(): Promise<{
     success: boolean;
     message: string;
 }>;
+/**
+ * Create payment intent for subscription
+ */
+export declare function createPaymentIntent(planName: 'starter' | 'growth' | 'pro'): Promise<{
+    clientSecret: string;
+    amount: number;
+    currency: string;
+    plan: string;
+}>;
 //# sourceMappingURL=billing.d.ts.map

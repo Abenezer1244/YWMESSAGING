@@ -7,6 +7,7 @@ import {
   subscribeHandler,
   upgradeHandler,
   cancelHandler,
+  createPaymentIntentHandler,
 } from '../controllers/billing.controller.js';
 
 const router = Router();
@@ -31,5 +32,8 @@ router.put('/billing/upgrade', upgradeHandler);
 
 // Cancel subscription
 router.delete('/billing/cancel', cancelHandler);
+
+// Create payment intent
+router.post('/billing/payment-intent', createPaymentIntentHandler);
 
 export default router;
