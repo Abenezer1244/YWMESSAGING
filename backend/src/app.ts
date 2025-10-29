@@ -7,6 +7,8 @@ import authRoutes from './routes/auth.routes.js';
 import branchRoutes from './routes/branch.routes.js';
 import groupRoutes from './routes/group.routes.js';
 import messageRoutes from './routes/message.routes.js';
+import templateRoutes from './routes/template.routes.js';
+import recurringRoutes from './routes/recurring.routes.js';
 
 const app = express();
 
@@ -38,6 +40,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api', branchRoutes);
 app.use('/api', groupRoutes);
 app.use('/api', messageRoutes);
+app.use('/api', templateRoutes);
+app.use('/api', recurringRoutes);
 
 // 404 handler
 app.use((req, res) => {

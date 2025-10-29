@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import useGroupStore from '../../stores/groupStore';
 import useMessageStore from '../../stores/messageStore';
 import { sendMessage } from '../../api/messages';
+import { getTemplates, MessageTemplate } from '../../api/templates';
+import TemplateFormModal from '../../components/templates/TemplateFormModal';
 
 export function SendMessagePage() {
   const { groups } = useGroupStore();
@@ -12,6 +14,21 @@ export function SendMessagePage() {
   const [targetType, setTargetType] = useState<'groups' | 'all'>('groups');
   const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [templates, setTemplates] = useState<MessageTemplate[]>([]);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+
+  useEffect(() => {
+    loadTemplates();
+  }, []);
+
+  const loadTemplates = async () => {
+    try {
+      const data = await getTemplates();
+      setTemplates(data);
+    } catch (error) {
+      console.error('Failed to load templates:', error);
+    }
+  };
 
   // Calculate segments and cost
   const segments = Math.ceil(content.length / 160) || 0;
@@ -25,6 +42,11 @@ export function SendMessagePage() {
     setSelectedGroupIds((prev) =>
       prev.includes(groupId) ? prev.filter((id) => id !== groupId) : [...prev, groupId]
     );
+  };
+
+  const handleUseTemplate = (template: MessageTemplate) => {
+    setContent(template.content);
+    toast.success(`Using template: ${template.name}`);
   };
 
   const handleSendMessage = async () => {
@@ -70,6 +92,35 @@ export function SendMessagePage() {
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow p-8 space-y-6">
+          {/* Template Selector */}
+          {templates.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Use Template
+              </label>
+              <div className="flex gap-2 flex-wrap">
+                {templates.slice(0, 6).map((template) => (
+                  <button
+                    key={template.id}
+                    onClick={() => handleUseTemplate(template)}
+                    className="px-3 py-1 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 text-sm rounded-lg transition"
+                    title={template.content}
+                  >
+                    {template.name}
+                  </button>
+                ))}
+                {templates.length > 6 && (
+                  <button
+                    onClick={() => window.location.href = '/templates'}
+                    className="px-3 py-1 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 text-sm rounded-lg transition"
+                  >
+                    More Templates...
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Message Composer */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -90,6 +141,14 @@ export function SendMessagePage() {
                 {segments > 0 && ` ($${(segments * 0.0075).toFixed(4)} per recipient)`}
               </span>
             </div>
+            {content.trim() && (
+              <button
+                onClick={() => setShowSaveModal(true)}
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium mt-2"
+              >
+                💾 Save as Template
+              </button>
+            )}
           </div>
 
           {/* Recipient Selection */}
@@ -195,6 +254,16 @@ export function SendMessagePage() {
           </div>
         </div>
       </main>
+
+      {showSaveModal && (
+        <TemplateFormModal
+          template={null}
+          onClose={() => {
+            setShowSaveModal(false);
+            loadTemplates();
+          }}
+        />
+      )}
     </div>
   );
 }

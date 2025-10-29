@@ -72,6 +72,18 @@ export function DashboardPage() {
                 >
                   📜 History
                 </button>
+                <button
+                  onClick={() => navigate('/templates')}
+                  className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition"
+                >
+                  📋 Templates
+                </button>
+                <button
+                  onClick={() => navigate('/recurring-messages')}
+                  className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition"
+                >
+                  🔄 Recurring
+                </button>
               </>
             )}
             <BranchSelector />
