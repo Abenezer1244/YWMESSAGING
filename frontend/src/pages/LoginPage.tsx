@@ -26,9 +26,9 @@ export function LoginPage() {
     setIsLoading(true);
     try {
       const response = await login(data);
-      const { admin, church, accessToken, refreshToken } = response.data;
+      const { admin, church } = response.data;
 
-      setAuth(admin, church, accessToken, refreshToken);
+      setAuth(admin, church);
       toast.success('Login successful!');
       navigate('/dashboard');
     } catch (error: any) {

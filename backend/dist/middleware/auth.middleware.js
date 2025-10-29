@@ -1,10 +1,16 @@
 import { verifyAccessToken } from '../utils/jwt.utils.js';
 /**
  * Middleware to authenticate JWT token
+ * Checks cookies first, then falls back to Authorization header
  */
 export function authenticateToken(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // "Bearer TOKEN"
+    // Try to get token from httpOnly cookie first
+    let token = req.cookies.accessToken;
+    // Fall back to Authorization header
+    if (!token) {
+        const authHeader = req.headers['authorization'];
+        token = authHeader && authHeader.split(' ')[1]; // "Bearer TOKEN"
+    }
     if (!token) {
         res.status(401).json({ error: 'No token provided' });
         return;

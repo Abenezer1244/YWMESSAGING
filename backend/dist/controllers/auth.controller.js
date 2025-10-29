@@ -22,9 +22,27 @@ export async function register(req, res) {
             return;
         }
         const result = await registerChurch({ email, password, firstName, lastName, churchName });
+        // Set httpOnly cookies for tokens
+        res.cookie('accessToken', result.accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 15 * 60 * 1000, // 15 minutes
+        });
+        res.cookie('refreshToken', result.refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        });
         res.status(201).json({
             success: true,
-            data: result,
+            data: {
+                adminId: result.adminId,
+                churchId: result.churchId,
+                admin: result.admin,
+                church: result.church,
+            },
         });
     }
     catch (error) {
@@ -45,9 +63,27 @@ export async function loginHandler(req, res) {
             return;
         }
         const result = await login({ email, password });
+        // Set httpOnly cookies for tokens
+        res.cookie('accessToken', result.accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 15 * 60 * 1000, // 15 minutes
+        });
+        res.cookie('refreshToken', result.refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        });
         res.status(200).json({
             success: true,
-            data: result,
+            data: {
+                adminId: result.adminId,
+                churchId: result.churchId,
+                admin: result.admin,
+                church: result.church,
+            },
         });
     }
     catch (error) {
@@ -60,20 +96,36 @@ export async function loginHandler(req, res) {
  */
 export async function refreshToken(req, res) {
     try {
-        const { refreshToken } = req.body;
-        if (!refreshToken) {
+        // Get refresh token from cookie
+        const refreshTokenFromCookie = req.cookies.refreshToken;
+        if (!refreshTokenFromCookie) {
             res.status(400).json({ error: 'Refresh token required' });
             return;
         }
-        const payload = verifyRefreshToken(refreshToken);
+        const payload = verifyRefreshToken(refreshTokenFromCookie);
         if (!payload) {
             res.status(401).json({ error: 'Invalid or expired refresh token' });
             return;
         }
         const result = await refreshAccessToken(payload.adminId);
+        // Set new httpOnly cookies for tokens
+        res.cookie('accessToken', result.accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 15 * 60 * 1000, // 15 minutes
+        });
+        res.cookie('refreshToken', result.refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        });
         res.status(200).json({
             success: true,
-            data: result,
+            data: {
+                success: true,
+            },
         });
     }
     catch (error) {

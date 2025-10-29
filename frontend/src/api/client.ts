@@ -8,21 +8,8 @@ const client = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Enable sending cookies with requests
 });
-
-// Request interceptor - attach access token
-client.interceptors.request.use(
-  (config) => {
-    const { accessToken } = useAuthStore.getState();
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
 
 // Response interceptor - handle token refresh
 client.interceptors.response.use(
@@ -30,26 +17,18 @@ client.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // If 401 and not already retrying, try to refresh token
+    // If 401 and not already retrying, try to refresh token via cookies
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
-        const { refreshToken } = useAuthStore.getState();
-        if (!refreshToken) {
-          throw new Error('No refresh token');
-        }
-
-        const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-          refreshToken,
+        // Send refresh request - cookies are automatically included
+        const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {}, {
+          withCredentials: true,
         });
 
-        const { accessToken, refreshToken: newRefreshToken } = response.data.data;
-        useAuthStore.getState().setAccessToken(accessToken);
-        useAuthStore.getState().setRefreshToken(newRefreshToken);
-
-        // Retry original request with new token
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        // Response will set new cookies automatically
+        // Retry original request
         return client(originalRequest);
       } catch (refreshError) {
         // If refresh fails, logout

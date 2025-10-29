@@ -9,6 +9,7 @@ declare global {
 }
 /**
  * Middleware to authenticate JWT token
+ * Checks cookies first, then falls back to Authorization header
  */
 export declare function authenticateToken(req: Request, res: Response, next: NextFunction): void;
 /**

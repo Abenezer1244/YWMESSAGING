@@ -29,9 +29,29 @@ export async function register(req: Request, res: Response): Promise<void> {
 
     const result = await registerChurch({ email, password, firstName, lastName, churchName });
 
+    // Set httpOnly cookies for tokens
+    res.cookie('accessToken', result.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
     res.status(201).json({
       success: true,
-      data: result,
+      data: {
+        adminId: result.adminId,
+        churchId: result.churchId,
+        admin: result.admin,
+        church: result.church,
+      },
     });
   } catch (error: any) {
     // Log detailed error server-side only
@@ -55,9 +75,29 @@ export async function loginHandler(req: Request, res: Response): Promise<void> {
 
     const result = await login({ email, password });
 
+    // Set httpOnly cookies for tokens
+    res.cookie('accessToken', result.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
     res.status(200).json({
       success: true,
-      data: result,
+      data: {
+        adminId: result.adminId,
+        churchId: result.churchId,
+        admin: result.admin,
+        church: result.church,
+      },
     });
   } catch (error: any) {
     console.error('Login error:', error);
@@ -70,14 +110,15 @@ export async function loginHandler(req: Request, res: Response): Promise<void> {
  */
 export async function refreshToken(req: Request, res: Response): Promise<void> {
   try {
-    const { refreshToken } = req.body;
+    // Get refresh token from cookie
+    const refreshTokenFromCookie = req.cookies.refreshToken;
 
-    if (!refreshToken) {
+    if (!refreshTokenFromCookie) {
       res.status(400).json({ error: 'Refresh token required' });
       return;
     }
 
-    const payload = verifyRefreshToken(refreshToken);
+    const payload = verifyRefreshToken(refreshTokenFromCookie);
     if (!payload) {
       res.status(401).json({ error: 'Invalid or expired refresh token' });
       return;
@@ -85,9 +126,26 @@ export async function refreshToken(req: Request, res: Response): Promise<void> {
 
     const result = await refreshAccessToken(payload.adminId);
 
+    // Set new httpOnly cookies for tokens
+    res.cookie('accessToken', result.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
     res.status(200).json({
       success: true,
-      data: result,
+      data: {
+        success: true,
+      },
     });
   } catch (error: any) {
     console.error('Token refresh error:', error);

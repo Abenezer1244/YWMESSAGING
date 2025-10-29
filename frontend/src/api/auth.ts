@@ -18,8 +18,6 @@ export interface AuthResponse {
   data: {
     adminId: string;
     churchId: string;
-    accessToken: string;
-    refreshToken: string;
     admin: {
       id: string;
       email: string;
@@ -53,16 +51,12 @@ export async function login(data: LoginRequest): Promise<AuthResponse> {
 }
 
 /**
- * Refresh access token
+ * Refresh access token via httpOnly cookies
  */
-export async function refreshToken(refreshToken: string): Promise<{
+export async function refreshToken(): Promise<{
   success: boolean;
-  data: {
-    accessToken: string;
-    refreshToken: string;
-  };
 }> {
-  const response = await client.post('/auth/refresh', { refreshToken });
+  const response = await client.post('/auth/refresh', {});
   return response.data;
 }
 

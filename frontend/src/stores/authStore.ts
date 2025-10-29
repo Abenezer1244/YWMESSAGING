@@ -20,18 +20,14 @@ interface AuthState {
   // State
   user: Admin | null;
   church: Church | null;
-  accessToken: string | null;
-  refreshToken: string | null;
   isLoading: boolean;
 
   // Computed
   isAuthenticated: boolean;
 
   // Actions
-  setAuth: (user: Admin, church: Church, accessToken: string, refreshToken: string) => void;
+  setAuth: (user: Admin, church: Church) => void;
   clearAuth: () => void;
-  setAccessToken: (token: string) => void;
-  setRefreshToken: (token: string) => void;
   logout: () => void;
 }
 
@@ -41,22 +37,18 @@ const useAuthStore = create<AuthState>()(
       // State
       user: null,
       church: null,
-      accessToken: null,
-      refreshToken: null,
       isLoading: false,
 
       // Computed
       get isAuthenticated() {
-        return get().accessToken !== null;
+        return get().user !== null;
       },
 
       // Actions
-      setAuth: (user, church, accessToken, refreshToken) => {
+      setAuth: (user, church) => {
         set({
           user,
           church,
-          accessToken,
-          refreshToken,
           isLoading: false,
         });
       },
@@ -65,26 +57,14 @@ const useAuthStore = create<AuthState>()(
         set({
           user: null,
           church: null,
-          accessToken: null,
-          refreshToken: null,
           isLoading: false,
         });
-      },
-
-      setAccessToken: (token) => {
-        set({ accessToken: token });
-      },
-
-      setRefreshToken: (token) => {
-        set({ refreshToken: token });
       },
 
       logout: () => {
         set({
           user: null,
           church: null,
-          accessToken: null,
-          refreshToken: null,
           isLoading: false,
         });
       },
@@ -94,8 +74,6 @@ const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         church: state.church,
-        accessToken: state.accessToken,
-        refreshToken: state.refreshToken,
       }),
     }
   )

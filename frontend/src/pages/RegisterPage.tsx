@@ -48,8 +48,8 @@ export function RegisterPage() {
         churchName: data.churchName,
       });
 
-      const { admin, church, accessToken, refreshToken } = response.data;
-      setAuth(admin, church, accessToken, refreshToken);
+      const { admin, church } = response.data;
+      setAuth(admin, church);
       toast.success('Registration successful!');
       navigate('/dashboard');
     } catch (error: any) {
