@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { getPlanLimits } from '../config/plans.js';
+import { getPlan } from '../config/plans.js';
 const prisma = new PrismaClient();
 /**
  * Get all branches for a church
@@ -48,8 +48,8 @@ export async function createBranch(churchId, input) {
     const currentCount = await prisma.branch.count({
         where: { churchId },
     });
-    // Get plan limits (defaulting to STARTER)
-    const limits = getPlanLimits('STARTER');
+    // Get plan limits (defaulting to starter)
+    const limits = getPlan('starter');
     // Check limit
     if (currentCount >= limits.branches) {
         throw new Error(`Branch limit reached (${limits.branches}). Upgrade your plan to add more branches.`);

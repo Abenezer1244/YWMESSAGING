@@ -10,6 +10,7 @@ import messageRoutes from './routes/message.routes.js';
 import templateRoutes from './routes/template.routes.js';
 import recurringRoutes from './routes/recurring.routes.js';
 import analyticsRoutes from './routes/analytics.routes.js';
+import billingRoutes from './routes/billing.routes.js';
 
 const app = express();
 
@@ -44,6 +45,7 @@ app.use('/api', messageRoutes);
 app.use('/api', templateRoutes);
 app.use('/api', recurringRoutes);
 app.use('/api', analyticsRoutes);
+app.use('/api', billingRoutes);
 
 // 404 handler
 app.use((req, res) => {

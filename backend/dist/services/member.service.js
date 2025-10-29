@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { formatToE164 } from '../utils/phone.utils.js';
+import { queueWelcomeMessage } from '../jobs/welcomeMessage.job.js';
 const prisma = new PrismaClient();
 /**
  * Get members for a group with pagination and search
@@ -104,6 +105,13 @@ export async function addMember(groupId, data) {
             member: true,
         },
     });
+    // Queue welcome message if enabled
+    try {
+        queueWelcomeMessage(groupMember.id, groupId, member.id, 60000);
+    }
+    catch (error) {
+        console.error('Error queueing welcome message:', error);
+    }
     return {
         id: groupMember.member.id,
         firstName: groupMember.member.firstName,
@@ -162,12 +170,19 @@ export async function importMembers(groupId, membersData) {
                 continue;
             }
             // Add to group
-            await prisma.groupMember.create({
+            const groupMember = await prisma.groupMember.create({
                 data: {
                     groupId,
                     memberId: member.id,
                 },
             });
+            // Queue welcome message if enabled
+            try {
+                queueWelcomeMessage(groupMember.id, groupId, member.id, 60000);
+            }
+            catch (error) {
+                console.error('Error queueing welcome message:', error);
+            }
             imported.push({
                 id: member.id,
                 firstName: member.firstName,

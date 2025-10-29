@@ -1,0 +1,100 @@
+export interface CreateRecurringMessageData {
+    name: string;
+    content: string;
+    targetType: 'individual' | 'groups' | 'branches' | 'all';
+    targetIds?: string[];
+    frequency: 'daily' | 'weekly' | 'monthly';
+    dayOfWeek?: number;
+    timeOfDay: string;
+}
+export declare function getRecurringMessages(churchId: string): Promise<{
+    id: string;
+    churchId: string;
+    name: string;
+    content: string;
+    targetType: string;
+    targetIds: string;
+    frequency: string;
+    dayOfWeek: number | null;
+    timeOfDay: string | null;
+    nextSendAt: Date;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+}[]>;
+export declare function createRecurringMessage(churchId: string, data: CreateRecurringMessageData): Promise<{
+    id: string;
+    churchId: string;
+    name: string;
+    content: string;
+    targetType: string;
+    targetIds: string;
+    frequency: string;
+    dayOfWeek: number | null;
+    timeOfDay: string | null;
+    nextSendAt: Date;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+}>;
+export declare function updateRecurringMessage(messageId: string, data: Partial<CreateRecurringMessageData>): Promise<{
+    id: string;
+    churchId: string;
+    name: string;
+    content: string;
+    targetType: string;
+    targetIds: string;
+    frequency: string;
+    dayOfWeek: number | null;
+    timeOfDay: string | null;
+    nextSendAt: Date;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+}>;
+export declare function deleteRecurringMessage(messageId: string): Promise<{
+    id: string;
+    churchId: string;
+    name: string;
+    content: string;
+    targetType: string;
+    targetIds: string;
+    frequency: string;
+    dayOfWeek: number | null;
+    timeOfDay: string | null;
+    nextSendAt: Date;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+}>;
+export declare function toggleRecurringMessage(messageId: string, isActive: boolean): Promise<{
+    id: string;
+    churchId: string;
+    name: string;
+    content: string;
+    targetType: string;
+    targetIds: string;
+    frequency: string;
+    dayOfWeek: number | null;
+    timeOfDay: string | null;
+    nextSendAt: Date;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+}>;
+export declare function updateNextSendAt(messageId: string, frequency: string, timeOfDay: string, dayOfWeek?: number): Promise<{
+    id: string;
+    churchId: string;
+    name: string;
+    content: string;
+    targetType: string;
+    targetIds: string;
+    frequency: string;
+    dayOfWeek: number | null;
+    timeOfDay: string | null;
+    nextSendAt: Date;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+}>;
+//# sourceMappingURL=recurring.service.d.ts.map

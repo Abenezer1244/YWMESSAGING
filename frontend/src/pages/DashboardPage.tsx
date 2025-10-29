@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../stores/authStore';
 import useBranchStore from '../stores/branchStore';
 import BranchSelector from '../components/BranchSelector';
+import TrialBanner from '../components/TrialBanner';
 
 export function DashboardPage() {
   const navigate = useNavigate();
@@ -92,6 +93,12 @@ export function DashboardPage() {
                 </button>
               </>
             )}
+            <button
+              onClick={() => navigate('/billing')}
+              className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition"
+            >
+              💳 Billing
+            </button>
             <BranchSelector />
           </div>
         </div>
@@ -100,19 +107,7 @@ export function DashboardPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Trial Banner */}
-        <div
-          className={`rounded-lg p-4 mb-8 text-white ${
-            trialColor === 'green'
-              ? 'bg-green-500'
-              : trialColor === 'yellow'
-              ? 'bg-yellow-500'
-              : 'bg-red-500'
-          }`}
-        >
-          <p className="font-semibold">
-            Trial Status: {daysUntilTrialEnd > 0 ? `${daysUntilTrialEnd} days remaining` : 'Expired'}
-          </p>
-        </div>
+        <TrialBanner />
 
         {/* Welcome Card */}
         <div className="bg-white rounded-lg shadow p-8 mb-8">

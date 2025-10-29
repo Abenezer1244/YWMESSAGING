@@ -13,6 +13,8 @@ import MessageHistoryPage from './pages/dashboard/MessageHistoryPage';
 import TemplatesPage from './pages/dashboard/TemplatesPage';
 import RecurringMessagesPage from './pages/dashboard/RecurringMessagesPage';
 import AnalyticsPage from './pages/dashboard/AnalyticsPage';
+import SubscribePage from './pages/SubscribePage';
+import BillingPage from './pages/BillingPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import useAuthStore from './stores/authStore';
 import useBranchStore from './stores/branchStore';
@@ -128,6 +130,22 @@ function App() {
           element={
             <ProtectedRoute>
               <AnalyticsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/subscribe"
+          element={
+            <ProtectedRoute>
+              <SubscribePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/billing"
+          element={
+            <ProtectedRoute>
+              <BillingPage />
             </ProtectedRoute>
           }
         />

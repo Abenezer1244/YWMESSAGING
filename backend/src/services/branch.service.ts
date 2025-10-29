@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { getPlanLimits } from '../config/plans.js';
+import { getPlan } from '../config/plans.js';
 
 const prisma = new PrismaClient();
 
@@ -71,8 +71,8 @@ export async function createBranch(
     where: { churchId },
   });
 
-  // Get plan limits (defaulting to STARTER)
-  const limits = getPlanLimits('STARTER');
+  // Get plan limits (defaulting to starter)
+  const limits = getPlan('starter');
 
   // Check limit
   if (currentCount >= limits.branches) {

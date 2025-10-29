@@ -6,6 +6,11 @@ import { csrfProtection } from './middleware/csrf.middleware.js';
 import authRoutes from './routes/auth.routes.js';
 import branchRoutes from './routes/branch.routes.js';
 import groupRoutes from './routes/group.routes.js';
+import messageRoutes from './routes/message.routes.js';
+import templateRoutes from './routes/template.routes.js';
+import recurringRoutes from './routes/recurring.routes.js';
+import analyticsRoutes from './routes/analytics.routes.js';
+import billingRoutes from './routes/billing.routes.js';
 const app = express();
 // Middleware
 app.use(helmet());
@@ -29,6 +34,11 @@ app.get('/api/csrf-token', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api', branchRoutes);
 app.use('/api', groupRoutes);
+app.use('/api', messageRoutes);
+app.use('/api', templateRoutes);
+app.use('/api', recurringRoutes);
+app.use('/api', analyticsRoutes);
+app.use('/api', billingRoutes);
 // 404 handler
 app.use((req, res) => {
     res.status(404).json({
