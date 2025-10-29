@@ -24,3 +24,17 @@ export const registerLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+/**
+ * SECURITY: Rate limiter for token refresh endpoint
+ * Prevents brute force attacks on token refresh
+ * 30 attempts per 15 minutes per IP
+ */
+export const refreshLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30,
+  message: 'Too many token refresh attempts. Please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.headers['x-forwarded-for'] as string || req.ip || 'unknown',
+});

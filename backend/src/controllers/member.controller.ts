@@ -1,16 +1,71 @@
 import { Request, Response } from 'express';
 import { parseCSV, formatAndValidate } from '../utils/csvParser.util.js';
 import * as memberService from '../services/member.service.js';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+/**
+ * SECURITY: Verify group belongs to authenticated user's church
+ */
+async function verifyGroupOwnership(groupId: string, churchId: string): Promise<boolean> {
+  const group = await prisma.group.findFirst({
+    where: {
+      id: groupId,
+      branch: {
+        churchId,
+      },
+    },
+  });
+  return !!group;
+}
+
+/**
+ * SECURITY: Verify member belongs to authenticated user's church
+ */
+async function verifyMemberOwnership(memberId: string, churchId: string): Promise<boolean> {
+  const member = await prisma.member.findFirst({
+    where: {
+      id: memberId,
+      groups: {
+        some: {
+          group: {
+            churchId,
+          },
+        },
+      },
+    },
+  });
+  return !!member;
+}
 
 /**
  * GET /api/groups/:groupId/members
+ * SECURITY: Verifies group belongs to authenticated user's church
  */
 export async function listMembers(req: Request, res: Response) {
   try {
     const { groupId } = req.params;
-    const page = req.query.page ? parseInt(req.query.page as string) : 1;
-    const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+    const churchId = req.user?.churchId;
+    const page = Math.max(1, req.query.page ? parseInt(req.query.page as string) : 1);
+    const limit = Math.min(100, req.query.limit ? parseInt(req.query.limit as string) : 50);
     const search = req.query.search as string | undefined;
+
+    if (!churchId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized',
+      });
+    }
+
+    // SECURITY: Verify group ownership
+    const hasAccess = await verifyGroupOwnership(groupId, churchId);
+    if (!hasAccess) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied',
+      });
+    }
 
     const result = await memberService.getMembers(groupId, {
       page,
@@ -33,11 +88,29 @@ export async function listMembers(req: Request, res: Response) {
 
 /**
  * POST /api/groups/:groupId/members
+ * SECURITY: Verifies group belongs to authenticated user's church
  */
 export async function addMember(req: Request, res: Response) {
   try {
     const { groupId } = req.params;
+    const churchId = req.user?.churchId;
     const { firstName, lastName, phone, email, optInSms } = req.body;
+
+    if (!churchId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized',
+      });
+    }
+
+    // SECURITY: Verify group ownership
+    const hasAccess = await verifyGroupOwnership(groupId, churchId);
+    if (!hasAccess) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied',
+      });
+    }
 
     // Validate input
     if (!firstName || !lastName || !phone) {
@@ -69,15 +142,41 @@ export async function addMember(req: Request, res: Response) {
 
 /**
  * POST /api/groups/:groupId/members/import
+ * SECURITY: Verifies group belongs to authenticated user's church
  */
 export async function importMembers(req: Request, res: Response) {
   try {
     const { groupId } = req.params;
+    const churchId = req.user?.churchId;
+
+    if (!churchId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized',
+      });
+    }
+
+    // SECURITY: Verify group ownership
+    const hasAccess = await verifyGroupOwnership(groupId, churchId);
+    if (!hasAccess) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied',
+      });
+    }
 
     if (!req.file) {
       return res.status(400).json({
         success: false,
         error: 'CSV file is required',
+      });
+    }
+
+    // SECURITY: Validate file size (max 5MB)
+    if (req.file.size > 5 * 1024 * 1024) {
+      return res.status(400).json({
+        success: false,
+        error: 'File size exceeds 5MB limit',
       });
     }
 
@@ -118,11 +217,29 @@ export async function importMembers(req: Request, res: Response) {
 
 /**
  * PUT /api/members/:memberId
+ * SECURITY: Verifies member belongs to authenticated user's church
  */
 export async function updateMember(req: Request, res: Response) {
   try {
     const { memberId } = req.params;
+    const churchId = req.user?.churchId;
     const { firstName, lastName, phone, email, optInSms } = req.body;
+
+    if (!churchId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized',
+      });
+    }
+
+    // SECURITY: Verify member ownership
+    const hasAccess = await verifyMemberOwnership(memberId, churchId);
+    if (!hasAccess) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied',
+      });
+    }
 
     const member = await memberService.updateMember(memberId, {
       firstName,
@@ -146,10 +263,28 @@ export async function updateMember(req: Request, res: Response) {
 
 /**
  * DELETE /api/groups/:groupId/members/:memberId
+ * SECURITY: Verifies member belongs to authenticated user's church
  */
 export async function removeMember(req: Request, res: Response) {
   try {
     const { groupId, memberId } = req.params;
+    const churchId = req.user?.churchId;
+
+    if (!churchId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized',
+      });
+    }
+
+    // SECURITY: Verify member ownership
+    const hasAccess = await verifyMemberOwnership(memberId, churchId);
+    if (!hasAccess) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied',
+      });
+    }
 
     const result = await memberService.removeMemberFromGroup(groupId, memberId);
 

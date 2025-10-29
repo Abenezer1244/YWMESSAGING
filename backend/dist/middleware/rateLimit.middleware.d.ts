@@ -8,4 +8,10 @@ export declare const loginLimiter: import("express-rate-limit").RateLimitRequest
  * 3 attempts per hour
  */
 export declare const registerLimiter: import("express-rate-limit").RateLimitRequestHandler;
+/**
+ * SECURITY: Rate limiter for token refresh endpoint
+ * Prevents brute force attacks on token refresh
+ * 30 attempts per 15 minutes per IP
+ */
+export declare const refreshLimiter: import("express-rate-limit").RateLimitRequestHandler;
 //# sourceMappingURL=rateLimit.middleware.d.ts.map

@@ -1,16 +1,35 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
+import Stripe from 'stripe';
 const router = Router();
 const prisma = new PrismaClient();
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+    apiVersion: '2022-11-15',
+});
 /**
  * POST /api/webhooks/stripe
  * Handle Stripe webhook events
+ * SECURITY: Validates webhook signature using Stripe signing secret
  */
 export async function handleStripeWebhook(req, res) {
     try {
-        const event = req.body;
+        const signature = req.headers['stripe-signature'];
+        const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+        if (!signature || !webhookSecret) {
+            console.warn('⚠️ Missing Stripe signature or webhook secret');
+            return res.status(400).json({ error: 'Invalid webhook configuration' });
+        }
+        // Verify webhook signature - CRITICAL SECURITY CHECK
+        let event;
+        try {
+            event = stripe.webhooks.constructEvent(req.body, signature, webhookSecret);
+        }
+        catch (err) {
+            console.warn(`⚠️ Webhook signature verification failed: ${err.message}`);
+            return res.status(400).json({ error: 'Invalid signature' });
+        }
         const eventType = event.type;
-        console.log(`📨 Received Stripe webhook: ${eventType}`);
+        console.log(`📨 Stripe webhook: ${eventType}`);
         switch (eventType) {
             case 'invoice.payment_succeeded':
                 await handlePaymentSucceeded(event.data.object);
@@ -25,10 +44,10 @@ export async function handleStripeWebhook(req, res) {
                 await handleSubscriptionDeleted(event.data.object);
                 break;
             case 'payment_intent.succeeded':
-                console.log('✅ Payment intent succeeded:', event.data.object.id);
+                console.log('✅ Payment intent succeeded');
                 break;
             case 'payment_intent.payment_failed':
-                console.log('❌ Payment intent failed:', event.data.object.id);
+                console.log('❌ Payment intent failed');
                 break;
             default:
                 console.log(`⚠️ Unhandled event type: ${eventType}`);
@@ -37,7 +56,7 @@ export async function handleStripeWebhook(req, res) {
         res.json({ received: true });
     }
     catch (error) {
-        console.error('❌ Webhook processing error:', error);
+        console.error('Webhook processing error');
         // Return 400 to signal error (Stripe will retry)
         res.status(400).json({ error: 'Webhook processing failed' });
     }
@@ -53,7 +72,7 @@ async function handlePaymentSucceeded(invoice) {
             where: { stripeCustomerId },
         });
         if (!church) {
-            console.log(`⚠️ Church not found for customer: ${stripeCustomerId}`);
+            console.log('⚠️ Church not found for Stripe customer');
             return;
         }
         // Update church subscription status
@@ -63,10 +82,10 @@ async function handlePaymentSucceeded(invoice) {
                 subscriptionStatus: 'active',
             },
         });
-        console.log(`✅ Payment succeeded for church: ${church.id}`);
+        console.log('✅ Payment succeeded');
     }
     catch (error) {
-        console.error('Failed to handle payment succeeded:', error);
+        console.error('Failed to handle payment succeeded');
     }
 }
 /**
@@ -80,7 +99,7 @@ async function handlePaymentFailed(invoice) {
             where: { stripeCustomerId },
         });
         if (!church) {
-            console.log(`⚠️ Church not found for customer: ${stripeCustomerId}`);
+            console.log('⚠️ Church not found for Stripe customer');
             return;
         }
         // Update church subscription status
@@ -90,10 +109,10 @@ async function handlePaymentFailed(invoice) {
                 subscriptionStatus: 'past_due',
             },
         });
-        console.log(`❌ Payment failed for church: ${church.id}`);
+        console.log('❌ Payment failed');
     }
     catch (error) {
-        console.error('Failed to handle payment failed:', error);
+        console.error('Failed to handle payment failed');
     }
 }
 /**
@@ -108,7 +127,7 @@ async function handleSubscriptionUpdated(subscription) {
             where: { stripeCustomerId },
         });
         if (!church) {
-            console.log(`⚠️ Church not found for customer: ${stripeCustomerId}`);
+            console.log('⚠️ Church not found for Stripe customer');
             return;
         }
         // Update subscription record
@@ -120,10 +139,10 @@ async function handleSubscriptionUpdated(subscription) {
                 updatedAt: new Date(),
             },
         });
-        console.log(`✅ Subscription updated for church: ${church.id}`);
+        console.log('✅ Subscription updated');
     }
     catch (error) {
-        console.error('Failed to handle subscription updated:', error);
+        console.error('Failed to handle subscription updated');
     }
 }
 /**
@@ -137,7 +156,7 @@ async function handleSubscriptionDeleted(subscription) {
             where: { stripeCustomerId },
         });
         if (!church) {
-            console.log(`⚠️ Church not found for customer: ${stripeCustomerId}`);
+            console.log('⚠️ Church not found for Stripe customer');
             return;
         }
         // Update subscription record
@@ -156,10 +175,10 @@ async function handleSubscriptionDeleted(subscription) {
                 subscriptionStatus: 'cancelled',
             },
         });
-        console.log(`✅ Subscription cancelled for church: ${church.id}`);
+        console.log('✅ Subscription cancelled');
     }
     catch (error) {
-        console.error('Failed to handle subscription deleted:', error);
+        console.error('Failed to handle subscription deleted');
     }
 }
 router.post('/webhooks/stripe', handleStripeWebhook);

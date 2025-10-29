@@ -2,8 +2,27 @@ import { Request, Response } from 'express';
 import * as messageService from '../services/message.service.js';
 import * as twilioService from '../services/twilio.service.js';
 import { PrismaClient } from '@prisma/client';
+import crypto from 'crypto';
 
 const prisma = new PrismaClient();
+
+/**
+ * SECURITY: Validate Twilio webhook request signature
+ * Twilio includes X-Twilio-Signature header with HMAC-SHA1 of request URL + body
+ */
+function validateTwilioSignature(req: Request, twilioAuthToken: string): boolean {
+  const signature = req.headers['x-twilio-signature'] as string;
+  if (!signature) {
+    return false;
+  }
+
+  const url = `https://${req.get('host')}${req.originalUrl}`;
+  const hmac = crypto.createHmac('sha1', twilioAuthToken);
+  hmac.update(url + new URLSearchParams(req.body as Record<string, string>).toString());
+  const computedSignature = hmac.digest('base64');
+
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(computedSignature));
+}
 
 /**
  * POST /api/churches/:churchId/twilio/connect
@@ -159,12 +178,29 @@ export async function getMessageHistory(req: Request, res: Response) {
 /**
  * GET /api/messages/:messageId
  * Get message details
+ * SECURITY: Verifies message belongs to authenticated user's church
  */
 export async function getMessageDetails(req: Request, res: Response) {
   try {
     const { messageId } = req.params;
+    const churchId = req.user?.churchId;
 
+    if (!churchId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized',
+      });
+    }
+
+    // SECURITY: Verify message belongs to user's church before returning details
     const message = await messageService.getMessageDetails(messageId);
+
+    if (!message || message.churchId !== churchId) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied',
+      });
+    }
 
     res.json({
       success: true,
@@ -181,6 +217,7 @@ export async function getMessageDetails(req: Request, res: Response) {
 /**
  * POST /api/webhooks/twilio/status
  * Webhook for Twilio delivery status updates
+ * SECURITY: Validates Twilio signature using auth token from database
  */
 export async function handleTwilioWebhook(req: Request, res: Response) {
   try {
@@ -190,14 +227,26 @@ export async function handleTwilioWebhook(req: Request, res: Response) {
       return res.status(400).json({ error: 'MessageSid required' });
     }
 
-    // Find recipient by Twilio message SID
+    // Find recipient by Twilio message SID to get church
     const recipient = await prisma.messageRecipient.findFirst({
       where: { twilioMessageSid: MessageSid },
+      include: {
+        message: {
+          include: { church: true },
+        },
+      },
     });
 
     if (!recipient) {
       // Message SID not found, just acknowledge webhook
       return res.status(200).json({ received: true });
+    }
+
+    // SECURITY: Validate Twilio signature using church's auth token
+    const church = recipient.message.church;
+    if (!church.twilioAuthToken || !validateTwilioSignature(req, church.twilioAuthToken)) {
+      console.warn('⚠️ Twilio webhook signature validation failed');
+      return res.status(401).json({ error: 'Invalid signature' });
     }
 
     // Map Twilio status to our status
@@ -222,7 +271,7 @@ export async function handleTwilioWebhook(req: Request, res: Response) {
 
     res.json({ received: true });
   } catch (error) {
-    console.error('Error processing Twilio webhook:', error);
+    console.error('Error processing Twilio webhook');
     res.status(500).json({ error: 'Failed to process webhook' });
   }
 }
