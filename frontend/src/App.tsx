@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { initializePostHog } from './hooks/useAnalytics';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
@@ -11,6 +12,7 @@ import SendMessagePage from './pages/dashboard/SendMessagePage';
 import MessageHistoryPage from './pages/dashboard/MessageHistoryPage';
 import TemplatesPage from './pages/dashboard/TemplatesPage';
 import RecurringMessagesPage from './pages/dashboard/RecurringMessagesPage';
+import AnalyticsPage from './pages/dashboard/AnalyticsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import useAuthStore from './stores/authStore';
 import useBranchStore from './stores/branchStore';
@@ -21,8 +23,12 @@ function App() {
   const { isAuthenticated, church } = useAuthStore();
   const { setBranches } = useBranchStore();
 
-  // Fetch CSRF token and branches on app load
+  // Initialize analytics and fetch CSRF token on app load
   useEffect(() => {
+    // Initialize PostHog
+    initializePostHog();
+
+    // Fetch CSRF token
     fetchCsrfToken().catch((error) => {
       console.error('Failed to initialize CSRF token:', error);
     });
@@ -114,6 +120,14 @@ function App() {
           element={
             <ProtectedRoute>
               <RecurringMessagesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <AnalyticsPage />
             </ProtectedRoute>
           }
         />

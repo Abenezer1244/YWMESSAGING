@@ -9,6 +9,7 @@ import groupRoutes from './routes/group.routes.js';
 import messageRoutes from './routes/message.routes.js';
 import templateRoutes from './routes/template.routes.js';
 import recurringRoutes from './routes/recurring.routes.js';
+import analyticsRoutes from './routes/analytics.routes.js';
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.use('/api', groupRoutes);
 app.use('/api', messageRoutes);
 app.use('/api', templateRoutes);
 app.use('/api', recurringRoutes);
+app.use('/api', analyticsRoutes);
 
 // 404 handler
 app.use((req, res) => {
