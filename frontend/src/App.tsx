@@ -7,6 +7,8 @@ import DashboardPage from './pages/DashboardPage';
 import BranchesPage from './pages/dashboard/BranchesPage';
 import GroupsPage from './pages/dashboard/GroupsPage';
 import MembersPage from './pages/dashboard/MembersPage';
+import SendMessagePage from './pages/dashboard/SendMessagePage';
+import MessageHistoryPage from './pages/dashboard/MessageHistoryPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import useAuthStore from './stores/authStore';
 import useBranchStore from './stores/branchStore';
@@ -78,6 +80,22 @@ function App() {
           element={
             <ProtectedRoute>
               <MembersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/send-message"
+          element={
+            <ProtectedRoute>
+              <SendMessagePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/message-history"
+          element={
+            <ProtectedRoute>
+              <MessageHistoryPage />
             </ProtectedRoute>
           }
         />

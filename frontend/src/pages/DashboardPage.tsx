@@ -60,6 +60,18 @@ export function DashboardPage() {
                 >
                   👤 Members
                 </button>
+                <button
+                  onClick={() => navigate('/send-message')}
+                  className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition"
+                >
+                  📨 Send Message
+                </button>
+                <button
+                  onClick={() => navigate('/message-history')}
+                  className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition"
+                >
+                  📜 History
+                </button>
               </>
             )}
             <BranchSelector />

@@ -6,6 +6,7 @@ import { csrfProtection, generateCsrfToken } from './middleware/csrf.middleware.
 import authRoutes from './routes/auth.routes.js';
 import branchRoutes from './routes/branch.routes.js';
 import groupRoutes from './routes/group.routes.js';
+import messageRoutes from './routes/message.routes.js';
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.get('/api/csrf-token', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api', branchRoutes);
 app.use('/api', groupRoutes);
+app.use('/api', messageRoutes);
 
 // 404 handler
 app.use((req, res) => {
