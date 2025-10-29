@@ -99,6 +99,12 @@ export function DashboardPage() {
             >
               💳 Billing
             </button>
+            <button
+              onClick={() => navigate('/admin/settings')}
+              className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition"
+            >
+              ⚙️ Settings
+            </button>
             <BranchSelector />
           </div>
         </div>

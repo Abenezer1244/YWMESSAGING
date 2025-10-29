@@ -12,6 +12,7 @@ import recurringRoutes from './routes/recurring.routes.js';
 import analyticsRoutes from './routes/analytics.routes.js';
 import billingRoutes from './routes/billing.routes.js';
 import webhookRoutes from './routes/webhook.routes.js';
+import adminRoutes from './routes/admin.routes.js';
 const app = express();
 // Middleware
 app.use(helmet());
@@ -43,6 +44,7 @@ app.use('/api', templateRoutes);
 app.use('/api', recurringRoutes);
 app.use('/api', analyticsRoutes);
 app.use('/api', billingRoutes);
+app.use('/api', adminRoutes);
 // 404 handler
 app.use((req, res) => {
     res.status(404).json({

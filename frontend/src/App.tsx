@@ -16,6 +16,7 @@ import AnalyticsPage from './pages/dashboard/AnalyticsPage';
 import SubscribePage from './pages/SubscribePage';
 import BillingPage from './pages/BillingPage';
 import CheckoutPage from './pages/CheckoutPage';
+import AdminSettingsPage from './pages/AdminSettingsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import useAuthStore from './stores/authStore';
 import useBranchStore from './stores/branchStore';
@@ -155,6 +156,14 @@ function App() {
           element={
             <ProtectedRoute>
               <CheckoutPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/settings"
+          element={
+            <ProtectedRoute>
+              <AdminSettingsPage />
             </ProtectedRoute>
           }
         />
