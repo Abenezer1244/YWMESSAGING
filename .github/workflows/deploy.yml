@@ -1,0 +1,93 @@
+name: Deploy to Render
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      # Backend Build
+      - name: Install backend dependencies
+        run: cd backend && npm ci
+
+      - name: Build backend
+        run: cd backend && npm run build
+
+      - name: Lint backend
+        run: cd backend && npm run lint --if-present || true
+
+      # Frontend Build
+      - name: Install frontend dependencies
+        run: cd frontend && npm ci
+
+      - name: Build frontend
+        run: cd frontend && npm run build
+
+      # Run tests (if available)
+      - name: Run backend tests
+        run: cd backend && npm test --if-present || true
+        
+      - name: Run frontend tests
+        run: cd frontend && npm test --if-present || true
+
+      # Deploy to Render (automatic via webhook)
+      - name: Trigger Render deployment
+        if: success()
+        run: |
+          curl -X POST https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_DEPLOY_KEY }}
+        continue-on-error: true
+
+      - name: Deployment notification
+        if: success()
+        run: echo "✅ Build successful! Render will auto-deploy on git push"
+
+      - name: Deployment failed
+        if: failure()
+        run: echo "❌ Build failed! Check logs above for errors"
+
+  security-checks:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run npm audit
+        run: |
+          npm audit --audit-level=moderate || true
+
+      - name: Check for hardcoded secrets
+        run: |
+          npm install -g truffleHog
+          trufflehog filesystem . --json || true
+
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: TypeScript compilation check
+        run: |
+          cd backend && npm install && npm run build
+          cd ../frontend && npm install && npm run build
