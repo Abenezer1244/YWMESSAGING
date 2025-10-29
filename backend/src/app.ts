@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import authRoutes from './routes/auth.routes.js';
 
 const app = express();
 
@@ -19,6 +20,9 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+// API Routes
+app.use('/api/auth', authRoutes);
 
 // 404 handler
 app.use((req, res) => {

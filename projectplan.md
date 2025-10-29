@@ -229,7 +229,7 @@
 - [ ] Generate new access + refresh tokens
 - [ ] **Verify:** Can refresh tokens successfully
 
-#### Task 2.7b: Password Reset API (Phase 2 - Optional)
+#### Task 2.7b: Password Reset API (Phase 2)
 - [ ] POST /api/auth/forgot-password endpoint
 - [ ] Accept email, generate reset token (30-min expiry)
 - [ ] Send reset link via SendGrid
