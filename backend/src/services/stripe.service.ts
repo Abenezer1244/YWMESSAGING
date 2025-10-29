@@ -1,7 +1,13 @@
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
-  apiVersion: '2023-10-16',
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+
+if (!STRIPE_SECRET_KEY) {
+  throw new Error('STRIPE_SECRET_KEY environment variable is required');
+}
+
+const stripe = new Stripe(STRIPE_SECRET_KEY, {
+  apiVersion: '2022-11-15',
 });
 
 /**
@@ -94,7 +100,11 @@ export async function cancelSubscription(subscriptionId: string): Promise<void> 
 export async function getCustomer(customerId: string): Promise<Stripe.Customer | null> {
   try {
     const customer = await stripe.customers.retrieve(customerId);
-    return customer;
+    // Handle deleted customers
+    if ('deleted' in customer && customer.deleted) {
+      return null;
+    }
+    return customer as Stripe.Customer;
   } catch (error) {
     console.error('❌ Failed to get customer:', error);
     return null;

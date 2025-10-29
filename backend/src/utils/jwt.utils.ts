@@ -1,7 +1,15 @@
 import jwt from 'jsonwebtoken';
 
-const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'access_secret_key_default';
-const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh_secret_key_default';
+const ACCESS_SECRET: string = process.env.JWT_ACCESS_SECRET || '';
+const REFRESH_SECRET: string = process.env.JWT_REFRESH_SECRET || '';
+
+// Validate secrets are set at startup
+if (!ACCESS_SECRET) {
+  throw new Error('JWT_ACCESS_SECRET environment variable is required');
+}
+if (!REFRESH_SECRET) {
+  throw new Error('JWT_REFRESH_SECRET environment variable is required');
+}
 
 export interface AccessTokenPayload {
   adminId: string;
@@ -40,7 +48,8 @@ export function generateRefreshToken(adminId: string): string {
  */
 export function verifyAccessToken(token: string): AccessTokenPayload | null {
   try {
-    return jwt.verify(token, ACCESS_SECRET) as AccessTokenPayload;
+    const payload = jwt.verify(token, ACCESS_SECRET) as unknown;
+    return payload as AccessTokenPayload;
   } catch (error) {
     return null;
   }
@@ -51,7 +60,8 @@ export function verifyAccessToken(token: string): AccessTokenPayload | null {
  */
 export function verifyRefreshToken(token: string): RefreshTokenPayload | null {
   try {
-    return jwt.verify(token, REFRESH_SECRET) as RefreshTokenPayload;
+    const payload = jwt.verify(token, REFRESH_SECRET) as unknown;
+    return payload as RefreshTokenPayload;
   } catch (error) {
     return null;
   }

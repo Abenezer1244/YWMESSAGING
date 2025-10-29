@@ -26,7 +26,7 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
   }
 
   try {
-    const msg = {
+    const msg: any = {
       to: options.to,
       from: process.env.SENDGRID_FROM_EMAIL || 'noreply@connect-yw.com',
       subject: options.subject,

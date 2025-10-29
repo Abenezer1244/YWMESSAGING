@@ -6,7 +6,9 @@
       "Bash(npx prisma generate:*)",
       "Bash(docker-compose up:*)",
       "Bash(docker:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

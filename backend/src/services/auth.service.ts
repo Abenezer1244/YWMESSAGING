@@ -48,7 +48,10 @@ export async function registerChurch(input: RegisterInput): Promise<RegisterResp
   });
 
   if (existingAdmin) {
-    throw new Error('Email already registered');
+    // Don't leak information about existing emails
+    // Log actual error server-side only
+    console.warn(`Registration attempt with existing email: ${input.email}`);
+    throw new Error('Registration failed. Please try again or contact support.');
   }
 
   // Hash password

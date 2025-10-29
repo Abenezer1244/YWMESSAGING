@@ -11,19 +11,19 @@ export async function register(req: Request, res: Response): Promise<void> {
 
     // Validate required fields
     if (!email || !password || !firstName || !lastName || !churchName) {
-      res.status(400).json({ error: 'Missing required fields' });
+      res.status(400).json({ error: 'Registration failed. Please check your input and try again.' });
       return;
     }
 
     // Validate email format
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      res.status(400).json({ error: 'Invalid email format' });
+      res.status(400).json({ error: 'Registration failed. Please check your input and try again.' });
       return;
     }
 
     // Validate password length
     if (password.length < 8) {
-      res.status(400).json({ error: 'Password must be at least 8 characters' });
+      res.status(400).json({ error: 'Registration failed. Please check your input and try again.' });
       return;
     }
 
@@ -34,8 +34,10 @@ export async function register(req: Request, res: Response): Promise<void> {
       data: result,
     });
   } catch (error: any) {
+    // Log detailed error server-side only
     console.error('Registration error:', error);
-    res.status(400).json({ error: error.message || 'Registration failed' });
+    // Return generic message to client
+    res.status(400).json({ error: 'Registration failed. Please try again later or contact support.' });
   }
 }
 
