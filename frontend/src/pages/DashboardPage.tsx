@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../stores/authStore';
+import BranchSelector from '../components/BranchSelector';
 
 export function DashboardPage() {
   const navigate = useNavigate();
@@ -21,17 +22,30 @@ export function DashboardPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Connect YW Dashboard</h1>
-            <p className="text-gray-600">{church?.name}</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Connect YW Dashboard</h1>
+              <p className="text-gray-600">{church?.name}</p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+            >
+              Logout
+            </button>
           </div>
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition"
-          >
-            Logout
-          </button>
+
+          {/* Navigation and Branch Selector */}
+          <div className="flex gap-4 items-center">
+            <button
+              onClick={() => navigate('/branches')}
+              className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition"
+            >
+              📍 Branches
+            </button>
+            <BranchSelector />
+          </div>
         </div>
       </header>
 

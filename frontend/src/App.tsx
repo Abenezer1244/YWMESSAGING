@@ -4,19 +4,34 @@ import { Toaster } from 'react-hot-toast';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
+import BranchesPage from './pages/dashboard/BranchesPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import useAuthStore from './stores/authStore';
+import useBranchStore from './stores/branchStore';
 import { fetchCsrfToken } from './api/client';
+import { getBranches } from './api/branches';
 
 function App() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, church } = useAuthStore();
+  const { setBranches } = useBranchStore();
 
-  // Fetch CSRF token on app load
+  // Fetch CSRF token and branches on app load
   useEffect(() => {
     fetchCsrfToken().catch((error) => {
       console.error('Failed to initialize CSRF token:', error);
     });
   }, []);
+
+  // Load branches when user is authenticated
+  useEffect(() => {
+    if (isAuthenticated && church?.id) {
+      getBranches(church.id)
+        .then((branches) => setBranches(branches))
+        .catch((error) => {
+          console.error('Failed to load branches:', error);
+        });
+    }
+  }, [isAuthenticated, church?.id, setBranches]);
 
   return (
     <Router>
@@ -37,6 +52,14 @@ function App() {
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/branches"
+          element={
+            <ProtectedRoute>
+              <BranchesPage />
             </ProtectedRoute>
           }
         />

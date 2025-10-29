@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { csrfProtection } from './middleware/csrf.middleware.js';
 import authRoutes from './routes/auth.routes.js';
+import branchRoutes from './routes/branch.routes.js';
 const app = express();
 // Middleware
 app.use(helmet());
@@ -25,6 +26,7 @@ app.get('/api/csrf-token', (req, res) => {
 });
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api', branchRoutes);
 // 404 handler
 app.use((req, res) => {
     res.status(404).json({
