@@ -34,6 +34,7 @@ export async function register(req: Request, res: Response): Promise<void> {
       httpOnly: true,
       secure: true, // Required for sameSite: none (HTTPS only)
       sameSite: 'none', // Allow cross-origin cookie sending
+      domain: '.onrender.com', // Share cookies across all onrender.com subdomains
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
@@ -41,6 +42,7 @@ export async function register(req: Request, res: Response): Promise<void> {
       httpOnly: true,
       secure: true, // Required for sameSite: none (HTTPS only)
       sameSite: 'none', // Allow cross-origin cookie sending
+      domain: '.onrender.com', // Share cookies across all onrender.com subdomains
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -80,6 +82,7 @@ export async function loginHandler(req: Request, res: Response): Promise<void> {
       httpOnly: true,
       secure: true, // Required for sameSite: none (HTTPS only)
       sameSite: 'none', // Allow cross-origin cookie sending
+      domain: '.onrender.com', // Share cookies across all onrender.com subdomains
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
@@ -87,6 +90,7 @@ export async function loginHandler(req: Request, res: Response): Promise<void> {
       httpOnly: true,
       secure: true, // Required for sameSite: none (HTTPS only)
       sameSite: 'none', // Allow cross-origin cookie sending
+      domain: '.onrender.com', // Share cookies across all onrender.com subdomains
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -131,6 +135,7 @@ export async function refreshToken(req: Request, res: Response): Promise<void> {
       httpOnly: true,
       secure: true, // Required for sameSite: none (HTTPS only)
       sameSite: 'none', // Allow cross-origin cookie sending
+      domain: '.onrender.com', // Share cookies across all onrender.com subdomains
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
@@ -138,6 +143,7 @@ export async function refreshToken(req: Request, res: Response): Promise<void> {
       httpOnly: true,
       secure: true, // Required for sameSite: none (HTTPS only)
       sameSite: 'none', // Allow cross-origin cookie sending
+      domain: '.onrender.com', // Share cookies across all onrender.com subdomains
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
