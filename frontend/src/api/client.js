@@ -3,9 +3,6 @@ import useAuthStore from '../stores/authStore';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 const client = axios.create({
     baseURL: API_BASE_URL,
-    headers: {
-        'Content-Type': 'application/json',
-    },
     withCredentials: true, // Enable sending cookies with requests
 });
 // Fetch and cache CSRF token
@@ -33,10 +30,10 @@ client.interceptors.request.use((config) => {
     if (accessToken) {
         config.headers['Authorization'] = `Bearer ${accessToken}`;
     }
-    // Don't override Content-Type for FormData (multipart/form-data)
-    // Axios will automatically set it with proper boundary
-    if (config.data instanceof FormData) {
-        delete config.headers['Content-Type'];
+    // Set Content-Type for JSON requests (not FormData)
+    // FormData requests will have Content-Type auto-set by axios with boundary
+    if (!(config.data instanceof FormData)) {
+        config.headers['Content-Type'] = 'application/json';
     }
     // Add CSRF token to POST, PUT, DELETE, PATCH requests
     if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(config.method?.toUpperCase() || '')) {

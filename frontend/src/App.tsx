@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { initializePostHog } from './hooks/useAnalytics';
+import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
@@ -93,7 +94,8 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Auth Routes */}
+        {/* Public Routes */}
+        <Route path="/" element={<LandingPage />} />
         <Route
           path="/login"
           element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />}
@@ -206,18 +208,6 @@ function App() {
             <ProtectedRoute>
               <AdminSettingsPage />
             </ProtectedRoute>
-          }
-        />
-
-        {/* Home / Redirect */}
-        <Route
-          path="/"
-          element={
-            isAuthenticated ? (
-              <Navigate to="/dashboard" replace />
-            ) : (
-              <Navigate to="/login" replace />
-            )
           }
         />
       </Routes>
