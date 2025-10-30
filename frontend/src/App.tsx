@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { initializePostHog } from './hooks/useAnalytics';
@@ -22,12 +22,14 @@ import useAuthStore from './stores/authStore';
 import useBranchStore from './stores/branchStore';
 import { fetchCsrfToken } from './api/client';
 import { getBranches } from './api/branches';
+import { getMe } from './api/auth';
 
 function App() {
-  const { isAuthenticated, church } = useAuthStore();
+  const { isAuthenticated, church, setAuth } = useAuthStore();
   const { setBranches } = useBranchStore();
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
 
-  // Initialize analytics and fetch CSRF token on app load
+  // Initialize analytics, fetch CSRF token, and restore auth session on app load
   useEffect(() => {
     // Initialize PostHog
     initializePostHog();
@@ -36,7 +38,24 @@ function App() {
     fetchCsrfToken().catch((error) => {
       console.error('Failed to initialize CSRF token:', error);
     });
-  }, []);
+
+    // Restore authentication from session
+    setIsCheckingAuth(true);
+    getMe()
+      .then((user) => {
+        // User has valid session, restore auth state
+        if (user) {
+          setAuth(user.admin, user.church);
+        }
+      })
+      .catch((error) => {
+        // User doesn't have valid session, auth will remain cleared
+        console.debug('No active session:', error?.message);
+      })
+      .finally(() => {
+        setIsCheckingAuth(false);
+      });
+  }, [setAuth]);
 
   // Load branches when user is authenticated
   useEffect(() => {
