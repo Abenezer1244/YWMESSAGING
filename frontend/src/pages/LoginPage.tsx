@@ -34,21 +34,37 @@ export function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
+      console.log('Starting login with:', data.email);
       const response = await login(data);
+      console.log('Login response:', response);
       const { admin, church } = response.data;
 
       console.log('Login successful, setting auth:', { admin, church });
       setAuth(admin, church);
+
+      // Verify state was set
+      const currentState = useAuthStore.getState();
+      console.log('Auth store after setAuth:', {
+        isAuthenticated: currentState.isAuthenticated,
+        user: currentState.user,
+        church: currentState.church,
+      });
 
       toast.success('Login successful!');
 
       // Use replace: true to ensure clean navigation
       // and add a small delay to allow state to update
       setTimeout(() => {
-        console.log('Navigating to dashboard');
+        const finalState = useAuthStore.getState();
+        console.log('About to navigate, final auth state:', {
+          isAuthenticated: finalState.isAuthenticated,
+          user: finalState.user,
+        });
+        console.log('Navigating to dashboard now');
         navigate('/dashboard', { replace: true });
       }, 100);
     } catch (error: any) {
+      console.error('Login error:', error);
       const errorMessage = error.response?.data?.error || 'Login failed. Please try again.';
       toast.error(errorMessage);
       setIsLoading(false);
