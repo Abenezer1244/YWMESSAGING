@@ -58,7 +58,7 @@ export async function registerChurch(input: RegisterInput): Promise<RegisterResp
   const passwordHash = await hashPassword(input.password);
 
   // Create Stripe customer
-  const stripeCustomerId = await createCustomer(input.churchName, input.email);
+  const stripeCustomerId = await createCustomer(input.email, input.churchName);
 
   // Calculate trial end date
   const trialEndsAt = new Date();
