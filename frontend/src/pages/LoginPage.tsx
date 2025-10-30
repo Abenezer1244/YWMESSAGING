@@ -40,29 +40,23 @@ export function LoginPage() {
       const { admin, church } = response.data;
 
       console.log('Login successful, setting auth:', { admin, church });
+
+      // Set auth and immediately navigate
+      // Zustand setAuth is synchronous, so this updates state right away
       setAuth(admin, church);
 
-      // Verify state was set
-      const currentState = useAuthStore.getState();
-      console.log('Auth store after setAuth:', {
-        isAuthenticated: currentState.isAuthenticated,
-        user: currentState.user,
-        church: currentState.church,
+      console.log('Auth state updated, checking state:', {
+        isAuthenticated: useAuthStore.getState().isAuthenticated,
+        user: useAuthStore.getState().user,
       });
 
+      // Navigate immediately without delay
+      console.log('Navigating to dashboard');
+      navigate('/dashboard', { replace: true });
+
+      // Show toast after navigation (it will appear on dashboard)
       toast.success('Login successful!');
 
-      // Use replace: true to ensure clean navigation
-      // and add a small delay to allow state to update
-      setTimeout(() => {
-        const finalState = useAuthStore.getState();
-        console.log('About to navigate, final auth state:', {
-          isAuthenticated: finalState.isAuthenticated,
-          user: finalState.user,
-        });
-        console.log('Navigating to dashboard now');
-        navigate('/dashboard', { replace: true });
-      }, 100);
     } catch (error: any) {
       console.error('Login error:', error);
       const errorMessage = error.response?.data?.error || 'Login failed. Please try again.';
