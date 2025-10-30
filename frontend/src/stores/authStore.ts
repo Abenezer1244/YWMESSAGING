@@ -21,9 +21,11 @@ interface AuthState {
   church: Church | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  accessToken: string | null;
+  refreshToken: string | null;
 
   // Actions
-  setAuth: (user: Admin, church: Church) => void;
+  setAuth: (user: Admin, church: Church, accessToken: string, refreshToken: string) => void;
   clearAuth: () => void;
   logout: () => void;
 }
@@ -34,15 +36,22 @@ const useAuthStore = create<AuthState>()((set, get) => ({
   church: null,
   isLoading: false,
   isAuthenticated: false,
+  accessToken: null,
+  refreshToken: null,
 
   // Actions
-  setAuth: (user, church) => {
-    console.log('authStore.setAuth called with:', { user, church });
+  setAuth: (user, church, accessToken, refreshToken) => {
+    console.log('authStore.setAuth called with:', { user, church, accessToken: accessToken ? 'present' : 'missing' });
+    // Store tokens in localStorage for persistence across page refreshes
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
     set({
       user,
       church,
       isLoading: false,
-      isAuthenticated: true, // Explicitly set isAuthenticated to true
+      isAuthenticated: true,
+      accessToken,
+      refreshToken,
     });
     console.log('authStore.setAuth complete, new state:', {
       user: get().user,
@@ -52,20 +61,28 @@ const useAuthStore = create<AuthState>()((set, get) => ({
   },
 
   clearAuth: () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     set({
       user: null,
       church: null,
       isLoading: false,
       isAuthenticated: false,
+      accessToken: null,
+      refreshToken: null,
     });
   },
 
   logout: () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     set({
       user: null,
       church: null,
       isLoading: false,
       isAuthenticated: false,
+      accessToken: null,
+      refreshToken: null,
     });
   },
 }));

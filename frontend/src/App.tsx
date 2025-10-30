@@ -41,6 +41,14 @@ function App() {
       console.error('Failed to initialize CSRF token:', error);
     });
 
+    // Restore tokens from localStorage if they exist
+    const savedAccessToken = localStorage.getItem('accessToken');
+    const savedRefreshToken = localStorage.getItem('refreshToken');
+    if (savedAccessToken && savedRefreshToken) {
+      console.log('Found saved tokens in localStorage, restoring auth state');
+      // Note: We'll validate these tokens with getMe()
+    }
+
     // Restore authentication from session
     setIsCheckingAuth(true);
     getMe()
@@ -54,7 +62,12 @@ function App() {
             lastName: response.data.lastName,
             role: response.data.role,
           };
-          setAuth(admin, response.data.church);
+          // Get saved tokens from localStorage
+          const savedAccessToken = localStorage.getItem('accessToken');
+          const savedRefreshToken = localStorage.getItem('refreshToken');
+
+          // If we have tokens, use them; otherwise use empty strings (shouldn't happen)
+          setAuth(admin, response.data.church, savedAccessToken || '', savedRefreshToken || '');
         }
       })
       .catch((error) => {

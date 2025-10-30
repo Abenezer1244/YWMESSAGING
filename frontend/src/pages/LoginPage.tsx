@@ -47,11 +47,11 @@ export function LoginPage() {
         adminIsUndefined: admin === undefined,
       });
 
-      console.log('Login successful, setting auth:', { admin, church });
+      console.log('Login successful, setting auth:', { admin, church, accessToken: response.data.accessToken ? 'present' : 'missing' });
 
-      // Set auth and immediately navigate
+      // Set auth with tokens and immediately navigate
       // Zustand setAuth is synchronous, so this updates state right away
-      setAuth(admin, church);
+      setAuth(admin, church, response.data.accessToken, response.data.refreshToken);
 
       console.log('After setAuth, checking store:', {
         isAuthenticated: useAuthStore.getState().isAuthenticated,

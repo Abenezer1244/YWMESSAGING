@@ -29,11 +29,21 @@ export async function fetchCsrfToken(): Promise<string> {
   }
 }
 
-// Request interceptor - attach CSRF token for state-changing requests
+// Request interceptor - attach JWT token and CSRF token
 client.interceptors.request.use((config) => {
+  // Get access token from store or localStorage
+  const accessToken = useAuthStore.getState().accessToken || localStorage.getItem('accessToken');
+
+  // Add JWT token to Authorization header
+  if (accessToken) {
+    config.headers['Authorization'] = `Bearer ${accessToken}`;
+  }
+
   // Add CSRF token to POST, PUT, DELETE, PATCH requests
   if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(config.method?.toUpperCase() || '')) {
-    config.headers['X-CSRF-Token'] = csrfToken;
+    if (csrfToken) {
+      config.headers['X-CSRF-Token'] = csrfToken;
+    }
   }
   return config;
 });
@@ -53,13 +63,38 @@ client.interceptors.response.use(
       if (!isRefreshing) {
         isRefreshing = true;
         try {
-          // Send refresh request - cookies are automatically included
-          await axios.post(`${API_BASE_URL}/auth/refresh`, {}, {
-            withCredentials: true,
-          });
+          // Get refresh token from store or localStorage
+          const refreshToken = useAuthStore.getState().refreshToken || localStorage.getItem('refreshToken');
 
-          // Response will set new cookies automatically
+          if (!refreshToken) {
+            // No refresh token, logout
+            useAuthStore.getState().logout();
+            return Promise.reject(error);
+          }
+
+          // Send refresh request with refresh token in header
+          const response = await axios.post(
+            `${API_BASE_URL}/auth/refresh`,
+            {},
+            {
+              headers: {
+                'Authorization': `Bearer ${refreshToken}`,
+              },
+              withCredentials: true,
+            }
+          );
+
+          // Update tokens in store and localStorage
+          const { accessToken, refreshToken: newRefreshToken } = response.data.data;
+          const state = useAuthStore.getState();
+          if (state.user && state.church) {
+            state.setAuth(state.user, state.church, accessToken, newRefreshToken);
+          }
+
           isRefreshing = false;
+
+          // Update original request with new token
+          originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
 
           // Retry original request
           return client(originalRequest);
