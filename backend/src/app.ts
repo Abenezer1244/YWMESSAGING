@@ -34,26 +34,23 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// Health check endpoint (no auth needed)
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // Webhook routes (must be before CSRF protection)
 app.use('/api', webhookRoutes);
 
 // Public auth routes (must be before CSRF protection)
 app.use('/api/auth', authRoutes);
 
-// CSRF protection for all other routes
-app.use(csrfProtection);
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
-// CSRF token endpoint - GET to retrieve a fresh CSRF token
+// CSRF token endpoint - GET to retrieve a fresh CSRF token (before CSRF protection)
 app.get('/api/csrf-token', (req, res) => {
   res.json({ csrfToken: req.csrfToken() });
 });
 
-// API Routes
+// Protected API Routes - JWT-based, no CSRF needed
 app.use('/api', branchRoutes);
 app.use('/api', groupRoutes);
 app.use('/api', messageRoutes);
