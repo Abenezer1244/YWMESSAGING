@@ -32,15 +32,15 @@ export async function register(req: Request, res: Response): Promise<void> {
     // Set httpOnly cookies for tokens
     res.cookie('accessToken', result.accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: true, // Required for sameSite: none (HTTPS only)
+      sameSite: 'none', // Allow cross-origin cookie sending
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: true, // Required for sameSite: none (HTTPS only)
+      sameSite: 'none', // Allow cross-origin cookie sending
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -78,15 +78,15 @@ export async function loginHandler(req: Request, res: Response): Promise<void> {
     // Set httpOnly cookies for tokens
     res.cookie('accessToken', result.accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: true, // Required for sameSite: none (HTTPS only)
+      sameSite: 'none', // Allow cross-origin cookie sending
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: true, // Required for sameSite: none (HTTPS only)
+      sameSite: 'none', // Allow cross-origin cookie sending
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -129,15 +129,15 @@ export async function refreshToken(req: Request, res: Response): Promise<void> {
     // Set new httpOnly cookies for tokens
     res.cookie('accessToken', result.accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: true, // Required for sameSite: none (HTTPS only)
+      sameSite: 'none', // Allow cross-origin cookie sending
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: true, // Required for sameSite: none (HTTPS only)
+      sameSite: 'none', // Allow cross-origin cookie sending
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
