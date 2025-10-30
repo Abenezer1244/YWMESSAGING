@@ -43,10 +43,16 @@ const useAuthStore = create<AuthState>()((set, get) => ({
 
   // Actions
   setAuth: (user, church) => {
+    console.log('authStore.setAuth called with:', { user, church });
     set({
       user,
       church,
       isLoading: false,
+    });
+    console.log('authStore.setAuth complete, new state:', {
+      user: get().user,
+      church: get().church,
+      isAuthenticated: get().isAuthenticated,
     });
   },
 
