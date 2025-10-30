@@ -51,6 +51,8 @@ export async function register(req: Request, res: Response): Promise<void> {
       data: {
         adminId: result.adminId,
         churchId: result.churchId,
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
         admin: result.admin,
         church: result.church,
       },
@@ -99,6 +101,8 @@ export async function loginHandler(req: Request, res: Response): Promise<void> {
       data: {
         adminId: result.adminId,
         churchId: result.churchId,
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
         admin: result.admin,
         church: result.church,
       },
