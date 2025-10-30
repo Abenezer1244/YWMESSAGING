@@ -22,7 +22,7 @@ services:
       - key: PORT
         value: 3000
       - key: FRONTEND_URL
-        value: https://connect-yw.onrender.com
+        value: https://connect-yw-frontend.onrender.com
       - key: JWT_ACCESS_SECRET
         sync: false
       - key: JWT_REFRESH_SECRET
