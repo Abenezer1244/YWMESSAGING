@@ -205,9 +205,6 @@ function App() {
             )
           }
         />
-
-        {/* 404 */}
-        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Toaster position="top-right" />
     </Router>
