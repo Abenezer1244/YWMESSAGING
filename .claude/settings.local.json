@@ -10,7 +10,11 @@
       "Bash(git commit:*)",
       "Bash(npm run build:*)",
       "Bash(npm install:*)",
-      "Read(//c/Users/Windows/OneDrive - Seattle Colleges/Desktop/**)"
+      "Read(//c/Users/Windows/OneDrive - Seattle Colleges/Desktop/**)",
+      "Bash(curl -s https://connect-yw-frontend.onrender.com)",
+      "Bash(curl -s https://connect-yw-frontend.onrender.com/login)",
+      "Read(//c/Users/Windows/OneDrive/**)",
+      "Bash(cd:*)"
     ],
     "deny": [],
     "ask": []
