@@ -29,6 +29,8 @@ function App() {
   const { setBranches } = useBranchStore();
   const [isCheckingAuth, setIsCheckingAuth] = useState(false);
 
+  console.log('App rendering, isAuthenticated:', isAuthenticated, 'church:', church?.id);
+
   // Initialize analytics, fetch CSRF token, and restore auth session on app load
   useEffect(() => {
     // Initialize PostHog

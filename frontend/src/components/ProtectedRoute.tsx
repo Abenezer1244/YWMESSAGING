@@ -6,12 +6,16 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
+
+  console.log('ProtectedRoute rendering, isAuthenticated:', isAuthenticated, 'user:', user);
 
   if (!isAuthenticated) {
+    console.log('User not authenticated, redirecting to /login');
     return <Navigate to="/login" replace />;
   }
 
+  console.log('User authenticated, rendering protected content');
   return <>{children}</>;
 }
 
