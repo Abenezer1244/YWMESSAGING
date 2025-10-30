@@ -2,12 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   RESET & BASE STYLES
+   ============================================ */
+
 * {
   @apply box-border;
 }
 
 html {
   scroll-behavior: smooth;
+  /* Dark mode color scheme */
+  @apply bg-white text-secondary-900 dark:bg-secondary-950 dark:text-secondary-50;
 }
 
 html,
@@ -20,26 +26,310 @@ body,
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
     'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.02em;
 }
 
-/* Custom scrollbar for webkit browsers */
+/* ============================================
+   FOCUS STATES (Accessibility)
+   ============================================ */
+
+:focus-visible {
+  @apply outline-none ring-2 ring-primary-500 ring-offset-2;
+}
+
+button:focus-visible {
+  @apply outline-none ring-2 ring-primary-500 ring-offset-2 rounded-sm;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  @apply outline-none ring-2 ring-primary-500 ring-offset-2;
+}
+
+.dark button:focus-visible,
+.dark input:focus-visible,
+.dark textarea:focus-visible,
+.dark select:focus-visible {
+  @apply ring-offset-secondary-900;
+}
+
+/* ============================================
+   CUSTOM SCROLLBAR
+   ============================================ */
+
 ::-webkit-scrollbar {
   width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  @apply bg-secondary-50 dark:bg-secondary-800;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  @apply bg-secondary-300 dark:bg-secondary-600 rounded-full;
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  @apply bg-secondary-400 dark:bg-secondary-500;
+}
+
+/* ============================================
+   SELECTION STYLES
+   ============================================ */
+
+::selection {
+  @apply bg-primary-200 text-primary-900;
+}
+
+.dark ::selection {
+  @apply bg-primary-700 text-primary-100;
+}
+
+/* ============================================
+   TYPOGRAPHY UTILITIES
+   ============================================ */
+
+.text-display {
+  @apply text-display font-bold leading-tight;
+}
+
+.text-h1 {
+  @apply text-h1 font-bold leading-tight;
+}
+
+.text-h2 {
+  @apply text-h2 font-bold leading-tight;
+}
+
+.text-h3 {
+  @apply text-h3 font-semibold leading-tight;
+}
+
+.text-body-large {
+  @apply text-lg font-normal;
+}
+
+.text-body {
+  @apply text-base font-normal;
+}
+
+.text-body-small {
+  @apply text-sm font-normal;
+}
+
+.text-label {
+  @apply text-xs font-semibold uppercase tracking-wide;
+}
+
+/* ============================================
+   BUTTON RESETS
+   ============================================ */
+
+button {
+  @apply cursor-pointer transition-all duration-normal;
+  font-family: inherit;
+}
+
+button:disabled {
+  @apply cursor-not-allowed opacity-50;
+}
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+
+input,
+textarea,
+select {
+  @apply transition-colors duration-normal;
+}
+
+input::placeholder,
+textarea::placeholder {
+  @apply text-secondary-400 dark:text-secondary-500;
+}
+
+/* ============================================
+   LINKS
+   ============================================ */
+
+a {
+  @apply text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors duration-normal;
+  text-decoration: none;
+}
+
+a:hover {
+  @apply underline;
+}
+
+/* ============================================
+   CODE BLOCKS
+   ============================================ */
+
+code {
+  @apply font-mono text-sm bg-secondary-100 dark:bg-secondary-800 px-2 py-1 rounded-sm;
+}
+
+pre {
+  @apply font-mono text-sm bg-secondary-900 dark:bg-secondary-950 text-secondary-50 p-4 rounded-md overflow-auto;
+}
+
+/* ============================================
+   COMPONENT STYLES
+   ============================================ */
+
+/* Loading spinner */
+.spinner {
+  @apply w-6 h-6 border-2 border-primary-200 border-t-primary-600 rounded-full animate-spin;
+}
+
+.spinner-sm {
+  @apply w-4 h-4 border-2 border-primary-200 border-t-primary-600 rounded-full animate-spin;
+}
+
+.spinner-lg {
+  @apply w-8 h-8 border-3 border-primary-200 border-t-primary-600 rounded-full animate-spin;
+}
+
+/* Skeleton loader */
+.skeleton {
+  @apply bg-secondary-200 dark:bg-secondary-700 rounded-md animate-pulse;
+}
+
+.skeleton-text {
+  @apply bg-secondary-200 dark:bg-secondary-700 rounded h-4 animate-pulse;
+}
+
+.skeleton-circle {
+  @apply bg-secondary-200 dark:bg-secondary-700 rounded-full animate-pulse;
+}
+
+/* Badge styles */
+.badge {
+  @apply inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold;
+}
+
+.badge-primary {
+  @apply bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-200;
+}
+
+.badge-success {
+  @apply bg-success-100 dark:bg-success-900 text-success-700 dark:text-success-200;
+}
+
+.badge-warning {
+  @apply bg-warning-100 dark:bg-warning-900 text-warning-700 dark:text-warning-200;
+}
+
+.badge-danger {
+  @apply bg-danger-100 dark:bg-danger-900 text-danger-700 dark:text-danger-200;
+}
+
+/* Divider */
+.divider {
+  @apply h-px bg-secondary-200 dark:bg-secondary-700;
+}
+
+/* Backdrop blur */
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+.backdrop-blur {
+  backdrop-filter: blur(12px);
+}
+
+.backdrop-blur-lg {
+  backdrop-filter: blur(20px);
+}
+
+/* ============================================
+   ANIMATIONS & TRANSITIONS
+   ============================================ */
+
+/* Fade in on mount */
+.fade-in {
+  @apply animate-fade-in;
+}
+
+.slide-up {
+  @apply animate-slide-up;
+}
+
+.slide-down {
+  @apply animate-slide-down;
+}
+
+.scale-in {
+  @apply animate-scale-in;
+}
+
+/* Smooth transitions */
+.transition-all-smooth {
+  @apply transition-all duration-normal ease-smooth;
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+/* Glass morphism effect */
+.glass {
+  @apply backdrop-blur-md bg-white/80 dark:bg-secondary-900/80;
+}
+
+/* Gradient text */
+.gradient-text {
+  @apply bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent;
+}
+
+/* Shadow elevation */
+.elevation-0 {
+  @apply shadow-none;
+}
+
+.elevation-1 {
+  @apply shadow-subtle;
+}
+
+.elevation-2 {
+  @apply shadow-sm;
+}
+
+.elevation-3 {
+  @apply shadow-md;
+}
+
+.elevation-4 {
+  @apply shadow-lg;
+}
+
+.elevation-5 {
+  @apply shadow-xl;
+}
+
+/* ============================================
+   DARK MODE SPECIFIC
+   ============================================ */
+
+.dark {
+  color-scheme: dark;
+}
+
+/* Print styles */
+@media print {
+  body {
+    @apply bg-white text-black;
+  }
+
+  .no-print {
+    @apply hidden;
+  }
 }
