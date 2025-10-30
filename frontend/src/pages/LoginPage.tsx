@@ -37,13 +37,20 @@ export function LoginPage() {
       const response = await login(data);
       const { admin, church } = response.data;
 
+      console.log('Login successful, setting auth:', { admin, church });
       setAuth(admin, church);
+
       toast.success('Login successful!');
-      navigate('/dashboard');
+
+      // Use replace: true to ensure clean navigation
+      // and add a small delay to allow state to update
+      setTimeout(() => {
+        console.log('Navigating to dashboard');
+        navigate('/dashboard', { replace: true });
+      }, 100);
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Login failed. Please try again.';
       toast.error(errorMessage);
-    } finally {
       setIsLoading(false);
     }
   };

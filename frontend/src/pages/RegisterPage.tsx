@@ -58,13 +58,20 @@ export function RegisterPage() {
       });
 
       const { admin, church } = response.data;
+      console.log('Registration successful, setting auth:', { admin, church });
       setAuth(admin, church);
+
       toast.success('Registration successful!');
-      navigate('/dashboard');
+
+      // Use replace: true to ensure clean navigation
+      // and add a small delay to allow state to update
+      setTimeout(() => {
+        console.log('Navigating to dashboard');
+        navigate('/dashboard', { replace: true });
+      }, 100);
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Registration failed. Please try again.';
       toast.error(errorMessage);
-    } finally {
       setIsLoading(false);
     }
   };
