@@ -13,6 +13,8 @@ const client = axios.create({
 
 // Fetch and cache CSRF token
 let csrfToken = '';
+let isRefreshing = false;
+let refreshSubscribers: ((token: string) => void)[] = [];
 
 export async function fetchCsrfToken(): Promise<string> {
   try {
@@ -36,30 +38,38 @@ client.interceptors.request.use((config) => {
   return config;
 });
 
-// Response interceptor - handle token refresh
+// Response interceptor - handle token refresh (but prevent infinite loops)
 client.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // If 401 and not already retrying, try to refresh token via cookies
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Only retry on 401 for non-auth endpoints
+    const isAuthEndpoint = originalRequest.url?.includes('/auth/');
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       originalRequest._retry = true;
 
-      try {
-        // Send refresh request - cookies are automatically included
-        const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {}, {
-          withCredentials: true,
-        });
+      if (!isRefreshing) {
+        isRefreshing = true;
+        try {
+          // Send refresh request - cookies are automatically included
+          await axios.post(`${API_BASE_URL}/auth/refresh`, {}, {
+            withCredentials: true,
+          });
 
-        // Response will set new cookies automatically
-        // Retry original request
-        return client(originalRequest);
-      } catch (refreshError) {
-        // If refresh fails, logout
-        useAuthStore.getState().logout();
-        window.location.href = '/login';
-        return Promise.reject(refreshError);
+          // Response will set new cookies automatically
+          isRefreshing = false;
+
+          // Retry original request
+          return client(originalRequest);
+        } catch (refreshError) {
+          // If refresh fails, just logout without reloading
+          isRefreshing = false;
+          useAuthStore.getState().logout();
+          // Don't do window.location.href - let React Router handle it
+          return Promise.reject(refreshError);
+        }
       }
     }
 
