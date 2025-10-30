@@ -42,10 +42,17 @@ function App() {
     // Restore authentication from session
     setIsCheckingAuth(true);
     getMe()
-      .then((user) => {
+      .then((response) => {
         // User has valid session, restore auth state
-        if (user) {
-          setAuth(user.admin, user.church);
+        if (response.success && response.data) {
+          const admin = {
+            id: response.data.id,
+            email: response.data.email,
+            firstName: response.data.firstName,
+            lastName: response.data.lastName,
+            role: response.data.role,
+          };
+          setAuth(admin, response.data.church);
         }
       })
       .catch((error) => {
