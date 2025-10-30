@@ -115,7 +115,14 @@ export async function getBranchStats(churchId: string) {
     },
   });
 
-  const stats = [];
+  const stats: Array<{
+    id: string;
+    name: string;
+    memberCount: number;
+    messageCount: number;
+    deliveryRate: number;
+    groupCount: number;
+  }> = [];
 
   for (const branch of branches) {
     // Count members
