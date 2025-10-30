@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { register as registerChurch } from '../api/auth';
+import { fetchCsrfToken } from '../api/client';
 import useAuthStore from '../stores/authStore';
 
 interface RegisterFormData {
@@ -18,6 +19,14 @@ export function RegisterPage() {
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch CSRF token on component mount
+  useEffect(() => {
+    fetchCsrfToken().catch(() => {
+      // Token fetch failed, but continue anyway
+      console.warn('Failed to fetch CSRF token, registration may fail');
+    });
+  }, []);
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterFormData>({
     defaultValues: {

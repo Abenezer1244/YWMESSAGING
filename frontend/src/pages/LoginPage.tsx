@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { login } from '../api/auth';
+import { fetchCsrfToken } from '../api/client';
 import useAuthStore from '../stores/authStore';
 
 interface LoginFormData {
@@ -14,6 +15,14 @@ export function LoginPage() {
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch CSRF token on component mount
+  useEffect(() => {
+    fetchCsrfToken().catch(() => {
+      // Token fetch failed, but continue anyway
+      console.warn('Failed to fetch CSRF token, login may fail');
+    });
+  }, []);
 
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
     defaultValues: {
