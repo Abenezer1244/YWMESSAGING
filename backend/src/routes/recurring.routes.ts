@@ -6,18 +6,18 @@ const router = Router();
 
 router.use(authenticateToken);
 
-router.get('/api/recurring-messages', recurringController.getRecurringMessages);
-router.post('/api/recurring-messages', recurringController.createRecurringMessage);
+router.get('/recurring-messages', recurringController.getRecurringMessages);
+router.post('/recurring-messages', recurringController.createRecurringMessage);
 router.put(
-  '/api/recurring-messages/:messageId',
+  '/recurring-messages/:messageId',
   recurringController.updateRecurringMessage
 );
 router.delete(
-  '/api/recurring-messages/:messageId',
+  '/recurring-messages/:messageId',
   recurringController.deleteRecurringMessage
 );
 router.put(
-  '/api/recurring-messages/:messageId/toggle',
+  '/recurring-messages/:messageId/toggle',
   recurringController.toggleRecurringMessage
 );
 
