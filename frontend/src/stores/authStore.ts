@@ -20,8 +20,6 @@ interface AuthState {
   user: Admin | null;
   church: Church | null;
   isLoading: boolean;
-
-  // Computed
   isAuthenticated: boolean;
 
   // Actions
@@ -35,11 +33,7 @@ const useAuthStore = create<AuthState>()((set, get) => ({
   user: null,
   church: null,
   isLoading: false,
-
-  // Computed
-  get isAuthenticated() {
-    return get().user !== null;
-  },
+  isAuthenticated: false,
 
   // Actions
   setAuth: (user, church) => {
@@ -48,6 +42,7 @@ const useAuthStore = create<AuthState>()((set, get) => ({
       user,
       church,
       isLoading: false,
+      isAuthenticated: true, // Explicitly set isAuthenticated to true
     });
     console.log('authStore.setAuth complete, new state:', {
       user: get().user,
@@ -61,6 +56,7 @@ const useAuthStore = create<AuthState>()((set, get) => ({
       user: null,
       church: null,
       isLoading: false,
+      isAuthenticated: false,
     });
   },
 
@@ -69,6 +65,7 @@ const useAuthStore = create<AuthState>()((set, get) => ({
       user: null,
       church: null,
       isLoading: false,
+      isAuthenticated: false,
     });
   },
 }));
