@@ -70,11 +70,7 @@ export async function importMembers(
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await client.post(`/groups/${groupId}/members/import`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
+  const response = await client.post(`/groups/${groupId}/members/import`, formData);
 
   return response.data.data;
 }

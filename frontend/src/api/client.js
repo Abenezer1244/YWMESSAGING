@@ -33,6 +33,11 @@ client.interceptors.request.use((config) => {
     if (accessToken) {
         config.headers['Authorization'] = `Bearer ${accessToken}`;
     }
+    // Don't override Content-Type for FormData (multipart/form-data)
+    // Axios will automatically set it with proper boundary
+    if (config.data instanceof FormData) {
+        delete config.headers['Content-Type'];
+    }
     // Add CSRF token to POST, PUT, DELETE, PATCH requests
     if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(config.method?.toUpperCase() || '')) {
         if (csrfToken) {
