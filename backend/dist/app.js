@@ -27,6 +27,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 // Webhook routes (must be before CSRF protection)
 app.use('/api', webhookRoutes);
+// Public auth routes (must be before CSRF protection)
+app.use('/api/auth', authRoutes);
 // CSRF protection for all other routes
 app.use(csrfProtection);
 // Health check endpoint
@@ -38,7 +40,6 @@ app.get('/api/csrf-token', (req, res) => {
     res.json({ csrfToken: req.csrfToken() });
 });
 // API Routes
-app.use('/api/auth', authRoutes);
 app.use('/api', branchRoutes);
 app.use('/api', groupRoutes);
 app.use('/api', messageRoutes);

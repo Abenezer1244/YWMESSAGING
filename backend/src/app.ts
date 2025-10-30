@@ -34,6 +34,9 @@ app.use(cookieParser());
 // Webhook routes (must be before CSRF protection)
 app.use('/api', webhookRoutes);
 
+// Public auth routes (must be before CSRF protection)
+app.use('/api/auth', authRoutes);
+
 // CSRF protection for all other routes
 app.use(csrfProtection);
 
@@ -48,7 +51,6 @@ app.get('/api/csrf-token', (req, res) => {
 });
 
 // API Routes
-app.use('/api/auth', authRoutes);
 app.use('/api', branchRoutes);
 app.use('/api', groupRoutes);
 app.use('/api', messageRoutes);
