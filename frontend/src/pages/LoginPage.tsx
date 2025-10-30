@@ -37,7 +37,15 @@ export function LoginPage() {
       console.log('Starting login with:', data.email);
       const response = await login(data);
       console.log('Login response:', response);
+      console.log('response.data keys:', Object.keys(response.data));
       const { admin, church } = response.data;
+
+      console.log('Extracted admin and church:', {
+        admin,
+        church,
+        adminIsNull: admin === null,
+        adminIsUndefined: admin === undefined,
+      });
 
       console.log('Login successful, setting auth:', { admin, church });
 
@@ -45,9 +53,10 @@ export function LoginPage() {
       // Zustand setAuth is synchronous, so this updates state right away
       setAuth(admin, church);
 
-      console.log('Auth state updated, checking state:', {
+      console.log('After setAuth, checking store:', {
         isAuthenticated: useAuthStore.getState().isAuthenticated,
         user: useAuthStore.getState().user,
+        church: useAuthStore.getState().church,
       });
 
       // Navigate immediately without delay
