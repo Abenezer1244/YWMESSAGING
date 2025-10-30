@@ -16,6 +16,9 @@ import adminRoutes from './routes/admin.routes.js';
 
 const app = express();
 
+// Trust proxy - required for rate limiting and IP detection on Render
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(helmet());
 app.use(
