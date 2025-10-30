@@ -43,11 +43,21 @@ export async function createBranchHandler(req: Request, res: Response): Promise<
     const { churchId } = req.params;
     const { name, address, phone, description } = req.body;
 
+    // DEBUG: Log authorization details
+    console.log('=== CREATE BRANCH DEBUG ===');
+    console.log('req.user:', req.user);
+    console.log('churchId from params:', churchId);
+    console.log('req.user?.churchId:', req.user?.churchId);
+    console.log('Match:', req.user?.churchId === churchId);
+    console.log('req.cookies:', Object.keys(req.cookies));
+
     // Verify user has access to this church
     if (req.user?.churchId !== churchId) {
+      console.log('AUTHORIZATION FAILED: churchId mismatch');
       res.status(403).json({ error: 'Unauthorized' });
       return;
     }
+    console.log('AUTHORIZATION PASSED');
 
     // Validate required fields
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
