@@ -72,4 +72,18 @@ export declare function getActivityLogs(churchId: string, limit?: number, offset
  * Get activity log count
  */
 export declare function getActivityLogCount(churchId: string): Promise<number>;
+/**
+ * Invite a co-admin (create new co-admin account)
+ */
+export declare function inviteCoAdmin(churchId: string, email: string, firstName: string, lastName: string): Promise<{
+    admin: {
+        role: string;
+        email: string;
+        id: string;
+        firstName: string;
+        lastName: string;
+        createdAt: Date;
+    };
+    tempPassword: string;
+}>;
 //# sourceMappingURL=admin.service.d.ts.map

@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import { csrfProtection } from './middleware/csrf.middleware.js';
 import authRoutes from './routes/auth.routes.js';
 import branchRoutes from './routes/branch.routes.js';
 import groupRoutes from './routes/group.routes.js';
@@ -14,6 +13,8 @@ import billingRoutes from './routes/billing.routes.js';
 import webhookRoutes from './routes/webhook.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 const app = express();
+// Trust proxy - required for rate limiting and IP detection on Render
+app.set('trust proxy', 1);
 // Middleware
 app.use(helmet());
 app.use(cors({
@@ -25,21 +26,19 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+// Health check endpoint (no auth needed)
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 // Webhook routes (must be before CSRF protection)
 app.use('/api', webhookRoutes);
 // Public auth routes (must be before CSRF protection)
 app.use('/api/auth', authRoutes);
-// CSRF protection for all other routes
-app.use(csrfProtection);
-// Health check endpoint
-app.get('/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-// CSRF token endpoint - GET to retrieve a fresh CSRF token
+// CSRF token endpoint - GET to retrieve a fresh CSRF token (before CSRF protection)
 app.get('/api/csrf-token', (req, res) => {
     res.json({ csrfToken: req.csrfToken() });
 });
-// API Routes
+// Protected API Routes - JWT-based, no CSRF needed
 app.use('/api', branchRoutes);
 app.use('/api', groupRoutes);
 app.use('/api', messageRoutes);

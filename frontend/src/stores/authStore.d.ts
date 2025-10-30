@@ -16,7 +16,9 @@ interface AuthState {
     church: Church | null;
     isLoading: boolean;
     isAuthenticated: boolean;
-    setAuth: (user: Admin, church: Church) => void;
+    accessToken: string | null;
+    refreshToken: string | null;
+    setAuth: (user: Admin, church: Church, accessToken: string, refreshToken: string) => void;
     clearAuth: () => void;
     logout: () => void;
 }

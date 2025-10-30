@@ -21,6 +21,13 @@ export async function getCoAdmins() {
     return response.data;
 }
 /**
+ * Invite a new co-admin
+ */
+export async function inviteCoAdmin(data) {
+    const response = await client.post('/admin/co-admins', data);
+    return response.data;
+}
+/**
  * Remove a co-admin
  */
 export async function removeCoAdmin(adminId) {

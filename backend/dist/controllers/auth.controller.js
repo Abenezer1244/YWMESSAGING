@@ -25,14 +25,16 @@ export async function register(req, res) {
         // Set httpOnly cookies for tokens
         res.cookie('accessToken', result.accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            secure: true, // Required for sameSite: none (HTTPS only)
+            sameSite: 'none', // Allow cross-origin cookie sending
+            domain: '.onrender.com', // Share cookies across all onrender.com subdomains
             maxAge: 15 * 60 * 1000, // 15 minutes
         });
         res.cookie('refreshToken', result.refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            secure: true, // Required for sameSite: none (HTTPS only)
+            sameSite: 'none', // Allow cross-origin cookie sending
+            domain: '.onrender.com', // Share cookies across all onrender.com subdomains
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
         res.status(201).json({
@@ -40,6 +42,8 @@ export async function register(req, res) {
             data: {
                 adminId: result.adminId,
                 churchId: result.churchId,
+                accessToken: result.accessToken,
+                refreshToken: result.refreshToken,
                 admin: result.admin,
                 church: result.church,
             },
@@ -66,14 +70,16 @@ export async function loginHandler(req, res) {
         // Set httpOnly cookies for tokens
         res.cookie('accessToken', result.accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            secure: true, // Required for sameSite: none (HTTPS only)
+            sameSite: 'none', // Allow cross-origin cookie sending
+            domain: '.onrender.com', // Share cookies across all onrender.com subdomains
             maxAge: 15 * 60 * 1000, // 15 minutes
         });
         res.cookie('refreshToken', result.refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            secure: true, // Required for sameSite: none (HTTPS only)
+            sameSite: 'none', // Allow cross-origin cookie sending
+            domain: '.onrender.com', // Share cookies across all onrender.com subdomains
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
         res.status(200).json({
@@ -81,6 +87,8 @@ export async function loginHandler(req, res) {
             data: {
                 adminId: result.adminId,
                 churchId: result.churchId,
+                accessToken: result.accessToken,
+                refreshToken: result.refreshToken,
                 admin: result.admin,
                 church: result.church,
             },
@@ -111,14 +119,16 @@ export async function refreshToken(req, res) {
         // Set new httpOnly cookies for tokens
         res.cookie('accessToken', result.accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            secure: true, // Required for sameSite: none (HTTPS only)
+            sameSite: 'none', // Allow cross-origin cookie sending
+            domain: '.onrender.com', // Share cookies across all onrender.com subdomains
             maxAge: 15 * 60 * 1000, // 15 minutes
         });
         res.cookie('refreshToken', result.refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            secure: true, // Required for sameSite: none (HTTPS only)
+            sameSite: 'none', // Allow cross-origin cookie sending
+            domain: '.onrender.com', // Share cookies across all onrender.com subdomains
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
         res.status(200).json({

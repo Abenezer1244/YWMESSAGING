@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticateToken } from '../middleware/auth.middleware.js';
-import { getProfileHandler, updateProfileHandler, getCoAdminsHandler, removeCoAdminHandler, getActivityLogsHandler, logActivityHandler, } from '../controllers/admin.controller.js';
+import { getProfileHandler, updateProfileHandler, getCoAdminsHandler, inviteCoAdminHandler, removeCoAdminHandler, getActivityLogsHandler, logActivityHandler, } from '../controllers/admin.controller.js';
 const router = Router();
 // All admin routes require authentication
 router.use(authenticateToken);
@@ -9,6 +9,7 @@ router.get('/admin/profile', getProfileHandler);
 router.put('/admin/profile', updateProfileHandler);
 // Co-admin endpoints
 router.get('/admin/co-admins', getCoAdminsHandler);
+router.post('/admin/co-admins', inviteCoAdminHandler);
 router.delete('/admin/co-admins/:adminId', removeCoAdminHandler);
 // Activity log endpoints
 router.get('/admin/activity-logs', getActivityLogsHandler);

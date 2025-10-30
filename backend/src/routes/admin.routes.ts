@@ -4,6 +4,7 @@ import {
   getProfileHandler,
   updateProfileHandler,
   getCoAdminsHandler,
+  inviteCoAdminHandler,
   removeCoAdminHandler,
   getActivityLogsHandler,
   logActivityHandler,
@@ -20,6 +21,7 @@ router.put('/admin/profile', updateProfileHandler);
 
 // Co-admin endpoints
 router.get('/admin/co-admins', getCoAdminsHandler);
+router.post('/admin/co-admins', inviteCoAdminHandler);
 router.delete('/admin/co-admins/:adminId', removeCoAdminHandler);
 
 // Activity log endpoints

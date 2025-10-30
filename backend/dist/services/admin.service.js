@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { hashPassword } from '../utils/password.utils.js';
 const prisma = new PrismaClient();
 /**
  * Update church profile
@@ -162,6 +163,53 @@ export async function getActivityLogCount(churchId) {
     }
     catch (error) {
         console.error('Failed to get activity log count:', error);
+        throw error;
+    }
+}
+/**
+ * Invite a co-admin (create new co-admin account)
+ */
+export async function inviteCoAdmin(churchId, email, firstName, lastName) {
+    try {
+        // Check if email already exists
+        const existingAdmin = await prisma.admin.findUnique({
+            where: { email },
+        });
+        if (existingAdmin) {
+            throw new Error('Email already in use');
+        }
+        // Generate a temporary password (12 characters)
+        const tempPassword = Math.random().toString(36).slice(2, 14);
+        // Hash the temporary password
+        const passwordHash = await hashPassword(tempPassword);
+        // Create new co-admin
+        const newAdmin = await prisma.admin.create({
+            data: {
+                churchId,
+                email,
+                firstName,
+                lastName,
+                passwordHash,
+                role: 'CO_ADMIN',
+            },
+            select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                role: true,
+                createdAt: true,
+            },
+        });
+        console.log(`✅ Co-admin invited: ${email} for church ${churchId}`);
+        // Return co-admin info with temporary password
+        return {
+            admin: newAdmin,
+            tempPassword, // Primary admin shares this with co-admin
+        };
+    }
+    catch (error) {
+        console.error('Failed to invite co-admin:', error);
         throw error;
     }
 }

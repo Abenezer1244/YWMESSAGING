@@ -52,6 +52,20 @@ export declare function updateProfile(data: {
  */
 export declare function getCoAdmins(): Promise<CoAdmin[]>;
 /**
+ * Invite a new co-admin
+ */
+export declare function inviteCoAdmin(data: {
+    email: string;
+    firstName: string;
+    lastName: string;
+}): Promise<{
+    success: boolean;
+    data: {
+        admin: CoAdmin;
+        tempPassword: string;
+    };
+}>;
+/**
  * Remove a co-admin
  */
 export declare function removeCoAdmin(adminId: string): Promise<{

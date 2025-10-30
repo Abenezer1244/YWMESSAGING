@@ -5,6 +5,7 @@ import {
   getChurchProfile,
   getCoAdmins,
   removeCoAdmin,
+  inviteCoAdmin,
   logActivity,
   getActivityLogs,
   getActivityLogCount,
@@ -122,6 +123,57 @@ export async function removeCoAdminHandler(req: Request, res: Response) {
   } catch (error) {
     console.error('Failed to remove co-admin:', error);
     res.status(500).json({ error: (error as Error).message || 'Failed to remove co-admin' });
+  }
+}
+
+/**
+ * POST /api/admin/co-admins
+ * Invite a new co-admin
+ */
+export async function inviteCoAdminHandler(req: Request, res: Response) {
+  try {
+    const churchId = req.user?.churchId;
+    if (!churchId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { email, firstName, lastName } = req.body;
+
+    // Validate required fields
+    if (!email || !firstName || !lastName) {
+      return res.status(400).json({ error: 'Email, first name, and last name required' });
+    }
+
+    // Validate email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+
+    const result = await inviteCoAdmin(churchId, email, firstName, lastName);
+
+    // Log activity
+    await logActivity(churchId, req.user?.adminId || '', 'Invite Co-Admin', {
+      email,
+      firstName,
+      lastName,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: {
+        admin: result.admin,
+        tempPassword: result.tempPassword,
+      },
+    });
+  } catch (error) {
+    console.error('Failed to invite co-admin:', error);
+    const errorMessage = (error as Error).message;
+
+    if (errorMessage === 'Email already in use') {
+      return res.status(400).json({ error: 'Email already in use' });
+    }
+
+    res.status(500).json({ error: errorMessage || 'Failed to invite co-admin' });
   }
 }
 

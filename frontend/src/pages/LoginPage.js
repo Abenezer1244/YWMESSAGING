@@ -1,14 +1,22 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { login } from '../api/auth';
+import { fetchCsrfToken } from '../api/client';
 import useAuthStore from '../stores/authStore';
 export function LoginPage() {
     const navigate = useNavigate();
     const { setAuth } = useAuthStore();
     const [isLoading, setIsLoading] = useState(false);
+    // Fetch CSRF token on component mount
+    useEffect(() => {
+        fetchCsrfToken().catch(() => {
+            // Token fetch failed, but continue anyway
+            console.warn('Failed to fetch CSRF token, login may fail');
+        });
+    }, []);
     const { register, handleSubmit, formState: { errors } } = useForm({
         defaultValues: {
             email: '',
@@ -18,17 +26,36 @@ export function LoginPage() {
     const onSubmit = async (data) => {
         setIsLoading(true);
         try {
+            console.log('Starting login with:', data.email);
             const response = await login(data);
+            console.log('Login response:', response);
+            console.log('response.data keys:', Object.keys(response.data));
             const { admin, church } = response.data;
-            setAuth(admin, church);
+            console.log('Extracted admin and church:', {
+                admin,
+                church,
+                adminIsNull: admin === null,
+                adminIsUndefined: admin === undefined,
+            });
+            console.log('Login successful, setting auth:', { admin, church, accessToken: response.data.accessToken ? 'present' : 'missing' });
+            // Set auth with tokens and immediately navigate
+            // Zustand setAuth is synchronous, so this updates state right away
+            setAuth(admin, church, response.data.accessToken, response.data.refreshToken);
+            console.log('After setAuth, checking store:', {
+                isAuthenticated: useAuthStore.getState().isAuthenticated,
+                user: useAuthStore.getState().user,
+                church: useAuthStore.getState().church,
+            });
+            // Navigate immediately without delay
+            console.log('Navigating to dashboard');
+            navigate('/dashboard', { replace: true });
+            // Show toast after navigation (it will appear on dashboard)
             toast.success('Login successful!');
-            navigate('/dashboard');
         }
         catch (error) {
+            console.error('Login error:', error);
             const errorMessage = error.response?.data?.error || 'Login failed. Please try again.';
             toast.error(errorMessage);
-        }
-        finally {
             setIsLoading(false);
         }
     };

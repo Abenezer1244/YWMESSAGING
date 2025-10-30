@@ -1,14 +1,22 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { register as registerChurch } from '../api/auth';
+import { fetchCsrfToken } from '../api/client';
 import useAuthStore from '../stores/authStore';
 export function RegisterPage() {
     const navigate = useNavigate();
     const { setAuth } = useAuthStore();
     const [isLoading, setIsLoading] = useState(false);
+    // Fetch CSRF token on component mount
+    useEffect(() => {
+        fetchCsrfToken().catch(() => {
+            // Token fetch failed, but continue anyway
+            console.warn('Failed to fetch CSRF token, registration may fail');
+        });
+    }, []);
     const { register, handleSubmit, watch, formState: { errors } } = useForm({
         defaultValues: {
             email: '',
@@ -34,16 +42,20 @@ export function RegisterPage() {
                 lastName: data.lastName,
                 churchName: data.churchName,
             });
-            const { admin, church } = response.data;
-            setAuth(admin, church);
+            const { admin, church, accessToken, refreshToken } = response.data;
+            console.log('Registration successful, setting auth:', { admin, church, accessToken: accessToken ? 'present' : 'missing' });
+            setAuth(admin, church, accessToken, refreshToken);
             toast.success('Registration successful!');
-            navigate('/dashboard');
+            // Use replace: true to ensure clean navigation
+            // and add a small delay to allow state to update
+            setTimeout(() => {
+                console.log('Navigating to dashboard');
+                navigate('/dashboard', { replace: true });
+            }, 100);
         }
         catch (error) {
             const errorMessage = error.response?.data?.error || 'Registration failed. Please try again.';
             toast.error(errorMessage);
-        }
-        finally {
             setIsLoading(false);
         }
     };

@@ -67,6 +67,18 @@ export async function getCoAdmins(): Promise<CoAdmin[]> {
 }
 
 /**
+ * Invite a new co-admin
+ */
+export async function inviteCoAdmin(data: {
+  email: string;
+  firstName: string;
+  lastName: string;
+}): Promise<{ success: boolean; data: { admin: CoAdmin; tempPassword: string } }> {
+  const response = await client.post('/admin/co-admins', data);
+  return response.data;
+}
+
+/**
  * Remove a co-admin
  */
 export async function removeCoAdmin(adminId: string): Promise<{ success: boolean; message: string }> {

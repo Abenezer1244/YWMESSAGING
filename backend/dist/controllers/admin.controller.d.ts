@@ -28,6 +28,11 @@ export declare function getCoAdminsHandler(req: Request, res: Response): Promise
  */
 export declare function removeCoAdminHandler(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**
+ * POST /api/admin/co-admins
+ * Invite a new co-admin
+ */
+export declare function inviteCoAdminHandler(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+/**
  * GET /api/admin/activity-logs
  * Get activity logs
  * Query params: ?page=1&limit=50
