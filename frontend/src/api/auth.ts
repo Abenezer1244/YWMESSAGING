@@ -18,6 +18,8 @@ export interface AuthResponse {
   data: {
     adminId: string;
     churchId: string;
+    accessToken: string;
+    refreshToken: string;
     admin: {
       id: string;
       email: string;

@@ -57,9 +57,9 @@ export function RegisterPage() {
         churchName: data.churchName,
       });
 
-      const { admin, church } = response.data;
-      console.log('Registration successful, setting auth:', { admin, church });
-      setAuth(admin, church);
+      const { admin, church, accessToken, refreshToken } = response.data;
+      console.log('Registration successful, setting auth:', { admin, church, accessToken: accessToken ? 'present' : 'missing' });
+      setAuth(admin, church, accessToken, refreshToken);
 
       toast.success('Registration successful!');
 
