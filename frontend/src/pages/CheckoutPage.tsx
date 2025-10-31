@@ -81,7 +81,7 @@ function PaymentForm({ planName, planPrice, onSubmit }: any) {
     style: {
       base: {
         fontSize: '16px',
-        color: '#374151',
+        color: '#111827',
         '::placeholder': {
           color: '#9CA3AF',
         },
@@ -94,13 +94,13 @@ function PaymentForm({ planName, planPrice, onSubmit }: any) {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2 className="text-2xl font-bold text-secondary-900 dark:text-secondary-50 mb-6">
+      <h2 className="text-2xl font-bold text-neutral-900 dark:text-white mb-6">
         Payment Details
       </h2>
 
       {/* Cardholder Name */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-secondary-900 dark:text-secondary-50 mb-2">
+        <label className="block text-sm font-medium text-neutral-900 dark:text-white mb-2">
           Cardholder Name
         </label>
         <input
@@ -109,19 +109,19 @@ function PaymentForm({ planName, planPrice, onSubmit }: any) {
           value={cardholderName}
           onChange={(e) => setCardholderName(e.target.value)}
           required
-          className="w-full px-4 py-2 border border-secondary-300 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+          className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
         />
       </div>
 
       {/* Stripe Card Element */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-secondary-900 dark:text-secondary-50 mb-2">
+        <label className="block text-sm font-medium text-neutral-900 dark:text-white mb-2">
           Card Details
         </label>
-        <div className="p-4 border border-secondary-300 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-800">
+        <div className="p-4 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900">
           <CardElement options={cardElementOptions} />
         </div>
-        <p className="text-xs text-secondary-600 dark:text-secondary-400 mt-2">
+        <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-2">
           Your card information is processed securely by Stripe.
         </p>
       </div>
@@ -129,29 +129,29 @@ function PaymentForm({ planName, planPrice, onSubmit }: any) {
       {/* Error Message */}
       {cardError && (
         <Card
-          variant="highlight"
-          className="mb-6 bg-danger-50 dark:bg-danger-900/30 border border-danger-200 dark:border-danger-700"
+          variant="default"
+          className="mb-6 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800"
         >
-          <p className="text-sm text-danger-700 dark:text-danger-300">{cardError}</p>
+          <p className="text-sm text-red-700 dark:text-red-300">{cardError}</p>
         </Card>
       )}
 
       {/* Terms Checkbox */}
       <div className="mb-6">
-        <label className="flex items-start">
+        <label className="flex items-start gap-3">
           <input
             type="checkbox"
-            className="mt-1 w-4 h-4 border-secondary-300 rounded text-primary-600 focus:ring-primary-500"
+            className="mt-1 w-4 h-4 border-neutral-300 rounded text-primary-500 focus:ring-primary-500"
             defaultChecked
             required
           />
-          <span className="ml-3 text-sm text-secondary-600 dark:text-secondary-400">
+          <span className="text-sm text-neutral-600 dark:text-neutral-400">
             I agree to the{' '}
-            <a href="/terms" className="text-primary-600 dark:text-primary-400 hover:underline">
+            <a href="/terms" className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 font-semibold">
               Terms of Service
             </a>{' '}
             and{' '}
-            <a href="/privacy" className="text-primary-600 dark:text-primary-400 hover:underline">
+            <a href="/privacy" className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 font-semibold">
               Privacy Policy
             </a>
           </span>
@@ -171,7 +171,7 @@ function PaymentForm({ planName, planPrice, onSubmit }: any) {
 
       {/* Return Link */}
       <div className="mt-4 text-center">
-        <a href="/subscribe" className="text-primary-600 dark:text-primary-400 hover:underline">
+        <a href="/subscribe" className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 font-semibold">
           Back to plans
         </a>
       </div>
@@ -219,14 +219,14 @@ export function CheckoutPage() {
   const plan = planPrices[planName];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-white dark:bg-neutral-950 p-6 transition-colors duration-normal">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-secondary-900 dark:text-secondary-50 mb-2">
+          <h1 className="text-4xl font-bold text-neutral-900 dark:text-white mb-2">
             💳 Complete Your Payment
           </h1>
-          <p className="text-secondary-600 dark:text-secondary-400">
+          <p className="text-neutral-600 dark:text-neutral-400">
             Secure checkout powered by Stripe
           </p>
         </div>
@@ -247,38 +247,38 @@ export function CheckoutPage() {
           </div>
 
           {/* Order Summary */}
-          <Card variant="default" className="h-fit">
-            <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-50 mb-6">Order Summary</h3>
+          <Card variant="default" className="h-fit border border-neutral-200 dark:border-neutral-800">
+            <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-6">Order Summary</h3>
 
-            <div className="border-b border-secondary-200 dark:border-secondary-700 pb-4 mb-4">
-              <p className="text-secondary-600 dark:text-secondary-400">{plan.name}</p>
-              <p className="text-2xl font-bold text-secondary-900 dark:text-secondary-50 mt-2">
+            <div className="border-b border-neutral-200 dark:border-neutral-800 pb-4 mb-4">
+              <p className="text-neutral-600 dark:text-neutral-400">{plan.name}</p>
+              <p className="text-2xl font-bold text-neutral-900 dark:text-white mt-2">
                 ${plan.price.toFixed(2)}
               </p>
-              <p className="text-sm text-secondary-600 dark:text-secondary-400 mt-1">/month</p>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">/month</p>
             </div>
 
             <div className="space-y-3 mb-6">
               <div className="flex justify-between text-sm">
-                <span className="text-secondary-600 dark:text-secondary-400">Subtotal</span>
-                <span className="text-secondary-900 dark:text-secondary-50">${plan.price.toFixed(2)}</span>
+                <span className="text-neutral-600 dark:text-neutral-400">Subtotal</span>
+                <span className="text-neutral-900 dark:text-white">${plan.price.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-secondary-600 dark:text-secondary-400">Tax</span>
-                <span className="text-secondary-900 dark:text-secondary-50">Calculated at checkout</span>
+                <span className="text-neutral-600 dark:text-neutral-400">Tax</span>
+                <span className="text-neutral-900 dark:text-white">Calculated at checkout</span>
               </div>
-              <div className="border-t border-secondary-200 dark:border-secondary-700 pt-3 flex justify-between font-semibold">
-                <span className="text-secondary-900 dark:text-secondary-50">Total</span>
-                <span className="text-secondary-900 dark:text-secondary-50">${plan.price.toFixed(2)}</span>
+              <div className="border-t border-neutral-200 dark:border-neutral-800 pt-3 flex justify-between font-semibold">
+                <span className="text-neutral-900 dark:text-white">Total</span>
+                <span className="text-neutral-900 dark:text-white">${plan.price.toFixed(2)}</span>
               </div>
             </div>
 
             {/* Features */}
-            <Card variant="highlight" className="bg-primary-50 dark:bg-primary-900/30">
-              <p className="text-sm font-semibold text-secondary-900 dark:text-secondary-50 mb-3">
+            <Card variant="highlight" className="bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-800">
+              <p className="text-sm font-semibold text-neutral-900 dark:text-white mb-3">
                 Plan Includes:
               </p>
-              <ul className="text-xs text-secondary-700 dark:text-secondary-300 space-y-2">
+              <ul className="text-xs text-neutral-700 dark:text-neutral-300 space-y-2">
                 {planName === 'starter' && (
                   <>
                     <li>✓ 1 Branch</li>
@@ -309,8 +309,8 @@ export function CheckoutPage() {
         </div>
 
         {/* Security Note */}
-        <Card variant="highlight" className="mt-8 bg-success-50 dark:bg-success-900/30 border border-success-200 dark:border-success-700">
-          <p className="text-sm text-success-800 dark:text-success-200">
+        <Card variant="highlight" className="mt-8 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-800">
+          <p className="text-sm text-primary-700 dark:text-primary-300">
             🔒 Your payment information is encrypted and processed securely by Stripe.
             We never store your card details.
           </p>
