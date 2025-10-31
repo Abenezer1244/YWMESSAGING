@@ -16,7 +16,10 @@
       "Read(//c/Users/Windows/OneDrive/**)",
       "Bash(cd:*)",
       "Bash(timeout 60 npm run build:*)",
-      "Bash(npm audit:*)"
+      "Bash(npm audit:*)",
+      "Bash(npm run test)",
+      "Bash(npx tsc:*)",
+      "WebFetch(domain:spacefor-agency-webflow-template.webflow.io)"
     ],
     "deny": [],
     "ask": []
