@@ -18,18 +18,14 @@ export async function fetchCsrfToken() {
         return csrfToken;
     }
     catch (error) {
-        console.error('Failed to fetch CSRF token:', error);
+        // CSRF token fetch failed - non-critical, some endpoints may not require it
         throw error;
     }
 }
-// Request interceptor - attach JWT token and CSRF token
+// Request interceptor - attach CSRF token
 client.interceptors.request.use((config) => {
-    // Get access token from store or localStorage
-    const accessToken = useAuthStore.getState().accessToken || localStorage.getItem('accessToken');
-    // Add JWT token to Authorization header
-    if (accessToken) {
-        config.headers['Authorization'] = `Bearer ${accessToken}`;
-    }
+    // ✅ SECURITY: Access tokens are in HTTPOnly cookies (sent automatically with withCredentials: true)
+    // Frontend does NOT add Authorization header (tokens are in secure cookies)
     // Set Content-Type for JSON requests (not FormData)
     // FormData requests will have Content-Type auto-set by axios with boundary
     if (!(config.data instanceof FormData)) {
@@ -53,34 +49,24 @@ client.interceptors.response.use((response) => response, async (error) => {
         if (!isRefreshing) {
             isRefreshing = true;
             try {
-                // Get refresh token from store or localStorage
-                const refreshToken = useAuthStore.getState().refreshToken || localStorage.getItem('refreshToken');
-                if (!refreshToken) {
-                    // No refresh token, logout
-                    useAuthStore.getState().logout();
-                    return Promise.reject(error);
-                }
-                // Send refresh request with refresh token in header
+                // ✅ SECURITY: Refresh token is in HTTPOnly cookie, sent automatically with withCredentials
+                // No need to manually send token in Authorization header
+                // Send refresh request (cookie is sent automatically)
                 const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {}, {
-                    headers: {
-                        'Authorization': `Bearer ${refreshToken}`,
-                    },
                     withCredentials: true,
                 });
-                // Update tokens in store and localStorage
+                // Update tokens in store (cookies are already updated by server)
                 const { accessToken, refreshToken: newRefreshToken } = response.data.data;
                 const state = useAuthStore.getState();
                 if (state.user && state.church) {
                     state.setAuth(state.user, state.church, accessToken, newRefreshToken);
                 }
                 isRefreshing = false;
-                // Update original request with new token
-                originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
-                // Retry original request
+                // Retry original request (will use new cookie automatically)
                 return client(originalRequest);
             }
             catch (refreshError) {
-                // If refresh fails, just logout without reloading
+                // If refresh fails, logout
                 isRefreshing = false;
                 useAuthStore.getState().logout();
                 // Don't do window.location.href - let React Router handle it

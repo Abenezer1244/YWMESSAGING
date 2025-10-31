@@ -48,11 +48,8 @@ function App() {
                 console.debug('CSRF token initialization failed');
             }
         });
-        // Restore tokens from localStorage if they exist
-        const savedAccessToken = localStorage.getItem('accessToken');
-        const savedRefreshToken = localStorage.getItem('refreshToken');
-        // Tokens will be validated with getMe() call below
         // Restore authentication from session
+        // Tokens are in HTTPOnly cookies, frontend just needs to restore user state
         setIsCheckingAuth(true);
         getMe()
             .then((response) => {
@@ -65,11 +62,8 @@ function App() {
                     lastName: response.data.lastName,
                     role: response.data.role,
                 };
-                // Get saved tokens from localStorage
-                const savedAccessToken = localStorage.getItem('accessToken');
-                const savedRefreshToken = localStorage.getItem('refreshToken');
-                // If we have tokens, use them; otherwise use empty strings (shouldn't happen)
-                setAuth(admin, response.data.church, savedAccessToken || '', savedRefreshToken || '');
+                // Tokens come from HTTPOnly cookies, only pass placeholder tokens for state
+                setAuth(admin, response.data.church, 'cookie-based', 'cookie-based');
             }
         })
             .catch(() => {
@@ -88,8 +82,8 @@ function App() {
         if (isAuthenticated && church?.id) {
             getBranches(church.id)
                 .then((branches) => setBranches(branches))
-                .catch((error) => {
-                console.error('Failed to load branches:', error);
+                .catch(() => {
+                // Failed to load branches, non-critical
             });
         }
     }, [isAuthenticated, church?.id, setBranches]);

@@ -10,13 +10,10 @@ const useAuthStore = create()((set, get) => ({
     tokenExpiresAt: null,
     // Actions
     setAuth: (user, church, accessToken, refreshToken, expiresIn = 3600) => {
-        // ⚠️ SECURITY NOTE: Tokens stored in localStorage are vulnerable to XSS attacks.
-        // In production, migrate to HTTPOnly + Secure cookies set by backend.
-        // See SECURITY_AUDIT.md for details.
+        // ✅ SECURITY: Tokens are stored in HTTPOnly cookies by the backend
+        // Frontend keeps tokens in Zustand state only for UI purposes
+        // Tokens are NOT stored in localStorage (prevents XSS attacks)
         const expiresAt = Date.now() + expiresIn * 1000;
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
-        localStorage.setItem('tokenExpiresAt', expiresAt.toString());
         set({
             user,
             church,
@@ -26,14 +23,9 @@ const useAuthStore = create()((set, get) => ({
             refreshToken,
             tokenExpiresAt: expiresAt,
         });
-        if (process.env.NODE_ENV === 'development') {
-            console.debug('Authentication state updated');
-        }
     },
     clearAuth: () => {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('tokenExpiresAt');
+        // Tokens are cleared from state only (already removed from localStorage for security)
         set({
             user: null,
             church: null,
@@ -45,9 +37,7 @@ const useAuthStore = create()((set, get) => ({
         });
     },
     logout: () => {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('tokenExpiresAt');
+        // Tokens are cleared from state and cookies (via backend logout endpoint)
         set({
             user: null,
             church: null,

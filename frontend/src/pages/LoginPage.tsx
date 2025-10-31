@@ -22,8 +22,7 @@ export function LoginPage() {
   // Fetch CSRF token on component mount
   useEffect(() => {
     fetchCsrfToken().catch(() => {
-      // Token fetch failed, but continue anyway
-      console.warn('Failed to fetch CSRF token, login may fail');
+      // Token fetch failed, but continue anyway (non-critical)
     });
   }, []);
 
@@ -37,33 +36,14 @@ export function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
-      console.log('Starting login with:', data.email);
       const response = await login(data);
-      console.log('Login response:', response);
-      console.log('response.data keys:', Object.keys(response.data));
       const { admin, church } = response.data;
-
-      console.log('Extracted admin and church:', {
-        admin,
-        church,
-        adminIsNull: admin === null,
-        adminIsUndefined: admin === undefined,
-      });
-
-      console.log('Login successful, setting auth:', { admin, church, accessToken: response.data.accessToken ? 'present' : 'missing' });
 
       // Set auth with tokens and immediately navigate
       // Zustand setAuth is synchronous, so this updates state right away
       setAuth(admin, church, response.data.accessToken, response.data.refreshToken);
 
-      console.log('After setAuth, checking store:', {
-        isAuthenticated: useAuthStore.getState().isAuthenticated,
-        user: useAuthStore.getState().user,
-        church: useAuthStore.getState().church,
-      });
-
       // Navigate immediately without delay
-      console.log('Navigating to dashboard');
       navigate('/dashboard', { replace: true });
 
       // Show toast after navigation (it will appear on dashboard)
