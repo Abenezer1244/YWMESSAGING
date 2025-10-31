@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../../stores/authStore';
+import Button from '../ui/Button';
 
 export default function FinalCTA() {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ export default function FinalCTA() {
   };
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 relative overflow-hidden">
+    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary-600 dark:from-primary-700 via-primary-700 dark:via-primary-800 to-primary-800 dark:to-primary-900 relative overflow-hidden transition-colors duration-normal">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-0 left-0 w-full h-full" style={{
@@ -23,28 +24,32 @@ export default function FinalCTA() {
       </div>
 
       <div className="relative max-w-4xl mx-auto text-center">
-        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 animate-fade-in">
+        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white dark:text-secondary-50 mb-6 animate-fadeIn">
           Ready to Connect Your Church?
         </h2>
-        <p className="text-xl sm:text-2xl text-primary-100 mb-10 max-w-2xl mx-auto leading-relaxed">
-          Join hundreds of churches using Connect YW to strengthen their community communication. 
+        <p className="text-xl sm:text-2xl text-primary-100 dark:text-primary-200 mb-10 max-w-2xl mx-auto leading-relaxed">
+          Join hundreds of churches using Connect YW to strengthen their community communication.
           Start your 14-day free trial today—no credit card required.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <button
+          <Button
+            variant="primary"
+            size="lg"
             onClick={handleStartTrial}
-            className="px-10 py-5 bg-white text-primary-700 rounded-lg font-bold text-lg hover:bg-primary-50 transition-all shadow-large hover:shadow-xl hover:scale-105 active:scale-95"
+            className="bg-white dark:bg-secondary-50 text-primary-700 dark:text-primary-600 hover:bg-primary-50 dark:hover:bg-secondary-100"
           >
             Start Free Trial
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="outline"
+            size="lg"
             onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
-            className="px-10 py-5 bg-primary-800 text-white border-2 border-white/30 rounded-lg font-bold text-lg hover:bg-primary-900 transition-all"
+            className="border-white/30 dark:border-primary-300 text-white dark:text-secondary-50 hover:bg-primary-700 dark:hover:bg-primary-700"
           >
             View Pricing
-          </button>
+          </Button>
         </div>
-        <div className="mt-8 flex items-center justify-center space-x-6 text-primary-100 text-sm">
+        <div className="mt-8 flex items-center justify-center space-x-6 text-primary-100 dark:text-primary-200 text-sm">
           <div className="flex items-center">
             <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />

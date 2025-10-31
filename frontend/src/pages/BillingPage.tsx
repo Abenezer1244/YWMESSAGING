@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { getPlan, cancelSubscription } from '../api/billing';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import { Spinner } from '../components/ui';
 
 interface PlanInfo {
   plan: 'starter' | 'growth' | 'pro';
@@ -70,34 +73,29 @@ export function BillingPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <h1 className="text-3xl font-bold text-gray-900">Billing Settings</h1>
+      <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 p-6 transition-colors duration-normal">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-center py-20">
+            <Spinner size="lg" text="Loading billing information..." />
           </div>
-        </header>
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center py-12">
-            <p className="text-gray-500">Loading billing information...</p>
-          </div>
-        </main>
+        </div>
       </div>
     );
   }
 
   if (!planInfo) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <h1 className="text-3xl font-bold text-gray-900">Billing Settings</h1>
-          </div>
-        </header>
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center py-12">
-            <p className="text-red-600">Failed to load billing information</p>
-          </div>
-        </main>
+      <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 p-6 transition-colors duration-normal">
+        <div className="max-w-7xl mx-auto">
+          <Card variant="highlight" className="text-center py-16">
+            <h2 className="text-2xl font-bold text-secondary-900 dark:text-secondary-50 mb-3">
+              Failed to Load Billing Information
+            </h2>
+            <p className="text-secondary-600 dark:text-secondary-400">
+              Please try refreshing the page or contact support if the issue persists.
+            </p>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -114,9 +112,9 @@ export function BillingPage() {
   };
 
   const getUsageColor = (percentage: number): string => {
-    if (percentage >= 90) return 'bg-red-500';
-    if (percentage >= 70) return 'bg-yellow-500';
-    return 'bg-green-500';
+    if (percentage >= 90) return 'bg-danger-500';
+    if (percentage >= 70) return 'bg-warning-500';
+    return 'bg-success-500';
   };
 
   const UsageBar = ({
@@ -134,13 +132,13 @@ export function BillingPage() {
     return (
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-medium text-gray-700">{label}</span>
-          <span className="text-sm text-gray-600">
+          <span className="text-sm font-medium text-secondary-900 dark:text-secondary-50">{label}</span>
+          <span className="text-sm text-secondary-600 dark:text-secondary-400">
             {used} / {isUnlimited ? '∞' : limit}
           </span>
         </div>
         {!isUnlimited && (
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="w-full bg-secondary-200 dark:bg-secondary-700 rounded-full h-2">
             <div
               className={`h-2 rounded-full ${getUsageColor(percentage)}`}
               style={{ width: `${Math.min(percentage, 100)}%` }}
@@ -148,76 +146,78 @@ export function BillingPage() {
           </div>
         )}
         {isUnlimited && (
-          <div className="text-sm text-green-600">Unlimited</div>
+          <div className="text-sm text-success-600 dark:text-success-400">Unlimited</div>
         )}
       </div>
     );
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-3xl font-bold text-gray-900">Billing Settings</h1>
-          <p className="text-gray-600 mt-2">Manage your subscription and view usage</p>
+    <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 p-6 transition-colors duration-normal">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-secondary-900 dark:text-secondary-50 mb-2">💳 Billing Settings</h1>
+          <p className="text-secondary-600 dark:text-secondary-400">Manage your subscription and view usage</p>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Main Content */}
         {/* Current Plan */}
-        <div className="bg-white rounded-lg shadow p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Current Plan</h2>
+        <Card variant="default" className="mb-8">
+          <h2 className="text-2xl font-bold text-secondary-900 dark:text-secondary-50 mb-6">Current Plan</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Plan Card */}
-            <div className="md:col-span-1 border rounded-lg p-6 bg-blue-50">
-              <h3 className="text-xl font-bold text-gray-900">
+            <Card variant="highlight">
+              <h3 className="text-xl font-bold text-secondary-900 dark:text-secondary-50">
                 {planNameMap[planInfo.plan]} Plan
               </h3>
-              <p className="text-3xl font-bold text-blue-600 mt-2">
+              <p className="text-3xl font-bold text-primary-600 dark:text-primary-400 mt-2">
                 ${planInfo.limits.price / 100}
-                <span className="text-lg text-gray-600">/month</span>
+                <span className="text-lg text-secondary-600 dark:text-secondary-400">/month</span>
               </p>
-              <button
+              <Button
+                variant="primary"
+                size="md"
                 onClick={() => navigate('/subscribe')}
-                className="mt-4 w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition"
+                className="mt-4 w-full"
               >
                 Change Plan
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="danger"
+                size="md"
                 onClick={handleCancel}
                 disabled={isCancelling}
-                className="mt-2 w-full bg-red-100 text-red-700 py-2 px-4 rounded-lg hover:bg-red-200 transition disabled:opacity-50"
+                className="mt-2 w-full"
               >
                 {isCancelling ? 'Cancelling...' : 'Cancel Subscription'}
-              </button>
-            </div>
+              </Button>
+            </Card>
 
             {/* Plan Features */}
             <div className="md:col-span-2">
-              <h4 className="font-semibold text-gray-900 mb-4">Features included:</h4>
+              <h4 className="font-semibold text-secondary-900 dark:text-secondary-50 mb-4">Features included:</h4>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {planInfo.limits.features.map((feature, idx) => (
                   <li key={idx} className="flex items-start">
-                    <span className="text-green-500 mr-3 mt-0.5">✓</span>
-                    <span className="text-gray-700">{feature}</span>
+                    <span className="text-success-500 mr-3 mt-0.5">✓</span>
+                    <span className="text-secondary-700 dark:text-secondary-300">{feature}</span>
                   </li>
                 ))}
               </ul>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Usage Overview */}
-        <div className="bg-white rounded-lg shadow p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+        <Card variant="default" className="mb-8">
+          <h2 className="text-2xl font-bold text-secondary-900 dark:text-secondary-50 mb-6">
             Current Usage ({new Date().toLocaleDateString()})
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <h3 className="font-semibold text-gray-900 mb-4">Organization</h3>
+              <h3 className="font-semibold text-secondary-900 dark:text-secondary-50 mb-4">Organization</h3>
               <UsageBar
                 label="Branches"
                 used={planInfo.usage.branches}
@@ -231,7 +231,7 @@ export function BillingPage() {
             </div>
 
             <div>
-              <h3 className="font-semibold text-gray-900 mb-4">Messaging</h3>
+              <h3 className="font-semibold text-secondary-900 dark:text-secondary-50 mb-4">Messaging</h3>
               <UsageBar
                 label="Members"
                 used={planInfo.usage.members}
@@ -246,57 +246,61 @@ export function BillingPage() {
           </div>
 
           {/* Remaining Capacity Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8 pt-8 border-t">
-            <div className="bg-blue-50 rounded-lg p-4">
-              <p className="text-sm text-gray-600">Remaining Branches</p>
-              <p className="text-2xl font-bold text-blue-600">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-secondary-200 dark:border-secondary-700">
+            <Card variant="highlight" className="bg-primary-50 dark:bg-primary-900/30">
+              <p className="text-sm text-secondary-600 dark:text-secondary-400">Remaining Branches</p>
+              <p className="text-2xl font-bold text-primary-600 dark:text-primary-400 mt-2">
                 {planInfo.remaining.branches === 999999
                   ? '∞'
                   : planInfo.remaining.branches}
               </p>
-            </div>
+            </Card>
 
-            <div className="bg-green-50 rounded-lg p-4">
-              <p className="text-sm text-gray-600">Remaining Members</p>
-              <p className="text-2xl font-bold text-green-600">
+            <Card variant="highlight" className="bg-success-50 dark:bg-success-900/30">
+              <p className="text-sm text-secondary-600 dark:text-secondary-400">Remaining Members</p>
+              <p className="text-2xl font-bold text-success-600 dark:text-success-400 mt-2">
                 {planInfo.remaining.members === 999999
                   ? '∞'
                   : planInfo.remaining.members}
               </p>
-            </div>
+            </Card>
 
-            <div className="bg-purple-50 rounded-lg p-4">
-              <p className="text-sm text-gray-600">Remaining Messages</p>
-              <p className="text-2xl font-bold text-purple-600">
+            <Card variant="highlight" className="bg-info-50 dark:bg-info-900/30">
+              <p className="text-sm text-secondary-600 dark:text-secondary-400">Remaining Messages</p>
+              <p className="text-2xl font-bold text-info-600 dark:text-info-400 mt-2">
                 {planInfo.remaining.messagesPerMonth === 999999
                   ? '∞'
                   : planInfo.remaining.messagesPerMonth}
               </p>
-            </div>
+            </Card>
 
-            <div className="bg-orange-50 rounded-lg p-4">
-              <p className="text-sm text-gray-600">Remaining Co-Admins</p>
-              <p className="text-2xl font-bold text-orange-600">
+            <Card variant="highlight" className="bg-warning-50 dark:bg-warning-900/30">
+              <p className="text-sm text-secondary-600 dark:text-secondary-400">Remaining Co-Admins</p>
+              <p className="text-2xl font-bold text-warning-600 dark:text-warning-400 mt-2">
                 {planInfo.remaining.coAdmins === 999999
                   ? '∞'
                   : planInfo.remaining.coAdmins}
               </p>
-            </div>
+            </Card>
           </div>
-        </div>
+        </Card>
 
         {/* Billing Info */}
-        <div className="bg-white rounded-lg shadow p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Billing Information</h2>
-          <p className="text-gray-600">
+        <Card variant="default">
+          <h2 className="text-2xl font-bold text-secondary-900 dark:text-secondary-50 mb-4">Billing Information</h2>
+          <p className="text-secondary-600 dark:text-secondary-400">
             Your subscription is billed monthly. You can manage your payment method
             and invoices through Stripe.
           </p>
-          <button className="mt-4 bg-blue-500 text-white py-2 px-6 rounded-lg hover:bg-blue-600 transition">
+          <Button
+            variant="primary"
+            size="md"
+            className="mt-4"
+          >
             Manage in Stripe
-          </button>
-        </div>
-      </main>
+          </Button>
+        </Card>
+      </div>
     </div>
   );
 }

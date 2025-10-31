@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { getTemplates, deleteTemplate, MessageTemplate } from '../../api/templates';
 import TemplateFormModal from '../../components/templates/TemplateFormModal';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import { Spinner } from '../../components/ui';
 
 export function TemplatesPage() {
   const [templates, setTemplates] = useState<MessageTemplate[]>([]);
@@ -73,85 +76,105 @@ export function TemplatesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">Message Templates</h1>
-            <button
-              onClick={handleCreate}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
-            >
-              Create Template
-            </button>
+    <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 p-6 transition-colors duration-normal">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-secondary-900 dark:text-secondary-50 mb-2">📋 Message Templates</h1>
+            <p className="text-secondary-600 dark:text-secondary-400">Reuse message templates to save time</p>
           </div>
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={handleCreate}
+          >
+            + Create Template
+          </Button>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Main Content */}
         {isLoading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500">Loading templates...</p>
+          <div className="flex items-center justify-center py-20">
+            <Spinner size="lg" text="Loading templates..." />
           </div>
         ) : templates.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No templates found</p>
-          </div>
+          <Card variant="highlight" className="text-center py-16">
+            <div className="mb-6">
+              <span className="text-6xl">📋</span>
+            </div>
+            <h2 className="text-2xl font-bold text-secondary-900 dark:text-secondary-50 mb-3">
+              No Templates Yet
+            </h2>
+            <p className="text-secondary-600 dark:text-secondary-400 mb-6 max-w-md mx-auto">
+              Create templates to quickly send frequently used messages.
+            </p>
+            <Button
+              variant="primary"
+              size="md"
+              onClick={handleCreate}
+            >
+              Create First Template
+            </Button>
+          </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {templates.map((template) => (
-              <div
+              <Card
                 key={template.id}
-                className="bg-white rounded-lg shadow p-6 flex flex-col"
+                variant="default"
+                className="hover:shadow-lg transition-shadow flex flex-col"
               >
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-50">
                       {template.name}
                     </h3>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-secondary-600 dark:text-secondary-400 mt-1">
                       {getCategoryLabel(template.category)}
                     </p>
                   </div>
                   {template.isDefault && (
-                    <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded">
+                    <span className="inline-block px-2 py-1 bg-primary-100 dark:bg-primary-900 text-primary-800 dark:text-primary-200 text-xs font-semibold rounded">
                       Default
                     </span>
                   )}
                 </div>
 
-                <p className="text-gray-700 text-sm mb-4 flex-grow line-clamp-3">
+                <p className="text-secondary-700 dark:text-secondary-300 text-sm mb-4 flex-grow line-clamp-3">
                   {template.content}
                 </p>
 
-                <div className="flex justify-between items-center mb-4 pt-4 border-t">
-                  <p className="text-xs text-gray-500">
+                <div className="flex justify-between items-center mb-4 pt-4 border-t border-secondary-200 dark:border-secondary-700">
+                  <p className="text-xs text-secondary-600 dark:text-secondary-400">
                     Used {template.usageCount} times
                   </p>
                 </div>
 
                 <div className="flex gap-2">
-                  <button
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={() => handleEdit(template)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition text-sm"
+                    fullWidth
                   >
                     Edit
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
                     onClick={() => handleDelete(template.id, template.isDefault)}
                     disabled={template.isDefault}
-                    className="flex-1 px-3 py-2 border border-red-300 rounded-lg text-red-700 font-medium hover:bg-red-50 transition text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    fullWidth
                   >
                     Delete
-                  </button>
+                  </Button>
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
         )}
-      </main>
+      </div>
 
       {showModal && (
         <TemplateFormModal

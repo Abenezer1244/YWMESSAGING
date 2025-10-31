@@ -5,6 +5,10 @@ import useGroupStore from '../../stores/groupStore';
 import { getMembers, Member } from '../../api/members';
 import { AddMemberModal } from '../../components/members/AddMemberModal';
 import { ImportCSVModal } from '../../components/members/ImportCSVModal';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import Input from '../../components/ui/Input';
+import { Spinner } from '../../components/ui';
 
 export function MembersPage() {
   const { groups, setLoading: setGroupsLoading } = useGroupStore();
@@ -60,26 +64,39 @@ export function MembersPage() {
 
   if (!currentGroup) {
     return (
-      <div className="flex items-center justify-center h-96 text-gray-500">
-        No group selected. Create or select a group first.
+      <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 flex items-center justify-center p-6">
+        <Card variant="default" className="text-center max-w-md">
+          <p className="text-secondary-600 dark:text-secondary-400 text-lg">
+            No group selected. Create or select a group first.
+          </p>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="mb-4">
-            <h1 className="text-3xl font-bold text-gray-900">Members</h1>
-            <p className="text-gray-600 mt-1">
-              {currentGroup.name} • {total} members
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 p-6 transition-colors duration-normal">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-4xl font-bold text-secondary-900 dark:text-secondary-50 mb-2">👤 Members</h1>
+              <p className="text-secondary-600 dark:text-secondary-400">
+                {currentGroup.name} • {total} members
+              </p>
+            </div>
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={() => setIsAddModalOpen(true)}
+            >
+              + Add Member
+            </Button>
           </div>
 
-          <div className="flex gap-4 items-center">
-            <input
+          <div className="flex gap-4 items-center flex-wrap">
+            <Input
               type="text"
               placeholder="Search by name, phone, or email..."
               value={search}
@@ -87,82 +104,82 @@ export function MembersPage() {
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 min-w-xs"
             />
-            <button
+            <Button
+              variant="primary"
+              size="md"
               onClick={() => setIsImportModalOpen(true)}
-              className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition"
             >
               📥 Import CSV
-            </button>
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
-            >
-              + Add Member
-            </button>
+            </Button>
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Main Content */}
         {isLoading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500">Loading members...</p>
+          <div className="flex items-center justify-center py-20">
+            <Spinner size="lg" text="Loading members..." />
           </div>
         ) : members.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg mb-4">
-              {search ? 'No members found matching your search' : 'No members yet'}
+          <Card variant="highlight" className="text-center py-16">
+            <div className="mb-6">
+              <span className="text-6xl">👤</span>
+            </div>
+            <h2 className="text-2xl font-bold text-secondary-900 dark:text-secondary-50 mb-3">
+              {search ? 'No Results' : 'No Members Yet'}
+            </h2>
+            <p className="text-secondary-600 dark:text-secondary-400 mb-6 max-w-md mx-auto">
+              {search ? 'No members found matching your search' : 'Add your first member to get started'}
             </p>
             {!search && (
-              <button
+              <Button
+                variant="primary"
+                size="md"
                 onClick={() => setIsAddModalOpen(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
               >
                 Add First Member
-              </button>
+              </Button>
             )}
-          </div>
+          </Card>
         ) : (
           <>
             {/* Table */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <Card variant="default" className="overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full">
-                  <thead className="bg-gray-50 border-b">
+                  <thead className="bg-secondary-100 dark:bg-secondary-800 border-b border-secondary-200 dark:border-secondary-700">
                     <tr>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-50">
                         Name
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-50">
                         Phone
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-50">
                         Email
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-50">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-50">
                         Added
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y">
+                  <tbody className="divide-y divide-secondary-200 dark:divide-secondary-700">
                     {members.map((member) => (
-                      <tr key={member.id} className="hover:bg-gray-50">
+                      <tr key={member.id} className="hover:bg-secondary-50 dark:hover:bg-secondary-700/50 transition-colors duration-normal">
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-secondary-900 dark:text-secondary-50">
                             {member.firstName} {member.lastName}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-600">{member.phone}</div>
+                          <div className="text-sm text-secondary-600 dark:text-secondary-400">{member.phone}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-600">
+                          <div className="text-sm text-secondary-600 dark:text-secondary-400">
                             {member.email || '—'}
                           </div>
                         </td>
@@ -170,14 +187,14 @@ export function MembersPage() {
                           <span
                             className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${
                               member.optInSms
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-red-100 text-red-800'
+                                ? 'bg-success-100 dark:bg-success-900 text-success-800 dark:text-success-200'
+                                : 'bg-danger-100 dark:bg-danger-900 text-danger-800 dark:text-danger-200'
                             }`}
                           >
-                            {member.optInSms ? 'Opted In' : 'Opted Out'}
+                            {member.optInSms ? '✅ Opted In' : '❌ Opted Out'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-600 dark:text-secondary-400">
                           {new Date(member.createdAt).toLocaleDateString()}
                         </td>
                       </tr>
@@ -185,33 +202,35 @@ export function MembersPage() {
                   </tbody>
                 </table>
               </div>
-            </div>
+            </Card>
 
             {/* Pagination */}
             {pages > 1 && (
               <div className="mt-6 flex justify-center gap-2">
-                <button
+                <Button
+                  variant="secondary"
+                  size="md"
                   onClick={() => setPage(Math.max(1, page - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                 >
-                  Previous
-                </button>
-                <div className="px-4 py-2 text-gray-700">
+                  ← Previous
+                </Button>
+                <div className="px-4 py-2 text-secondary-700 dark:text-secondary-300 font-medium">
                   Page {page} of {pages}
                 </div>
-                <button
+                <Button
+                  variant="secondary"
+                  size="md"
                   onClick={() => setPage(Math.min(pages, page + 1))}
                   disabled={page === pages}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                 >
-                  Next
-                </button>
+                  Next →
+                </Button>
               </div>
             )}
           </>
         )}
-      </main>
+      </div>
 
       {/* Modals */}
       <AddMemberModal

@@ -5,6 +5,9 @@ import toast from 'react-hot-toast';
 import { login } from '../api/auth';
 import { fetchCsrfToken } from '../api/client';
 import useAuthStore from '../stores/authStore';
+import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
+import Card from '../components/ui/Card';
 
 interface LoginFormData {
   email: string;
@@ -75,76 +78,79 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold text-center mb-2 text-gray-900">
-            Connect YW
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 dark:from-secondary-900 via-white dark:via-secondary-950 to-primary-100 dark:to-secondary-900 flex items-center justify-center p-4 transition-colors duration-normal">
+      <div className="w-full max-w-md animate-fadeIn">
+        <Card variant="default" className="p-8">
+          {/* Logo */}
+          <div className="flex items-center justify-center mb-8">
+            <div className="w-16 h-16 bg-gradient-to-br from-primary-600 dark:from-primary-500 to-primary-700 dark:to-primary-600 rounded-lg flex items-center justify-center shadow-md">
+              <span className="text-white font-bold text-2xl">YW</span>
+            </div>
+          </div>
+
+          <h1 className="text-3xl font-bold text-center mb-2 text-secondary-900 dark:text-secondary-50">
+            Welcome Back
           </h1>
-          <p className="text-center text-gray-600 mb-8">
-            Church SMS Platform
+          <p className="text-center text-secondary-600 dark:text-secondary-400 mb-8">
+            Church SMS Communication Platform
           </p>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <input
-                type="email"
-                {...register('email', {
-                  required: 'Email is required',
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: 'Invalid email format',
-                  },
-                })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                placeholder="you@example.com"
-                disabled={isLoading}
-              />
-              {errors.email && (
-                <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Password
-              </label>
-              <input
-                type="password"
-                {...register('password', {
-                  required: 'Password is required',
-                  minLength: {
-                    value: 8,
-                    message: 'Password must be at least 8 characters',
-                  },
-                })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                placeholder="••••••••"
-                disabled={isLoading}
-              />
-              {errors.password && (
-                <p className="text-sm text-red-500 mt-1">{errors.password.message}</p>
-              )}
-            </div>
-
-            <button
-              type="submit"
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <Input
+              label="Email Address"
+              type="email"
+              placeholder="pastor@church.com"
               disabled={isLoading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg transition"
+              error={errors.email?.message}
+              {...register('email', {
+                required: 'Email is required',
+                pattern: {
+                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: 'Invalid email format',
+                },
+              })}
+            />
+
+            <Input
+              label="Password"
+              type="password"
+              placeholder="••••••••"
+              disabled={isLoading}
+              error={errors.password?.message}
+              {...register('password', {
+                required: 'Password is required',
+                minLength: {
+                  value: 8,
+                  message: 'Password must be at least 8 characters',
+                },
+              })}
+            />
+
+            <Button
+              type="submit"
+              variant="primary"
+              size="md"
+              fullWidth
+              isLoading={isLoading}
+              disabled={isLoading}
             >
               {isLoading ? 'Logging in...' : 'Login'}
-            </button>
+            </Button>
           </form>
 
-          <p className="text-center text-gray-600 mt-6">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-blue-600 hover:text-blue-700 font-semibold">
-              Sign up
-            </Link>
-          </p>
+          <div className="mt-8 pt-8 border-t border-secondary-200 dark:border-secondary-700">
+            <p className="text-center text-secondary-600 dark:text-secondary-400">
+              Don't have an account?{' '}
+              <Link to="/register" className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-semibold transition-colors">
+                Create account
+              </Link>
+            </p>
+          </div>
+        </Card>
+
+        {/* Additional Info */}
+        <div className="mt-8 text-center text-sm text-secondary-600 dark:text-secondary-400">
+          <p>14-day free trial • No credit card required</p>
         </div>
       </div>
     </div>

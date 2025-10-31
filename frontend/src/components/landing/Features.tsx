@@ -1,3 +1,5 @@
+import Card from '../ui/Card';
+
 interface Feature {
   icon: React.ReactNode;
   title: string;
@@ -63,15 +65,15 @@ const features: Feature[] = [
 
 export default function Features() {
   return (
-    <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+    <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-secondary-900 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
-        <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-16 animate-fadeIn">
+          <h2 className="text-4xl sm:text-5xl font-bold text-secondary-900 dark:text-secondary-50 mb-4">
             Everything You Need to{' '}
-            <span className="text-primary-600">Stay Connected</span>
+            <span className="text-primary-600 dark:text-primary-400">Stay Connected</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-secondary-600 dark:text-secondary-400 max-w-3xl mx-auto">
             Powerful features designed specifically for churches managing multiple locations and hundreds of members.
           </p>
         </div>
@@ -79,17 +81,18 @@ export default function Features() {
         {/* Features Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <div
+            <Card
               key={index}
-              className="group p-8 bg-white rounded-xl border border-gray-200 hover:border-primary-300 hover:shadow-medium transition-all duration-300 animate-slide-up"
+              variant="default"
+              className="group animate-slideUp"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="w-16 h-16 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center mb-6 group-hover:bg-primary-600 group-hover:text-white transition-colors">
+              <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 rounded-lg flex items-center justify-center mb-6 group-hover:bg-primary-600 dark:group-hover:bg-primary-500 group-hover:text-white dark:group-hover:text-secondary-50 transition-colors duration-normal">
                 {feature.icon}
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-              <p className="text-gray-600 leading-relaxed">{feature.description}</p>
-            </div>
+              <h3 className="text-xl font-bold text-secondary-900 dark:text-secondary-50 mb-3">{feature.title}</h3>
+              <p className="text-secondary-600 dark:text-secondary-400 leading-relaxed">{feature.description}</p>
+            </Card>
           ))}
         </div>
       </div>

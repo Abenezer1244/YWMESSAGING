@@ -3,6 +3,8 @@ import useAuthStore from '../stores/authStore';
 import useBranchStore from '../stores/branchStore';
 import BranchSelector from '../components/BranchSelector';
 import TrialBanner from '../components/TrialBanner';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
 
 export function DashboardPage() {
   const navigate = useNavigate();
@@ -19,92 +21,60 @@ export function DashboardPage() {
   ) : 0;
 
   const trialStatus = daysUntilTrialEnd > 0 ? 'active' : 'expired';
-  const trialColor = daysUntilTrialEnd >= 8 ? 'green' : daysUntilTrialEnd >= 4 ? 'yellow' : 'red';
+  const trialColor = daysUntilTrialEnd >= 8 ? 'success' : daysUntilTrialEnd >= 4 ? 'warning' : 'danger';
+
+  const navigationItems = [
+    { label: '📍 Branches', action: () => navigate('/branches'), always: true },
+    { label: '👥 Groups', action: () => navigate(`/branches/${currentBranchId}/groups`), conditional: true },
+    { label: '👤 Members', action: () => navigate(`/members?groupId=`), conditional: true },
+    { label: '📨 Send Message', action: () => navigate('/send-message'), conditional: true },
+    { label: '📜 History', action: () => navigate('/message-history'), conditional: true },
+    { label: '📋 Templates', action: () => navigate('/templates'), conditional: true },
+    { label: '🔄 Recurring', action: () => navigate('/recurring-messages'), conditional: true },
+    { label: '📊 Analytics', action: () => navigate('/analytics'), conditional: true },
+    { label: '💳 Billing', action: () => navigate('/billing'), always: true },
+    { label: '⚙️ Settings', action: () => navigate('/admin/settings'), always: true },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 transition-colors duration-normal">
       {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Connect YW Dashboard</h1>
-              <p className="text-gray-600">{church?.name}</p>
+      <header className="bg-white dark:bg-secondary-800 shadow-md border-b border-secondary-200 dark:border-secondary-700 transition-colors duration-normal">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-primary-600 dark:from-primary-500 to-primary-700 dark:to-primary-600 rounded-lg flex items-center justify-center shadow-md">
+                <span className="text-white font-bold text-lg">YW</span>
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-secondary-900 dark:text-secondary-50">Dashboard</h1>
+                <p className="text-secondary-600 dark:text-secondary-400">{church?.name}</p>
+              </div>
             </div>
-            <button
+            <Button
+              variant="danger"
+              size="md"
               onClick={handleLogout}
-              className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition"
             >
               Logout
-            </button>
+            </Button>
           </div>
 
-          {/* Navigation and Branch Selector */}
-          <div className="flex gap-4 items-center">
-            <button
-              onClick={() => navigate('/branches')}
-              className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition"
-            >
-              📍 Branches
-            </button>
-            {currentBranchId && (
-              <>
+          {/* Navigation */}
+          <div className="flex flex-wrap gap-2 items-center">
+            {navigationItems.map((item) => {
+              const shouldShow = item.always || (item.conditional && currentBranchId);
+              if (!shouldShow) return null;
+              return (
                 <button
-                  onClick={() => navigate(`/branches/${currentBranchId}/groups`)}
-                  className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition"
+                  key={item.label}
+                  onClick={item.action}
+                  className="px-4 py-2 text-secondary-700 dark:text-secondary-300 font-medium hover:bg-primary-100 dark:hover:bg-primary-900 rounded-lg transition-colors duration-normal border border-secondary-200 dark:border-secondary-700 hover:border-primary-300 dark:hover:border-primary-600"
                 >
-                  👥 Groups
+                  {item.label}
                 </button>
-                <button
-                  onClick={() => navigate(`/members?groupId=`)}
-                  className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition"
-                >
-                  👤 Members
-                </button>
-                <button
-                  onClick={() => navigate('/send-message')}
-                  className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition"
-                >
-                  📨 Send Message
-                </button>
-                <button
-                  onClick={() => navigate('/message-history')}
-                  className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition"
-                >
-                  📜 History
-                </button>
-                <button
-                  onClick={() => navigate('/templates')}
-                  className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition"
-                >
-                  📋 Templates
-                </button>
-                <button
-                  onClick={() => navigate('/recurring-messages')}
-                  className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition"
-                >
-                  🔄 Recurring
-                </button>
-                <button
-                  onClick={() => navigate('/analytics')}
-                  className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition"
-                >
-                  📊 Analytics
-                </button>
-              </>
-            )}
-            <button
-              onClick={() => navigate('/billing')}
-              className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition"
-            >
-              💳 Billing
-            </button>
-            <button
-              onClick={() => navigate('/admin/settings')}
-              className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition"
-            >
-              ⚙️ Settings
-            </button>
+              );
+            })}
             <BranchSelector />
           </div>
         </div>
@@ -115,73 +85,136 @@ export function DashboardPage() {
         {/* Trial Banner */}
         <TrialBanner />
 
-        {/* Welcome Card */}
-        <div className="bg-white rounded-lg shadow p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Welcome, {user?.firstName}!
+        {/* Welcome Section */}
+        <div className="mb-8 animate-fadeIn">
+          <h2 className="text-2xl font-bold text-secondary-900 dark:text-secondary-50 mb-6">
+            Welcome back, {user?.firstName}! 👋
           </h2>
+
+          {/* Info Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="border-l-4 border-blue-500 pl-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">User Info</h3>
-              <p className="text-gray-600">
-                <strong>Name:</strong> {user?.firstName} {user?.lastName}
-              </p>
-              <p className="text-gray-600">
-                <strong>Email:</strong> {user?.email}
-              </p>
-              <p className="text-gray-600">
-                <strong>Role:</strong> {user?.role}
-              </p>
+            {/* User Info Card */}
+            <Card variant="default">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900 rounded-lg flex items-center justify-center">
+                  <span className="text-2xl">👤</span>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-50 mb-3">Your Account</h3>
+                  <div className="space-y-2 text-sm">
+                    <p className="text-secondary-600 dark:text-secondary-400">
+                      <span className="font-medium text-secondary-900 dark:text-secondary-50">{user?.firstName} {user?.lastName}</span>
+                    </p>
+                    <p className="text-secondary-600 dark:text-secondary-400">
+                      <span className="text-secondary-500 dark:text-secondary-400">{user?.email}</span>
+                    </p>
+                    <p className="text-secondary-600 dark:text-secondary-400">
+                      <span className="inline-block px-2 py-1 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded text-xs font-semibold">{user?.role}</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Church Info Card */}
+            <Card variant="default">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-info-100 dark:bg-info-900 rounded-lg flex items-center justify-center">
+                  <span className="text-2xl">⛪</span>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-50 mb-3">Church Details</h3>
+                  <div className="space-y-2 text-sm">
+                    <p className="text-secondary-600 dark:text-secondary-400">
+                      <span className="font-medium text-secondary-900 dark:text-secondary-50">{church?.name}</span>
+                    </p>
+                    <p className="text-secondary-600 dark:text-secondary-400">
+                      <span className="text-secondary-500 dark:text-secondary-400">{church?.email}</span>
+                    </p>
+                    <p className="text-secondary-600 dark:text-secondary-400">
+                      Trial ends <span className="font-semibold text-secondary-900 dark:text-secondary-50">{new Date(church?.trialEndsAt || '').toLocaleDateString()}</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card variant="default" className="text-center">
+            <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <span className="text-3xl">📍</span>
             </div>
+            <div className="text-4xl font-bold text-primary-600 dark:text-primary-400 mb-2">0</div>
+            <p className="text-secondary-600 dark:text-secondary-400 font-medium">Active Branches</p>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/branches')}
+              className="mt-4"
+              fullWidth
+            >
+              View Branches
+            </Button>
+          </Card>
 
-            <div className="border-l-4 border-blue-500 pl-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Church Info</h3>
-              <p className="text-gray-600">
-                <strong>Name:</strong> {church?.name}
-              </p>
-              <p className="text-gray-600">
-                <strong>Email:</strong> {church?.email}
-              </p>
-              <p className="text-gray-600">
-                <strong>Trial Ends:</strong> {new Date(church?.trialEndsAt || '').toLocaleDateString()}
-              </p>
+          <Card variant="default" className="text-center">
+            <div className="w-16 h-16 bg-success-100 dark:bg-success-900 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <span className="text-3xl">👥</span>
             </div>
-          </div>
+            <div className="text-4xl font-bold text-success-600 dark:text-success-400 mb-2">0</div>
+            <p className="text-secondary-600 dark:text-secondary-400 font-medium">Total Members</p>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(`/members?groupId=`)}
+              className="mt-4"
+              fullWidth
+            >
+              Manage Members
+            </Button>
+          </Card>
+
+          <Card variant="default" className="text-center">
+            <div className="w-16 h-16 bg-info-100 dark:bg-info-900 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <span className="text-3xl">📨</span>
+            </div>
+            <div className="text-4xl font-bold text-info-600 dark:text-info-400 mb-2">0</div>
+            <p className="text-secondary-600 dark:text-secondary-400 font-medium">Messages Sent</p>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/send-message')}
+              className="mt-4"
+              fullWidth
+            >
+              Send Message
+            </Button>
+          </Card>
         </div>
 
-        {/* Placeholder Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <div className="text-4xl font-bold text-blue-600 mb-2">0</div>
-            <p className="text-gray-600">Branches</p>
-            <p className="text-sm text-gray-500 mt-2">Coming soon</p>
+        {/* Quick Features */}
+        <Card variant="highlight">
+          <h3 className="text-xl font-bold text-secondary-900 dark:text-secondary-50 mb-4">✨ Key Features</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              { icon: '📍', title: 'Multi-Branch', desc: 'Manage multiple church locations' },
+              { icon: '👥', title: 'Groups & Members', desc: 'Organize and segment your congregation' },
+              { icon: '📨', title: 'SMS Messaging', desc: 'Send direct messages to members' },
+              { icon: '📋', title: 'Templates', desc: 'Reuse pre-built message templates' },
+              { icon: '🔄', title: 'Recurring Messages', desc: 'Automate regular communications' },
+              { icon: '📊', title: 'Analytics', desc: 'Track engagement and delivery rates' },
+            ].map((feature, idx) => (
+              <div key={idx} className="p-4 bg-secondary-50 dark:bg-secondary-700 rounded-lg">
+                <div className="text-3xl mb-2">{feature.icon}</div>
+                <h4 className="font-semibold text-secondary-900 dark:text-secondary-50">{feature.title}</h4>
+                <p className="text-sm text-secondary-600 dark:text-secondary-400">{feature.desc}</p>
+              </div>
+            ))}
           </div>
-
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <div className="text-4xl font-bold text-green-600 mb-2">0</div>
-            <p className="text-gray-600">Members</p>
-            <p className="text-sm text-gray-500 mt-2">Coming soon</p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <div className="text-4xl font-bold text-purple-600 mb-2">0</div>
-            <p className="text-gray-600">Messages Sent</p>
-            <p className="text-sm text-gray-500 mt-2">Coming soon</p>
-          </div>
-        </div>
-
-        {/* Features Coming Soon */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-8 mt-8">
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">Coming Soon</h3>
-          <ul className="list-disc list-inside space-y-2 text-gray-700">
-            <li>Multi-branch management</li>
-            <li>Member management with CSV import</li>
-            <li>SMS messaging to groups and individuals</li>
-            <li>Message templates and automation</li>
-            <li>Analytics and reporting</li>
-            <li>Billing and subscription management</li>
-          </ul>
-        </div>
+        </Card>
       </main>
     </div>
   );

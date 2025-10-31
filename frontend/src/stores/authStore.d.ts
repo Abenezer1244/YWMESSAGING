@@ -18,9 +18,11 @@ interface AuthState {
     isAuthenticated: boolean;
     accessToken: string | null;
     refreshToken: string | null;
-    setAuth: (user: Admin, church: Church, accessToken: string, refreshToken: string) => void;
+    tokenExpiresAt: number | null;
+    setAuth: (user: Admin, church: Church, accessToken: string, refreshToken: string, expiresIn?: number) => void;
     clearAuth: () => void;
     logout: () => void;
+    isTokenExpired: () => boolean;
 }
 declare const useAuthStore: import("zustand").UseBoundStore<import("zustand").StoreApi<AuthState>>;
 export default useAuthStore;

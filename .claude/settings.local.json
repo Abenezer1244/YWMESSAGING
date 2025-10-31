@@ -14,7 +14,9 @@
       "Bash(curl -s https://connect-yw-frontend.onrender.com)",
       "Bash(curl -s https://connect-yw-frontend.onrender.com/login)",
       "Read(//c/Users/Windows/OneDrive/**)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(timeout 60 npm run build:*)",
+      "Bash(npm audit:*)"
     ],
     "deny": [],
     "ask": []

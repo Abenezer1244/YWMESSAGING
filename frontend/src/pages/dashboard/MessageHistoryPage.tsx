@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import useMessageStore, { SentMessage } from '../../stores/messageStore';
 import { getMessageHistory } from '../../api/messages';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import { Spinner } from '../../components/ui';
 
 export function MessageHistoryPage() {
   const { messages, setMessages, isLoading, setLoading } = useMessageStore();
@@ -36,32 +39,29 @@ export function MessageHistoryPage() {
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case 'sent':
-        return 'bg-green-100 text-green-800';
+        return 'bg-success-100 dark:bg-success-900 text-success-800 dark:text-success-200';
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-warning-100 dark:bg-warning-900 text-warning-800 dark:text-warning-200';
       case 'failed':
-        return 'bg-red-100 text-red-800';
+        return 'bg-danger-100 dark:bg-danger-900 text-danger-800 dark:text-danger-200';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-secondary-100 dark:bg-secondary-800 text-secondary-800 dark:text-secondary-200';
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <h1 className="text-3xl font-bold text-gray-900">Message History</h1>
-          <p className="text-gray-600 mt-1">{total} total messages</p>
+    <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 p-6 transition-colors duration-normal">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-secondary-900 dark:text-secondary-50 mb-2">📜 Message History</h1>
+          <p className="text-secondary-600 dark:text-secondary-400">{total} total messages</p>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filter */}
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Filter by Status
+        <Card variant="default" className="mb-6">
+          <label className="block text-sm font-semibold text-secondary-900 dark:text-secondary-50 mb-3">
+            🔍 Filter by Status
           </label>
           <select
             value={statusFilter}
@@ -69,57 +69,65 @@ export function MessageHistoryPage() {
               setStatusFilter(e.target.value);
               setPage(1);
             }}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2 border border-secondary-200 dark:border-secondary-700 rounded-lg bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-50 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors duration-normal"
           >
             <option value="">All Statuses</option>
             <option value="pending">Pending</option>
             <option value="sent">Sent</option>
             <option value="failed">Failed</option>
           </select>
-        </div>
+        </Card>
 
         {/* Messages Table */}
         {isLoading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500">Loading messages...</p>
+          <div className="flex items-center justify-center py-20">
+            <Spinner size="lg" text="Loading messages..." />
           </div>
         ) : messages.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No messages found</p>
-          </div>
+          <Card variant="highlight" className="text-center py-16">
+            <div className="mb-6">
+              <span className="text-6xl">📜</span>
+            </div>
+            <h2 className="text-2xl font-bold text-secondary-900 dark:text-secondary-50 mb-3">
+              No Messages Found
+            </h2>
+            <p className="text-secondary-600 dark:text-secondary-400">
+              Your message history will appear here after you send messages.
+            </p>
+          </Card>
         ) : (
           <>
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <Card variant="default" className="overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full">
-                  <thead className="bg-gray-50 border-b">
+                  <thead className="bg-secondary-100 dark:bg-secondary-800 border-b border-secondary-200 dark:border-secondary-700">
                     <tr>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-50">
                         Message
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-50">
                         Recipients
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-50">
                         Delivery
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-50">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-50">
                         Sent
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y">
+                  <tbody className="divide-y divide-secondary-200 dark:divide-secondary-700">
                     {messages.map((message) => (
-                      <tr key={message.id} className="hover:bg-gray-50">
+                      <tr key={message.id} className="hover:bg-secondary-50 dark:hover:bg-secondary-700/50 transition-colors duration-normal">
                         <td className="px-6 py-4">
-                          <p className="text-sm text-gray-900 font-medium truncate max-w-xs">
+                          <p className="text-sm text-secondary-900 dark:text-secondary-50 font-medium truncate max-w-xs">
                             {message.content.slice(0, 50)}
                             {message.content.length > 50 ? '...' : ''}
                           </p>
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-xs text-secondary-600 dark:text-secondary-400 mt-1">
                             {message.targetType === 'individual'
                               ? 'Individual'
                               : message.targetType === 'groups'
@@ -130,16 +138,16 @@ export function MessageHistoryPage() {
                           </p>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900 font-medium">
+                          <div className="text-sm text-secondary-900 dark:text-secondary-50 font-medium">
                             {message.totalRecipients}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm">
-                            <p className="text-gray-900 font-medium">
+                            <p className="text-secondary-900 dark:text-secondary-50 font-medium">
                               {message.deliveredCount}/{message.totalRecipients}
                             </p>
-                            <p className="text-gray-500 text-xs">
+                            <p className="text-secondary-600 dark:text-secondary-400 text-xs">
                               {message.deliveryRate || 0}%
                             </p>
                           </div>
@@ -153,7 +161,7 @@ export function MessageHistoryPage() {
                             {message.status.charAt(0).toUpperCase() + message.status.slice(1)}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-600 dark:text-secondary-400">
                           {new Date(message.createdAt).toLocaleDateString()}
                           <br />
                           {new Date(message.createdAt).toLocaleTimeString()}
@@ -163,33 +171,35 @@ export function MessageHistoryPage() {
                   </tbody>
                 </table>
               </div>
-            </div>
+            </Card>
 
             {/* Pagination */}
             {pages > 1 && (
               <div className="mt-6 flex justify-center gap-2">
-                <button
+                <Button
+                  variant="secondary"
+                  size="md"
                   onClick={() => setPage(Math.max(1, page - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                 >
-                  Previous
-                </button>
-                <div className="px-4 py-2 text-gray-700">
+                  ← Previous
+                </Button>
+                <div className="px-4 py-2 text-secondary-700 dark:text-secondary-300 font-medium">
                   Page {page} of {pages}
                 </div>
-                <button
+                <Button
+                  variant="secondary"
+                  size="md"
                   onClick={() => setPage(Math.min(pages, page + 1))}
                   disabled={page === pages}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                 >
-                  Next
-                </button>
+                  Next →
+                </Button>
               </div>
             )}
           </>
         )}
-      </main>
+      </div>
     </div>
   );
 }

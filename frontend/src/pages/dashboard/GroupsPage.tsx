@@ -4,6 +4,9 @@ import toast from 'react-hot-toast';
 import useGroupStore, { Group } from '../../stores/groupStore';
 import { getGroups, deleteGroup } from '../../api/groups';
 import { GroupFormModal } from '../../components/groups/GroupFormModal';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import { Spinner } from '../../components/ui';
 
 export function GroupsPage() {
   const { branchId = '' } = useParams();
@@ -61,124 +64,133 @@ export function GroupsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="text-gray-500">Loading groups...</div>
+      <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 flex items-center justify-center p-6">
+        <Spinner size="lg" text="Loading groups..." />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Groups</h1>
-              <p className="text-gray-600 mt-1">{groups.length} groups</p>
-            </div>
-            <button
-              onClick={handleCreateClick}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
-            >
-              + Create Group
-            </button>
+    <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 p-6 transition-colors duration-normal">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-secondary-900 dark:text-secondary-50 mb-2">👥 Groups</h1>
+            <p className="text-secondary-600 dark:text-secondary-400">{groups.length} groups in this branch</p>
           </div>
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={handleCreateClick}
+          >
+            + New Group
+          </Button>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Main Content */}
         {groups.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg mb-4">No groups yet</p>
-            <button
+          <Card variant="highlight" className="text-center py-16">
+            <div className="mb-6">
+              <span className="text-6xl">👥</span>
+            </div>
+            <h2 className="text-2xl font-bold text-secondary-900 dark:text-secondary-50 mb-3">
+              No Groups Yet
+            </h2>
+            <p className="text-secondary-600 dark:text-secondary-400 mb-6 max-w-md mx-auto">
+              Create your first group to start organizing your congregation.
+            </p>
+            <Button
+              variant="primary"
+              size="md"
               onClick={handleCreateClick}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
             >
               Create First Group
-            </button>
-          </div>
+            </Button>
+          </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {groups.map((group) => (
-              <div
-                key={group.id}
-                className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition"
-              >
-                <div className="flex justify-between items-start mb-3">
+              <Card key={group.id} variant="default" className="hover:shadow-lg transition-shadow">
+                <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900">{group.name}</h3>
+                    <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-50">{group.name}</h3>
                     {group.description && (
-                      <p className="text-gray-600 text-sm mt-1">{group.description}</p>
+                      <p className="text-secondary-600 dark:text-secondary-400 text-sm mt-1">{group.description}</p>
                     )}
                   </div>
                   <div className="flex gap-2">
-                    <button
+                    <Button
+                      variant="secondary"
+                      size="sm"
                       onClick={() => handleEditClick(group)}
-                      className="text-blue-600 hover:text-blue-700 font-medium text-sm"
                     >
                       Edit
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
                       onClick={() => setDeleteConfirm(group.id)}
-                      className="text-red-600 hover:text-red-700 font-medium text-sm"
                     >
                       Delete
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                <div className="space-y-2 mb-6 pb-6 border-b border-secondary-200 dark:border-secondary-700">
                   <div>
-                    <p className="text-gray-600 text-sm">Members</p>
-                    <p className="text-2xl font-bold text-blue-600">{group.memberCount}</p>
+                    <p className="text-secondary-600 dark:text-secondary-400 text-sm">👤 Members</p>
+                    <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">{group.memberCount}</p>
                   </div>
                   {group.welcomeMessageEnabled && (
                     <div>
-                      <p className="text-gray-600 text-sm">Welcome Message</p>
-                      <p className="text-sm text-green-600 font-medium">✓ Enabled</p>
+                      <p className="text-secondary-600 dark:text-secondary-400 text-sm">Welcome Message</p>
+                      <p className="text-sm text-success-600 dark:text-success-400 font-medium">✅ Enabled</p>
                     </div>
                   )}
                 </div>
 
-                <div className="mt-4">
-                  <a
-                    href={`/members?groupId=${group.id}`}
-                    className="text-blue-600 hover:text-blue-700 font-medium text-sm"
-                  >
-                    Manage Members →
-                  </a>
-                </div>
-              </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => window.location.href = `/members?groupId=${group.id}`}
+                  fullWidth
+                >
+                  👥 Manage Members
+                </Button>
+              </Card>
             ))}
           </div>
         )}
-      </main>
+      </div>
 
       {/* Delete Confirmation */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg max-w-sm w-full mx-4 p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-2">Delete Group?</h3>
-            <p className="text-gray-600 mb-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <Card variant="default" className="max-w-sm w-full">
+            <h3 className="text-lg font-bold text-secondary-900 dark:text-secondary-50 mb-2">⚠️ Delete Group?</h3>
+            <p className="text-secondary-600 dark:text-secondary-400 mb-6">
               This will delete the group and remove all members. This action cannot be undone.
             </p>
             <div className="flex gap-3">
-              <button
+              <Button
+                variant="secondary"
+                size="md"
                 onClick={() => setDeleteConfirm(null)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition"
+                fullWidth
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="danger"
+                size="md"
                 onClick={() => handleDeleteClick(deleteConfirm)}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition"
+                fullWidth
               >
                 Delete
-              </button>
+              </Button>
             </div>
-          </div>
+          </Card>
         </div>
       )}
 

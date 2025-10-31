@@ -20,6 +20,9 @@ import {
   BranchStats,
   SummaryStats,
 } from '../../api/analytics';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import { Spinner } from '../../components/ui';
 
 export function AnalyticsPage() {
   const [messageStats, setMessageStats] = useState<MessageStats | null>(null);
@@ -52,82 +55,81 @@ export function AnalyticsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">Analytics</h1>
-            <select
-              value={days}
-              onChange={(e) => setDays(parseInt(e.target.value))}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value={7}>Last 7 days</option>
-              <option value={30}>Last 30 days</option>
-              <option value={90}>Last 90 days</option>
-            </select>
+    <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 p-6 transition-colors duration-normal">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-secondary-900 dark:text-secondary-50 mb-2">📊 Analytics</h1>
+            <p className="text-secondary-600 dark:text-secondary-400">Track your messaging performance and engagement</p>
           </div>
+          <select
+            value={days}
+            onChange={(e) => setDays(parseInt(e.target.value))}
+            className="px-4 py-2 border border-secondary-200 dark:border-secondary-700 rounded-lg bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-50 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors duration-normal"
+          >
+            <option value={7}>Last 7 days</option>
+            <option value={30}>Last 30 days</option>
+            <option value={90}>Last 90 days</option>
+          </select>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Main Content */}
         {isLoading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500">Loading analytics...</p>
+          <div className="flex items-center justify-center py-20">
+            <Spinner size="lg" text="Loading analytics..." />
           </div>
         ) : (
           <div className="space-y-8">
             {/* Summary Cards */}
             {summaryStats && (
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <div className="bg-white rounded-lg shadow p-6">
-                  <p className="text-gray-600 text-sm">Total Messages</p>
-                  <p className="text-3xl font-bold text-blue-600 mt-2">
+                <Card variant="default" className="text-center">
+                  <p className="text-secondary-600 dark:text-secondary-400 text-sm mb-2">📨 Total Messages</p>
+                  <p className="text-3xl font-bold text-primary-600 dark:text-primary-400">
                     {summaryStats.totalMessages}
                   </p>
-                </div>
+                </Card>
 
-                <div className="bg-white rounded-lg shadow p-6">
-                  <p className="text-gray-600 text-sm">Avg Delivery Rate</p>
-                  <p className="text-3xl font-bold text-green-600 mt-2">
+                <Card variant="default" className="text-center">
+                  <p className="text-secondary-600 dark:text-secondary-400 text-sm mb-2">✅ Delivery Rate</p>
+                  <p className="text-3xl font-bold text-success-600 dark:text-success-400">
                     {summaryStats.averageDeliveryRate}%
                   </p>
-                </div>
+                </Card>
 
-                <div className="bg-white rounded-lg shadow p-6">
-                  <p className="text-gray-600 text-sm">Total Members</p>
-                  <p className="text-3xl font-bold text-purple-600 mt-2">
+                <Card variant="default" className="text-center">
+                  <p className="text-secondary-600 dark:text-secondary-400 text-sm mb-2">👤 Total Members</p>
+                  <p className="text-3xl font-bold text-info-600 dark:text-info-400">
                     {summaryStats.totalMembers}
                   </p>
-                </div>
+                </Card>
 
-                <div className="bg-white rounded-lg shadow p-6">
-                  <p className="text-gray-600 text-sm">Total Branches</p>
-                  <p className="text-3xl font-bold text-orange-600 mt-2">
+                <Card variant="default" className="text-center">
+                  <p className="text-secondary-600 dark:text-secondary-400 text-sm mb-2">📍 Branches</p>
+                  <p className="text-3xl font-bold text-warning-600 dark:text-warning-400">
                     {summaryStats.totalBranches}
                   </p>
-                </div>
+                </Card>
 
-                <div className="bg-white rounded-lg shadow p-6">
-                  <p className="text-gray-600 text-sm">Total Groups</p>
-                  <p className="text-3xl font-bold text-pink-600 mt-2">
+                <Card variant="default" className="text-center">
+                  <p className="text-secondary-600 dark:text-secondary-400 text-sm mb-2">👥 Total Groups</p>
+                  <p className="text-3xl font-bold text-danger-600 dark:text-danger-400">
                     {summaryStats.totalGroups}
                   </p>
-                </div>
+                </Card>
               </div>
             )}
 
             {/* Message Volume Chart */}
             {messageStats && messageStats.byDay.length > 0 && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                  Message Volume
+              <Card variant="default">
+                <h2 className="text-lg font-semibold text-secondary-900 dark:text-secondary-50 mb-4">
+                  📈 Message Volume
                 </h2>
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={messageStats.byDay}>
-                    <CartesianGrid strokeDasharray="3 3" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
                     <XAxis
                       dataKey="date"
                       tick={{ fontSize: 12 }}
@@ -136,7 +138,7 @@ export function AnalyticsPage() {
                       height={80}
                     />
                     <YAxis />
-                    <Tooltip />
+                    <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px', color: '#fff' }} />
                     <Legend />
                     <Line
                       type="monotone"
@@ -158,18 +160,18 @@ export function AnalyticsPage() {
                     />
                   </LineChart>
                 </ResponsiveContainer>
-              </div>
+              </Card>
             )}
 
             {/* Branch Comparison */}
             {branchStats.length > 0 && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                  Branch Comparison
+              <Card variant="default">
+                <h2 className="text-lg font-semibold text-secondary-900 dark:text-secondary-50 mb-4">
+                  📊 Branch Comparison
                 </h2>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={branchStats}>
-                    <CartesianGrid strokeDasharray="3 3" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
                     <XAxis
                       dataKey="name"
                       tick={{ fontSize: 12 }}
@@ -179,7 +181,7 @@ export function AnalyticsPage() {
                     />
                     <YAxis yAxisId="left" />
                     <YAxis yAxisId="right" orientation="right" />
-                    <Tooltip />
+                    <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px', color: '#fff' }} />
                     <Legend />
                     <Bar
                       yAxisId="left"
@@ -195,64 +197,62 @@ export function AnalyticsPage() {
                     />
                   </BarChart>
                 </ResponsiveContainer>
-              </div>
+              </Card>
             )}
 
             {/* Branch Statistics Table */}
             {branchStats.length > 0 && (
-              <div className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="px-6 py-4 border-b">
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    Branch Details
-                  </h2>
-                </div>
+              <Card variant="default" className="overflow-hidden">
+                <h2 className="text-lg font-semibold text-secondary-900 dark:text-secondary-50 mb-4">
+                  📋 Branch Details
+                </h2>
                 <div className="overflow-x-auto">
                   <table className="min-w-full">
-                    <thead className="bg-gray-50 border-b">
+                    <thead className="bg-secondary-100 dark:bg-secondary-800 border-b border-secondary-200 dark:border-secondary-700">
                       <tr>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-50">
                           Branch
                         </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-50">
                           Members
                         </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-50">
                           Groups
                         </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-50">
                           Messages
                         </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-50">
                           Delivery Rate
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y">
+                    <tbody className="divide-y divide-secondary-200 dark:divide-secondary-700">
                       {branchStats.map((branch) => (
-                        <tr key={branch.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                        <tr key={branch.id} className="hover:bg-secondary-50 dark:hover:bg-secondary-700/50 transition-colors duration-normal">
+                          <td className="px-6 py-4 text-sm font-medium text-secondary-900 dark:text-secondary-50">
                             {branch.name}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-600">
+                          <td className="px-6 py-4 text-sm text-secondary-600 dark:text-secondary-400">
                             {branch.memberCount}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-600">
+                          <td className="px-6 py-4 text-sm text-secondary-600 dark:text-secondary-400">
                             {branch.groupCount}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-600">
+                          <td className="px-6 py-4 text-sm text-secondary-600 dark:text-secondary-400">
                             {branch.messageCount}
                           </td>
                           <td className="px-6 py-4 text-sm">
                             <div className="flex items-center gap-2">
-                              <div className="w-32 bg-gray-200 rounded-full h-2">
+                              <div className="w-32 bg-secondary-200 dark:bg-secondary-700 rounded-full h-2">
                                 <div
-                                  className="bg-green-500 h-2 rounded-full"
+                                  className="bg-success-500 h-2 rounded-full"
                                   style={{
                                     width: `${branch.deliveryRate}%`,
                                   }}
                                 />
                               </div>
-                              <span className="font-medium text-gray-900">
+                              <span className="font-medium text-secondary-900 dark:text-secondary-50">
                                 {branch.deliveryRate}%
                               </span>
                             </div>
@@ -262,46 +262,46 @@ export function AnalyticsPage() {
                     </tbody>
                   </table>
                 </div>
-              </div>
+              </Card>
             )}
 
             {/* Message Stats Summary */}
             {messageStats && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                  Message Statistics
+              <Card variant="default">
+                <h2 className="text-lg font-semibold text-secondary-900 dark:text-secondary-50 mb-4">
+                  💬 Message Statistics
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div>
-                    <p className="text-gray-600 text-sm">Total Messages</p>
-                    <p className="text-2xl font-bold text-blue-600 mt-1">
+                    <p className="text-secondary-600 dark:text-secondary-400 text-sm mb-1">Total Messages</p>
+                    <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">
                       {messageStats.totalMessages}
                     </p>
                   </div>
                   <div>
-                    <p className="text-gray-600 text-sm">Delivered</p>
-                    <p className="text-2xl font-bold text-green-600 mt-1">
+                    <p className="text-secondary-600 dark:text-secondary-400 text-sm mb-1">Delivered</p>
+                    <p className="text-2xl font-bold text-success-600 dark:text-success-400">
                       {messageStats.deliveredCount}
                     </p>
                   </div>
                   <div>
-                    <p className="text-gray-600 text-sm">Failed</p>
-                    <p className="text-2xl font-bold text-red-600 mt-1">
+                    <p className="text-secondary-600 dark:text-secondary-400 text-sm mb-1">Failed</p>
+                    <p className="text-2xl font-bold text-danger-600 dark:text-danger-400">
                       {messageStats.failedCount}
                     </p>
                   </div>
                   <div>
-                    <p className="text-gray-600 text-sm">Pending</p>
-                    <p className="text-2xl font-bold text-yellow-600 mt-1">
+                    <p className="text-secondary-600 dark:text-secondary-400 text-sm mb-1">Pending</p>
+                    <p className="text-2xl font-bold text-warning-600 dark:text-warning-400">
                       {messageStats.pendingCount}
                     </p>
                   </div>
                 </div>
-              </div>
+              </Card>
             )}
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }

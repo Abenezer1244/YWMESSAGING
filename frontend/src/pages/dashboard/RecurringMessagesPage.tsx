@@ -7,6 +7,9 @@ import {
   RecurringMessage,
 } from '../../api/recurring';
 import RecurringMessageModal from '../../components/recurring/RecurringMessageModal';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import { Spinner } from '../../components/ui';
 
 export function RecurringMessagesPage() {
   const [messages, setMessages] = useState<RecurringMessage[]>([]);
@@ -100,94 +103,114 @@ export function RecurringMessagesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">Recurring Messages</h1>
-            <button
-              onClick={handleCreate}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
-            >
-              Create Recurring Message
-            </button>
+    <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 p-6 transition-colors duration-normal">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-secondary-900 dark:text-secondary-50 mb-2">🔄 Recurring Messages</h1>
+            <p className="text-secondary-600 dark:text-secondary-400">Automate regular communications</p>
           </div>
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={handleCreate}
+          >
+            + Create Recurring Message
+          </Button>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Main Content */}
         {isLoading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500">Loading recurring messages...</p>
+          <div className="flex items-center justify-center py-20">
+            <Spinner size="lg" text="Loading recurring messages..." />
           </div>
         ) : messages.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No recurring messages yet</p>
-          </div>
+          <Card variant="highlight" className="text-center py-16">
+            <div className="mb-6">
+              <span className="text-6xl">🔄</span>
+            </div>
+            <h2 className="text-2xl font-bold text-secondary-900 dark:text-secondary-50 mb-3">
+              No Recurring Messages Yet
+            </h2>
+            <p className="text-secondary-600 dark:text-secondary-400 mb-6 max-w-md mx-auto">
+              Create recurring messages to automatically send messages on a regular schedule.
+            </p>
+            <Button
+              variant="primary"
+              size="md"
+              onClick={handleCreate}
+            >
+              Create First Message
+            </Button>
+          </Card>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {messages.map((message) => (
-              <div
+              <Card
                 key={message.id}
-                className={`bg-white rounded-lg shadow p-6 ${
-                  !message.isActive ? 'opacity-60' : ''
+                variant="default"
+                className={`hover:shadow-lg transition-shadow ${
+                  !message.isActive ? 'opacity-75' : ''
                 }`}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-50">
                       {message.name}
                     </h3>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-secondary-600 dark:text-secondary-400 mt-1">
                       {getFrequencyLabel(message.frequency)}
                     </p>
                   </div>
                   <button
                     onClick={() => handleToggle(message.id, message.isActive)}
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
                       message.isActive
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-gray-100 text-gray-800'
+                        ? 'bg-success-100 dark:bg-success-900 text-success-800 dark:text-success-200'
+                        : 'bg-secondary-200 dark:bg-secondary-700 text-secondary-800 dark:text-secondary-300'
                     }`}
                   >
-                    {message.isActive ? 'Active' : 'Paused'}
+                    {message.isActive ? '✅ Active' : '⏸️ Paused'}
                   </button>
                 </div>
 
-                <p className="text-gray-700 text-sm mb-4 line-clamp-2">
+                <p className="text-secondary-700 dark:text-secondary-300 text-sm mb-4 line-clamp-2">
                   {message.content}
                 </p>
 
-                <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4 text-sm">
-                  <p className="text-gray-700">
-                    <strong>Next send:</strong> {formatNextSend(message.nextSendAt)}
+                <Card variant="highlight" className="mb-4">
+                  <p className="text-secondary-900 dark:text-secondary-50 text-sm">
+                    <strong>⏱️ Next send:</strong> {formatNextSend(message.nextSendAt)}
                   </p>
-                  <p className="text-gray-600 text-xs mt-1">
+                  <p className="text-secondary-600 dark:text-secondary-400 text-xs mt-2">
                     {new Date(message.nextSendAt).toLocaleString()}
                   </p>
-                </div>
+                </Card>
 
                 <div className="flex gap-2">
-                  <button
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={() => handleEdit(message)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition text-sm"
+                    fullWidth
                   >
                     Edit
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
                     onClick={() => handleDelete(message.id)}
-                    className="flex-1 px-3 py-2 border border-red-300 rounded-lg text-red-700 font-medium hover:bg-red-50 transition text-sm"
+                    fullWidth
                   >
                     Delete
-                  </button>
+                  </Button>
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
         )}
-      </main>
+      </div>
 
       {showModal && (
         <RecurringMessageModal

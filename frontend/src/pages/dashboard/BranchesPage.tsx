@@ -4,6 +4,9 @@ import useAuthStore from '../../stores/authStore';
 import useBranchStore, { Branch } from '../../stores/branchStore';
 import { getBranches, deleteBranch } from '../../api/branches';
 import BranchFormModal from '../../components/branches/BranchFormModal';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import { Spinner } from '../../components/ui';
 
 export function BranchesPage() {
   const auth = useAuthStore();
@@ -74,86 +77,108 @@ export function BranchesPage() {
 
   if (isLoading && branches.length === 0) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-32 bg-gray-200 rounded-lg" />
-          ))}
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 p-6 flex items-center justify-center">
+        <Spinner size="lg" text="Loading branches..." />
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Branches</h1>
-        <button
-          onClick={handleCreate}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-        >
-          + Create Branch
-        </button>
-      </div>
-
-      {branches.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-12 text-center">
-          <p className="text-gray-500 mb-4">No branches yet. Create your first branch to get started.</p>
-          <button
+    <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 p-6 transition-colors duration-normal">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-secondary-900 dark:text-secondary-50 mb-2">📍 Branches</h1>
+            <p className="text-secondary-600 dark:text-secondary-400">Manage your church locations</p>
+          </div>
+          <Button
+            variant="primary"
+            size="lg"
             onClick={handleCreate}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
           >
-            Create Your First Branch
-          </button>
+            + New Branch
+          </Button>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {branches.map((branch) => (
-            <div key={branch.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{branch.name}</h3>
 
-              {branch.address && (
-                <p className="text-sm text-gray-600 mb-1">📍 {branch.address}</p>
-              )}
-
-              {branch.phone && (
-                <p className="text-sm text-gray-600 mb-3">📞 {branch.phone}</p>
-              )}
-
-              {branch.description && (
-                <p className="text-sm text-gray-500 mb-4">{branch.description}</p>
-              )}
-
-              <div className="border-t pt-4 mb-4 flex gap-4">
-                <div className="flex-1">
-                  <p className="text-2xl font-bold text-blue-600">{branch.groupCount}</p>
-                  <p className="text-xs text-gray-500">Groups</p>
-                </div>
-                <div className="flex-1">
-                  <p className="text-2xl font-bold text-green-600">{branch.memberCount}</p>
-                  <p className="text-xs text-gray-500">Members</p>
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleEdit(branch)}
-                  className="flex-1 px-3 py-2 text-sm bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(branch.id)}
-                  disabled={deleting === branch.id || branches.length === 1}
-                  className="flex-1 px-3 py-2 text-sm bg-red-50 text-red-600 rounded hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                >
-                  {deleting === branch.id ? 'Deleting...' : 'Delete'}
-                </button>
-              </div>
+        {branches.length === 0 ? (
+          <Card variant="highlight" className="text-center py-16">
+            <div className="mb-6">
+              <span className="text-6xl">📍</span>
             </div>
-          ))}
-        </div>
-      )}
+            <h2 className="text-2xl font-bold text-secondary-900 dark:text-secondary-50 mb-3">
+              No Branches Yet
+            </h2>
+            <p className="text-secondary-600 dark:text-secondary-400 mb-6 max-w-md mx-auto">
+              Create your first branch to start managing your church locations and organizing your congregation.
+            </p>
+            <Button
+              variant="primary"
+              size="md"
+              onClick={handleCreate}
+            >
+              Create Your First Branch
+            </Button>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {branches.map((branch) => (
+              <Card key={branch.id} variant="default" className="hover:shadow-lg transition-shadow">
+                <div className="mb-4">
+                  <h3 className="text-xl font-bold text-secondary-900 dark:text-secondary-50 mb-2">{branch.name}</h3>
+                  {branch.description && (
+                    <p className="text-sm text-secondary-600 dark:text-secondary-400">{branch.description}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2 mb-6 pb-6 border-b border-secondary-200 dark:border-secondary-700">
+                  {branch.address && (
+                    <p className="text-sm text-secondary-600 dark:text-secondary-400">
+                      <span className="font-medium">📍</span> {branch.address}
+                    </p>
+                  )}
+                  {branch.phone && (
+                    <p className="text-sm text-secondary-600 dark:text-secondary-400">
+                      <span className="font-medium">📞</span> {branch.phone}
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">{branch.groupCount}</p>
+                    <p className="text-xs text-secondary-600 dark:text-secondary-400 uppercase">Groups</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-success-600 dark:text-success-400">{branch.memberCount}</p>
+                    <p className="text-xs text-secondary-600 dark:text-secondary-400 uppercase">Members</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleEdit(branch)}
+                    fullWidth
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleDelete(branch.id)}
+                    disabled={deleting === branch.id || branches.length === 1}
+                    fullWidth
+                  >
+                    {deleting === branch.id ? 'Deleting...' : 'Delete'}
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
 
       <BranchFormModal
         isOpen={modalOpen}

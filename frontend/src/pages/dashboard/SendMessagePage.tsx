@@ -5,6 +5,9 @@ import useMessageStore from '../../stores/messageStore';
 import { sendMessage } from '../../api/messages';
 import { getTemplates, MessageTemplate } from '../../api/templates';
 import TemplateFormModal from '../../components/templates/TemplateFormModal';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import { Spinner } from '../../components/ui';
 
 export function SendMessagePage() {
   const { groups } = useGroupStore();
@@ -81,41 +84,44 @@ export function SendMessagePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <h1 className="text-3xl font-bold text-gray-900">Send Message</h1>
+    <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 p-6 transition-colors duration-normal">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-secondary-900 dark:text-secondary-50 mb-2">📨 Send Message</h1>
+            <p className="text-secondary-600 dark:text-secondary-400">Reach your congregation with direct SMS messages</p>
+          </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow p-8 space-y-6">
+        {/* Main Content */}
+        <Card variant="default" className="space-y-6">
           {/* Template Selector */}
           {templates.length > 0 && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Use Template
+              <label className="block text-sm font-semibold text-secondary-900 dark:text-secondary-50 mb-3">
+                📋 Use Template
               </label>
               <div className="flex gap-2 flex-wrap">
                 {templates.slice(0, 6).map((template) => (
-                  <button
+                  <Button
                     key={template.id}
+                    variant="secondary"
+                    size="sm"
                     onClick={() => handleUseTemplate(template)}
-                    className="px-3 py-1 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 text-sm rounded-lg transition"
                     title={template.content}
                   >
                     {template.name}
-                  </button>
+                  </Button>
                 ))}
                 {templates.length > 6 && (
-                  <button
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => window.location.href = '/templates'}
-                    className="px-3 py-1 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 text-sm rounded-lg transition"
                   >
                     More Templates...
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
@@ -123,18 +129,18 @@ export function SendMessagePage() {
 
           {/* Message Composer */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Message Content
+            <label className="block text-sm font-semibold text-secondary-900 dark:text-secondary-50 mb-3">
+              ✍️ Message Content
             </label>
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value.slice(0, 1600))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full px-4 py-3 border border-secondary-200 dark:border-secondary-700 rounded-lg bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-50 placeholder-secondary-400 dark:placeholder-secondary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none transition-colors duration-normal"
               rows={6}
               placeholder="Type your message here..."
               maxLength={1600}
             />
-            <div className="flex justify-between mt-2 text-sm text-gray-600">
+            <div className="flex justify-between mt-3 text-sm text-secondary-600 dark:text-secondary-400">
               <span>{content.length} / 1600 characters</span>
               <span>
                 {segments} SMS segment{segments !== 1 ? 's' : ''}
@@ -142,50 +148,52 @@ export function SendMessagePage() {
               </span>
             </div>
             {content.trim() && (
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowSaveModal(true)}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium mt-2"
+                className="mt-2"
               >
                 💾 Save as Template
-              </button>
+              </Button>
             )}
           </div>
 
           {/* Recipient Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Send To
+            <label className="block text-sm font-semibold text-secondary-900 dark:text-secondary-50 mb-3">
+              👥 Send To
             </label>
             <div className="space-y-3">
-              <label className="flex items-center gap-3 cursor-pointer">
+              <label className="flex items-center gap-3 cursor-pointer group">
                 <input
                   type="radio"
                   name="targetType"
                   value="groups"
                   checked={targetType === 'groups'}
                   onChange={(e) => setTargetType(e.target.value as 'groups' | 'all')}
-                  className="w-4 h-4"
+                  className="w-4 h-4 accent-primary-600 dark:accent-primary-400 cursor-pointer"
                 />
-                <span className="text-sm font-medium text-gray-700">Select Groups</span>
+                <span className="text-sm font-medium text-secondary-900 dark:text-secondary-50">Select Groups</span>
               </label>
 
               {targetType === 'groups' && (
-                <div className="ml-7 space-y-2 bg-gray-50 p-4 rounded-lg">
+                <div className="ml-7 space-y-2 bg-secondary-100 dark:bg-secondary-800 p-4 rounded-lg border border-secondary-200 dark:border-secondary-700">
                   {groups.length === 0 ? (
-                    <p className="text-gray-500 text-sm">No groups available</p>
+                    <p className="text-secondary-600 dark:text-secondary-400 text-sm">No groups available</p>
                   ) : (
                     groups.map((group) => (
                       <label
                         key={group.id}
-                        className="flex items-center gap-3 cursor-pointer"
+                        className="flex items-center gap-3 cursor-pointer group"
                       >
                         <input
                           type="checkbox"
                           checked={selectedGroupIds.includes(group.id)}
                           onChange={() => handleGroupToggle(group.id)}
-                          className="w-4 h-4 rounded"
+                          className="w-4 h-4 rounded accent-primary-600 dark:accent-primary-400 cursor-pointer"
                         />
-                        <span className="text-sm text-gray-700">
+                        <span className="text-sm text-secondary-700 dark:text-secondary-300">
                           {group.name} ({group.memberCount} members)
                         </span>
                       </label>
@@ -194,66 +202,70 @@ export function SendMessagePage() {
                 </div>
               )}
 
-              <label className="flex items-center gap-3 cursor-pointer">
+              <label className="flex items-center gap-3 cursor-pointer group">
                 <input
                   type="radio"
                   name="targetType"
                   value="all"
                   checked={targetType === 'all'}
                   onChange={(e) => setTargetType(e.target.value as 'groups' | 'all')}
-                  className="w-4 h-4"
+                  className="w-4 h-4 accent-primary-600 dark:accent-primary-400 cursor-pointer"
                 />
-                <span className="text-sm font-medium text-gray-700">All Members</span>
+                <span className="text-sm font-medium text-secondary-900 dark:text-secondary-50">All Members</span>
               </label>
             </div>
           </div>
 
           {/* Cost Summary */}
           {(targetType === 'all' || selectedGroupIds.length > 0) && segments > 0 && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <Card variant="highlight">
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-700">Recipients:</span>
-                  <span className="font-medium">{recipientCount}</span>
+                  <span className="text-secondary-700 dark:text-secondary-300">Recipients:</span>
+                  <span className="font-medium text-secondary-900 dark:text-secondary-50">{recipientCount}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-700">Segments:</span>
-                  <span className="font-medium">{segments}</span>
+                  <span className="text-secondary-700 dark:text-secondary-300">Segments:</span>
+                  <span className="font-medium text-secondary-900 dark:text-secondary-50">{segments}</span>
                 </div>
-                <div className="flex justify-between border-t pt-2">
-                  <span className="font-medium text-gray-900">Estimated Cost:</span>
-                  <span className="font-bold text-blue-600">${totalCost.toFixed(2)}</span>
+                <div className="flex justify-between border-t border-primary-200 dark:border-primary-700 pt-2">
+                  <span className="font-medium text-secondary-900 dark:text-secondary-50">Estimated Cost:</span>
+                  <span className="font-bold text-primary-600 dark:text-primary-400">${totalCost.toFixed(2)}</span>
                 </div>
               </div>
-            </div>
+            </Card>
           )}
 
           {/* Send Button */}
-          <div className="flex gap-3">
-            <button
+          <div className="flex gap-3 pt-4">
+            <Button
+              variant="secondary"
+              size="md"
               onClick={() => {
                 setContent('');
                 setSelectedGroupIds([]);
               }}
-              className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition"
               disabled={isLoading}
             >
-              Clear
-            </button>
-            <button
+              🗑️ Clear
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              fullWidth
               onClick={handleSendMessage}
               disabled={
                 isLoading ||
                 !content.trim() ||
                 (targetType === 'groups' && selectedGroupIds.length === 0)
               }
-              className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition disabled:bg-gray-400"
+              isLoading={isLoading}
             >
-              {isLoading ? 'Sending...' : 'Send Message'}
-            </button>
+              {isLoading ? 'Sending...' : '✉️ Send Message'}
+            </Button>
           </div>
-        </div>
-      </main>
+        </Card>
+      </div>
 
       {showSaveModal && (
         <TemplateFormModal
