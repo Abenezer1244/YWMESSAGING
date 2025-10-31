@@ -31,14 +31,14 @@ const testimonials: Testimonial[] = [
 
 export default function Testimonials() {
   return (
-    <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-secondary-900 transition-colors duration-normal">
+    <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-neutral-950 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-16 animate-fadeIn">
-          <h2 className="text-4xl sm:text-5xl font-bold text-secondary-900 dark:text-secondary-50 mb-4">
-            Trusted by <span className="text-primary-600 dark:text-primary-400">Church Leaders</span>
+          <h2 className="text-4xl sm:text-5xl font-bold text-neutral-900 dark:text-white mb-4 leading-tight tracking-tight">
+            Trusted by <span className="text-primary-500">Church Leaders</span>
           </h2>
-          <p className="text-xl text-secondary-600 dark:text-secondary-400 max-w-3xl mx-auto">
+          <p className="text-lg text-neutral-600 dark:text-neutral-400 max-w-3xl mx-auto font-light leading-relaxed">
             See how churches across the country are using Connect YW to strengthen their communities.
           </p>
         </div>
@@ -49,13 +49,13 @@ export default function Testimonials() {
             <Card
               key={index}
               variant="default"
-              className="animate-slideUp"
+              className="animate-slideUp p-8 border border-neutral-200 dark:border-neutral-800 hover:shadow-lg transition-all duration-normal"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               {/* Quote Icon */}
-              <div className="mb-4">
+              <div className="mb-6">
                 <svg
-                  className="w-12 h-12 text-primary-200 dark:text-primary-800"
+                  className="w-10 h-10 text-primary-100 dark:text-primary-900"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -64,18 +64,18 @@ export default function Testimonials() {
               </div>
 
               {/* Content */}
-              <p className="text-secondary-700 dark:text-secondary-300 mb-6 leading-relaxed italic">
+              <p className="text-neutral-700 dark:text-neutral-300 mb-6 leading-relaxed italic">
                 "{testimonial.content}"
               </p>
 
               {/* Author */}
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-gradient-to-br from-primary-400 dark:from-primary-500 to-primary-600 dark:to-primary-700 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center text-white font-semibold text-base flex-shrink-0">
                   {testimonial.name.charAt(0)}
                 </div>
                 <div>
-                  <div className="font-semibold text-secondary-900 dark:text-secondary-50">{testimonial.name}</div>
-                  <div className="text-sm text-secondary-600 dark:text-secondary-400">
+                  <div className="font-semibold text-neutral-900 dark:text-white text-sm">{testimonial.name}</div>
+                  <div className="text-xs text-neutral-600 dark:text-neutral-400">
                     {testimonial.role}, {testimonial.church}
                   </div>
                 </div>
@@ -85,23 +85,23 @@ export default function Testimonials() {
         </div>
 
         {/* Trust Indicators */}
-        <div className="mt-16 pt-12 border-t border-secondary-200 dark:border-secondary-700">
+        <div className="mt-16 pt-12 border-t border-neutral-200 dark:border-neutral-800">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-2">100+</div>
-              <div className="text-secondary-600 dark:text-secondary-400">Churches</div>
+              <div className="text-3xl font-bold text-primary-500 dark:text-primary-400 mb-2">100+</div>
+              <div className="text-neutral-600 dark:text-neutral-400 text-sm">Churches</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-2">25K+</div>
-              <div className="text-secondary-600 dark:text-secondary-400">Members</div>
+              <div className="text-3xl font-bold text-primary-500 dark:text-primary-400 mb-2">25K+</div>
+              <div className="text-neutral-600 dark:text-neutral-400 text-sm">Members</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-2">500K+</div>
-              <div className="text-secondary-600 dark:text-secondary-400">Messages Sent</div>
+              <div className="text-3xl font-bold text-primary-500 dark:text-primary-400 mb-2">500K+</div>
+              <div className="text-neutral-600 dark:text-neutral-400 text-sm">Messages Sent</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-2">99.9%</div>
-              <div className="text-secondary-600 dark:text-secondary-400">Uptime</div>
+              <div className="text-3xl font-bold text-primary-500 dark:text-primary-400 mb-2">99.9%</div>
+              <div className="text-neutral-600 dark:text-neutral-400 text-sm">Uptime</div>
             </div>
           </div>
         </div>

@@ -65,15 +65,15 @@ const features: Feature[] = [
 
 export default function Features() {
   return (
-    <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-secondary-900 transition-colors duration-normal">
+    <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-neutral-950 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-16 animate-fadeIn">
-          <h2 className="text-4xl sm:text-5xl font-bold text-secondary-900 dark:text-secondary-50 mb-4">
+          <h2 className="text-4xl sm:text-5xl font-bold text-neutral-900 dark:text-white mb-4 leading-tight tracking-tight">
             Everything You Need to{' '}
-            <span className="text-primary-600 dark:text-primary-400">Stay Connected</span>
+            <span className="text-primary-500">Stay Connected</span>
           </h2>
-          <p className="text-xl text-secondary-600 dark:text-secondary-400 max-w-3xl mx-auto">
+          <p className="text-lg text-neutral-600 dark:text-neutral-400 max-w-3xl mx-auto font-light leading-relaxed">
             Powerful features designed specifically for churches managing multiple locations and hundreds of members.
           </p>
         </div>
@@ -84,14 +84,14 @@ export default function Features() {
             <Card
               key={index}
               variant="default"
-              className="group animate-slideUp"
+              className="group animate-slideUp p-8 border border-neutral-200 dark:border-neutral-800 hover:shadow-lg dark:hover:shadow-lg transition-all duration-normal"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 rounded-lg flex items-center justify-center mb-6 group-hover:bg-primary-600 dark:group-hover:bg-primary-500 group-hover:text-white dark:group-hover:text-secondary-50 transition-colors duration-normal">
+              <div className="w-12 h-12 bg-primary-50 dark:bg-primary-950 text-primary-500 rounded-lg flex items-center justify-center mb-5 group-hover:bg-primary-500 dark:group-hover:bg-primary-500 group-hover:text-white transition-colors duration-normal">
                 {feature.icon}
               </div>
-              <h3 className="text-xl font-bold text-secondary-900 dark:text-secondary-50 mb-3">{feature.title}</h3>
-              <p className="text-secondary-600 dark:text-secondary-400 leading-relaxed">{feature.description}</p>
+              <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3">{feature.title}</h3>
+              <p className="text-neutral-600 dark:text-neutral-400 text-sm leading-relaxed">{feature.description}</p>
             </Card>
           ))}
         </div>
