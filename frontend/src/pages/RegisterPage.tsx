@@ -80,23 +80,30 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 dark:from-secondary-900 via-white dark:via-secondary-950 to-primary-100 dark:to-secondary-900 flex items-center justify-center p-4 py-8 transition-colors duration-normal">
-      <div className="w-full max-w-2xl animate-fadeIn">
-        <Card variant="default" className="p-8">
+    <div className="min-h-screen bg-white dark:bg-neutral-950 flex items-center justify-center p-4 py-8 relative overflow-hidden">
+      {/* Subtle background accent */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-primary-500 opacity-5 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div className="w-full max-w-2xl relative z-10 animate-fadeIn">
+        <div className="text-center mb-12">
           {/* Logo */}
-          <div className="flex items-center justify-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary-600 dark:from-primary-500 to-primary-700 dark:to-primary-600 rounded-lg flex items-center justify-center shadow-md">
+          <div className="flex items-center justify-center mb-6">
+            <div className="w-14 h-14 bg-primary-500 rounded-xl flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
               <span className="text-white font-bold text-2xl">YW</span>
             </div>
           </div>
 
-          <h1 className="text-3xl font-bold text-center mb-2 text-secondary-900 dark:text-secondary-50">
-            Start Your Free Trial
+          {/* Headline */}
+          <h1 className="text-4xl font-bold text-neutral-900 dark:text-white mb-3 tracking-tight">
+            Create Your Account
           </h1>
-          <p className="text-center text-secondary-600 dark:text-secondary-400 mb-8">
-            Create your church account in minutes • 14-day free trial
+          <p className="text-lg text-neutral-600 dark:text-neutral-400 font-light">
+            Start your 14-day free trial • No credit card required
           </p>
+        </div>
 
+        {/* Registration Card */}
+        <Card variant="default" className="p-8 border border-neutral-200 dark:border-neutral-800 shadow-lg">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {/* Name Fields */}
             <div className="grid grid-cols-2 gap-4">
@@ -105,6 +112,7 @@ export function RegisterPage() {
                 placeholder="John"
                 disabled={isLoading}
                 error={errors.firstName?.message}
+                className="bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700"
                 {...register('firstName', { required: 'First name is required' })}
               />
 
@@ -113,25 +121,29 @@ export function RegisterPage() {
                 placeholder="Doe"
                 disabled={isLoading}
                 error={errors.lastName?.message}
+                className="bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700"
                 {...register('lastName', { required: 'Last name is required' })}
               />
             </div>
 
-            {/* Church and Email */}
+            {/* Church Name */}
             <Input
               label="Church Name"
               placeholder="Grace Community Church"
               disabled={isLoading}
               error={errors.churchName?.message}
+              className="bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700"
               {...register('churchName', { required: 'Church name is required' })}
             />
 
+            {/* Email Address */}
             <Input
               label="Email Address"
               type="email"
               placeholder="pastor@church.com"
               disabled={isLoading}
               error={errors.email?.message}
+              className="bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700"
               {...register('email', {
                 required: 'Email is required',
                 pattern: {
@@ -149,6 +161,7 @@ export function RegisterPage() {
               helperText="Must be at least 8 characters"
               disabled={isLoading}
               error={errors.password?.message}
+              className="bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700"
               {...register('password', {
                 required: 'Password is required',
                 minLength: {
@@ -164,46 +177,59 @@ export function RegisterPage() {
               placeholder="••••••••"
               disabled={isLoading}
               error={errors.confirmPassword?.message}
+              className="bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700"
               {...register('confirmPassword', {
                 required: 'Please confirm your password',
               })}
             />
 
+            {/* Submit Button */}
             <Button
               type="submit"
               variant="primary"
-              size="md"
+              size="lg"
               fullWidth
               isLoading={isLoading}
               disabled={isLoading}
+              className="font-semibold mt-6"
             >
               {isLoading ? 'Creating account...' : 'Create Account'}
             </Button>
           </form>
 
-          <div className="mt-8 pt-8 border-t border-secondary-200 dark:border-secondary-700">
-            <p className="text-center text-secondary-600 dark:text-secondary-400">
+          {/* Divider */}
+          <div className="mt-8 pt-8 border-t border-neutral-200 dark:border-neutral-800">
+            <p className="text-center text-neutral-600 dark:text-neutral-400 text-sm">
               Already have an account?{' '}
-              <Link to="/login" className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-semibold transition-colors">
+              <Link
+                to="/login"
+                className="text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300 font-semibold transition-colors"
+              >
                 Login here
               </Link>
             </p>
           </div>
         </Card>
 
-        {/* Benefits */}
-        <div className="mt-8 grid grid-cols-3 gap-4 text-center text-sm">
-          <div className="text-secondary-600 dark:text-secondary-400">
-            <div className="text-2xl mb-2">⚡</div>
-            <p className="font-medium">Setup in Minutes</p>
+        {/* Trust Indicators */}
+        <div className="mt-8 grid grid-cols-3 gap-4 text-center">
+          <div className="flex flex-col items-center gap-2">
+            <svg className="w-5 h-5 text-success-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 font-medium">Setup in Minutes</p>
           </div>
-          <div className="text-secondary-600 dark:text-secondary-400">
-            <div className="text-2xl mb-2">🔒</div>
-            <p className="font-medium">Secure & Reliable</p>
+          <div className="flex flex-col items-center gap-2">
+            <svg className="w-5 h-5 text-success-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 font-medium">Secure & Reliable</p>
           </div>
-          <div className="text-secondary-600 dark:text-secondary-400">
-            <div className="text-2xl mb-2">💳</div>
-            <p className="font-medium">No Card Required</p>
+          <div className="flex flex-col items-center gap-2">
+            <svg className="w-5 h-5 text-success-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 font-medium">No Card Required</p>
           </div>
         </div>
       </div>

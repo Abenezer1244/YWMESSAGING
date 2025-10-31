@@ -78,79 +78,103 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 dark:from-secondary-900 via-white dark:via-secondary-950 to-primary-100 dark:to-secondary-900 flex items-center justify-center p-4 transition-colors duration-normal">
-      <div className="w-full max-w-md animate-fadeIn">
-        <Card variant="default" className="p-8">
+    <div className="min-h-screen bg-white dark:bg-neutral-950 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Subtle background accent */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-primary-500 opacity-5 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div className="w-full max-w-md relative z-10 animate-fadeIn">
+        <div className="text-center mb-12">
           {/* Logo */}
-          <div className="flex items-center justify-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary-600 dark:from-primary-500 to-primary-700 dark:to-primary-600 rounded-lg flex items-center justify-center shadow-md">
+          <div className="flex items-center justify-center mb-6">
+            <div className="w-14 h-14 bg-primary-500 rounded-xl flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
               <span className="text-white font-bold text-2xl">YW</span>
             </div>
           </div>
 
-          <h1 className="text-3xl font-bold text-center mb-2 text-secondary-900 dark:text-secondary-50">
+          {/* Headline */}
+          <h1 className="text-4xl font-bold text-neutral-900 dark:text-white mb-3 tracking-tight">
             Welcome Back
           </h1>
-          <p className="text-center text-secondary-600 dark:text-secondary-400 mb-8">
+          <p className="text-lg text-neutral-600 dark:text-neutral-400 font-light">
             Church SMS Communication Platform
           </p>
+        </div>
 
+        {/* Login Card */}
+        <Card variant="default" className="p-8 border border-neutral-200 dark:border-neutral-800 shadow-lg">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            <Input
-              label="Email Address"
-              type="email"
-              placeholder="pastor@church.com"
-              disabled={isLoading}
-              error={errors.email?.message}
-              {...register('email', {
-                required: 'Email is required',
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: 'Invalid email format',
-                },
-              })}
-            />
+            {/* Email Input */}
+            <div>
+              <Input
+                label="Email Address"
+                type="email"
+                placeholder="pastor@church.com"
+                disabled={isLoading}
+                error={errors.email?.message}
+                {...register('email', {
+                  required: 'Email is required',
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: 'Invalid email format',
+                  },
+                })}
+                className="bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700"
+              />
+            </div>
 
-            <Input
-              label="Password"
-              type="password"
-              placeholder="••••••••"
-              disabled={isLoading}
-              error={errors.password?.message}
-              {...register('password', {
-                required: 'Password is required',
-                minLength: {
-                  value: 8,
-                  message: 'Password must be at least 8 characters',
-                },
-              })}
-            />
+            {/* Password Input */}
+            <div>
+              <Input
+                label="Password"
+                type="password"
+                placeholder="••••••••"
+                disabled={isLoading}
+                error={errors.password?.message}
+                {...register('password', {
+                  required: 'Password is required',
+                  minLength: {
+                    value: 8,
+                    message: 'Password must be at least 8 characters',
+                  },
+                })}
+                className="bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700"
+              />
+            </div>
 
+            {/* Submit Button */}
             <Button
               type="submit"
               variant="primary"
-              size="md"
+              size="lg"
               fullWidth
               isLoading={isLoading}
               disabled={isLoading}
+              className="font-semibold mt-6"
             >
               {isLoading ? 'Logging in...' : 'Login'}
             </Button>
           </form>
 
-          <div className="mt-8 pt-8 border-t border-secondary-200 dark:border-secondary-700">
-            <p className="text-center text-secondary-600 dark:text-secondary-400">
+          {/* Divider */}
+          <div className="mt-8 pt-8 border-t border-neutral-200 dark:border-neutral-800">
+            <p className="text-center text-neutral-600 dark:text-neutral-400 text-sm">
               Don't have an account?{' '}
-              <Link to="/register" className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-semibold transition-colors">
-                Create account
+              <Link
+                to="/register"
+                className="text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300 font-semibold transition-colors"
+              >
+                Sign up
               </Link>
             </p>
           </div>
         </Card>
 
-        {/* Additional Info */}
-        <div className="mt-8 text-center text-sm text-secondary-600 dark:text-secondary-400">
-          <p>14-day free trial • No credit card required</p>
+        {/* Trust Indicator */}
+        <div className="mt-8 flex items-center justify-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+          <svg className="w-4 h-4 text-success-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 111.414 1.414L7.414 8l3.293 3.293a1 1 0 11-1.414 1.414l-4-4z" clipRule="evenodd" />
+          </svg>
+          <span>Secure login • No password stored</span>
         </div>
       </div>
     </div>
