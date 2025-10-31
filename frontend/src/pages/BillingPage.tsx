@@ -73,7 +73,7 @@ export function BillingPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 p-6 transition-colors duration-normal">
+      <div className="min-h-screen bg-white dark:bg-neutral-950 p-6 transition-colors duration-normal">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-center py-20">
             <Spinner size="lg" text="Loading billing information..." />
@@ -85,13 +85,13 @@ export function BillingPage() {
 
   if (!planInfo) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 p-6 transition-colors duration-normal">
+      <div className="min-h-screen bg-white dark:bg-neutral-950 p-6 transition-colors duration-normal">
         <div className="max-w-7xl mx-auto">
-          <Card variant="highlight" className="text-center py-16">
-            <h2 className="text-2xl font-bold text-secondary-900 dark:text-secondary-50 mb-3">
+          <Card variant="default" className="text-center py-16 border border-neutral-200 dark:border-neutral-800">
+            <h2 className="text-2xl font-bold text-neutral-900 dark:text-white mb-3">
               Failed to Load Billing Information
             </h2>
-            <p className="text-secondary-600 dark:text-secondary-400">
+            <p className="text-neutral-600 dark:text-neutral-400">
               Please try refreshing the page or contact support if the issue persists.
             </p>
           </Card>
@@ -132,13 +132,13 @@ export function BillingPage() {
     return (
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-medium text-secondary-900 dark:text-secondary-50">{label}</span>
-          <span className="text-sm text-secondary-600 dark:text-secondary-400">
+          <span className="text-sm font-medium text-neutral-900 dark:text-white">{label}</span>
+          <span className="text-sm text-neutral-600 dark:text-neutral-400">
             {used} / {isUnlimited ? '∞' : limit}
           </span>
         </div>
         {!isUnlimited && (
-          <div className="w-full bg-secondary-200 dark:bg-secondary-700 rounded-full h-2">
+          <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
             <div
               className={`h-2 rounded-full ${getUsageColor(percentage)}`}
               style={{ width: `${Math.min(percentage, 100)}%` }}
@@ -146,34 +146,34 @@ export function BillingPage() {
           </div>
         )}
         {isUnlimited && (
-          <div className="text-sm text-success-600 dark:text-success-400">Unlimited</div>
+          <div className="text-sm text-success-500 dark:text-success-400">Unlimited</div>
         )}
       </div>
     );
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-white dark:bg-neutral-950 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-secondary-900 dark:text-secondary-50 mb-2">💳 Billing Settings</h1>
-          <p className="text-secondary-600 dark:text-secondary-400">Manage your subscription and view usage</p>
+          <h1 className="text-4xl font-bold text-neutral-900 dark:text-white mb-2 tracking-tight">💳 Billing Settings</h1>
+          <p className="text-neutral-600 dark:text-neutral-400">Manage your subscription and view usage</p>
         </div>
 
         {/* Main Content */}
         {/* Current Plan */}
-        <Card variant="default" className="mb-8">
-          <h2 className="text-2xl font-bold text-secondary-900 dark:text-secondary-50 mb-6">Current Plan</h2>
+        <Card variant="default" className="mb-8 border border-neutral-200 dark:border-neutral-800">
+          <h2 className="text-2xl font-bold text-neutral-900 dark:text-white mb-6">Current Plan</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Plan Card */}
-            <Card variant="highlight">
-              <h3 className="text-xl font-bold text-secondary-900 dark:text-secondary-50">
+            <Card variant="default" className="border border-primary-200 dark:border-primary-800 bg-primary-50 dark:bg-primary-950/30">
+              <h3 className="text-xl font-bold text-neutral-900 dark:text-white">
                 {planNameMap[planInfo.plan]} Plan
               </h3>
-              <p className="text-3xl font-bold text-primary-600 dark:text-primary-400 mt-2">
+              <p className="text-3xl font-bold text-primary-500 dark:text-primary-400 mt-2">
                 ${planInfo.limits.price / 100}
-                <span className="text-lg text-secondary-600 dark:text-secondary-400">/month</span>
+                <span className="text-lg text-neutral-600 dark:text-neutral-400">/month</span>
               </p>
               <Button
                 variant="primary"
@@ -184,7 +184,7 @@ export function BillingPage() {
                 Change Plan
               </Button>
               <Button
-                variant="danger"
+                variant="outline"
                 size="md"
                 onClick={handleCancel}
                 disabled={isCancelling}
@@ -196,12 +196,12 @@ export function BillingPage() {
 
             {/* Plan Features */}
             <div className="md:col-span-2">
-              <h4 className="font-semibold text-secondary-900 dark:text-secondary-50 mb-4">Features included:</h4>
+              <h4 className="font-semibold text-neutral-900 dark:text-white mb-4">Features included:</h4>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {planInfo.limits.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-start">
-                    <span className="text-success-500 mr-3 mt-0.5">✓</span>
-                    <span className="text-secondary-700 dark:text-secondary-300">{feature}</span>
+                  <li key={idx} className="flex items-start gap-3">
+                    <span className="text-success-500 flex-shrink-0 mt-0.5">✓</span>
+                    <span className="text-neutral-700 dark:text-neutral-300">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -210,14 +210,14 @@ export function BillingPage() {
         </Card>
 
         {/* Usage Overview */}
-        <Card variant="default" className="mb-8">
-          <h2 className="text-2xl font-bold text-secondary-900 dark:text-secondary-50 mb-6">
+        <Card variant="default" className="mb-8 border border-neutral-200 dark:border-neutral-800">
+          <h2 className="text-2xl font-bold text-neutral-900 dark:text-white mb-6">
             Current Usage ({new Date().toLocaleDateString()})
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <h3 className="font-semibold text-secondary-900 dark:text-secondary-50 mb-4">Organization</h3>
+              <h3 className="font-semibold text-neutral-900 dark:text-white mb-4">Organization</h3>
               <UsageBar
                 label="Branches"
                 used={planInfo.usage.branches}
@@ -231,7 +231,7 @@ export function BillingPage() {
             </div>
 
             <div>
-              <h3 className="font-semibold text-secondary-900 dark:text-secondary-50 mb-4">Messaging</h3>
+              <h3 className="font-semibold text-neutral-900 dark:text-white mb-4">Messaging</h3>
               <UsageBar
                 label="Members"
                 used={planInfo.usage.members}
@@ -246,37 +246,37 @@ export function BillingPage() {
           </div>
 
           {/* Remaining Capacity Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-secondary-200 dark:border-secondary-700">
-            <Card variant="highlight" className="bg-primary-50 dark:bg-primary-900/30">
-              <p className="text-sm text-secondary-600 dark:text-secondary-400">Remaining Branches</p>
-              <p className="text-2xl font-bold text-primary-600 dark:text-primary-400 mt-2">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-neutral-200 dark:border-neutral-800">
+            <Card variant="default" className="border border-neutral-200 dark:border-neutral-800 bg-primary-50 dark:bg-primary-950/30">
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">Remaining Branches</p>
+              <p className="text-2xl font-bold text-primary-500 dark:text-primary-400 mt-2">
                 {planInfo.remaining.branches === 999999
                   ? '∞'
                   : planInfo.remaining.branches}
               </p>
             </Card>
 
-            <Card variant="highlight" className="bg-success-50 dark:bg-success-900/30">
-              <p className="text-sm text-secondary-600 dark:text-secondary-400">Remaining Members</p>
-              <p className="text-2xl font-bold text-success-600 dark:text-success-400 mt-2">
+            <Card variant="default" className="border border-neutral-200 dark:border-neutral-800 bg-success-50 dark:bg-success-950/30">
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">Remaining Members</p>
+              <p className="text-2xl font-bold text-success-500 dark:text-success-400 mt-2">
                 {planInfo.remaining.members === 999999
                   ? '∞'
                   : planInfo.remaining.members}
               </p>
             </Card>
 
-            <Card variant="highlight" className="bg-info-50 dark:bg-info-900/30">
-              <p className="text-sm text-secondary-600 dark:text-secondary-400">Remaining Messages</p>
-              <p className="text-2xl font-bold text-info-600 dark:text-info-400 mt-2">
+            <Card variant="default" className="border border-neutral-200 dark:border-neutral-800 bg-blue-50 dark:bg-blue-950/30">
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">Remaining Messages</p>
+              <p className="text-2xl font-bold text-blue-500 dark:text-blue-400 mt-2">
                 {planInfo.remaining.messagesPerMonth === 999999
                   ? '∞'
                   : planInfo.remaining.messagesPerMonth}
               </p>
             </Card>
 
-            <Card variant="highlight" className="bg-warning-50 dark:bg-warning-900/30">
-              <p className="text-sm text-secondary-600 dark:text-secondary-400">Remaining Co-Admins</p>
-              <p className="text-2xl font-bold text-warning-600 dark:text-warning-400 mt-2">
+            <Card variant="default" className="border border-neutral-200 dark:border-neutral-800 bg-amber-50 dark:bg-amber-950/30">
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">Remaining Co-Admins</p>
+              <p className="text-2xl font-bold text-amber-500 dark:text-amber-400 mt-2">
                 {planInfo.remaining.coAdmins === 999999
                   ? '∞'
                   : planInfo.remaining.coAdmins}
@@ -286,9 +286,9 @@ export function BillingPage() {
         </Card>
 
         {/* Billing Info */}
-        <Card variant="default">
-          <h2 className="text-2xl font-bold text-secondary-900 dark:text-secondary-50 mb-4">Billing Information</h2>
-          <p className="text-secondary-600 dark:text-secondary-400">
+        <Card variant="default" className="border border-neutral-200 dark:border-neutral-800">
+          <h2 className="text-2xl font-bold text-neutral-900 dark:text-white mb-4">Billing Information</h2>
+          <p className="text-neutral-600 dark:text-neutral-400">
             Your subscription is billed monthly. You can manage your payment method
             and invoices through Stripe.
           </p>
