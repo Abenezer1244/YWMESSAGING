@@ -57,15 +57,15 @@ export default function Navigation() {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-sticky bg-white/95 dark:bg-secondary-900/95 backdrop-blur-sm border-b border-secondary-200 dark:border-secondary-700 transition-colors duration-normal">
+    <nav className="fixed top-0 left-0 right-0 z-sticky bg-white dark:bg-neutral-950 border-b border-neutral-200 dark:border-neutral-800 shadow-sm transition-colors duration-normal">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-primary-700 dark:from-primary-500 dark:to-primary-600 rounded-md flex items-center justify-center shadow-subtle group-hover:shadow-md transition-shadow duration-normal">
-              <span className="text-white font-bold text-lg">YW</span>
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="w-9 h-9 bg-primary-500 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-normal">
+              <span className="text-white font-bold text-base">YW</span>
             </div>
-            <span className="text-lg font-bold text-secondary-900 dark:text-secondary-50 hidden sm:block">Connect YW</span>
+            <span className="text-lg font-semibold text-neutral-900 dark:text-white hidden sm:block">Connect YW</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -75,10 +75,10 @@ export default function Navigation() {
                 key={link.href}
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
-                className={`font-medium transition-colors duration-normal pb-1 border-b-2 ${
+                className={`text-sm font-medium transition-colors duration-normal pb-1 border-b-2 ${
                   activeSection === link.href.substring(1)
-                    ? 'text-primary-600 dark:text-primary-400 border-primary-600 dark:border-primary-400'
-                    : 'text-secondary-700 dark:text-secondary-300 border-transparent hover:text-primary-600 dark:hover:text-primary-400'
+                    ? 'text-primary-500 dark:text-primary-400 border-primary-500 dark:border-primary-400'
+                    : 'text-neutral-600 dark:text-neutral-400 border-transparent hover:text-primary-500 dark:hover:text-primary-400'
                 }`}
               >
                 {link.label}
@@ -87,7 +87,7 @@ export default function Navigation() {
           </div>
 
           {/* Right Side Controls */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             {/* Dark Mode Toggle */}
             <DarkModeToggle />
 
@@ -95,7 +95,7 @@ export default function Navigation() {
             {!isAuthenticated && (
               <button
                 onClick={handleSignIn}
-                className="hidden sm:block text-secondary-700 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors duration-normal"
+                className="hidden sm:block text-neutral-600 dark:text-neutral-400 hover:text-primary-500 dark:hover:text-primary-400 font-medium transition-colors duration-normal text-sm"
               >
                 Sign In
               </button>
@@ -114,22 +114,22 @@ export default function Navigation() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-sm hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors duration-normal"
+              className="md:hidden p-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors duration-normal"
               aria-label="Toggle menu"
             >
               <div className="w-6 h-6 flex flex-col justify-between">
                 <span
-                  className={`h-0.5 w-full bg-secondary-900 dark:bg-secondary-50 transition-transform duration-300 ${
+                  className={`h-0.5 w-full bg-neutral-900 dark:bg-white transition-transform duration-300 ${
                     isMenuOpen ? 'rotate-45 translate-y-2.5' : ''
                   }`}
                 />
                 <span
-                  className={`h-0.5 w-full bg-secondary-900 dark:bg-secondary-50 transition-opacity duration-300 ${
+                  className={`h-0.5 w-full bg-neutral-900 dark:bg-white transition-opacity duration-300 ${
                     isMenuOpen ? 'opacity-0' : 'opacity-100'
                   }`}
                 />
                 <span
-                  className={`h-0.5 w-full bg-secondary-900 dark:bg-secondary-50 transition-transform duration-300 ${
+                  className={`h-0.5 w-full bg-neutral-900 dark:bg-white transition-transform duration-300 ${
                     isMenuOpen ? '-rotate-45 -translate-y-2.5' : ''
                   }`}
                 />
@@ -140,22 +140,22 @@ export default function Navigation() {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-secondary-200 dark:border-secondary-700 py-4 space-y-3 animate-slide-down">
+          <div className="md:hidden border-t border-neutral-200 dark:border-neutral-800 py-4 space-y-2 animate-slide-down">
             {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
-                className="block px-4 py-2 text-secondary-700 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-secondary-800 rounded-md transition-colors duration-normal font-medium"
+                className="block px-4 py-2 text-neutral-600 dark:text-neutral-400 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-neutral-50 dark:hover:bg-neutral-900 rounded-lg transition-colors duration-normal font-medium text-sm"
               >
                 {link.label}
               </a>
             ))}
-            <div className="border-t border-secondary-200 dark:border-secondary-700 pt-3 space-y-2">
+            <div className="border-t border-neutral-200 dark:border-neutral-800 pt-3 space-y-2">
               {!isAuthenticated && (
                 <button
                   onClick={handleSignIn}
-                  className="w-full px-4 py-2 text-secondary-700 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors duration-normal text-left"
+                  className="w-full px-4 py-2 text-neutral-600 dark:text-neutral-400 hover:text-primary-500 dark:hover:text-primary-400 font-medium transition-colors duration-normal text-left text-sm"
                 >
                   Sign In
                 </button>
