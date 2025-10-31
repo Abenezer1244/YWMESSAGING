@@ -57,15 +57,15 @@ export default function Navigation() {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-sticky bg-white dark:bg-neutral-950 border-b border-neutral-200 dark:border-neutral-800 shadow-sm transition-colors duration-normal">
+    <nav className="fixed top-0 left-0 right-0 z-sticky bg-warm-gunmetal-2 border-b border-warm-copper shadow-sm transition-colors duration-normal">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 bg-primary-500 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-normal">
+            <div className="w-9 h-9 bg-warm-copper rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-normal">
               <span className="text-white font-bold text-base">YW</span>
             </div>
-            <span className="text-lg font-semibold text-neutral-900 dark:text-white hidden sm:block">Connect YW</span>
+            <span className="text-lg font-semibold text-white hidden sm:block">Connect YW</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -77,8 +77,8 @@ export default function Navigation() {
                 onClick={(e) => handleNavClick(e, link.href)}
                 className={`text-sm font-medium transition-colors duration-normal pb-1 border-b-2 ${
                   activeSection === link.href.substring(1)
-                    ? 'text-primary-500 dark:text-primary-400 border-primary-500 dark:border-primary-400'
-                    : 'text-neutral-600 dark:text-neutral-400 border-transparent hover:text-primary-500 dark:hover:text-primary-400'
+                    ? 'text-warm-copper border-warm-copper'
+                    : 'text-warm-100 border-transparent hover:text-warm-copper'
                 }`}
               >
                 {link.label}
@@ -95,7 +95,7 @@ export default function Navigation() {
             {!isAuthenticated && (
               <button
                 onClick={handleSignIn}
-                className="hidden sm:block text-neutral-600 dark:text-neutral-400 hover:text-primary-500 dark:hover:text-primary-400 font-medium transition-colors duration-normal text-sm"
+                className="hidden sm:block text-warm-100 hover:text-warm-copper font-medium transition-colors duration-normal text-sm"
               >
                 Sign In
               </button>
@@ -114,22 +114,22 @@ export default function Navigation() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors duration-normal"
+              className="md:hidden p-2 rounded-md hover:bg-warm-coyote transition-colors duration-normal"
               aria-label="Toggle menu"
             >
               <div className="w-6 h-6 flex flex-col justify-between">
                 <span
-                  className={`h-0.5 w-full bg-neutral-900 dark:bg-white transition-transform duration-300 ${
+                  className={`h-0.5 w-full bg-warm-copper transition-transform duration-300 ${
                     isMenuOpen ? 'rotate-45 translate-y-2.5' : ''
                   }`}
                 />
                 <span
-                  className={`h-0.5 w-full bg-neutral-900 dark:bg-white transition-opacity duration-300 ${
+                  className={`h-0.5 w-full bg-warm-copper transition-opacity duration-300 ${
                     isMenuOpen ? 'opacity-0' : 'opacity-100'
                   }`}
                 />
                 <span
-                  className={`h-0.5 w-full bg-neutral-900 dark:bg-white transition-transform duration-300 ${
+                  className={`h-0.5 w-full bg-warm-copper transition-transform duration-300 ${
                     isMenuOpen ? '-rotate-45 -translate-y-2.5' : ''
                   }`}
                 />
@@ -140,22 +140,22 @@ export default function Navigation() {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-neutral-200 dark:border-neutral-800 py-4 space-y-2 animate-slide-down">
+          <div className="md:hidden border-t border-warm-copper py-4 space-y-2 animate-slide-down bg-warm-gunmetal">
             {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
-                className="block px-4 py-2 text-neutral-600 dark:text-neutral-400 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-neutral-50 dark:hover:bg-neutral-900 rounded-lg transition-colors duration-normal font-medium text-sm"
+                className="block px-4 py-2 text-warm-100 hover:text-warm-copper hover:bg-warm-coyote rounded-lg transition-colors duration-normal font-medium text-sm"
               >
                 {link.label}
               </a>
             ))}
-            <div className="border-t border-neutral-200 dark:border-neutral-800 pt-3 space-y-2">
+            <div className="border-t border-warm-copper pt-3 space-y-2">
               {!isAuthenticated && (
                 <button
                   onClick={handleSignIn}
-                  className="w-full px-4 py-2 text-neutral-600 dark:text-neutral-400 hover:text-primary-500 dark:hover:text-primary-400 font-medium transition-colors duration-normal text-left text-sm"
+                  className="w-full px-4 py-2 text-warm-100 hover:text-warm-copper font-medium transition-colors duration-normal text-left text-sm"
                 >
                   Sign In
                 </button>

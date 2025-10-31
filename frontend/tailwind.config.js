@@ -48,6 +48,21 @@ export default {
           900: '#78350f',
           950: '#451a03',
         },
+        // Warm Palette - Copper to Gunmetal (Landing Page Redesign)
+        warm: {
+          50: '#f5ede4',
+          100: '#e8dcc8',
+          copper: '#b76935',
+          'brown-sugar': '#a56336',
+          'raw-umber': '#935e38',
+          coyote: '#815839',
+          coffee: '#6f523b',
+          'walnut-brown': '#5c4d3c',
+          'black-olive': '#4a473e',
+          'outer-space': '#38413f',
+          gunmetal: '#263c41',
+          'gunmetal-2': '#143642',
+        },
         // Semantic Colors
         success: {
           50: '#f0fdf4',
@@ -137,7 +152,7 @@ export default {
         '4xl': '96px',
       },
 
-      // Enhanced Shadows
+      // Enhanced Shadows with Dual-Layer Effect
       boxShadow: {
         'none': 'none',
         'subtle': '0 1px 2px rgba(0, 0, 0, 0.04)',
@@ -148,6 +163,11 @@ export default {
         'xl': '0 20px 25px rgba(0, 0, 0, 0.1), 0 8px 10px rgba(0, 0, 0, 0.04)',
         '2xl': '0 25px 50px rgba(0, 0, 0, 0.15)',
         'inner': 'inset 0 2px 4px rgba(0, 0, 0, 0.05)',
+        // Dual-layer shadows for warm palette (light top + dark bottom)
+        'dual-sm': '0 1px 2px rgba(255, 255, 255, 0.15) inset, 0 1px 3px rgba(0, 0, 0, 0.2)',
+        'dual-md': '0 2px 4px rgba(255, 255, 255, 0.1) inset, 0 4px 8px rgba(0, 0, 0, 0.2)',
+        'dual-lg': '0 4px 8px rgba(255, 255, 255, 0.1) inset, 0 8px 16px rgba(0, 0, 0, 0.25)',
+        'dual-xl': '0 6px 12px rgba(255, 255, 255, 0.1) inset, 0 12px 24px rgba(0, 0, 0, 0.3)',
       },
 
       // Border Radius
