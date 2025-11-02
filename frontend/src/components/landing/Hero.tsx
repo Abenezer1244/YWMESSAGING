@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { CheckCircle2, Zap, Smartphone, ArrowRight } from 'lucide-react';
 import useAuthStore from '../../stores/authStore';
 import Button from '../ui/Button';
 
@@ -19,122 +20,138 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative pt-40 pb-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-blue-800 to-blue-federal overflow-hidden">
-      {/* Minimal background accent */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-blue-pacific opacity-10 rounded-full blur-3xl pointer-events-none"></div>
+    <section className="relative min-h-screen flex items-center px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-blue-800 via-blue-750 to-blue-federal overflow-hidden pt-24">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 right-10 w-96 h-96 bg-blue-pacific opacity-20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-sky-blue opacity-15 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 right-1/4 w-64 h-64 bg-blue-honolulu opacity-10 rounded-full blur-3xl animate-pulse delay-700"></div>
+      </div>
 
-      <div className="relative max-w-6xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+      <div className="relative max-w-7xl mx-auto w-full">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Left Column - Content */}
-          <div className="text-left animate-fadeIn">
-            {/* Badge */}
-            <div className="inline-flex items-center px-3 py-1 bg-blue-700 border border-blue-600 rounded-lg text-sm font-medium text-blue-100 mb-8">
-              <span className="w-2 h-2 bg-blue-pacific rounded-full mr-2"></span>
-              Trusted by churches nationwide
+          <div className="text-left space-y-8 animate-fadeIn">
+            {/* Modern Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-700/40 border border-blue-600/50 rounded-full text-sm font-medium text-blue-100 backdrop-blur-sm hover:bg-blue-700/60 transition-colors duration-300">
+              <div className="w-2 h-2 bg-gradient-to-r from-blue-pacific to-blue-sky-blue rounded-full animate-pulse"></div>
+              <span>Trusted by 100+ churches nationwide</span>
             </div>
 
-            {/* Main Headline */}
-            <h1 className="text-6xl sm:text-7xl lg:text-7xl font-bold text-white mb-6 leading-tight tracking-tight">
-              Connect Your{' '}
-              <span className="text-blue-pacific">
-                Church Community
-              </span>
-            </h1>
+            {/* Main Headline - Gradient Text Effect */}
+            <div className="space-y-4">
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
+                <span className="text-white">Connect Your</span>
+                <br />
+                <span className="bg-gradient-to-r from-blue-pacific via-blue-sky-blue to-blue-honolulu bg-clip-text text-transparent animate-pulse">
+                  Church Community
+                </span>
+              </h1>
+            </div>
 
-            {/* Subheading */}
-            <p className="text-lg sm:text-xl text-blue-100 mb-8 leading-relaxed max-w-xl font-light">
-              Enterprise SMS communication platform designed for churches. Keep your congregation connected, informed, and engaged with ease.
+            {/* Subheading - Modern typography */}
+            <p className="text-xl sm:text-2xl text-blue-100/90 max-w-lg leading-relaxed font-light">
+              Enterprise SMS communication platform built for churches. Strengthen community engagement, manage multiple locations, and communicate with confidence.
             </p>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-12">
+            {/* Modern CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Button
-                variant="primary"
                 size="lg"
                 onClick={handleStartTrial}
-                className="font-semibold bg-blue-pacific hover:bg-blue-400 text-blue-900"
+                className="bg-gradient-to-r from-blue-pacific to-blue-sky-blue hover:from-blue-400 hover:to-blue-300 text-blue-900 font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
               >
-                Start 14-Day Free Trial
+                <span>Start Free Trial</span>
+                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
               <Button
                 variant="outline"
                 size="lg"
                 onClick={handleLearnMore}
-                className="font-semibold border-blue-400 text-blue-100 hover:bg-blue-700"
+                className="border-2 border-blue-400/50 text-blue-100 hover:bg-blue-700/30 hover:border-blue-400 font-semibold rounded-lg backdrop-blur-sm transition-all duration-300"
               >
                 Learn More
               </Button>
             </div>
 
-            {/* Trust indicators - Horizontal */}
-            <div className="flex flex-wrap items-center gap-8 text-sm text-blue-100">
-              <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-success-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                No credit card required
-              </div>
-              <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-success-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                Setup in minutes
-              </div>
-              <div className="flex items-center">
-                <svg className="w-5 h-5 text-success-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                Cancel anytime
-              </div>
+            {/* Trust Indicators - Modern Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6">
+              {[
+                { icon: CheckCircle2, text: 'No credit card needed' },
+                { icon: Zap, text: 'Setup in 5 minutes' },
+                { icon: Smartphone, text: 'Mobile access included' },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-3 p-3 bg-blue-700/20 rounded-lg border border-blue-600/30 backdrop-blur-sm hover:bg-blue-700/40 transition-colors duration-300">
+                  <item.icon className="w-5 h-5 text-blue-pacific flex-shrink-0" />
+                  <span className="text-sm text-blue-100">{item.text}</span>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Right Column - Modern Dashboard Preview */}
-          <div className="relative hidden lg:block animate-slideUp">
-            <div className="relative bg-gradient-to-br from-blue-700 to-blue-marian rounded-2xl shadow-dual-lg p-8 border border-blue-600 overflow-hidden">
-              {/* Accent bar at top */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-pacific to-blue-sky-blue"></div>
+          {/* Right Column - Modern Dashboard Preview Card */}
+          <div className="relative hidden lg:block">
+            <div className="relative group">
+              {/* Glow effect behind card */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-pacific via-blue-sky-blue to-blue-honolulu rounded-2xl blur-2xl opacity-20 group-hover:opacity-40 transition duration-500 animate-pulse"></div>
 
-              {/* Mock dashboard content - modern layout */}
-              <div className="space-y-6">
-                {/* Header section */}
-                <div>
-                  <div className="h-2 w-20 bg-blue-600 rounded mb-3"></div>
-                  <div className="h-6 w-32 bg-blue-400 rounded"></div>
+              {/* Modern Card */}
+              <div className="relative bg-gradient-to-br from-blue-700/40 to-blue-marian/40 rounded-2xl p-8 border border-blue-600/40 backdrop-blur-xl shadow-2xl overflow-hidden animate-slideUp group-hover:shadow-blue-900/50 transition-shadow duration-500">
+                {/* Accent gradient top */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-pacific to-transparent"></div>
+
+                {/* Card Header */}
+                <div className="mb-8 pb-6 border-b border-blue-600/20">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-3 h-3 rounded-full bg-blue-pacific"></div>
+                    <div className="text-sm font-semibold text-blue-100">Dashboard Preview</div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-white">Message Analytics</h3>
                 </div>
 
-                {/* Stats section */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-blue-600 rounded-lg p-4">
-                    <div className="h-2 w-12 bg-blue-500 rounded mb-2"></div>
-                    <div className="h-5 w-16 bg-blue-pacific rounded"></div>
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                  <div className="p-4 bg-blue-600/30 rounded-lg border border-blue-500/20">
+                    <div className="text-xs text-blue-300 mb-2">DELIVERED</div>
+                    <div className="text-3xl font-bold text-blue-pacific">2,847</div>
                   </div>
-                  <div className="bg-blue-600 rounded-lg p-4">
-                    <div className="h-2 w-12 bg-blue-500 rounded mb-2"></div>
-                    <div className="h-5 w-16 bg-success-500 rounded"></div>
-                  </div>
-                </div>
-
-                {/* Main content area */}
-                <div className="bg-blue-600 rounded-lg p-4 space-y-3">
-                  <div className="h-3 w-24 bg-blue-500 rounded"></div>
-                  <div className="space-y-2">
-                    <div className="h-2 bg-blue-400 rounded w-full"></div>
-                    <div className="h-2 bg-blue-400 rounded w-4/5"></div>
-                    <div className="h-2 bg-blue-400 rounded w-3/4"></div>
+                  <div className="p-4 bg-blue-600/30 rounded-lg border border-blue-500/20">
+                    <div className="text-xs text-blue-300 mb-2">ENGAGED</div>
+                    <div className="text-3xl font-bold text-success-500">89%</div>
                   </div>
                 </div>
 
-                {/* Action buttons area */}
+                {/* Activity Chart Mockup */}
+                <div className="space-y-3 mb-8">
+                  <div className="text-sm font-semibold text-blue-100">Recent Activity</div>
+                  {[80, 65, 90, 45, 75].map((height, i) => (
+                    <div key={i} className="flex items-end gap-2 h-8">
+                      <div className="flex-1 bg-gradient-to-t from-blue-pacific to-blue-sky-blue rounded-t opacity-80 hover:opacity-100 transition-opacity" style={{ height: `${height}%` }}></div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Action Buttons */}
                 <div className="flex gap-2">
-                  <div className="h-8 flex-1 bg-blue-pacific rounded-lg"></div>
-                  <div className="h-8 w-8 bg-blue-sky-blue rounded-lg"></div>
+                  <button className="flex-1 py-2 px-4 bg-blue-pacific hover:bg-blue-sky-blue text-blue-900 font-semibold rounded-lg transition-colors duration-300">
+                    Export
+                  </button>
+                  <button className="px-4 py-2 bg-blue-600/40 hover:bg-blue-600/60 text-blue-100 rounded-lg transition-colors duration-300">
+                    ⋯
+                  </button>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
 
-            {/* Subtle floating accent */}
-            <div className="absolute -top-8 -right-8 w-32 h-32 bg-blue-pacific opacity-15 rounded-full blur-3xl pointer-events-none"></div>
+        {/* Bottom Scrolling Indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center">
+          <div className="flex flex-col items-center gap-2 text-blue-300">
+            <span className="text-sm font-medium">Scroll to explore</span>
+            <svg className="w-6 h-6 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
           </div>
         </div>
       </div>

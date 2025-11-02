@@ -2,8 +2,13 @@ import { Link } from 'react-router-dom';
 
 export default function Footer() {
   return (
-    <footer className="bg-blue-federal border-t border-blue-pacific transition-colors duration-normal">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <footer className="relative bg-gradient-to-b from-blue-federal to-blue-900 border-t border-blue-pacific/30 backdrop-blur-sm transition-colors duration-normal overflow-hidden">
+      {/* Subtle background gradient elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-pacific opacity-5 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid md:grid-cols-4 gap-12">
           {/* Brand Column */}
           <div className="md:col-span-1">
@@ -122,12 +127,12 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 pt-8 border-t border-blue-pacific flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-blue-100">
+        <div className="mt-12 pt-8 border-t border-blue-pacific/30 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-sm text-blue-200">
             &copy; {new Date().getFullYear()} Connect. All rights reserved.
           </p>
-          <p className="text-sm text-blue-100">
-            Made with <span className="text-red-500">♥</span> for churches
+          <p className="text-sm text-blue-200">
+            Made with <span className="text-red-500 animate-pulse">♥</span> for churches
           </p>
         </div>
       </div>

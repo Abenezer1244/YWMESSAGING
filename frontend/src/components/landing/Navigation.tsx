@@ -57,7 +57,7 @@ export default function Navigation() {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-sticky bg-blue-federal border-b border-blue-pacific shadow-sm transition-colors duration-normal">
+    <nav className="fixed top-0 left-0 right-0 z-sticky bg-blue-federal/80 backdrop-blur-md border-b border-blue-pacific/30 shadow-lg transition-colors duration-normal">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -140,7 +140,7 @@ export default function Navigation() {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-blue-pacific py-4 space-y-2 animate-slide-down bg-blue-700">
+          <div className="md:hidden border-t border-blue-pacific/30 py-4 space-y-2 animate-slide-down bg-blue-700/50 backdrop-blur-md">
             {navLinks.map((link) => (
               <a
                 key={link.href}

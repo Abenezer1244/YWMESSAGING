@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { Check, Zap } from 'lucide-react';
 import useAuthStore from '../../stores/authStore';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
@@ -74,90 +75,103 @@ export default function Pricing() {
   };
 
   return (
-    <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-blue-50 to-white transition-colors duration-normal">
-      <div className="max-w-7xl mx-auto">
+    <section id="pricing" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-blue-federal to-blue-marian overflow-hidden transition-colors duration-normal">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-1/3 w-96 h-96 bg-blue-pacific opacity-10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-blue-sky-blue opacity-15 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      </div>
+
+      <div className="relative max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-16 animate-fadeIn">
-          <h2 className="text-4xl sm:text-5xl font-bold text-blue-900 mb-4 leading-tight tracking-tight">
-            Simple, Transparent <span className="text-blue-pacific">Pricing</span>
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight tracking-tight">
+            Simple, Transparent{' '}
+            <span className="bg-gradient-to-r from-blue-pacific via-blue-sky-blue to-blue-honolulu bg-clip-text text-transparent">Pricing</span>
           </h2>
-          <p className="text-lg text-blue-700 max-w-3xl mx-auto font-light leading-relaxed">
+          <p className="text-lg text-blue-100 max-w-3xl mx-auto font-light leading-relaxed">
             Choose the plan that fits your church. All plans include a 14-day free trial. No credit card required.
           </p>
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {plans.map((plan, index) => (
             <div
               key={index}
-              className={`relative bg-white rounded-xl border p-8 transition-all duration-300 animate-slideUp ${
-                plan.highlight
-                  ? 'border-blue-pacific shadow-dual-lg scale-105 md:scale-110'
-                  : 'border-blue-200 hover:border-blue-pacific hover:shadow-dual-lg'
+              className={`group relative animate-slideUp transition-all duration-300 ${
+                plan.highlight ? 'md:scale-105' : ''
               }`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              {/* Popular Badge */}
+              {/* Glow effect for highlighted card */}
               {plan.highlight && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <Badge
-                    color="primary"
-                    variant="solid"
-                    size="sm"
-                  >
-                    Most Popular
-                  </Badge>
-                </div>
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-pacific via-blue-sky-blue to-blue-honolulu rounded-2xl blur-2xl opacity-30 group-hover:opacity-50 transition duration-500 animate-pulse -z-10"></div>
               )}
 
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-semibold text-blue-900 mb-2">{plan.name}</h3>
-                <div className="mb-4">
-                  <span className="text-5xl font-bold text-blue-pacific">{plan.price}</span>
-                  <span className="text-blue-600 text-sm">/month</span>
+              <div className={`relative bg-gradient-to-br rounded-2xl p-8 border transition-all duration-300 overflow-hidden h-full ${
+                plan.highlight
+                  ? 'from-blue-700/60 to-blue-marian/60 border-blue-500/80 shadow-2xl'
+                  : 'from-blue-700/40 to-blue-marian/40 border-blue-600/40 hover:border-blue-500/80'
+              }`}>
+                {/* Background gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-blue-marian/20 to-transparent pointer-events-none"></div>
+
+                {/* Popular Badge */}
+                {plan.highlight && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+                    <div className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-blue-pacific to-blue-sky-blue rounded-full text-white text-xs font-semibold">
+                      <Zap className="w-3 h-3" />
+                      Most Popular
+                    </div>
+                  </div>
+                )}
+
+                {/* Content */}
+                <div className="relative z-10">
+                  <div className="text-center mb-8 pt-4">
+                    <h3 className="text-2xl font-semibold text-white mb-3">{plan.name}</h3>
+                    <div className="mb-4">
+                      <span className="text-5xl font-bold bg-gradient-to-r from-blue-pacific to-blue-sky-blue bg-clip-text text-transparent">{plan.price}</span>
+                      <span className="text-blue-200 text-sm">/month</span>
+                    </div>
+                    <p className="text-blue-100 text-sm">{plan.description}</p>
+                  </div>
+
+                  <ul className="space-y-3 mb-8">
+                    {plan.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-start gap-3">
+                        <Check className="w-5 h-5 text-blue-pacific flex-shrink-0 mt-0.5" />
+                        <span className="text-blue-100 text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button
+                    variant={plan.highlight ? 'primary' : 'outline'}
+                    size="md"
+                    onClick={handleStartTrial}
+                    fullWidth
+                    className={plan.highlight ? 'bg-gradient-to-r from-blue-pacific to-blue-sky-blue hover:from-blue-400 hover:to-blue-300 text-blue-900' : ''}
+                  >
+                    {plan.ctaText}
+                  </Button>
                 </div>
-                <p className="text-blue-700 text-sm">{plan.description}</p>
               </div>
-
-              <ul className="space-y-3 mb-8">
-                {plan.features.map((feature, featureIndex) => (
-                  <li key={featureIndex} className="flex items-start gap-3">
-                    <svg
-                      className="w-5 h-5 text-success-500 mt-0.5 flex-shrink-0"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <span className="text-blue-900 text-sm">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Button
-                variant={plan.highlight ? 'primary' : 'outline'}
-                size="md"
-                onClick={handleStartTrial}
-                fullWidth
-              >
-                {plan.ctaText}
-              </Button>
             </div>
           ))}
         </div>
 
         {/* Additional Info */}
-        <div className="mt-12 text-center">
-          <p className="text-blue-700 mb-4 text-sm">
+        <div className="mt-16 text-center">
+          <p className="text-blue-200 mb-4 text-sm">
             All plans include: Secure messaging, message history, reply inbox, and mobile access
           </p>
-          <p className="text-sm text-blue-700">
-            Need a custom plan? <a href="mailto:support@connect.com" className="text-blue-pacific hover:text-blue-honolulu font-semibold">Contact us</a>
+          <p className="text-sm text-blue-200">
+            Need a custom plan?{' '}
+            <a href="mailto:support@connect.com" className="text-blue-pacific hover:text-blue-sky-blue font-semibold transition-colors">
+              Contact us
+            </a>
           </p>
         </div>
       </div>
