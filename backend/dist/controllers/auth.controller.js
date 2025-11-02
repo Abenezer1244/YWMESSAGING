@@ -22,28 +22,29 @@ export async function register(req, res) {
             return;
         }
         const result = await registerChurch({ email, password, firstName, lastName, churchName });
-        // Set httpOnly cookies for tokens
+        // ✅ SECURITY: Determine cookie domain based on environment
+        // Production: .onrender.com (shared across subdomains)
+        // Development: undefined (localhost only)
+        const cookieDomain = process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined;
+        // Set httpOnly cookies for tokens (secure, cannot be accessed via JavaScript)
         res.cookie('accessToken', result.accessToken, {
             httpOnly: true,
-            secure: true, // Required for sameSite: none (HTTPS only)
+            secure: process.env.NODE_ENV === 'production', // HTTPS only in production
             sameSite: 'none', // Allow cross-origin cookie sending
-            domain: '.onrender.com', // Share cookies across all onrender.com subdomains
+            domain: cookieDomain,
             maxAge: 15 * 60 * 1000, // 15 minutes
         });
         res.cookie('refreshToken', result.refreshToken, {
             httpOnly: true,
-            secure: true, // Required for sameSite: none (HTTPS only)
+            secure: process.env.NODE_ENV === 'production', // HTTPS only in production
             sameSite: 'none', // Allow cross-origin cookie sending
-            domain: '.onrender.com', // Share cookies across all onrender.com subdomains
+            domain: cookieDomain,
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
+        // ✅ SECURITY: Return only user info, NOT tokens (tokens are in HTTPOnly cookies)
         res.status(201).json({
             success: true,
             data: {
-                adminId: result.adminId,
-                churchId: result.churchId,
-                accessToken: result.accessToken,
-                refreshToken: result.refreshToken,
                 admin: result.admin,
                 church: result.church,
             },
@@ -67,28 +68,27 @@ export async function loginHandler(req, res) {
             return;
         }
         const result = await login({ email, password });
+        // ✅ SECURITY: Determine cookie domain based on environment
+        const cookieDomain = process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined;
         // Set httpOnly cookies for tokens
         res.cookie('accessToken', result.accessToken, {
             httpOnly: true,
-            secure: true, // Required for sameSite: none (HTTPS only)
+            secure: process.env.NODE_ENV === 'production', // HTTPS only in production
             sameSite: 'none', // Allow cross-origin cookie sending
-            domain: '.onrender.com', // Share cookies across all onrender.com subdomains
+            domain: cookieDomain,
             maxAge: 15 * 60 * 1000, // 15 minutes
         });
         res.cookie('refreshToken', result.refreshToken, {
             httpOnly: true,
-            secure: true, // Required for sameSite: none (HTTPS only)
+            secure: process.env.NODE_ENV === 'production', // HTTPS only in production
             sameSite: 'none', // Allow cross-origin cookie sending
-            domain: '.onrender.com', // Share cookies across all onrender.com subdomains
+            domain: cookieDomain,
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
+        // ✅ SECURITY: Return only user info, NOT tokens (tokens are in HTTPOnly cookies)
         res.status(200).json({
             success: true,
             data: {
-                adminId: result.adminId,
-                churchId: result.churchId,
-                accessToken: result.accessToken,
-                refreshToken: result.refreshToken,
                 admin: result.admin,
                 church: result.church,
             },
@@ -116,21 +116,24 @@ export async function refreshToken(req, res) {
             return;
         }
         const result = await refreshAccessToken(payload.adminId);
+        // ✅ SECURITY: Determine cookie domain based on environment
+        const cookieDomain = process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined;
         // Set new httpOnly cookies for tokens
         res.cookie('accessToken', result.accessToken, {
             httpOnly: true,
-            secure: true, // Required for sameSite: none (HTTPS only)
+            secure: process.env.NODE_ENV === 'production', // HTTPS only in production
             sameSite: 'none', // Allow cross-origin cookie sending
-            domain: '.onrender.com', // Share cookies across all onrender.com subdomains
+            domain: cookieDomain,
             maxAge: 15 * 60 * 1000, // 15 minutes
         });
         res.cookie('refreshToken', result.refreshToken, {
             httpOnly: true,
-            secure: true, // Required for sameSite: none (HTTPS only)
+            secure: process.env.NODE_ENV === 'production', // HTTPS only in production
             sameSite: 'none', // Allow cross-origin cookie sending
-            domain: '.onrender.com', // Share cookies across all onrender.com subdomains
+            domain: cookieDomain,
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
+        // ✅ SECURITY: Return success only, NOT tokens (tokens are in HTTPOnly cookies)
         res.status(200).json({
             success: true,
             data: {

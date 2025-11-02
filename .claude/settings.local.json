@@ -19,7 +19,16 @@
       "Bash(npm audit:*)",
       "Bash(npm run test)",
       "Bash(npx tsc:*)",
-      "WebFetch(domain:spacefor-agency-webflow-template.webflow.io)"
+      "WebFetch(domain:spacefor-agency-webflow-template.webflow.io)",
+      "Bash(claude mcp add:*)",
+      "Bash(claude mcp list)",
+      "Bash(npx shadcn@latest mcp init:*)",
+      "Bash(cat:*)",
+      "Bash(npx shadcn-ui@latest init)",
+      "Bash(npx shadcn@latest init:*)",
+      "Bash(git clone:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm registry:build:*)"
     ],
     "deny": [],
     "ask": []
