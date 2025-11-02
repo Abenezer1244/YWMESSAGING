@@ -77,20 +77,20 @@ export function BranchesPage() {
 
   if (isLoading && branches.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 p-6 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 dark:from-primary-900 to-primary-100 dark:to-primary-950 p-6 flex items-center justify-center">
         <Spinner size="lg" text="Loading branches..." />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 dark:from-primary-900 to-primary-100 dark:to-primary-950 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-secondary-900 dark:text-secondary-50 mb-2">📍 Branches</h1>
-            <p className="text-secondary-600 dark:text-secondary-400">Manage your church locations</p>
+            <h1 className="text-4xl font-bold text-primary-900 dark:text-primary-50 mb-2">📍 Branches</h1>
+            <p className="text-primary-600 dark:text-primary-400">Manage your church locations</p>
           </div>
           <Button
             variant="primary"

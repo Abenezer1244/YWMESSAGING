@@ -79,7 +79,7 @@ export function SubscribePage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-neutral-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-gradient-to-b from-white to-primary-50 dark:from-primary-950 dark:to-primary-900 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-12">
@@ -97,19 +97,19 @@ export function SubscribePage() {
               variant="default"
               className={`overflow-hidden transform transition hover:shadow-lg border ${
                 plan.highlighted
-                  ? 'ring-2 ring-primary-500 md:scale-105 border-primary-300 dark:border-primary-700 bg-white dark:bg-neutral-900'
+                  ? 'ring-2 ring-accent-500 md:scale-105 border-accent-300 dark:border-accent-700 bg-white dark:bg-neutral-900'
                   : 'border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900'
               }`}
             >
               {/* Card Header */}
-              <div className={`-m-6 mb-6 px-6 py-8 ${plan.highlighted ? 'bg-primary-50 dark:bg-primary-900/30' : 'bg-neutral-50 dark:bg-neutral-900'}`}>
+              <div className={`-m-6 mb-6 px-6 py-8 ${plan.highlighted ? 'bg-accent-50 dark:bg-accent-950/30' : 'bg-neutral-50 dark:bg-neutral-900'}`}>
                 {plan.highlighted && (
-                  <div className="text-sm font-semibold text-primary-600 dark:text-primary-400 mb-2">
+                  <div className="text-sm font-semibold text-accent-600 dark:text-accent-400 mb-2">
                     ⭐ Most Popular
                   </div>
                 )}
                 <h2 className={`text-2xl font-bold ${plan.highlighted ? 'text-neutral-900 dark:text-white' : 'text-neutral-900 dark:text-white'}`}>{plan.name}</h2>
-                <p className={`text-sm mt-2 ${plan.highlighted ? 'text-primary-600 dark:text-primary-400' : 'text-neutral-600 dark:text-neutral-400'}`}>
+                <p className={`text-sm mt-2 ${plan.highlighted ? 'text-accent-600 dark:text-accent-400' : 'text-neutral-600 dark:text-neutral-400'}`}>
                   {plan.description}
                 </p>
               </div>

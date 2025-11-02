@@ -84,13 +84,13 @@ export function SendMessagePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 dark:from-primary-900 to-primary-100 dark:to-primary-950 p-6 transition-colors duration-normal">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-secondary-900 dark:text-secondary-50 mb-2">📨 Send Message</h1>
-            <p className="text-secondary-600 dark:text-secondary-400">Reach your congregation with direct SMS messages</p>
+            <h1 className="text-4xl font-bold text-primary-900 dark:text-primary-50 mb-2">📨 Send Message</h1>
+            <p className="text-primary-600 dark:text-primary-400">Reach your congregation with direct SMS messages</p>
           </div>
         </div>
 
@@ -99,7 +99,7 @@ export function SendMessagePage() {
           {/* Template Selector */}
           {templates.length > 0 && (
             <div>
-              <label className="block text-sm font-semibold text-secondary-900 dark:text-secondary-50 mb-3">
+              <label className="block text-sm font-semibold text-primary-900 dark:text-primary-50 mb-3">
                 📋 Use Template
               </label>
               <div className="flex gap-2 flex-wrap">
@@ -129,18 +129,18 @@ export function SendMessagePage() {
 
           {/* Message Composer */}
           <div>
-            <label className="block text-sm font-semibold text-secondary-900 dark:text-secondary-50 mb-3">
+            <label className="block text-sm font-semibold text-primary-900 dark:text-primary-50 mb-3">
               ✍️ Message Content
             </label>
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value.slice(0, 1600))}
-              className="w-full px-4 py-3 border border-secondary-200 dark:border-secondary-700 rounded-lg bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-50 placeholder-secondary-400 dark:placeholder-secondary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none transition-colors duration-normal"
+              className="w-full px-4 py-3 border border-primary-200 dark:border-primary-700 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-primary-50 placeholder-primary-400 dark:placeholder-primary-500 focus:outline-none focus:ring-2 focus:ring-accent-500 resize-none transition-colors duration-normal"
               rows={6}
               placeholder="Type your message here..."
               maxLength={1600}
             />
-            <div className="flex justify-between mt-3 text-sm text-secondary-600 dark:text-secondary-400">
+            <div className="flex justify-between mt-3 text-sm text-primary-600 dark:text-primary-400">
               <span>{content.length} / 1600 characters</span>
               <span>
                 {segments} SMS segment{segments !== 1 ? 's' : ''}
@@ -161,7 +161,7 @@ export function SendMessagePage() {
 
           {/* Recipient Selection */}
           <div>
-            <label className="block text-sm font-semibold text-secondary-900 dark:text-secondary-50 mb-3">
+            <label className="block text-sm font-semibold text-primary-900 dark:text-primary-50 mb-3">
               👥 Send To
             </label>
             <div className="space-y-3">
@@ -172,15 +172,15 @@ export function SendMessagePage() {
                   value="groups"
                   checked={targetType === 'groups'}
                   onChange={(e) => setTargetType(e.target.value as 'groups' | 'all')}
-                  className="w-4 h-4 accent-primary-600 dark:accent-primary-400 cursor-pointer"
+                  className="w-4 h-4 accent-accent-500 dark:accent-accent-400 cursor-pointer"
                 />
-                <span className="text-sm font-medium text-secondary-900 dark:text-secondary-50">Select Groups</span>
+                <span className="text-sm font-medium text-primary-900 dark:text-primary-50">Select Groups</span>
               </label>
 
               {targetType === 'groups' && (
-                <div className="ml-7 space-y-2 bg-secondary-100 dark:bg-secondary-800 p-4 rounded-lg border border-secondary-200 dark:border-secondary-700">
+                <div className="ml-7 space-y-2 bg-primary-100 dark:bg-primary-800 p-4 rounded-lg border border-primary-200 dark:border-primary-700">
                   {groups.length === 0 ? (
-                    <p className="text-secondary-600 dark:text-secondary-400 text-sm">No groups available</p>
+                    <p className="text-primary-600 dark:text-primary-400 text-sm">No groups available</p>
                   ) : (
                     groups.map((group) => (
                       <label
@@ -191,9 +191,9 @@ export function SendMessagePage() {
                           type="checkbox"
                           checked={selectedGroupIds.includes(group.id)}
                           onChange={() => handleGroupToggle(group.id)}
-                          className="w-4 h-4 rounded accent-primary-600 dark:accent-primary-400 cursor-pointer"
+                          className="w-4 h-4 rounded accent-accent-500 dark:accent-accent-400 cursor-pointer"
                         />
-                        <span className="text-sm text-secondary-700 dark:text-secondary-300">
+                        <span className="text-sm text-primary-700 dark:text-primary-300">
                           {group.name} ({group.memberCount} members)
                         </span>
                       </label>
@@ -209,9 +209,9 @@ export function SendMessagePage() {
                   value="all"
                   checked={targetType === 'all'}
                   onChange={(e) => setTargetType(e.target.value as 'groups' | 'all')}
-                  className="w-4 h-4 accent-primary-600 dark:accent-primary-400 cursor-pointer"
+                  className="w-4 h-4 accent-accent-500 dark:accent-accent-400 cursor-pointer"
                 />
-                <span className="text-sm font-medium text-secondary-900 dark:text-secondary-50">All Members</span>
+                <span className="text-sm font-medium text-primary-900 dark:text-primary-50">All Members</span>
               </label>
             </div>
           </div>
@@ -221,16 +221,16 @@ export function SendMessagePage() {
             <Card variant="highlight">
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-secondary-700 dark:text-secondary-300">Recipients:</span>
-                  <span className="font-medium text-secondary-900 dark:text-secondary-50">{recipientCount}</span>
+                  <span className="text-primary-700 dark:text-primary-300">Recipients:</span>
+                  <span className="font-medium text-primary-900 dark:text-primary-50">{recipientCount}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-secondary-700 dark:text-secondary-300">Segments:</span>
-                  <span className="font-medium text-secondary-900 dark:text-secondary-50">{segments}</span>
+                  <span className="text-primary-700 dark:text-primary-300">Segments:</span>
+                  <span className="font-medium text-primary-900 dark:text-primary-50">{segments}</span>
                 </div>
                 <div className="flex justify-between border-t border-primary-200 dark:border-primary-700 pt-2">
-                  <span className="font-medium text-secondary-900 dark:text-secondary-50">Estimated Cost:</span>
-                  <span className="font-bold text-primary-600 dark:text-primary-400">${totalCost.toFixed(2)}</span>
+                  <span className="font-medium text-primary-900 dark:text-primary-50">Estimated Cost:</span>
+                  <span className="font-bold text-accent-600 dark:text-accent-400">${totalCost.toFixed(2)}</span>
                 </div>
               </div>
             </Card>

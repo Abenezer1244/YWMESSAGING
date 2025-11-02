@@ -20,12 +20,12 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-blue-800 via-blue-750 to-blue-federal overflow-hidden pt-24">
+    <section className="relative min-h-screen flex items-center px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-primary-800 via-primary-900 to-primary-950 overflow-hidden pt-24">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-10 w-96 h-96 bg-blue-pacific opacity-20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-sky-blue opacity-15 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 right-1/4 w-64 h-64 bg-blue-honolulu opacity-10 rounded-full blur-3xl animate-pulse delay-700"></div>
+        <div className="absolute top-20 right-10 w-96 h-96 bg-accent-500 opacity-15 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-accent-400 opacity-10 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 right-1/4 w-64 h-64 bg-primary-700 opacity-10 rounded-full blur-3xl animate-pulse delay-700"></div>
       </div>
 
       <div className="relative max-w-7xl mx-auto w-full">
@@ -33,8 +33,8 @@ export default function Hero() {
           {/* Left Column - Content */}
           <div className="text-left space-y-8 animate-fadeIn">
             {/* Modern Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-700/40 border border-blue-600/50 rounded-full text-sm font-medium text-blue-100 backdrop-blur-sm hover:bg-blue-700/60 transition-colors duration-300">
-              <div className="w-2 h-2 bg-gradient-to-r from-blue-pacific to-blue-sky-blue rounded-full animate-pulse"></div>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent-500/15 border border-accent-400/50 rounded-full text-sm font-medium text-accent-100 backdrop-blur-sm hover:bg-accent-500/25 transition-colors duration-300">
+              <div className="w-2 h-2 bg-gradient-to-r from-accent-400 to-accent-500 rounded-full animate-pulse"></div>
               <span>Trusted by 100+ churches nationwide</span>
             </div>
 
@@ -43,14 +43,14 @@ export default function Hero() {
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
                 <span className="text-white">Connect Your</span>
                 <br />
-                <span className="bg-gradient-to-r from-blue-pacific via-blue-sky-blue to-blue-honolulu bg-clip-text text-transparent animate-pulse">
+                <span className="bg-gradient-to-r from-accent-300 via-accent-500 to-primary-400 bg-clip-text text-transparent">
                   Church Community
                 </span>
               </h1>
             </div>
 
             {/* Subheading - Modern typography */}
-            <p className="text-xl sm:text-2xl text-blue-100/90 max-w-lg leading-relaxed font-light">
+            <p className="text-xl sm:text-2xl text-primary-100/90 max-w-lg leading-relaxed font-light">
               Enterprise SMS communication platform built for churches. Strengthen community engagement, manage multiple locations, and communicate with confidence.
             </p>
 
@@ -59,7 +59,7 @@ export default function Hero() {
               <Button
                 size="lg"
                 onClick={handleStartTrial}
-                className="bg-gradient-to-r from-blue-pacific to-blue-sky-blue hover:from-blue-400 hover:to-blue-300 text-blue-900 font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
+                className="bg-gradient-to-r from-accent-400 to-accent-500 hover:from-accent-300 hover:to-accent-400 text-primary-900 font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
               >
                 <span>Start Free Trial</span>
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -68,7 +68,7 @@ export default function Hero() {
                 variant="outline"
                 size="lg"
                 onClick={handleLearnMore}
-                className="border-2 border-blue-400/50 text-blue-100 hover:bg-blue-700/30 hover:border-blue-400 font-semibold rounded-lg backdrop-blur-sm transition-all duration-300"
+                className="border-2 border-accent-400/50 text-primary-100 hover:bg-primary-700/30 hover:border-accent-400 font-semibold rounded-lg backdrop-blur-sm transition-all duration-300"
               >
                 Learn More
               </Button>
@@ -81,9 +81,9 @@ export default function Hero() {
                 { icon: Zap, text: 'Setup in 5 minutes' },
                 { icon: Smartphone, text: 'Mobile access included' },
               ].map((item, i) => (
-                <div key={i} className="flex items-center gap-3 p-3 bg-blue-700/20 rounded-lg border border-blue-600/30 backdrop-blur-sm hover:bg-blue-700/40 transition-colors duration-300">
-                  <item.icon className="w-5 h-5 text-blue-pacific flex-shrink-0" />
-                  <span className="text-sm text-blue-100">{item.text}</span>
+                <div key={i} className="flex items-center gap-3 p-3 bg-primary-700/20 rounded-lg border border-accent-400/30 backdrop-blur-sm hover:bg-primary-700/40 transition-colors duration-300">
+                  <item.icon className="w-5 h-5 text-accent-400 flex-shrink-0" />
+                  <span className="text-sm text-primary-100">{item.text}</span>
                 </div>
               ))}
             </div>

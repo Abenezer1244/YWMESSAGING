@@ -64,9 +64,9 @@ export function MembersPage() {
 
   if (!currentGroup) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 dark:from-primary-900 to-primary-100 dark:to-primary-950 flex items-center justify-center p-6">
         <Card variant="default" className="text-center max-w-md">
-          <p className="text-secondary-600 dark:text-secondary-400 text-lg">
+          <p className="text-primary-600 dark:text-primary-400 text-lg">
             No group selected. Create or select a group first.
           </p>
         </Card>
@@ -75,14 +75,14 @@ export function MembersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 dark:from-primary-900 to-primary-100 dark:to-primary-950 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-4xl font-bold text-secondary-900 dark:text-secondary-50 mb-2">👤 Members</h1>
-              <p className="text-secondary-600 dark:text-secondary-400">
+              <h1 className="text-4xl font-bold text-primary-900 dark:text-primary-50 mb-2">👤 Members</h1>
+              <p className="text-primary-600 dark:text-primary-400">
                 {currentGroup.name} • {total} members
               </p>
             </div>
@@ -126,10 +126,10 @@ export function MembersPage() {
             <div className="mb-6">
               <span className="text-6xl">👤</span>
             </div>
-            <h2 className="text-2xl font-bold text-secondary-900 dark:text-secondary-50 mb-3">
+            <h2 className="text-2xl font-bold text-primary-900 dark:text-primary-50 mb-3">
               {search ? 'No Results' : 'No Members Yet'}
             </h2>
-            <p className="text-secondary-600 dark:text-secondary-400 mb-6 max-w-md mx-auto">
+            <p className="text-primary-600 dark:text-primary-400 mb-6 max-w-md mx-auto">
               {search ? 'No members found matching your search' : 'Add your first member to get started'}
             </p>
             {!search && (
@@ -148,38 +148,38 @@ export function MembersPage() {
             <Card variant="default" className="overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full">
-                  <thead className="bg-secondary-100 dark:bg-secondary-800 border-b border-secondary-200 dark:border-secondary-700">
+                  <thead className="bg-primary-100 dark:bg-primary-800 border-b border-primary-200 dark:border-primary-700">
                     <tr>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-50">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-primary-900 dark:text-primary-50">
                         Name
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-50">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-primary-900 dark:text-primary-50">
                         Phone
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-50">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-primary-900 dark:text-primary-50">
                         Email
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-50">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-primary-900 dark:text-primary-50">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-50">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-primary-900 dark:text-primary-50">
                         Added
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-secondary-200 dark:divide-secondary-700">
+                  <tbody className="divide-y divide-primary-200 dark:divide-primary-700">
                     {members.map((member) => (
-                      <tr key={member.id} className="hover:bg-secondary-50 dark:hover:bg-secondary-700/50 transition-colors duration-normal">
+                      <tr key={member.id} className="hover:bg-primary-50 dark:hover:bg-primary-700/50 transition-colors duration-normal">
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-secondary-900 dark:text-secondary-50">
+                          <div className="text-sm font-medium text-primary-900 dark:text-primary-50">
                             {member.firstName} {member.lastName}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-secondary-600 dark:text-secondary-400">{member.phone}</div>
+                          <div className="text-sm text-primary-600 dark:text-primary-400">{member.phone}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-secondary-600 dark:text-secondary-400">
+                          <div className="text-sm text-primary-600 dark:text-primary-400">
                             {member.email || '—'}
                           </div>
                         </td>
@@ -194,7 +194,7 @@ export function MembersPage() {
                             {member.optInSms ? '✅ Opted In' : '❌ Opted Out'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-600 dark:text-secondary-400">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-primary-600 dark:text-primary-400">
                           {new Date(member.createdAt).toLocaleDateString()}
                         </td>
                       </tr>
@@ -215,7 +215,7 @@ export function MembersPage() {
                 >
                   ← Previous
                 </Button>
-                <div className="px-4 py-2 text-secondary-700 dark:text-secondary-300 font-medium">
+                <div className="px-4 py-2 text-primary-700 dark:text-primary-300 font-medium">
                   Page {page} of {pages}
                 </div>
                 <Button

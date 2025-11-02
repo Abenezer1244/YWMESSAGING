@@ -73,7 +73,7 @@ export function BillingPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-neutral-950 p-6 transition-colors duration-normal">
+      <div className="min-h-screen bg-gradient-to-b from-white to-primary-50 dark:from-primary-950 dark:to-primary-900 p-6 transition-colors duration-normal">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-center py-20">
             <Spinner size="lg" text="Loading billing information..." />
@@ -85,7 +85,7 @@ export function BillingPage() {
 
   if (!planInfo) {
     return (
-      <div className="min-h-screen bg-white dark:bg-neutral-950 p-6 transition-colors duration-normal">
+      <div className="min-h-screen bg-gradient-to-b from-white to-primary-50 dark:from-primary-950 dark:to-primary-900 p-6 transition-colors duration-normal">
         <div className="max-w-7xl mx-auto">
           <Card variant="default" className="text-center py-16 border border-neutral-200 dark:border-neutral-800">
             <h2 className="text-2xl font-bold text-neutral-900 dark:text-white mb-3">
@@ -153,7 +153,7 @@ export function BillingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-neutral-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-gradient-to-b from-white to-primary-50 dark:from-primary-950 dark:to-primary-900 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -167,11 +167,11 @@ export function BillingPage() {
           <h2 className="text-2xl font-bold text-neutral-900 dark:text-white mb-6">Current Plan</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Plan Card */}
-            <Card variant="default" className="border border-primary-200 dark:border-primary-800 bg-primary-50 dark:bg-primary-950/30">
+            <Card variant="default" className="border border-accent-200 dark:border-accent-800 bg-accent-50 dark:bg-accent-950/30">
               <h3 className="text-xl font-bold text-neutral-900 dark:text-white">
                 {planNameMap[planInfo.plan]} Plan
               </h3>
-              <p className="text-3xl font-bold text-primary-500 dark:text-primary-400 mt-2">
+              <p className="text-3xl font-bold text-accent-500 dark:text-accent-400 mt-2">
                 ${planInfo.limits.price / 100}
                 <span className="text-lg text-neutral-600 dark:text-neutral-400">/month</span>
               </p>
@@ -247,9 +247,9 @@ export function BillingPage() {
 
           {/* Remaining Capacity Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-neutral-200 dark:border-neutral-800">
-            <Card variant="default" className="border border-neutral-200 dark:border-neutral-800 bg-primary-50 dark:bg-primary-950/30">
+            <Card variant="default" className="border border-neutral-200 dark:border-neutral-800 bg-accent-50 dark:bg-accent-950/30">
               <p className="text-sm text-neutral-600 dark:text-neutral-400">Remaining Branches</p>
-              <p className="text-2xl font-bold text-primary-500 dark:text-primary-400 mt-2">
+              <p className="text-2xl font-bold text-accent-500 dark:text-accent-400 mt-2">
                 {planInfo.remaining.branches === 999999
                   ? '∞'
                   : planInfo.remaining.branches}

@@ -42,11 +42,11 @@ const features: Feature[] = [
 
 export default function Features() {
   return (
-    <section id="features" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-blue-800 via-blue-750 to-blue-federal overflow-hidden transition-colors duration-normal">
+    <section id="features" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-primary-800 via-primary-850 to-primary-900 overflow-hidden transition-colors duration-normal">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-1/4 w-80 h-80 bg-blue-sky-blue opacity-10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-blue-pacific opacity-15 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-20 left-1/4 w-80 h-80 bg-accent-400 opacity-10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-accent-500 opacity-15 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
 
       <div className="relative max-w-7xl mx-auto">
@@ -54,9 +54,9 @@ export default function Features() {
         <div className="text-center mb-16 animate-fadeIn">
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight tracking-tight">
             Everything You Need to{' '}
-            <span className="bg-gradient-to-r from-blue-pacific via-blue-sky-blue to-blue-honolulu bg-clip-text text-transparent">Stay Connected</span>
+            <span className="bg-gradient-to-r from-accent-500 via-accent-400 to-accent-300 bg-clip-text text-transparent">Stay Connected</span>
           </h2>
-          <p className="text-lg text-blue-100 max-w-3xl mx-auto font-light leading-relaxed">
+          <p className="text-lg text-primary-100 max-w-3xl mx-auto font-light leading-relaxed">
             Powerful features designed specifically for churches managing multiple locations and hundreds of members.
           </p>
         </div>
@@ -67,19 +67,19 @@ export default function Features() {
             <Card
               key={index}
               variant="default"
-              className="group animate-slideUp relative p-8 bg-gradient-to-br from-blue-700/40 to-blue-marian/40 border border-blue-600/40 hover:border-blue-500/80 backdrop-blur-xl rounded-2xl transition-all duration-300 overflow-hidden"
+              className="group animate-slideUp relative p-8 bg-gradient-to-br from-primary-700/40 to-primary-800/40 border border-primary-600/40 hover:border-primary-500/80 backdrop-blur-xl rounded-2xl transition-all duration-300 overflow-hidden"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               {/* Glow effect on hover */}
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-pacific/0 via-blue-sky-blue/0 to-blue-honolulu/0 group-hover:from-blue-pacific/5 group-hover:via-blue-sky-blue/5 group-hover:to-blue-honolulu/5 transition-all duration-300 pointer-events-none"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-accent-500/0 via-accent-400/0 to-accent-300/0 group-hover:from-accent-500/5 group-hover:via-accent-400/5 group-hover:to-accent-300/5 transition-all duration-300 pointer-events-none"></div>
 
               {/* Content */}
               <div className="relative z-10">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-pacific to-blue-sky-blue text-white rounded-lg flex items-center justify-center mb-5 group-hover:shadow-lg group-hover:shadow-blue-sky-blue/50 transition-all duration-300">
+                <div className="w-12 h-12 bg-gradient-to-br from-accent-500 to-accent-400 text-primary-900 rounded-lg flex items-center justify-center mb-5 group-hover:shadow-lg group-hover:shadow-accent-400/50 transition-all duration-300">
                   {feature.icon}
                 </div>
                 <h3 className="text-lg font-semibold text-white mb-3">{feature.title}</h3>
-                <p className="text-blue-100 text-sm leading-relaxed">{feature.description}</p>
+                <p className="text-primary-100 text-sm leading-relaxed">{feature.description}</p>
               </div>
             </Card>
           ))}

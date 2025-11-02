@@ -37,14 +37,14 @@ export function DashboardPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-neutral-950 transition-colors duration-normal">
+    <div className="min-h-screen bg-gradient-to-b from-white to-primary-50 dark:from-primary-950 dark:to-primary-900 transition-colors duration-normal">
       {/* Header */}
-      <header className="bg-white dark:bg-neutral-900 shadow-sm border-b border-neutral-200 dark:border-neutral-800 transition-colors duration-normal">
+      <header className="bg-white dark:bg-primary-900 shadow-sm border-b border-neutral-200 dark:border-primary-800 transition-colors duration-normal">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-primary-500 rounded-lg flex items-center justify-center shadow-md">
-                <span className="text-white font-bold text-base">YW</span>
+              <div className="w-12 h-12 bg-accent-500 rounded-lg flex items-center justify-center shadow-md">
+                <span className="text-primary-900 font-bold text-base">C</span>
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-neutral-900 dark:text-white">Dashboard</h1>
@@ -69,7 +69,7 @@ export function DashboardPage() {
                 <button
                   key={item.label}
                   onClick={item.action}
-                  className="px-4 py-2 text-neutral-700 dark:text-neutral-300 font-medium text-sm hover:bg-primary-50 dark:hover:bg-neutral-800 rounded-lg transition-colors duration-normal border border-neutral-200 dark:border-neutral-700 hover:border-primary-300 dark:hover:border-primary-500"
+                  className="px-4 py-2 text-neutral-700 dark:text-neutral-300 font-medium text-sm hover:bg-accent-50 dark:hover:bg-primary-800 rounded-lg transition-colors duration-normal border border-neutral-200 dark:border-primary-700 hover:border-accent-300 dark:hover:border-accent-500"
                 >
                   {item.label}
                 </button>

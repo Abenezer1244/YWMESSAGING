@@ -1,38 +1,39 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Users, MessageSquare, Clock, FileText, BarChart3, UserPlus } from 'lucide-react';
 import Card from '../ui/Card';
 const features = [
     {
-        icon: (_jsx("svg", { className: "w-8 h-8", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24", children: _jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" }) })),
+        icon: _jsx(Users, { className: "w-8 h-8" }),
         title: 'Multi-Branch Management',
         description: 'Manage 3-10 church locations from one unified dashboard. Coordinate messaging across all branches seamlessly.',
     },
     {
-        icon: (_jsx("svg", { className: "w-8 h-8", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24", children: _jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" }) })),
+        icon: _jsx(MessageSquare, { className: "w-8 h-8" }),
         title: 'SMS Messaging',
         description: 'Send messages to individuals, groups, entire branches, or your whole congregation. Support for one-way and two-way communication.',
     },
     {
-        icon: (_jsx("svg", { className: "w-8 h-8", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24", children: _jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" }) })),
+        icon: _jsx(Clock, { className: "w-8 h-8" }),
         title: 'Message Scheduling',
         description: 'Schedule messages in advance or set up recurring messages (daily, weekly, monthly). Send welcome messages automatically.',
     },
     {
-        icon: (_jsx("svg", { className: "w-8 h-8", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24", children: _jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" }) })),
+        icon: _jsx(FileText, { className: "w-8 h-8" }),
         title: 'Message Templates',
         description: 'Save time with pre-built and custom message templates. Maintain consistent communication while personalizing your messages.',
     },
     {
-        icon: (_jsx("svg", { className: "w-8 h-8", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24", children: _jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" }) })),
+        icon: _jsx(BarChart3, { className: "w-8 h-8" }),
         title: 'Analytics & Insights',
         description: 'Track delivery rates, reply rates, and engagement metrics. Understand your congregation\'s communication patterns with detailed analytics.',
     },
     {
-        icon: (_jsx("svg", { className: "w-8 h-8", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24", children: _jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" }) })),
+        icon: _jsx(UserPlus, { className: "w-8 h-8" }),
         title: 'Member Management',
         description: 'Import members via CSV, organize by groups and tags, and maintain detailed member profiles. Segment your congregation for targeted messaging.',
     },
 ];
 export default function Features() {
-    return (_jsx("section", { id: "features", className: "py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-blue-50 to-white transition-colors duration-normal", children: _jsxs("div", { className: "max-w-7xl mx-auto", children: [_jsxs("div", { className: "text-center mb-16 animate-fadeIn", children: [_jsxs("h2", { className: "text-4xl sm:text-5xl font-bold text-blue-900 mb-4 leading-tight tracking-tight", children: ["Everything You Need to", ' ', _jsx("span", { className: "text-blue-pacific", children: "Stay Connected" })] }), _jsx("p", { className: "text-lg text-blue-700 max-w-3xl mx-auto font-light leading-relaxed", children: "Powerful features designed specifically for churches managing multiple locations and hundreds of members." })] }), _jsx("div", { className: "grid md:grid-cols-2 lg:grid-cols-3 gap-8", children: features.map((feature, index) => (_jsxs(Card, { variant: "default", className: "group animate-slideUp p-8 bg-white border border-blue-200 hover:shadow-dual-lg transition-all duration-normal rounded-xl", style: { animationDelay: `${index * 0.1}s` }, children: [_jsx("div", { className: "w-12 h-12 bg-blue-100 text-blue-pacific rounded-lg flex items-center justify-center mb-5 group-hover:bg-blue-pacific group-hover:text-white transition-colors duration-normal", children: feature.icon }), _jsx("h3", { className: "text-lg font-semibold text-blue-900 mb-3", children: feature.title }), _jsx("p", { className: "text-blue-600 text-sm leading-relaxed", children: feature.description })] }, index))) })] }) }));
+    return (_jsxs("section", { id: "features", className: "relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-primary-800 via-primary-850 to-primary-900 overflow-hidden transition-colors duration-normal", children: [_jsxs("div", { className: "absolute inset-0 overflow-hidden pointer-events-none", children: [_jsx("div", { className: "absolute top-20 left-1/4 w-80 h-80 bg-accent-400 opacity-10 rounded-full blur-3xl animate-pulse" }), _jsx("div", { className: "absolute bottom-20 right-1/4 w-96 h-96 bg-accent-500 opacity-15 rounded-full blur-3xl animate-pulse delay-1000" })] }), _jsxs("div", { className: "relative max-w-7xl mx-auto", children: [_jsxs("div", { className: "text-center mb-16 animate-fadeIn", children: [_jsxs("h2", { className: "text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight tracking-tight", children: ["Everything You Need to", ' ', _jsx("span", { className: "bg-gradient-to-r from-accent-500 via-accent-400 to-accent-300 bg-clip-text text-transparent", children: "Stay Connected" })] }), _jsx("p", { className: "text-lg text-primary-100 max-w-3xl mx-auto font-light leading-relaxed", children: "Powerful features designed specifically for churches managing multiple locations and hundreds of members." })] }), _jsx("div", { className: "grid md:grid-cols-2 lg:grid-cols-3 gap-6", children: features.map((feature, index) => (_jsxs(Card, { variant: "default", className: "group animate-slideUp relative p-8 bg-gradient-to-br from-primary-700/40 to-primary-800/40 border border-primary-600/40 hover:border-primary-500/80 backdrop-blur-xl rounded-2xl transition-all duration-300 overflow-hidden", style: { animationDelay: `${index * 0.1}s` }, children: [_jsx("div", { className: "absolute inset-0 bg-gradient-to-r from-accent-500/0 via-accent-400/0 to-accent-300/0 group-hover:from-accent-500/5 group-hover:via-accent-400/5 group-hover:to-accent-300/5 transition-all duration-300 pointer-events-none" }), _jsxs("div", { className: "relative z-10", children: [_jsx("div", { className: "w-12 h-12 bg-gradient-to-br from-accent-500 to-accent-400 text-primary-900 rounded-lg flex items-center justify-center mb-5 group-hover:shadow-lg group-hover:shadow-accent-400/50 transition-all duration-300", children: feature.icon }), _jsx("h3", { className: "text-lg font-semibold text-white mb-3", children: feature.title }), _jsx("p", { className: "text-primary-100 text-sm leading-relaxed", children: feature.description })] })] }, index))) })] })] }));
 }
 //# sourceMappingURL=Features.js.map

@@ -103,13 +103,13 @@ export function RecurringMessagesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 dark:from-primary-900 to-primary-100 dark:to-primary-950 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-secondary-900 dark:text-secondary-50 mb-2">🔄 Recurring Messages</h1>
-            <p className="text-secondary-600 dark:text-secondary-400">Automate regular communications</p>
+            <h1 className="text-4xl font-bold text-primary-900 dark:text-primary-50 mb-2">🔄 Recurring Messages</h1>
+            <p className="text-primary-600 dark:text-primary-400">Automate regular communications</p>
           </div>
           <Button
             variant="primary"
@@ -130,10 +130,10 @@ export function RecurringMessagesPage() {
             <div className="mb-6">
               <span className="text-6xl">🔄</span>
             </div>
-            <h2 className="text-2xl font-bold text-secondary-900 dark:text-secondary-50 mb-3">
+            <h2 className="text-2xl font-bold text-primary-900 dark:text-primary-50 mb-3">
               No Recurring Messages Yet
             </h2>
-            <p className="text-secondary-600 dark:text-secondary-400 mb-6 max-w-md mx-auto">
+            <p className="text-primary-600 dark:text-primary-400 mb-6 max-w-md mx-auto">
               Create recurring messages to automatically send messages on a regular schedule.
             </p>
             <Button
@@ -156,10 +156,10 @@ export function RecurringMessagesPage() {
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-50">
+                    <h3 className="text-lg font-semibold text-primary-900 dark:text-primary-50">
                       {message.name}
                     </h3>
-                    <p className="text-sm text-secondary-600 dark:text-secondary-400 mt-1">
+                    <p className="text-sm text-primary-600 dark:text-primary-400 mt-1">
                       {getFrequencyLabel(message.frequency)}
                     </p>
                   </div>
@@ -168,22 +168,22 @@ export function RecurringMessagesPage() {
                     className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
                       message.isActive
                         ? 'bg-success-100 dark:bg-success-900 text-success-800 dark:text-success-200'
-                        : 'bg-secondary-200 dark:bg-secondary-700 text-secondary-800 dark:text-secondary-300'
+                        : 'bg-primary-200 dark:bg-primary-700 text-primary-800 dark:text-primary-300'
                     }`}
                   >
                     {message.isActive ? '✅ Active' : '⏸️ Paused'}
                   </button>
                 </div>
 
-                <p className="text-secondary-700 dark:text-secondary-300 text-sm mb-4 line-clamp-2">
+                <p className="text-primary-700 dark:text-primary-300 text-sm mb-4 line-clamp-2">
                   {message.content}
                 </p>
 
                 <Card variant="highlight" className="mb-4">
-                  <p className="text-secondary-900 dark:text-secondary-50 text-sm">
+                  <p className="text-primary-900 dark:text-primary-50 text-sm">
                     <strong>⏱️ Next send:</strong> {formatNextSend(message.nextSendAt)}
                   </p>
-                  <p className="text-secondary-600 dark:text-secondary-400 text-xs mt-2">
+                  <p className="text-primary-600 dark:text-primary-400 text-xs mt-2">
                     {new Date(message.nextSendAt).toLocaleString()}
                   </p>
                 </Card>

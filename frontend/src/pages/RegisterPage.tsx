@@ -80,16 +80,16 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-neutral-950 flex items-center justify-center p-4 py-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-white to-primary-50 dark:from-primary-950 dark:to-primary-900 flex items-center justify-center p-4 py-8 relative overflow-hidden">
       {/* Subtle background accent */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-primary-500 opacity-5 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-accent-500 opacity-10 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="w-full max-w-2xl relative z-10 animate-fadeIn">
         <div className="text-center mb-12">
           {/* Logo */}
           <div className="flex items-center justify-center mb-6">
-            <div className="w-14 h-14 bg-primary-500 rounded-xl flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
-              <span className="text-white font-bold text-2xl">YW</span>
+            <div className="w-14 h-14 bg-accent-500 rounded-xl flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
+              <span className="text-primary-900 font-bold text-2xl">C</span>
             </div>
           </div>
 
@@ -203,7 +203,7 @@ export function RegisterPage() {
               Already have an account?{' '}
               <Link
                 to="/login"
-                className="text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300 font-semibold transition-colors"
+                className="text-accent-500 hover:text-accent-400 dark:text-accent-400 dark:hover:text-accent-300 font-semibold transition-colors"
               >
                 Login here
               </Link>

@@ -75,11 +75,11 @@ export default function Pricing() {
   };
 
   return (
-    <section id="pricing" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-blue-federal to-blue-marian overflow-hidden transition-colors duration-normal">
+    <section id="pricing" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-primary-900 to-primary-800 overflow-hidden transition-colors duration-normal">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-1/3 w-96 h-96 bg-blue-pacific opacity-10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-blue-sky-blue opacity-15 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-0 right-1/3 w-96 h-96 bg-accent-500 opacity-10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-accent-400 opacity-15 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
 
       <div className="relative max-w-7xl mx-auto">
@@ -87,9 +87,9 @@ export default function Pricing() {
         <div className="text-center mb-16 animate-fadeIn">
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight tracking-tight">
             Simple, Transparent{' '}
-            <span className="bg-gradient-to-r from-blue-pacific via-blue-sky-blue to-blue-honolulu bg-clip-text text-transparent">Pricing</span>
+            <span className="bg-gradient-to-r from-accent-500 via-accent-400 to-accent-300 bg-clip-text text-transparent">Pricing</span>
           </h2>
-          <p className="text-lg text-blue-100 max-w-3xl mx-auto font-light leading-relaxed">
+          <p className="text-lg text-primary-100 max-w-3xl mx-auto font-light leading-relaxed">
             Choose the plan that fits your church. All plans include a 14-day free trial. No credit card required.
           </p>
         </div>
@@ -106,21 +106,21 @@ export default function Pricing() {
             >
               {/* Glow effect for highlighted card */}
               {plan.highlight && (
-                <div className="absolute -inset-1 bg-gradient-to-r from-blue-pacific via-blue-sky-blue to-blue-honolulu rounded-2xl blur-2xl opacity-30 group-hover:opacity-50 transition duration-500 animate-pulse -z-10"></div>
+                <div className="absolute -inset-1 bg-gradient-to-r from-accent-500 via-accent-400 to-accent-300 rounded-2xl blur-2xl opacity-30 group-hover:opacity-50 transition duration-500 animate-pulse -z-10"></div>
               )}
 
               <div className={`relative bg-gradient-to-br rounded-2xl p-8 border transition-all duration-300 overflow-hidden h-full ${
                 plan.highlight
-                  ? 'from-blue-700/60 to-blue-marian/60 border-blue-500/80 shadow-2xl'
-                  : 'from-blue-700/40 to-blue-marian/40 border-blue-600/40 hover:border-blue-500/80'
+                  ? 'from-primary-700/60 to-primary-800/60 border-primary-500/80 shadow-2xl'
+                  : 'from-primary-700/40 to-primary-800/40 border-primary-600/40 hover:border-primary-500/80'
               }`}>
                 {/* Background gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-blue-marian/20 to-transparent pointer-events-none"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-primary-800/20 to-transparent pointer-events-none"></div>
 
                 {/* Popular Badge */}
                 {plan.highlight && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-                    <div className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-blue-pacific to-blue-sky-blue rounded-full text-white text-xs font-semibold">
+                    <div className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-accent-500 to-accent-400 rounded-full text-primary-900 text-xs font-semibold">
                       <Zap className="w-3 h-3" />
                       Most Popular
                     </div>
@@ -132,17 +132,17 @@ export default function Pricing() {
                   <div className="text-center mb-8 pt-4">
                     <h3 className="text-2xl font-semibold text-white mb-3">{plan.name}</h3>
                     <div className="mb-4">
-                      <span className="text-5xl font-bold bg-gradient-to-r from-blue-pacific to-blue-sky-blue bg-clip-text text-transparent">{plan.price}</span>
-                      <span className="text-blue-200 text-sm">/month</span>
+                      <span className="text-5xl font-bold bg-gradient-to-r from-accent-500 to-accent-400 bg-clip-text text-transparent">{plan.price}</span>
+                      <span className="text-primary-200 text-sm">/month</span>
                     </div>
-                    <p className="text-blue-100 text-sm">{plan.description}</p>
+                    <p className="text-primary-100 text-sm">{plan.description}</p>
                   </div>
 
                   <ul className="space-y-3 mb-8">
                     {plan.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-start gap-3">
-                        <Check className="w-5 h-5 text-blue-pacific flex-shrink-0 mt-0.5" />
-                        <span className="text-blue-100 text-sm">{feature}</span>
+                        <Check className="w-5 h-5 text-accent-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-primary-100 text-sm">{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -152,7 +152,7 @@ export default function Pricing() {
                     size="md"
                     onClick={handleStartTrial}
                     fullWidth
-                    className={plan.highlight ? 'bg-gradient-to-r from-blue-pacific to-blue-sky-blue hover:from-blue-400 hover:to-blue-300 text-blue-900' : ''}
+                    className={plan.highlight ? 'bg-gradient-to-r from-accent-500 to-accent-400 hover:from-accent-400 hover:to-accent-300 text-primary-900' : ''}
                   >
                     {plan.ctaText}
                   </Button>
@@ -164,12 +164,12 @@ export default function Pricing() {
 
         {/* Additional Info */}
         <div className="mt-16 text-center">
-          <p className="text-blue-200 mb-4 text-sm">
+          <p className="text-primary-200 mb-4 text-sm">
             All plans include: Secure messaging, message history, reply inbox, and mobile access
           </p>
-          <p className="text-sm text-blue-200">
+          <p className="text-sm text-primary-200">
             Need a custom plan?{' '}
-            <a href="mailto:support@connect.com" className="text-blue-pacific hover:text-blue-sky-blue font-semibold transition-colors">
+            <a href="mailto:support@connect.com" className="text-accent-500 hover:text-accent-400 font-semibold transition-colors">
               Contact us
             </a>
           </p>

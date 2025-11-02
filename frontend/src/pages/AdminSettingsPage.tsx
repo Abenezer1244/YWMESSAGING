@@ -96,24 +96,24 @@ export function AdminSettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-neutral-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-gradient-to-b from-white to-primary-50 dark:from-primary-950 dark:to-primary-900 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-neutral-900 dark:text-white mb-2">⚙️ Admin Settings</h1>
-          <p className="text-neutral-600 dark:text-neutral-400">Manage your church account and permissions</p>
+          <h1 className="text-4xl font-bold text-primary-900 dark:text-primary-50 mb-2">⚙️ Admin Settings</h1>
+          <p className="text-primary-600 dark:text-primary-400">Manage your church account and permissions</p>
         </div>
 
         {/* Tab Navigation */}
-        <Card variant="default" className="mb-8 border border-neutral-200 dark:border-neutral-800">
-          <div className="border-b border-neutral-200 dark:border-neutral-800">
+        <Card variant="default" className="mb-8 border border-primary-200 dark:border-primary-800">
+          <div className="border-b border-primary-200 dark:border-primary-800">
             <div className="flex">
               <button
                 onClick={() => setActiveTab('profile')}
                 className={`flex-1 px-4 py-4 text-center font-medium border-b-2 transition ${
                   activeTab === 'profile'
-                    ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                    : 'border-transparent text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white'
+                    ? 'border-accent-500 text-accent-600 dark:text-accent-400'
+                    : 'border-transparent text-primary-700 dark:text-primary-300 hover:text-primary-900 dark:hover:text-white'
                 }`}
               >
                 ⛪ Church Profile
@@ -122,8 +122,8 @@ export function AdminSettingsPage() {
                 onClick={() => setActiveTab('coadmins')}
                 className={`flex-1 px-4 py-4 text-center font-medium border-b-2 transition ${
                   activeTab === 'coadmins'
-                    ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                    : 'border-transparent text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white'
+                    ? 'border-accent-500 text-accent-600 dark:text-accent-400'
+                    : 'border-transparent text-primary-700 dark:text-primary-300 hover:text-primary-900 dark:hover:text-white'
                 }`}
               >
                 👥 Co-Admins
@@ -132,8 +132,8 @@ export function AdminSettingsPage() {
                 onClick={() => setActiveTab('logs')}
                 className={`flex-1 px-4 py-4 text-center font-medium border-b-2 transition ${
                   activeTab === 'logs'
-                    ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                    : 'border-transparent text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white'
+                    ? 'border-accent-500 text-accent-600 dark:text-accent-400'
+                    : 'border-transparent text-primary-700 dark:text-primary-300 hover:text-primary-900 dark:hover:text-white'
                 }`}
               >
                 📋 Activity Logs
@@ -146,7 +146,7 @@ export function AdminSettingsPage() {
             {/* Church Profile Tab */}
             {activeTab === 'profile' && (
               <div>
-                <h2 className="text-2xl font-bold text-neutral-900 dark:text-white mb-6">Church Profile</h2>
+                <h2 className="text-2xl font-bold text-primary-900 dark:text-primary-50 mb-6">Church Profile</h2>
 
                 {isLoading ? (
                   <div className="flex justify-center py-12">
@@ -180,18 +180,18 @@ export function AdminSettingsPage() {
 
                     {/* Account Info */}
                     {profile && (
-                      <Card variant="highlight" className="mb-6 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-800">
-                        <h3 className="font-semibold text-neutral-900 dark:text-white mb-3">Account Information</h3>
+                      <Card variant="highlight" className="mb-6 bg-accent-50 dark:bg-accent-900/30 border border-accent-200 dark:border-accent-800">
+                        <h3 className="font-semibold text-primary-900 dark:text-primary-50 mb-3">Account Information</h3>
                         <div className="space-y-2 text-sm">
                           <p>
-                            <span className="text-neutral-600 dark:text-neutral-400">Status:</span>{' '}
-                            <span className="font-medium text-neutral-900 dark:text-white">
+                            <span className="text-primary-600 dark:text-primary-400">Status:</span>{' '}
+                            <span className="font-medium text-primary-900 dark:text-primary-50">
                               {profile.subscriptionStatus}
                             </span>
                           </p>
                           <p>
-                            <span className="text-neutral-600 dark:text-neutral-400">Created:</span>{' '}
-                            <span className="font-medium text-neutral-900 dark:text-white">
+                            <span className="text-primary-600 dark:text-primary-400">Created:</span>{' '}
+                            <span className="font-medium text-primary-900 dark:text-primary-50">
                               {new Date(profile.createdAt).toLocaleDateString()}
                             </span>
                           </p>

@@ -76,13 +76,13 @@ export function TemplatesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-secondary-50 dark:from-secondary-900 to-secondary-100 dark:to-secondary-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 dark:from-primary-900 to-primary-100 dark:to-primary-950 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-secondary-900 dark:text-secondary-50 mb-2">📋 Message Templates</h1>
-            <p className="text-secondary-600 dark:text-secondary-400">Reuse message templates to save time</p>
+            <h1 className="text-4xl font-bold text-primary-900 dark:text-primary-50 mb-2">📋 Message Templates</h1>
+            <p className="text-primary-600 dark:text-primary-400">Reuse message templates to save time</p>
           </div>
           <Button
             variant="primary"
@@ -103,10 +103,10 @@ export function TemplatesPage() {
             <div className="mb-6">
               <span className="text-6xl">📋</span>
             </div>
-            <h2 className="text-2xl font-bold text-secondary-900 dark:text-secondary-50 mb-3">
+            <h2 className="text-2xl font-bold text-primary-900 dark:text-primary-50 mb-3">
               No Templates Yet
             </h2>
-            <p className="text-secondary-600 dark:text-secondary-400 mb-6 max-w-md mx-auto">
+            <p className="text-primary-600 dark:text-primary-400 mb-6 max-w-md mx-auto">
               Create templates to quickly send frequently used messages.
             </p>
             <Button
@@ -127,26 +127,26 @@ export function TemplatesPage() {
               >
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <h3 className="text-lg font-semibold text-secondary-900 dark:text-secondary-50">
+                    <h3 className="text-lg font-semibold text-primary-900 dark:text-primary-50">
                       {template.name}
                     </h3>
-                    <p className="text-sm text-secondary-600 dark:text-secondary-400 mt-1">
+                    <p className="text-sm text-primary-600 dark:text-primary-400 mt-1">
                       {getCategoryLabel(template.category)}
                     </p>
                   </div>
                   {template.isDefault && (
-                    <span className="inline-block px-2 py-1 bg-primary-100 dark:bg-primary-900 text-primary-800 dark:text-primary-200 text-xs font-semibold rounded">
+                    <span className="inline-block px-2 py-1 bg-accent-100 dark:bg-accent-900 text-accent-800 dark:text-accent-200 text-xs font-semibold rounded">
                       Default
                     </span>
                   )}
                 </div>
 
-                <p className="text-secondary-700 dark:text-secondary-300 text-sm mb-4 flex-grow line-clamp-3">
+                <p className="text-primary-700 dark:text-primary-300 text-sm mb-4 flex-grow line-clamp-3">
                   {template.content}
                 </p>
 
-                <div className="flex justify-between items-center mb-4 pt-4 border-t border-secondary-200 dark:border-secondary-700">
-                  <p className="text-xs text-secondary-600 dark:text-secondary-400">
+                <div className="flex justify-between items-center mb-4 pt-4 border-t border-primary-200 dark:border-primary-700">
+                  <p className="text-xs text-primary-600 dark:text-primary-400">
                     Used {template.usageCount} times
                   </p>
                 </div>

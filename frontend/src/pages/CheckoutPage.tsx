@@ -219,7 +219,7 @@ export function CheckoutPage() {
   const plan = planPrices[planName];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-neutral-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-gradient-to-b from-white to-primary-50 dark:from-primary-950 dark:to-primary-900 p-6 transition-colors duration-normal">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -274,7 +274,7 @@ export function CheckoutPage() {
             </div>
 
             {/* Features */}
-            <Card variant="highlight" className="bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-800">
+            <Card variant="highlight" className="bg-accent-50 dark:bg-accent-900/30 border border-accent-200 dark:border-accent-800">
               <p className="text-sm font-semibold text-neutral-900 dark:text-white mb-3">
                 Plan Includes:
               </p>
@@ -309,8 +309,8 @@ export function CheckoutPage() {
         </div>
 
         {/* Security Note */}
-        <Card variant="highlight" className="mt-8 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-800">
-          <p className="text-sm text-primary-700 dark:text-primary-300">
+        <Card variant="highlight" className="mt-8 bg-accent-50 dark:bg-accent-900/30 border border-accent-200 dark:border-accent-800">
+          <p className="text-sm text-accent-700 dark:text-accent-300">
             🔒 Your payment information is encrypted and processed securely by Stripe.
             We never store your card details.
           </p>

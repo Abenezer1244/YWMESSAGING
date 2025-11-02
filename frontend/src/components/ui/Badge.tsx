@@ -31,14 +31,14 @@ const Badge: React.FC<BadgeProps> = ({
 
   const colorConfig = {
     primary: {
-      solid: 'bg-primary-600 dark:bg-primary-500 text-white',
-      outline: 'border-2 border-primary-600 dark:border-primary-400 text-primary-600 dark:text-primary-400 bg-transparent',
-      soft: 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-200',
+      solid: 'bg-accent-600 dark:bg-accent-500 text-primary-900 dark:text-primary-900',
+      outline: 'border-2 border-accent-600 dark:border-accent-400 text-accent-600 dark:text-accent-400 bg-transparent',
+      soft: 'bg-accent-100 dark:bg-accent-900 text-accent-700 dark:text-accent-200',
     },
     secondary: {
-      solid: 'bg-secondary-600 dark:bg-secondary-500 text-white',
-      outline: 'border-2 border-secondary-600 dark:border-secondary-400 text-secondary-600 dark:text-secondary-400 bg-transparent',
-      soft: 'bg-secondary-100 dark:bg-secondary-800 text-secondary-700 dark:text-secondary-200',
+      solid: 'bg-primary-600 dark:bg-primary-500 text-white',
+      outline: 'border-2 border-primary-600 dark:border-primary-400 text-primary-600 dark:text-primary-400 bg-transparent',
+      soft: 'bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-200',
     },
     success: {
       solid: 'bg-success-600 dark:bg-success-500 text-white',
