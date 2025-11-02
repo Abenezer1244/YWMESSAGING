@@ -74,14 +74,14 @@ export default function Pricing() {
   };
 
   return (
-    <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-warm-black-olive to-warm-outer-space transition-colors duration-normal">
+    <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-blue-50 to-white transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-16 animate-fadeIn">
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4 leading-tight tracking-tight">
-            Simple, Transparent <span className="text-warm-copper">Pricing</span>
+          <h2 className="text-4xl sm:text-5xl font-bold text-blue-900 mb-4 leading-tight tracking-tight">
+            Simple, Transparent <span className="text-blue-pacific">Pricing</span>
           </h2>
-          <p className="text-lg text-warm-100 max-w-3xl mx-auto font-light leading-relaxed">
+          <p className="text-lg text-blue-700 max-w-3xl mx-auto font-light leading-relaxed">
             Choose the plan that fits your church. All plans include a 14-day free trial. No credit card required.
           </p>
         </div>
@@ -91,10 +91,10 @@ export default function Pricing() {
           {plans.map((plan, index) => (
             <div
               key={index}
-              className={`relative bg-gradient-to-br from-warm-coffee to-warm-coyote rounded-xl border p-8 transition-all duration-300 animate-slideUp ${
+              className={`relative bg-white rounded-xl border p-8 transition-all duration-300 animate-slideUp ${
                 plan.highlight
-                  ? 'border-warm-copper shadow-dual-lg scale-105 md:scale-110'
-                  : 'border-warm-coffee hover:border-warm-copper hover:shadow-dual-lg'
+                  ? 'border-blue-pacific shadow-dual-lg scale-105 md:scale-110'
+                  : 'border-blue-200 hover:border-blue-pacific hover:shadow-dual-lg'
               }`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
@@ -112,12 +112,12 @@ export default function Pricing() {
               )}
 
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-semibold text-white mb-2">{plan.name}</h3>
+                <h3 className="text-2xl font-semibold text-blue-900 mb-2">{plan.name}</h3>
                 <div className="mb-4">
-                  <span className="text-5xl font-bold text-warm-copper">{plan.price}</span>
-                  <span className="text-warm-100 text-sm">/month</span>
+                  <span className="text-5xl font-bold text-blue-pacific">{plan.price}</span>
+                  <span className="text-blue-600 text-sm">/month</span>
                 </div>
-                <p className="text-warm-100 text-sm">{plan.description}</p>
+                <p className="text-blue-700 text-sm">{plan.description}</p>
               </div>
 
               <ul className="space-y-3 mb-8">
@@ -134,7 +134,7 @@ export default function Pricing() {
                         clipRule="evenodd"
                       />
                     </svg>
-                    <span className="text-warm-50 text-sm">{feature}</span>
+                    <span className="text-blue-900 text-sm">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -153,11 +153,11 @@ export default function Pricing() {
 
         {/* Additional Info */}
         <div className="mt-12 text-center">
-          <p className="text-warm-100 mb-4 text-sm">
+          <p className="text-blue-700 mb-4 text-sm">
             All plans include: Secure messaging, message history, reply inbox, and mobile access
           </p>
-          <p className="text-sm text-warm-100">
-            Need a custom plan? <a href="mailto:support@connect-yw.com" className="text-warm-copper hover:text-warm-brown-sugar font-semibold">Contact us</a>
+          <p className="text-sm text-blue-700">
+            Need a custom plan? <a href="mailto:support@connect.com" className="text-blue-pacific hover:text-blue-honolulu font-semibold">Contact us</a>
           </p>
         </div>
       </div>

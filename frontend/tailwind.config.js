@@ -50,19 +50,23 @@ export default {
   				DEFAULT: 'hsl(var(--accent))',
   				foreground: 'hsl(var(--accent-foreground))'
   			},
-  			warm: {
-  				'50': '#f5ede4',
-  				'100': '#e8dcc8',
-  				copper: '#b76935',
-  				'brown-sugar': '#a56336',
-  				'raw-umber': '#935e38',
-  				coyote: '#815839',
-  				coffee: '#6f523b',
-  				'walnut-brown': '#5c4d3c',
-  				'black-olive': '#4a473e',
-  				'outer-space': '#38413f',
-  				gunmetal: '#263c41',
-  				'gunmetal-2': '#143642'
+  			blue: {
+  				'50': '#caf0f8',
+  				'100': '#ade8f4',
+  				'200': '#90e0ef',
+  				'300': '#48cae4',
+  				'400': '#00b4d8',
+  				'500': '#0096c7',
+  				'600': '#0077b6',
+  				'700': '#023e8a',
+  				'800': '#03045e',
+  				'900': '#030449',
+  				cyan: '#caf0f8',
+  				'sky-blue': '#48cae4',
+  				'pacific': '#00b4d8',
+  				'honolulu': '#0077b6',
+  				'marian': '#023e8a',
+  				'federal': '#03045e'
   			},
   			success: {
   				'50': '#f0fdf4',

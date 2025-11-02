@@ -65,15 +65,15 @@ const features: Feature[] = [
 
 export default function Features() {
   return (
-    <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-warm-walnut-brown to-warm-coffee transition-colors duration-normal">
+    <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-blue-50 to-white transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-16 animate-fadeIn">
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4 leading-tight tracking-tight">
+          <h2 className="text-4xl sm:text-5xl font-bold text-blue-900 mb-4 leading-tight tracking-tight">
             Everything You Need to{' '}
-            <span className="text-warm-copper">Stay Connected</span>
+            <span className="text-blue-pacific">Stay Connected</span>
           </h2>
-          <p className="text-lg text-warm-100 max-w-3xl mx-auto font-light leading-relaxed">
+          <p className="text-lg text-blue-700 max-w-3xl mx-auto font-light leading-relaxed">
             Powerful features designed specifically for churches managing multiple locations and hundreds of members.
           </p>
         </div>
@@ -84,14 +84,14 @@ export default function Features() {
             <Card
               key={index}
               variant="default"
-              className="group animate-slideUp p-8 bg-gradient-to-br from-warm-brown-sugar to-warm-raw-umber border border-warm-coffee hover:shadow-dual-lg transition-all duration-normal"
+              className="group animate-slideUp p-8 bg-white border border-blue-200 hover:shadow-dual-lg transition-all duration-normal rounded-xl"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="w-12 h-12 bg-warm-coyote text-warm-copper rounded-lg flex items-center justify-center mb-5 group-hover:bg-warm-copper group-hover:text-white transition-colors duration-normal">
+              <div className="w-12 h-12 bg-blue-100 text-blue-pacific rounded-lg flex items-center justify-center mb-5 group-hover:bg-blue-pacific group-hover:text-white transition-colors duration-normal">
                 {feature.icon}
               </div>
-              <h3 className="text-lg font-semibold text-white mb-3">{feature.title}</h3>
-              <p className="text-warm-100 text-sm leading-relaxed">{feature.description}</p>
+              <h3 className="text-lg font-semibold text-blue-900 mb-3">{feature.title}</h3>
+              <p className="text-blue-600 text-sm leading-relaxed">{feature.description}</p>
             </Card>
           ))}
         </div>
