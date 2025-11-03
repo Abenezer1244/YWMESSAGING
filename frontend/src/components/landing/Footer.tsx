@@ -76,24 +76,24 @@ export default function Footer() {
             <h3 className="text-white font-semibold mb-5 text-sm tracking-tight">Company</h3>
             <ul className="space-y-3 text-sm">
               <li>
-                <a href="#" className="text-slate-300 hover:text-accent-400 transition-colors">
+                <Link to="/about" className="text-slate-300 hover:text-accent-400 transition-colors">
                   About Us
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="mailto:support@connect.com" className="text-slate-300 hover:text-accent-400 transition-colors">
+                <Link to="/contact" className="text-slate-300 hover:text-accent-400 transition-colors">
                   Contact
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-slate-300 hover:text-accent-400 transition-colors">
+                <Link to="/blog" className="text-slate-300 hover:text-accent-400 transition-colors">
                   Blog
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-slate-300 hover:text-accent-400 transition-colors">
+                <Link to="/careers" className="text-slate-300 hover:text-accent-400 transition-colors">
                   Careers
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
