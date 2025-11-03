@@ -97,7 +97,7 @@ export function AdminSettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-white dark:bg-slate-950 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Back Button */}
         <div className="mb-6">
@@ -106,20 +106,20 @@ export function AdminSettingsPage() {
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">⚙️ Admin Settings</h1>
-          <p className="text-slate-300">Manage your church account and permissions</p>
+          <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">⚙️ Admin Settings</h1>
+          <p className="text-slate-700 dark:text-slate-300">Manage your church account and permissions</p>
         </div>
 
         {/* Tab Navigation */}
-        <Card variant="default" className="mb-8 border border-slate-700 bg-slate-900/50">
-          <div className="border-b border-slate-700">
+        <Card variant="default" className="mb-8 border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900/50">
+          <div className="border-b border-slate-300 dark:border-slate-700">
             <div className="flex">
               <button
                 onClick={() => setActiveTab('profile')}
                 className={`flex-1 px-4 py-4 text-center font-medium border-b-2 transition ${
                   activeTab === 'profile'
                     ? 'border-accent-500 text-accent-400'
-                    : 'border-transparent text-slate-400 hover:text-white'
+                    : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 ⛪ Church Profile
@@ -129,7 +129,7 @@ export function AdminSettingsPage() {
                 className={`flex-1 px-4 py-4 text-center font-medium border-b-2 transition ${
                   activeTab === 'coadmins'
                     ? 'border-accent-500 text-accent-400'
-                    : 'border-transparent text-slate-400 hover:text-white'
+                    : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 👥 Co-Admins
@@ -139,7 +139,7 @@ export function AdminSettingsPage() {
                 className={`flex-1 px-4 py-4 text-center font-medium border-b-2 transition ${
                   activeTab === 'logs'
                     ? 'border-accent-500 text-accent-400'
-                    : 'border-transparent text-slate-400 hover:text-white'
+                    : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 📋 Activity Logs
@@ -152,7 +152,7 @@ export function AdminSettingsPage() {
             {/* Church Profile Tab */}
             {activeTab === 'profile' && (
               <div>
-                <h2 className="text-2xl font-bold text-white mb-6">Church Profile</h2>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Church Profile</h2>
 
                 {isLoading ? (
                   <div className="flex justify-center py-12">
@@ -187,17 +187,17 @@ export function AdminSettingsPage() {
                     {/* Account Info */}
                     {profile && (
                       <Card variant="highlight" className="mb-6 bg-accent-500/10 border border-accent-500/30">
-                        <h3 className="font-semibold text-white mb-3">Account Information</h3>
+                        <h3 className="font-semibold text-slate-900 dark:text-white mb-3">Account Information</h3>
                         <div className="space-y-2 text-sm">
                           <p>
-                            <span className="text-slate-400">Status:</span>{' '}
-                            <span className="font-medium text-white">
+                            <span className="text-slate-600 dark:text-slate-400">Status:</span>{' '}
+                            <span className="font-medium text-slate-900 dark:text-white">
                               {profile.subscriptionStatus}
                             </span>
                           </p>
                           <p>
-                            <span className="text-slate-400">Created:</span>{' '}
-                            <span className="font-medium text-white">
+                            <span className="text-slate-600 dark:text-slate-400">Created:</span>{' '}
+                            <span className="font-medium text-slate-900 dark:text-white">
                               {new Date(profile.createdAt).toLocaleDateString()}
                             </span>
                           </p>

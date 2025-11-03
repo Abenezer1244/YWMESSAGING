@@ -78,14 +78,14 @@ export function BranchesPage() {
 
   if (isLoading && branches.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-950 p-6 flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-slate-950 p-6 flex items-center justify-center">
         <Spinner size="lg" text="Loading branches..." />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-white dark:bg-slate-950 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Back Button */}
         <div className="mb-6">
@@ -95,8 +95,8 @@ export function BranchesPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2">📍 Branches</h1>
-            <p className="text-slate-300">Manage your church locations</p>
+            <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">📍 Branches</h1>
+            <p className="text-slate-700 dark:text-slate-300">Manage your church locations</p>
           </div>
           <Button
             variant="primary"
@@ -108,14 +108,14 @@ export function BranchesPage() {
         </div>
 
         {branches.length === 0 ? (
-          <Card variant="highlight" className="text-center py-16 bg-slate-900/50 border-slate-700">
+          <Card variant="highlight" className="text-center py-16 bg-slate-50 dark:bg-slate-900/50 border-slate-300 dark:border-slate-700">
             <div className="mb-6">
               <span className="text-6xl">📍</span>
             </div>
-            <h2 className="text-2xl font-bold text-white mb-3">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
               No Branches Yet
             </h2>
-            <p className="text-slate-300 mb-6 max-w-md mx-auto">
+            <p className="text-slate-700 dark:text-slate-300 mb-6 max-w-md mx-auto">
               Create your first branch to start managing your church locations and organizing your congregation.
             </p>
             <Button
@@ -129,22 +129,22 @@ export function BranchesPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {branches.map((branch) => (
-              <Card key={branch.id} variant="default" className="hover:shadow-lg transition-shadow bg-slate-900/50 border-slate-700">
+              <Card key={branch.id} variant="default" className="hover:shadow-lg transition-shadow bg-slate-50 dark:bg-slate-900/50 border-slate-300 dark:border-slate-700">
                 <div className="mb-4">
-                  <h3 className="text-xl font-bold text-white mb-2">{branch.name}</h3>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{branch.name}</h3>
                   {branch.description && (
-                    <p className="text-sm text-slate-300">{branch.description}</p>
+                    <p className="text-sm text-slate-700 dark:text-slate-300">{branch.description}</p>
                   )}
                 </div>
 
-                <div className="space-y-2 mb-6 pb-6 border-b border-slate-700">
+                <div className="space-y-2 mb-6 pb-6 border-b border-slate-300 dark:border-slate-700">
                   {branch.address && (
-                    <p className="text-sm text-slate-300">
+                    <p className="text-sm text-slate-700 dark:text-slate-300">
                       <span className="font-medium">📍</span> {branch.address}
                     </p>
                   )}
                   {branch.phone && (
-                    <p className="text-sm text-slate-300">
+                    <p className="text-sm text-slate-700 dark:text-slate-300">
                       <span className="font-medium">📞</span> {branch.phone}
                     </p>
                   )}
@@ -153,11 +153,11 @@ export function BranchesPage() {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="text-center">
                     <p className="text-2xl font-bold text-accent-400">{branch.groupCount}</p>
-                    <p className="text-xs text-slate-400 uppercase">Groups</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 uppercase">Groups</p>
                   </div>
                   <div className="text-center">
                     <p className="text-2xl font-bold text-accent-400">{branch.memberCount}</p>
-                    <p className="text-xs text-slate-400 uppercase">Members</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 uppercase">Members</p>
                   </div>
                 </div>
 

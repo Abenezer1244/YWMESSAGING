@@ -51,7 +51,7 @@ export function MessageHistoryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-white dark:bg-slate-950 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Back Button */}
         <div className="mb-6">
@@ -60,13 +60,13 @@ export function MessageHistoryPage() {
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">📜 Message History</h1>
-          <p className="text-slate-300">{total} total messages</p>
+          <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">📜 Message History</h1>
+          <p className="text-slate-700 dark:text-slate-300">{total} total messages</p>
         </div>
 
         {/* Filter */}
-        <Card variant="default" className="mb-6 bg-slate-900/50 border-slate-700">
-          <label className="block text-sm font-semibold text-white mb-3">
+        <Card variant="default" className="mb-6 bg-slate-50 dark:bg-slate-900/50 border-slate-300 dark:border-slate-700">
+          <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-3">
             🔍 Filter by Status
           </label>
           <select
@@ -75,7 +75,7 @@ export function MessageHistoryPage() {
               setStatusFilter(e.target.value);
               setPage(1);
             }}
-            className="px-4 py-2 border border-slate-600 rounded-lg bg-slate-800 text-white focus:outline-none focus:ring-2 focus:ring-accent-500 transition-colors duration-normal"
+            className="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent-500 transition-colors duration-normal"
           >
             <option value="">All Statuses</option>
             <option value="pending">Pending</option>
@@ -90,14 +90,14 @@ export function MessageHistoryPage() {
             <Spinner size="lg" text="Loading messages..." />
           </div>
         ) : messages.length === 0 ? (
-          <Card variant="highlight" className="text-center py-16 bg-slate-900/50 border-slate-700">
+          <Card variant="highlight" className="text-center py-16 bg-slate-50 dark:bg-slate-900/50 border-slate-300 dark:border-slate-700">
             <div className="mb-6">
               <span className="text-6xl">📜</span>
             </div>
-            <h2 className="text-2xl font-bold text-white mb-3">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
               No Messages Found
             </h2>
-            <p className="text-slate-300">
+            <p className="text-slate-700 dark:text-slate-300">
               Your message history will appear here after you send messages.
             </p>
           </Card>
@@ -106,34 +106,34 @@ export function MessageHistoryPage() {
             <Card variant="default" className="overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full">
-                  <thead className="bg-primary-100 dark:bg-primary-800 border-b border-primary-200 dark:border-primary-700">
+                  <thead className="bg-slate-100 dark:bg-slate-800/70 border-b border-slate-300 dark:border-slate-700">
                     <tr>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-primary-900 dark:text-primary-50">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 dark:text-white">
                         Message
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-primary-900 dark:text-primary-50">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 dark:text-white">
                         Recipients
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-primary-900 dark:text-primary-50">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 dark:text-white">
                         Delivery
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-primary-900 dark:text-primary-50">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 dark:text-white">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-primary-900 dark:text-primary-50">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 dark:text-white">
                         Sent
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-primary-200 dark:divide-primary-700">
+                  <tbody className="divide-y divide-slate-300 dark:divide-slate-700">
                     {messages.map((message) => (
-                      <tr key={message.id} className="hover:bg-primary-50 dark:hover:bg-primary-700/50 transition-colors duration-normal">
+                      <tr key={message.id} className="hover:bg-slate-200 dark:hover:bg-slate-800/50 transition-colors duration-normal">
                         <td className="px-6 py-4">
-                          <p className="text-sm text-primary-900 dark:text-primary-50 font-medium truncate max-w-xs">
+                          <p className="text-sm text-slate-900 dark:text-white font-medium truncate max-w-xs">
                             {message.content.slice(0, 50)}
                             {message.content.length > 50 ? '...' : ''}
                           </p>
-                          <p className="text-xs text-primary-600 dark:text-primary-400 mt-1">
+                          <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
                             {message.targetType === 'individual'
                               ? 'Individual'
                               : message.targetType === 'groups'
@@ -144,16 +144,16 @@ export function MessageHistoryPage() {
                           </p>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-primary-900 dark:text-primary-50 font-medium">
+                          <div className="text-sm text-slate-900 dark:text-white font-medium">
                             {message.totalRecipients}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm">
-                            <p className="text-primary-900 dark:text-primary-50 font-medium">
+                            <p className="text-slate-900 dark:text-white font-medium">
                               {message.deliveredCount}/{message.totalRecipients}
                             </p>
-                            <p className="text-primary-600 dark:text-primary-400 text-xs">
+                            <p className="text-slate-600 dark:text-slate-400 text-xs">
                               {message.deliveryRate || 0}%
                             </p>
                           </div>
@@ -167,7 +167,7 @@ export function MessageHistoryPage() {
                             {message.status.charAt(0).toUpperCase() + message.status.slice(1)}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-primary-600 dark:text-primary-400">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400">
                           {new Date(message.createdAt).toLocaleDateString()}
                           <br />
                           {new Date(message.createdAt).toLocaleTimeString()}
@@ -190,7 +190,7 @@ export function MessageHistoryPage() {
                 >
                   ← Previous
                 </Button>
-                <div className="px-4 py-2 text-primary-700 dark:text-primary-300 font-medium">
+                <div className="px-4 py-2 text-slate-700 dark:text-slate-300 font-medium">
                   Page {page} of {pages}
                 </div>
                 <Button

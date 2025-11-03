@@ -85,7 +85,7 @@ export function SendMessagePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-white dark:bg-slate-950 p-6 transition-colors duration-normal">
       <div className="max-w-4xl mx-auto">
         {/* Back Button */}
         <div className="mb-6">
@@ -95,8 +95,8 @@ export function SendMessagePage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2">📨 Send Message</h1>
-            <p className="text-slate-300">Reach your congregation with direct SMS messages</p>
+            <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">📨 Send Message</h1>
+            <p className="text-slate-700 dark:text-slate-300">Reach your congregation with direct SMS messages</p>
           </div>
         </div>
 

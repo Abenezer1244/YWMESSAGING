@@ -43,7 +43,7 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 transition-colors duration-normal">
+    <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-normal">
       {/* Back Button */}
       <div className="p-6">
         <BackButton variant="ghost" />
@@ -52,8 +52,8 @@ export default function AboutPage() {
       {/* Header Section */}
       <div className="px-6 py-12 bg-gradient-to-b from-slate-900 to-slate-950">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold text-white mb-4">About Connect</h1>
-          <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+          <h1 className="text-5xl font-bold text-slate-900 dark:text-white mb-4">About Connect</h1>
+          <p className="text-xl text-slate-700 dark:text-slate-300 max-w-2xl mx-auto">
             Empowering faith communities with modern communication technology
           </p>
         </div>
@@ -63,8 +63,8 @@ export default function AboutPage() {
       <div className="max-w-4xl mx-auto px-6 py-12">
         {/* Mission Section */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-white mb-6">Our Story</h2>
-          <div className="space-y-4 text-slate-300 leading-relaxed">
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-6">Our Story</h2>
+          <div className="space-y-4 text-slate-700 dark:text-slate-300 leading-relaxed">
             <p>
               Connect was founded with a simple belief: churches need better tools to communicate with their congregations. Whether it's important announcements, event reminders, or emergency notifications, reliable communication is essential for modern faith communities.
             </p>
@@ -79,16 +79,16 @@ export default function AboutPage() {
 
         {/* Values Section */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-white mb-12">Our Values</h2>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-12">Our Values</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {values.map((value, idx) => (
               <div
                 key={idx}
-                className="bg-slate-900/50 border border-slate-700 rounded-lg p-6 hover:border-accent-500/50 transition-colors"
+                className="bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg p-6 hover:border-accent-500/50 transition-colors"
               >
                 <div className="text-4xl mb-4">{value.icon}</div>
-                <h3 className="text-xl font-semibold text-white mb-3">{value.title}</h3>
-                <p className="text-slate-400 text-sm">{value.description}</p>
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">{value.title}</h3>
+                <p className="text-slate-600 dark:text-slate-400 text-sm">{value.description}</p>
               </div>
             ))}
           </div>
@@ -96,15 +96,15 @@ export default function AboutPage() {
 
         {/* Team Section */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-white mb-6">Our Team</h2>
-          <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-8">
-            <p className="text-slate-300 mb-4">
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-6">Our Team</h2>
+          <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg p-8">
+            <p className="text-slate-700 dark:text-slate-300 mb-4">
               We are a dedicated team of developers, designers, and church ministry professionals committed to making a difference in how faith communities communicate.
             </p>
-            <p className="text-slate-300 mb-4">
+            <p className="text-slate-700 dark:text-slate-300 mb-4">
               Our diverse backgrounds—from software engineering to pastoral ministry—enable us to build solutions that truly understand the needs of churches.
             </p>
-            <p className="text-slate-400 text-sm">
+            <p className="text-slate-600 dark:text-slate-400 text-sm">
               We're growing! If you're passionate about technology and faith communities, we'd love to hear from you. Visit our Careers page to learn about open positions.
             </p>
           </div>
@@ -112,29 +112,29 @@ export default function AboutPage() {
 
         {/* Why Choose Us Section */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-white mb-6">Why Choose Connect?</h2>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-6">Why Choose Connect?</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-accent-500/10 border border-accent-500/30 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-white mb-3">Built for Churches</h3>
-              <p className="text-slate-300 text-sm">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">Built for Churches</h3>
+              <p className="text-slate-700 dark:text-slate-300 text-sm">
                 We understand the unique communication needs of faith communities and have built features specifically for churches.
               </p>
             </div>
             <div className="bg-accent-500/10 border border-accent-500/30 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-white mb-3">Reliable & Secure</h3>
-              <p className="text-slate-300 text-sm">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">Reliable & Secure</h3>
+              <p className="text-slate-700 dark:text-slate-300 text-sm">
                 Enterprise-grade security and 99.9% uptime ensures your communications reach your congregation every time.
               </p>
             </div>
             <div className="bg-accent-500/10 border border-accent-500/30 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-white mb-3">Affordable Plans</h3>
-              <p className="text-slate-300 text-sm">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">Affordable Plans</h3>
+              <p className="text-slate-700 dark:text-slate-300 text-sm">
                 Starting at just $49/month, our plans are designed to fit organizations of any size and budget.
               </p>
             </div>
             <div className="bg-accent-500/10 border border-accent-500/30 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-white mb-3">World-Class Support</h3>
-              <p className="text-slate-300 text-sm">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">World-Class Support</h3>
+              <p className="text-slate-700 dark:text-slate-300 text-sm">
                 Our support team is dedicated to helping you succeed with personalized assistance and training.
               </p>
             </div>
@@ -143,13 +143,13 @@ export default function AboutPage() {
 
         {/* CTA Section */}
         <section className="bg-gradient-to-r from-accent-500/10 to-blue-500/10 border border-accent-500/30 rounded-lg p-8 text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">Ready to Transform Your Communication?</h2>
-          <p className="text-slate-300 mb-6 max-w-2xl mx-auto">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Ready to Transform Your Communication?</h2>
+          <p className="text-slate-700 dark:text-slate-300 mb-6 max-w-2xl mx-auto">
             Join hundreds of churches already using Connect to strengthen their communities.
           </p>
           <Link
             to="/register"
-            className="inline-block bg-accent-500 hover:bg-accent-600 text-white font-semibold py-3 px-8 rounded-lg transition-colors"
+            className="inline-block bg-accent-500 hover:bg-accent-600 text-slate-900 dark:text-white font-semibold py-3 px-8 rounded-lg transition-colors"
           >
             Start Your Free Trial
           </Link>
@@ -157,7 +157,7 @@ export default function AboutPage() {
       </div>
 
       {/* Navigation Links */}
-      <div className="max-w-4xl mx-auto px-6 py-8 border-t border-slate-700 mt-12">
+      <div className="max-w-4xl mx-auto px-6 py-8 border-t border-slate-300 dark:border-slate-700 mt-12">
         <div className="flex gap-8">
           <Link to="/" className="text-accent-400 hover:text-accent-300 font-medium">
             ← Back to Home

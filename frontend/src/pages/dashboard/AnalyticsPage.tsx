@@ -56,7 +56,7 @@ export function AnalyticsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-white dark:bg-slate-950 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Back Button */}
         <div className="mb-6">
@@ -66,13 +66,13 @@ export function AnalyticsPage() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2">📊 Analytics</h1>
-            <p className="text-slate-300">Track your messaging performance and engagement</p>
+            <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">📊 Analytics</h1>
+            <p className="text-slate-700 dark:text-slate-300">Track your messaging performance and engagement</p>
           </div>
           <select
             value={days}
             onChange={(e) => setDays(parseInt(e.target.value))}
-            className="px-4 py-2 border border-slate-600 rounded-lg bg-slate-800 text-white focus:outline-none focus:ring-2 focus:ring-accent-500 transition-colors duration-normal"
+            className="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent-500 transition-colors duration-normal"
           >
             <option value={7}>Last 7 days</option>
             <option value={30}>Last 30 days</option>
@@ -90,8 +90,8 @@ export function AnalyticsPage() {
             {/* Summary Cards */}
             {summaryStats && (
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <Card variant="default" className="text-center bg-slate-900/50 border-slate-700">
-                  <p className="text-slate-400 text-sm mb-2">📨 Total Messages</p>
+                <Card variant="default" className="text-center bg-slate-50 dark:bg-slate-900/50 border-slate-300 dark:border-slate-700">
+                  <p className="text-slate-600 dark:text-slate-400 text-sm mb-2">📨 Total Messages</p>
                   <p className="text-3xl font-bold text-accent-400">
                     {summaryStats.totalMessages}
                   </p>
@@ -129,8 +129,8 @@ export function AnalyticsPage() {
 
             {/* Message Volume Chart */}
             {messageStats && messageStats.byDay.length > 0 && (
-              <Card variant="default" className="bg-slate-900/50 border-slate-700">
-                <h2 className="text-lg font-semibold text-white mb-4">
+              <Card variant="default" className="bg-slate-50 dark:bg-slate-900/50 border-slate-300 dark:border-slate-700">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
                   📈 Message Volume
                 </h2>
                 <ResponsiveContainer width="100%" height={300}>
@@ -171,8 +171,8 @@ export function AnalyticsPage() {
 
             {/* Branch Comparison */}
             {branchStats.length > 0 && (
-              <Card variant="default" className="bg-slate-900/50 border-slate-700">
-                <h2 className="text-lg font-semibold text-white mb-4">
+              <Card variant="default" className="bg-slate-50 dark:bg-slate-900/50 border-slate-300 dark:border-slate-700">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
                   📊 Branch Comparison
                 </h2>
                 <ResponsiveContainer width="100%" height={300}>
@@ -214,43 +214,43 @@ export function AnalyticsPage() {
                 </h2>
                 <div className="overflow-x-auto">
                   <table className="min-w-full">
-                    <thead className="bg-slate-800/70 border-b border-slate-700">
+                    <thead className="bg-slate-100 dark:bg-slate-800/70 border-b border-slate-300 dark:border-slate-700">
                       <tr>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 dark:text-white">
                           Branch
                         </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 dark:text-white">
                           Members
                         </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 dark:text-white">
                           Groups
                         </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 dark:text-white">
                           Messages
                         </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 dark:text-white">
                           Delivery Rate
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-700">
+                    <tbody className="divide-y divide-slate-300 dark:divide-slate-700">
                       {branchStats.map((branch) => (
-                        <tr key={branch.id} className="hover:bg-slate-800/50 transition-colors duration-normal">
-                          <td className="px-6 py-4 text-sm font-medium text-white">
+                        <tr key={branch.id} className="hover:bg-slate-200 dark:hover:bg-slate-800/50 transition-colors duration-normal">
+                          <td className="px-6 py-4 text-sm font-medium text-slate-900 dark:text-white">
                             {branch.name}
                           </td>
-                          <td className="px-6 py-4 text-sm text-slate-300">
+                          <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-300">
                             {branch.memberCount}
                           </td>
-                          <td className="px-6 py-4 text-sm text-slate-300">
+                          <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-300">
                             {branch.groupCount}
                           </td>
-                          <td className="px-6 py-4 text-sm text-slate-300">
+                          <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-300">
                             {branch.messageCount}
                           </td>
                           <td className="px-6 py-4 text-sm">
                             <div className="flex items-center gap-2">
-                              <div className="w-32 bg-slate-700 rounded-full h-2">
+                              <div className="w-32 bg-slate-300 dark:bg-slate-700 rounded-full h-2">
                                 <div
                                   className="bg-green-500 h-2 rounded-full"
                                   style={{
@@ -258,7 +258,7 @@ export function AnalyticsPage() {
                                   }}
                                 />
                               </div>
-                              <span className="font-medium text-white">
+                              <span className="font-medium text-slate-900 dark:text-white">
                                 {branch.deliveryRate}%
                               </span>
                             </div>
@@ -273,13 +273,13 @@ export function AnalyticsPage() {
 
             {/* Message Stats Summary */}
             {messageStats && (
-              <Card variant="default" className="bg-slate-900/50 border-slate-700">
-                <h2 className="text-lg font-semibold text-white mb-4">
+              <Card variant="default" className="bg-slate-50 dark:bg-slate-900/50 border-slate-300 dark:border-slate-700">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
                   💬 Message Statistics
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div>
-                    <p className="text-slate-400 text-sm mb-1">Total Messages</p>
+                    <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Total Messages</p>
                     <p className="text-2xl font-bold text-accent-400">
                       {messageStats.totalMessages}
                     </p>

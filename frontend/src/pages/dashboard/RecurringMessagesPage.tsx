@@ -104,7 +104,7 @@ export function RecurringMessagesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-white dark:bg-slate-950 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Back Button */}
         <div className="mb-6">
@@ -114,8 +114,8 @@ export function RecurringMessagesPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2">🔄 Recurring Messages</h1>
-            <p className="text-slate-300">Automate regular communications</p>
+            <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">🔄 Recurring Messages</h1>
+            <p className="text-slate-700 dark:text-slate-300">Automate regular communications</p>
           </div>
           <Button
             variant="primary"
@@ -132,14 +132,14 @@ export function RecurringMessagesPage() {
             <Spinner size="lg" text="Loading recurring messages..." />
           </div>
         ) : messages.length === 0 ? (
-          <Card variant="highlight" className="text-center py-16 bg-slate-900/50 border-slate-700">
+          <Card variant="highlight" className="text-center py-16 bg-slate-50 dark:bg-slate-900/50 border-slate-300 dark:border-slate-700">
             <div className="mb-6">
               <span className="text-6xl">🔄</span>
             </div>
-            <h2 className="text-2xl font-bold text-white mb-3">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
               No Recurring Messages Yet
             </h2>
-            <p className="text-slate-300 mb-6 max-w-md mx-auto">
+            <p className="text-slate-700 dark:text-slate-300 mb-6 max-w-md mx-auto">
               Create recurring messages to automatically send messages on a regular schedule.
             </p>
             <Button
@@ -156,16 +156,16 @@ export function RecurringMessagesPage() {
               <Card
                 key={message.id}
                 variant="default"
-                className={`hover:shadow-lg transition-shadow bg-slate-900/50 border-slate-700 ${
+                className={`hover:shadow-lg transition-shadow bg-slate-50 dark:bg-slate-900/50 border-slate-300 dark:border-slate-700 ${
                   !message.isActive ? 'opacity-75' : ''
                 }`}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-white">
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
                       {message.name}
                     </h3>
-                    <p className="text-sm text-slate-300 mt-1">
+                    <p className="text-sm text-slate-700 dark:text-slate-300 mt-1">
                       {getFrequencyLabel(message.frequency)}
                     </p>
                   </div>
@@ -181,15 +181,15 @@ export function RecurringMessagesPage() {
                   </button>
                 </div>
 
-                <p className="text-primary-700 dark:text-primary-300 text-sm mb-4 line-clamp-2">
+                <p className="text-slate-700 dark:text-slate-300 text-sm mb-4 line-clamp-2">
                   {message.content}
                 </p>
 
                 <Card variant="highlight" className="mb-4">
-                  <p className="text-primary-900 dark:text-primary-50 text-sm">
+                  <p className="text-slate-900 dark:text-white text-sm">
                     <strong>⏱️ Next send:</strong> {formatNextSend(message.nextSendAt)}
                   </p>
-                  <p className="text-primary-600 dark:text-primary-400 text-xs mt-2">
+                  <p className="text-slate-600 dark:text-slate-400 text-xs mt-2">
                     {new Date(message.nextSendAt).toLocaleString()}
                   </p>
                 </Card>

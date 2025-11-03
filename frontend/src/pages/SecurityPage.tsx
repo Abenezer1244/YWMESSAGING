@@ -3,7 +3,7 @@ import BackButton from '../components/BackButton';
 
 export default function SecurityPage() {
   return (
-    <div className="min-h-screen bg-slate-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-white dark:bg-slate-950 p-6 transition-colors duration-normal">
       <div className="max-w-4xl mx-auto">
         {/* Back Button */}
         <div className="mb-6">
@@ -12,15 +12,15 @@ export default function SecurityPage() {
 
         {/* Header */}
         <div className="mb-12">
-          <h1 className="text-4xl font-bold text-white mb-2">Security</h1>
-          <p className="text-slate-400">Last updated: {new Date().toLocaleDateString()}</p>
+          <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">Security</h1>
+          <p className="text-slate-600 dark:text-slate-400">Last updated: {new Date().toLocaleDateString()}</p>
         </div>
 
         {/* Content */}
-        <div className="space-y-8 text-slate-300">
+        <div className="space-y-8 text-slate-700 dark:text-slate-300">
           {/* Introduction */}
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">1. Our Commitment to Security</h2>
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mb-4">1. Our Commitment to Security</h2>
             <p className="leading-relaxed">
               Connect takes the security of your data seriously. We are committed to implementing industry-leading security measures to protect your personal information, organization data, and communications. This page outlines our security practices and commitments.
             </p>
@@ -28,16 +28,16 @@ export default function SecurityPage() {
 
           {/* Data Encryption */}
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">2. Data Encryption</h2>
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mb-4">2. Data Encryption</h2>
             <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-semibold text-slate-200 mb-2">In Transit</h3>
+                <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-2">In Transit</h3>
                 <p className="leading-relaxed">
                   All data transmitted between your device and our servers is encrypted using TLS 1.2 or higher. This ensures that your information cannot be intercepted or read by third parties.
                 </p>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-slate-200 mb-2">At Rest</h3>
+                <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-2">At Rest</h3>
                 <p className="leading-relaxed">
                   All sensitive data stored on our servers is encrypted using AES-256 encryption. This protects your information even if our physical servers are compromised.
                 </p>
@@ -47,7 +47,7 @@ export default function SecurityPage() {
 
           {/* Authentication & Access */}
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">3. Authentication & Access Control</h2>
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mb-4">3. Authentication & Access Control</h2>
             <ul className="space-y-3">
               <li className="flex gap-3">
                 <span className="text-accent-400 flex-shrink-0">•</span>
@@ -74,22 +74,22 @@ export default function SecurityPage() {
 
           {/* Infrastructure Security */}
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">4. Infrastructure Security</h2>
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mb-4">4. Infrastructure Security</h2>
             <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-semibold text-slate-200 mb-2">Hosting & Infrastructure</h3>
+                <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-2">Hosting & Infrastructure</h3>
                 <p className="leading-relaxed">
                   Connect is hosted on secure, enterprise-grade cloud infrastructure. Our servers are protected by firewalls, intrusion detection systems, and continuous monitoring.
                 </p>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-slate-200 mb-2">Data Centers</h3>
+                <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-2">Data Centers</h3>
                 <p className="leading-relaxed">
                   Our data centers are SOC 2 compliant and feature redundancy, backup power supplies, and climate control to ensure continuous availability and data protection.
                 </p>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-slate-200 mb-2">Regular Updates</h3>
+                <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-2">Regular Updates</h3>
                 <p className="leading-relaxed">
                   We regularly update and patch all systems, applications, and dependencies to protect against known vulnerabilities.
                 </p>
@@ -99,7 +99,7 @@ export default function SecurityPage() {
 
           {/* Monitoring & Incident Response */}
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">5. Monitoring & Incident Response</h2>
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mb-4">5. Monitoring & Incident Response</h2>
             <ul className="space-y-3">
               <li className="flex gap-3">
                 <span className="text-accent-400 flex-shrink-0">•</span>
@@ -126,7 +126,7 @@ export default function SecurityPage() {
 
           {/* Compliance & Certifications */}
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">6. Compliance & Certifications</h2>
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mb-4">6. Compliance & Certifications</h2>
             <p className="leading-relaxed mb-3">
               Connect complies with major data protection and security standards:
             </p>
@@ -152,7 +152,7 @@ export default function SecurityPage() {
 
           {/* Employee Security */}
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">7. Employee Security</h2>
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mb-4">7. Employee Security</h2>
             <ul className="space-y-3">
               <li className="flex gap-3">
                 <span className="text-accent-400 flex-shrink-0">•</span>
@@ -175,33 +175,33 @@ export default function SecurityPage() {
 
           {/* Reporting Security Issues */}
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">8. Reporting Security Issues</h2>
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mb-4">8. Reporting Security Issues</h2>
             <p className="leading-relaxed mb-4">
               If you discover a security vulnerability, please report it to us immediately at security@connect.com. Please do not publicly disclose the vulnerability until we have had time to address it.
             </p>
-            <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-6">
-              <p className="text-white font-semibold mb-2">Security Contact</p>
-              <p className="text-slate-400">Email: security@connect.com</p>
-              <p className="text-slate-400">PGP Key: Available upon request</p>
+            <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg p-6">
+              <p className="text-slate-900 dark:text-white font-semibold mb-2">Security Contact</p>
+              <p className="text-slate-600 dark:text-slate-400">Email: security@connect.com</p>
+              <p className="text-slate-600 dark:text-slate-400">PGP Key: Available upon request</p>
             </div>
           </section>
 
           {/* Contact Us */}
           <section>
-            <h2 className="text-2xl font-semibold text-white mb-4">9. Contact Us</h2>
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mb-4">9. Contact Us</h2>
             <p className="leading-relaxed mb-4">
               For security-related questions or concerns, please contact:
             </p>
-            <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-6">
-              <p className="text-white">Connect Support</p>
-              <p className="text-slate-400">Email: support@connect.com</p>
-              <p className="text-slate-400">Website: www.connect.com</p>
+            <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg p-6">
+              <p className="text-slate-900 dark:text-white">Connect Support</p>
+              <p className="text-slate-600 dark:text-slate-400">Email: support@connect.com</p>
+              <p className="text-slate-600 dark:text-slate-400">Website: www.connect.com</p>
             </div>
           </section>
         </div>
 
         {/* Navigation Links */}
-        <div className="mt-12 pt-8 border-t border-slate-700">
+        <div className="mt-12 pt-8 border-t border-slate-300 dark:border-slate-700">
           <Link to="/" className="text-accent-400 hover:text-accent-300 font-medium">
             ← Back to Home
           </Link>

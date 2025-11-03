@@ -81,7 +81,7 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 py-8 relative overflow-hidden">
+    <div className="min-h-screen bg-white dark:bg-slate-950 flex items-center justify-center p-4 py-8 relative overflow-hidden">
       {/* Subtle background accent */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-accent-500 opacity-10 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -99,16 +99,16 @@ export function RegisterPage() {
           </div>
 
           {/* Headline */}
-          <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">
+          <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight">
             Create Your Account
           </h1>
-          <p className="text-lg text-slate-300 font-light">
+          <p className="text-lg text-slate-700 dark:text-slate-300 font-light">
             Start your 14-day free trial • No credit card required
           </p>
         </div>
 
         {/* Registration Card */}
-        <Card variant="default" className="p-8 border border-slate-700 bg-slate-900/50 shadow-lg">
+        <Card variant="default" className="p-8 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 shadow-lg">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {/* Name Fields */}
             <div className="grid grid-cols-2 gap-4">
@@ -117,7 +117,7 @@ export function RegisterPage() {
                 placeholder="John"
                 disabled={isLoading}
                 error={errors.firstName?.message}
-                className="bg-slate-800 border-slate-600 text-white"
+                className="bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white"
                 {...register('firstName', { required: 'First name is required' })}
               />
 
@@ -126,7 +126,7 @@ export function RegisterPage() {
                 placeholder="Doe"
                 disabled={isLoading}
                 error={errors.lastName?.message}
-                className="bg-slate-800 border-slate-600 text-white"
+                className="bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white"
                 {...register('lastName', { required: 'Last name is required' })}
               />
             </div>
@@ -137,7 +137,7 @@ export function RegisterPage() {
               placeholder="Grace Community Church"
               disabled={isLoading}
               error={errors.churchName?.message}
-              className="bg-slate-800 border-slate-600 text-white"
+              className="bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white"
               {...register('churchName', { required: 'Church name is required' })}
             />
 
@@ -148,7 +148,7 @@ export function RegisterPage() {
               placeholder="pastor@church.com"
               disabled={isLoading}
               error={errors.email?.message}
-              className="bg-slate-800 border-slate-600 text-white"
+              className="bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white"
               {...register('email', {
                 required: 'Email is required',
                 pattern: {
@@ -166,7 +166,7 @@ export function RegisterPage() {
               helperText="Must be at least 8 characters"
               disabled={isLoading}
               error={errors.password?.message}
-              className="bg-slate-800 border-slate-600 text-white"
+              className="bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white"
               {...register('password', {
                 required: 'Password is required',
                 minLength: {
@@ -182,7 +182,7 @@ export function RegisterPage() {
               placeholder="••••••••"
               disabled={isLoading}
               error={errors.confirmPassword?.message}
-              className="bg-slate-800 border-slate-600 text-white"
+              className="bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white"
               {...register('confirmPassword', {
                 required: 'Please confirm your password',
               })}
@@ -203,8 +203,8 @@ export function RegisterPage() {
           </form>
 
           {/* Divider */}
-          <div className="mt-8 pt-8 border-t border-slate-700">
-            <p className="text-center text-slate-300 text-sm">
+          <div className="mt-8 pt-8 border-t border-slate-300 dark:border-slate-700">
+            <p className="text-center text-slate-700 dark:text-slate-300 text-sm">
               Already have an account?{' '}
               <Link
                 to="/login"
@@ -222,19 +222,19 @@ export function RegisterPage() {
             <svg className="w-5 h-5 text-success-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <p className="text-sm text-slate-300 font-medium">Setup in Minutes</p>
+            <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">Setup in Minutes</p>
           </div>
           <div className="flex flex-col items-center gap-2">
             <svg className="w-5 h-5 text-success-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <p className="text-sm text-slate-300 font-medium">Secure & Reliable</p>
+            <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">Secure & Reliable</p>
           </div>
           <div className="flex flex-col items-center gap-2">
             <svg className="w-5 h-5 text-success-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <p className="text-sm text-slate-300 font-medium">No Card Required</p>
+            <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">No Card Required</p>
           </div>
         </div>
       </div>
