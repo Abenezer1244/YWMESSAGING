@@ -56,13 +56,6 @@ function App() {
 
   // Initialize analytics, fetch CSRF token, and restore auth session on app load
   useEffect(() => {
-    // Load tweakcn live preview script
-    const script = document.createElement('script');
-    script.src = 'https://tweakcn.com/live-preview.min.js';
-    script.async = true;
-    script.crossOrigin = 'anonymous';
-    document.head.appendChild(script);
-
     // Initialize PostHog
     initializePostHog();
 
