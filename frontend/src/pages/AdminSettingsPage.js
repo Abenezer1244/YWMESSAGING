@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { getProfile, updateProfile } from '../api/admin';
 import CoAdminPanel from '../components/admin/CoAdminPanel';
 import ActivityLogsPanel from '../components/admin/ActivityLogsPanel';
+import BackButton from '../components/BackButton';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
@@ -81,7 +82,7 @@ export function AdminSettingsPage() {
             setIsSaving(false);
         }
     };
-    return (_jsx("div", { className: "min-h-screen bg-gradient-to-b from-white to-primary-50 dark:from-primary-950 dark:to-primary-900 p-6 transition-colors duration-normal", children: _jsxs("div", { className: "max-w-7xl mx-auto", children: [_jsxs("div", { className: "mb-8", children: [_jsx("h1", { className: "text-4xl font-bold text-primary-900 dark:text-primary-50 mb-2", children: "\u2699\uFE0F Admin Settings" }), _jsx("p", { className: "text-primary-600 dark:text-primary-400", children: "Manage your church account and permissions" })] }), _jsxs(Card, { variant: "default", className: "mb-8 border border-primary-200 dark:border-primary-800", children: [_jsx("div", { className: "border-b border-primary-200 dark:border-primary-800", children: _jsxs("div", { className: "flex", children: [_jsx("button", { onClick: () => setActiveTab('profile'), className: `flex-1 px-4 py-4 text-center font-medium border-b-2 transition ${activeTab === 'profile'
+    return (_jsx("div", { className: "min-h-screen bg-gradient-to-b from-white to-primary-50 dark:from-primary-950 dark:to-primary-900 p-6 transition-colors duration-normal", children: _jsxs("div", { className: "max-w-7xl mx-auto", children: [_jsx("div", { className: "mb-6", children: _jsx(BackButton, { variant: "ghost" }) }), _jsxs("div", { className: "mb-8", children: [_jsx("h1", { className: "text-4xl font-bold text-primary-900 dark:text-primary-50 mb-2", children: "\u2699\uFE0F Admin Settings" }), _jsx("p", { className: "text-primary-600 dark:text-primary-400", children: "Manage your church account and permissions" })] }), _jsxs(Card, { variant: "default", className: "mb-8 border border-primary-200 dark:border-primary-800", children: [_jsx("div", { className: "border-b border-primary-200 dark:border-primary-800", children: _jsxs("div", { className: "flex", children: [_jsx("button", { onClick: () => setActiveTab('profile'), className: `flex-1 px-4 py-4 text-center font-medium border-b-2 transition ${activeTab === 'profile'
                                             ? 'border-accent-500 text-accent-600 dark:text-accent-400'
                                             : 'border-transparent text-primary-700 dark:text-primary-300 hover:text-primary-900 dark:hover:text-white'}`, children: "\u26EA Church Profile" }), _jsx("button", { onClick: () => setActiveTab('coadmins'), className: `flex-1 px-4 py-4 text-center font-medium border-b-2 transition ${activeTab === 'coadmins'
                                             ? 'border-accent-500 text-accent-600 dark:text-accent-400'
