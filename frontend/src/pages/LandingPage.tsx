@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import Navigation from '../components/landing/Navigation';
 import Hero from '../components/landing/Hero';
+import DashboardPreview from '../components/landing/DashboardPreview';
 import Features from '../components/landing/Features';
 import Pricing from '../components/landing/Pricing';
 import Testimonials from '../components/landing/Testimonials';
@@ -67,6 +68,7 @@ export default function LandingPage() {
       <Navigation />
       <main>
         <Hero />
+        <DashboardPreview />
         <Features />
         <Pricing />
         <Testimonials />

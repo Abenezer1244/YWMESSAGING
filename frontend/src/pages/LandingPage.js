@@ -2,6 +2,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useEffect } from 'react';
 import Navigation from '../components/landing/Navigation';
 import Hero from '../components/landing/Hero';
+import DashboardPreview from '../components/landing/DashboardPreview';
 import Features from '../components/landing/Features';
 import Pricing from '../components/landing/Pricing';
 import Testimonials from '../components/landing/Testimonials';
@@ -53,6 +54,6 @@ export default function LandingPage() {
             sections.forEach((section) => observer.unobserve(section));
         };
     }, []);
-    return (_jsxs("div", { className: "min-h-screen bg-slate-950 text-white", children: [_jsx(Navigation, {}), _jsxs("main", { children: [_jsx(Hero, {}), _jsx(Features, {}), _jsx(Pricing, {}), _jsx(Testimonials, {}), _jsx(FinalCTA, {})] }), _jsx(Footer, {})] }));
+    return (_jsxs("div", { className: "min-h-screen bg-slate-950 text-white", children: [_jsx(Navigation, {}), _jsxs("main", { children: [_jsx(Hero, {}), _jsx(DashboardPreview, {}), _jsx(Features, {}), _jsx(Pricing, {}), _jsx(Testimonials, {}), _jsx(FinalCTA, {})] }), _jsx(Footer, {})] }));
 }
 //# sourceMappingURL=LandingPage.js.map

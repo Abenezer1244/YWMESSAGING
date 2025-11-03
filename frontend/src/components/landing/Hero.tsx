@@ -28,14 +28,16 @@ export default function Hero() {
         <div className="absolute top-1/2 right-1/4 w-64 h-64 bg-primary-700 opacity-10 rounded-full blur-3xl animate-pulse delay-700"></div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto w-full">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Left Column - Content */}
-          <div className="text-left space-y-8 animate-fadeIn">
+      <div className="relative max-w-4xl mx-auto w-full">
+        <div className="w-full">
+          {/* Content */}
+          <div className="text-center space-y-8 animate-fadeIn">
             {/* Modern Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent-500/15 border border-accent-400/50 rounded-full text-sm font-medium text-accent-100 backdrop-blur-sm hover:bg-accent-500/25 transition-colors duration-300">
-              <div className="w-2 h-2 bg-gradient-to-r from-accent-400 to-accent-500 rounded-full animate-pulse"></div>
-              <span>Trusted by 100+ churches nationwide</span>
+            <div className="flex justify-center">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent-500/15 border border-accent-400/50 rounded-full text-sm font-medium text-accent-100 backdrop-blur-sm hover:bg-accent-500/25 transition-colors duration-300">
+                <div className="w-2 h-2 bg-gradient-to-r from-accent-400 to-accent-500 rounded-full animate-pulse"></div>
+                <span>Trusted by 100+ churches nationwide</span>
+              </div>
             </div>
 
             {/* Main Headline - Gradient Text Effect */}
@@ -86,61 +88,6 @@ export default function Hero() {
                   <span className="text-sm text-primary-100">{item.text}</span>
                 </div>
               ))}
-            </div>
-          </div>
-
-          {/* Right Column - Modern Dashboard Preview Card */}
-          <div className="relative hidden lg:block">
-            <div className="relative group">
-              {/* Glow effect behind card */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-pacific via-blue-sky-blue to-blue-honolulu rounded-2xl blur-2xl opacity-20 group-hover:opacity-40 transition duration-500 animate-pulse"></div>
-
-              {/* Modern Card */}
-              <div className="relative bg-gradient-to-br from-blue-700/40 to-blue-marian/40 rounded-2xl p-8 border border-blue-600/40 backdrop-blur-xl shadow-2xl overflow-hidden animate-slideUp group-hover:shadow-blue-900/50 transition-shadow duration-500">
-                {/* Accent gradient top */}
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-pacific to-transparent"></div>
-
-                {/* Card Header */}
-                <div className="mb-8 pb-6 border-b border-blue-600/20">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-3 h-3 rounded-full bg-blue-pacific"></div>
-                    <div className="text-sm font-semibold text-blue-100">Dashboard Preview</div>
-                  </div>
-                  <h3 className="text-2xl font-bold text-white">Message Analytics</h3>
-                </div>
-
-                {/* Stats Grid */}
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                  <div className="p-4 bg-blue-600/30 rounded-lg border border-blue-500/20">
-                    <div className="text-xs text-blue-300 mb-2">DELIVERED</div>
-                    <div className="text-3xl font-bold text-blue-pacific">2,847</div>
-                  </div>
-                  <div className="p-4 bg-blue-600/30 rounded-lg border border-blue-500/20">
-                    <div className="text-xs text-blue-300 mb-2">ENGAGED</div>
-                    <div className="text-3xl font-bold text-success-500">89%</div>
-                  </div>
-                </div>
-
-                {/* Activity Chart Mockup */}
-                <div className="space-y-3 mb-8">
-                  <div className="text-sm font-semibold text-blue-100">Recent Activity</div>
-                  {[80, 65, 90, 45, 75].map((height, i) => (
-                    <div key={i} className="flex items-end gap-2 h-8">
-                      <div className="flex-1 bg-gradient-to-t from-blue-pacific to-blue-sky-blue rounded-t opacity-80 hover:opacity-100 transition-opacity" style={{ height: `${height}%` }}></div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button className="flex-1 py-2 px-4 bg-blue-pacific hover:bg-blue-sky-blue text-blue-900 font-semibold rounded-lg transition-colors duration-300">
-                    Export
-                  </button>
-                  <button className="px-4 py-2 bg-blue-600/40 hover:bg-blue-600/60 text-blue-100 rounded-lg transition-colors duration-300">
-                    ⋯
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         </div>
