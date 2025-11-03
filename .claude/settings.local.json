@@ -45,7 +45,8 @@
       "mcp__playwright__browser_console_messages",
       "mcp__playwright__browser_resize",
       "mcp__playwright__browser_close",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "WebFetch(domain:www.svgator.com)"
     ],
     "deny": [],
     "ask": []
