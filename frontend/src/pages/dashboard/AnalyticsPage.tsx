@@ -56,7 +56,7 @@ export function AnalyticsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 dark:from-primary-900 to-primary-100 dark:to-primary-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-slate-950 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Back Button */}
         <div className="mb-6">
@@ -66,13 +66,13 @@ export function AnalyticsPage() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-primary-900 dark:text-primary-50 mb-2">📊 Analytics</h1>
-            <p className="text-primary-600 dark:text-primary-400">Track your messaging performance and engagement</p>
+            <h1 className="text-4xl font-bold text-white mb-2">📊 Analytics</h1>
+            <p className="text-slate-300">Track your messaging performance and engagement</p>
           </div>
           <select
             value={days}
             onChange={(e) => setDays(parseInt(e.target.value))}
-            className="px-4 py-2 border border-primary-200 dark:border-primary-700 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-primary-50 focus:outline-none focus:ring-2 focus:ring-accent-500 transition-colors duration-normal"
+            className="px-4 py-2 border border-slate-600 rounded-lg bg-slate-800 text-white focus:outline-none focus:ring-2 focus:ring-accent-500 transition-colors duration-normal"
           >
             <option value={7}>Last 7 days</option>
             <option value={30}>Last 30 days</option>
@@ -90,37 +90,37 @@ export function AnalyticsPage() {
             {/* Summary Cards */}
             {summaryStats && (
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <Card variant="default" className="text-center">
-                  <p className="text-primary-600 dark:text-primary-400 text-sm mb-2">📨 Total Messages</p>
-                  <p className="text-3xl font-bold text-primary-600 dark:text-primary-400">
+                <Card variant="default" className="text-center bg-slate-900/50 border-slate-700">
+                  <p className="text-slate-400 text-sm mb-2">📨 Total Messages</p>
+                  <p className="text-3xl font-bold text-accent-400">
                     {summaryStats.totalMessages}
                   </p>
                 </Card>
 
-                <Card variant="default" className="text-center">
-                  <p className="text-primary-600 dark:text-primary-400 text-sm mb-2">✅ Delivery Rate</p>
-                  <p className="text-3xl font-bold text-success-600 dark:text-success-400">
+                <Card variant="default" className="text-center bg-slate-900/50 border-slate-700">
+                  <p className="text-slate-400 text-sm mb-2">✅ Delivery Rate</p>
+                  <p className="text-3xl font-bold text-green-400">
                     {summaryStats.averageDeliveryRate}%
                   </p>
                 </Card>
 
-                <Card variant="default" className="text-center">
-                  <p className="text-primary-600 dark:text-primary-400 text-sm mb-2">👤 Total Members</p>
-                  <p className="text-3xl font-bold text-info-600 dark:text-info-400">
+                <Card variant="default" className="text-center bg-slate-900/50 border-slate-700">
+                  <p className="text-slate-400 text-sm mb-2">👤 Total Members</p>
+                  <p className="text-3xl font-bold text-blue-400">
                     {summaryStats.totalMembers}
                   </p>
                 </Card>
 
-                <Card variant="default" className="text-center">
-                  <p className="text-primary-600 dark:text-primary-400 text-sm mb-2">📍 Branches</p>
-                  <p className="text-3xl font-bold text-warning-600 dark:text-warning-400">
+                <Card variant="default" className="text-center bg-slate-900/50 border-slate-700">
+                  <p className="text-slate-400 text-sm mb-2">📍 Branches</p>
+                  <p className="text-3xl font-bold text-yellow-400">
                     {summaryStats.totalBranches}
                   </p>
                 </Card>
 
-                <Card variant="default" className="text-center">
-                  <p className="text-primary-600 dark:text-primary-400 text-sm mb-2">👥 Total Groups</p>
-                  <p className="text-3xl font-bold text-danger-600 dark:text-danger-400">
+                <Card variant="default" className="text-center bg-slate-900/50 border-slate-700">
+                  <p className="text-slate-400 text-sm mb-2">👥 Total Groups</p>
+                  <p className="text-3xl font-bold text-red-400">
                     {summaryStats.totalGroups}
                   </p>
                 </Card>
@@ -129,8 +129,8 @@ export function AnalyticsPage() {
 
             {/* Message Volume Chart */}
             {messageStats && messageStats.byDay.length > 0 && (
-              <Card variant="default">
-                <h2 className="text-lg font-semibold text-primary-900 dark:text-primary-50 mb-4">
+              <Card variant="default" className="bg-slate-900/50 border-slate-700">
+                <h2 className="text-lg font-semibold text-white mb-4">
                   📈 Message Volume
                 </h2>
                 <ResponsiveContainer width="100%" height={300}>
@@ -171,8 +171,8 @@ export function AnalyticsPage() {
 
             {/* Branch Comparison */}
             {branchStats.length > 0 && (
-              <Card variant="default">
-                <h2 className="text-lg font-semibold text-primary-900 dark:text-primary-50 mb-4">
+              <Card variant="default" className="bg-slate-900/50 border-slate-700">
+                <h2 className="text-lg font-semibold text-white mb-4">
                   📊 Branch Comparison
                 </h2>
                 <ResponsiveContainer width="100%" height={300}>
@@ -208,57 +208,57 @@ export function AnalyticsPage() {
 
             {/* Branch Statistics Table */}
             {branchStats.length > 0 && (
-              <Card variant="default" className="overflow-hidden">
-                <h2 className="text-lg font-semibold text-primary-900 dark:text-primary-50 mb-4">
+              <Card variant="default" className="overflow-hidden bg-slate-900/50 border-slate-700">
+                <h2 className="text-lg font-semibold text-white mb-4">
                   📋 Branch Details
                 </h2>
                 <div className="overflow-x-auto">
                   <table className="min-w-full">
-                    <thead className="bg-primary-100 dark:bg-primary-800 border-b border-primary-200 dark:border-primary-700">
+                    <thead className="bg-slate-800/70 border-b border-slate-700">
                       <tr>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-primary-900 dark:text-primary-50">
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">
                           Branch
                         </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-primary-900 dark:text-primary-50">
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">
                           Members
                         </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-primary-900 dark:text-primary-50">
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">
                           Groups
                         </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-primary-900 dark:text-primary-50">
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">
                           Messages
                         </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-primary-900 dark:text-primary-50">
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">
                           Delivery Rate
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-secondary-200 dark:divide-secondary-700">
+                    <tbody className="divide-y divide-slate-700">
                       {branchStats.map((branch) => (
-                        <tr key={branch.id} className="hover:bg-secondary-50 dark:hover:bg-secondary-700/50 transition-colors duration-normal">
-                          <td className="px-6 py-4 text-sm font-medium text-primary-900 dark:text-primary-50">
+                        <tr key={branch.id} className="hover:bg-slate-800/50 transition-colors duration-normal">
+                          <td className="px-6 py-4 text-sm font-medium text-white">
                             {branch.name}
                           </td>
-                          <td className="px-6 py-4 text-sm text-primary-600 dark:text-primary-400">
+                          <td className="px-6 py-4 text-sm text-slate-300">
                             {branch.memberCount}
                           </td>
-                          <td className="px-6 py-4 text-sm text-primary-600 dark:text-primary-400">
+                          <td className="px-6 py-4 text-sm text-slate-300">
                             {branch.groupCount}
                           </td>
-                          <td className="px-6 py-4 text-sm text-primary-600 dark:text-primary-400">
+                          <td className="px-6 py-4 text-sm text-slate-300">
                             {branch.messageCount}
                           </td>
                           <td className="px-6 py-4 text-sm">
                             <div className="flex items-center gap-2">
-                              <div className="w-32 bg-secondary-200 dark:bg-secondary-700 rounded-full h-2">
+                              <div className="w-32 bg-slate-700 rounded-full h-2">
                                 <div
-                                  className="bg-success-500 h-2 rounded-full"
+                                  className="bg-green-500 h-2 rounded-full"
                                   style={{
                                     width: `${branch.deliveryRate}%`,
                                   }}
                                 />
                               </div>
-                              <span className="font-medium text-primary-900 dark:text-primary-50">
+                              <span className="font-medium text-white">
                                 {branch.deliveryRate}%
                               </span>
                             </div>
@@ -273,32 +273,32 @@ export function AnalyticsPage() {
 
             {/* Message Stats Summary */}
             {messageStats && (
-              <Card variant="default">
-                <h2 className="text-lg font-semibold text-primary-900 dark:text-primary-50 mb-4">
+              <Card variant="default" className="bg-slate-900/50 border-slate-700">
+                <h2 className="text-lg font-semibold text-white mb-4">
                   💬 Message Statistics
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div>
-                    <p className="text-primary-600 dark:text-primary-400 text-sm mb-1">Total Messages</p>
-                    <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">
+                    <p className="text-slate-400 text-sm mb-1">Total Messages</p>
+                    <p className="text-2xl font-bold text-accent-400">
                       {messageStats.totalMessages}
                     </p>
                   </div>
                   <div>
-                    <p className="text-primary-600 dark:text-primary-400 text-sm mb-1">Delivered</p>
-                    <p className="text-2xl font-bold text-success-600 dark:text-success-400">
+                    <p className="text-slate-400 text-sm mb-1">Delivered</p>
+                    <p className="text-2xl font-bold text-green-400">
                       {messageStats.deliveredCount}
                     </p>
                   </div>
                   <div>
-                    <p className="text-primary-600 dark:text-primary-400 text-sm mb-1">Failed</p>
-                    <p className="text-2xl font-bold text-danger-600 dark:text-danger-400">
+                    <p className="text-slate-400 text-sm mb-1">Failed</p>
+                    <p className="text-2xl font-bold text-red-400">
                       {messageStats.failedCount}
                     </p>
                   </div>
                   <div>
-                    <p className="text-primary-600 dark:text-primary-400 text-sm mb-1">Pending</p>
-                    <p className="text-2xl font-bold text-warning-600 dark:text-warning-400">
+                    <p className="text-slate-400 text-sm mb-1">Pending</p>
+                    <p className="text-2xl font-bold text-yellow-400">
                       {messageStats.pendingCount}
                     </p>
                   </div>

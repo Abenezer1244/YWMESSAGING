@@ -40,18 +40,18 @@ export function MessageHistoryPage() {
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case 'sent':
-        return 'bg-success-100 dark:bg-success-900 text-success-800 dark:text-success-200';
+        return 'bg-green-500/20 text-green-400';
       case 'pending':
-        return 'bg-warning-100 dark:bg-warning-900 text-warning-800 dark:text-warning-200';
+        return 'bg-yellow-500/20 text-yellow-400';
       case 'failed':
-        return 'bg-danger-100 dark:bg-danger-900 text-danger-800 dark:text-danger-200';
+        return 'bg-red-500/20 text-red-400';
       default:
-        return 'bg-secondary-100 dark:bg-secondary-800 text-secondary-800 dark:text-secondary-200';
+        return 'bg-slate-700/50 text-slate-300';
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 dark:from-primary-900 to-primary-100 dark:to-primary-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-slate-950 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Back Button */}
         <div className="mb-6">
@@ -60,13 +60,13 @@ export function MessageHistoryPage() {
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-primary-900 dark:text-primary-50 mb-2">📜 Message History</h1>
-          <p className="text-primary-600 dark:text-primary-400">{total} total messages</p>
+          <h1 className="text-4xl font-bold text-white mb-2">📜 Message History</h1>
+          <p className="text-slate-300">{total} total messages</p>
         </div>
 
         {/* Filter */}
-        <Card variant="default" className="mb-6">
-          <label className="block text-sm font-semibold text-primary-900 dark:text-primary-50 mb-3">
+        <Card variant="default" className="mb-6 bg-slate-900/50 border-slate-700">
+          <label className="block text-sm font-semibold text-white mb-3">
             🔍 Filter by Status
           </label>
           <select
@@ -75,7 +75,7 @@ export function MessageHistoryPage() {
               setStatusFilter(e.target.value);
               setPage(1);
             }}
-            className="px-4 py-2 border border-primary-200 dark:border-primary-700 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-primary-50 focus:outline-none focus:ring-2 focus:ring-accent-500 transition-colors duration-normal"
+            className="px-4 py-2 border border-slate-600 rounded-lg bg-slate-800 text-white focus:outline-none focus:ring-2 focus:ring-accent-500 transition-colors duration-normal"
           >
             <option value="">All Statuses</option>
             <option value="pending">Pending</option>
@@ -90,14 +90,14 @@ export function MessageHistoryPage() {
             <Spinner size="lg" text="Loading messages..." />
           </div>
         ) : messages.length === 0 ? (
-          <Card variant="highlight" className="text-center py-16">
+          <Card variant="highlight" className="text-center py-16 bg-slate-900/50 border-slate-700">
             <div className="mb-6">
               <span className="text-6xl">📜</span>
             </div>
-            <h2 className="text-2xl font-bold text-primary-900 dark:text-primary-50 mb-3">
+            <h2 className="text-2xl font-bold text-white mb-3">
               No Messages Found
             </h2>
-            <p className="text-primary-600 dark:text-primary-400">
+            <p className="text-slate-300">
               Your message history will appear here after you send messages.
             </p>
           </Card>

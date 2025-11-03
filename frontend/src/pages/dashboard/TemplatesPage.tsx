@@ -77,7 +77,7 @@ export function TemplatesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 dark:from-primary-900 to-primary-100 dark:to-primary-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-slate-950 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Back Button */}
         <div className="mb-6">
@@ -87,8 +87,8 @@ export function TemplatesPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-primary-900 dark:text-primary-50 mb-2">📋 Message Templates</h1>
-            <p className="text-primary-600 dark:text-primary-400">Reuse message templates to save time</p>
+            <h1 className="text-4xl font-bold text-white mb-2">📋 Message Templates</h1>
+            <p className="text-slate-300">Reuse message templates to save time</p>
           </div>
           <Button
             variant="primary"
@@ -105,14 +105,14 @@ export function TemplatesPage() {
             <Spinner size="lg" text="Loading templates..." />
           </div>
         ) : templates.length === 0 ? (
-          <Card variant="highlight" className="text-center py-16">
+          <Card variant="highlight" className="text-center py-16 bg-slate-900/50 border-slate-700">
             <div className="mb-6">
               <span className="text-6xl">📋</span>
             </div>
-            <h2 className="text-2xl font-bold text-primary-900 dark:text-primary-50 mb-3">
+            <h2 className="text-2xl font-bold text-white mb-3">
               No Templates Yet
             </h2>
-            <p className="text-primary-600 dark:text-primary-400 mb-6 max-w-md mx-auto">
+            <p className="text-slate-300 mb-6 max-w-md mx-auto">
               Create templates to quickly send frequently used messages.
             </p>
             <Button
@@ -129,30 +129,30 @@ export function TemplatesPage() {
               <Card
                 key={template.id}
                 variant="default"
-                className="hover:shadow-lg transition-shadow flex flex-col"
+                className="hover:shadow-lg transition-shadow flex flex-col bg-slate-900/50 border-slate-700"
               >
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <h3 className="text-lg font-semibold text-primary-900 dark:text-primary-50">
+                    <h3 className="text-lg font-semibold text-white">
                       {template.name}
                     </h3>
-                    <p className="text-sm text-primary-600 dark:text-primary-400 mt-1">
+                    <p className="text-sm text-slate-300 mt-1">
                       {getCategoryLabel(template.category)}
                     </p>
                   </div>
                   {template.isDefault && (
-                    <span className="inline-block px-2 py-1 bg-accent-100 dark:bg-accent-900 text-accent-800 dark:text-accent-200 text-xs font-semibold rounded">
+                    <span className="inline-block px-2 py-1 bg-accent-500/20 text-accent-400 text-xs font-semibold rounded">
                       Default
                     </span>
                   )}
                 </div>
 
-                <p className="text-primary-700 dark:text-primary-300 text-sm mb-4 flex-grow line-clamp-3">
+                <p className="text-slate-300 text-sm mb-4 flex-grow line-clamp-3">
                   {template.content}
                 </p>
 
-                <div className="flex justify-between items-center mb-4 pt-4 border-t border-primary-200 dark:border-primary-700">
-                  <p className="text-xs text-primary-600 dark:text-primary-400">
+                <div className="flex justify-between items-center mb-4 pt-4 border-t border-slate-700">
+                  <p className="text-xs text-slate-400">
                     Used {template.usageCount} times
                   </p>
                 </div>

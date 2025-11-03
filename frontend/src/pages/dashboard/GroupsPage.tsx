@@ -65,14 +65,14 @@ export function GroupsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 dark:from-primary-900 to-primary-100 dark:to-primary-950 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
         <Spinner size="lg" text="Loading groups..." />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 dark:from-primary-900 to-primary-100 dark:to-primary-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-slate-950 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Back Button */}
         <div className="mb-6">
@@ -82,8 +82,8 @@ export function GroupsPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-primary-900 dark:text-primary-50 mb-2">👥 Groups</h1>
-            <p className="text-primary-600 dark:text-primary-400">{groups.length} groups in this branch</p>
+            <h1 className="text-4xl font-bold text-white mb-2">👥 Groups</h1>
+            <p className="text-slate-300">{groups.length} groups in this branch</p>
           </div>
           <Button
             variant="primary"
@@ -96,14 +96,14 @@ export function GroupsPage() {
 
         {/* Main Content */}
         {groups.length === 0 ? (
-          <Card variant="highlight" className="text-center py-16">
+          <Card variant="highlight" className="text-center py-16 bg-slate-900/50 border-slate-700">
             <div className="mb-6">
               <span className="text-6xl">👥</span>
             </div>
-            <h2 className="text-2xl font-bold text-primary-900 dark:text-primary-50 mb-3">
+            <h2 className="text-2xl font-bold text-white mb-3">
               No Groups Yet
             </h2>
-            <p className="text-primary-600 dark:text-primary-400 mb-6 max-w-md mx-auto">
+            <p className="text-slate-300 mb-6 max-w-md mx-auto">
               Create your first group to start organizing your congregation.
             </p>
             <Button
@@ -117,12 +117,12 @@ export function GroupsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {groups.map((group) => (
-              <Card key={group.id} variant="default" className="hover:shadow-lg transition-shadow">
+              <Card key={group.id} variant="default" className="hover:shadow-lg transition-shadow bg-slate-900/50 border-slate-700">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-primary-900 dark:text-primary-50">{group.name}</h3>
+                    <h3 className="text-lg font-semibold text-white">{group.name}</h3>
                     {group.description && (
-                      <p className="text-primary-600 dark:text-primary-400 text-sm mt-1">{group.description}</p>
+                      <p className="text-slate-300 text-sm mt-1">{group.description}</p>
                     )}
                   </div>
                   <div className="flex gap-2">
@@ -143,15 +143,15 @@ export function GroupsPage() {
                   </div>
                 </div>
 
-                <div className="space-y-2 mb-6 pb-6 border-b border-primary-200 dark:border-primary-700">
+                <div className="space-y-2 mb-6 pb-6 border-b border-slate-700">
                   <div>
-                    <p className="text-primary-600 dark:text-primary-400 text-sm">👤 Members</p>
-                    <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">{group.memberCount}</p>
+                    <p className="text-slate-400 text-sm">👤 Members</p>
+                    <p className="text-2xl font-bold text-accent-400">{group.memberCount}</p>
                   </div>
                   {group.welcomeMessageEnabled && (
                     <div>
-                      <p className="text-secondary-600 dark:text-secondary-400 text-sm">Welcome Message</p>
-                      <p className="text-sm text-success-600 dark:text-success-400 font-medium">✅ Enabled</p>
+                      <p className="text-slate-400 text-sm">Welcome Message</p>
+                      <p className="text-sm text-green-400 font-medium">✅ Enabled</p>
                     </div>
                   )}
                 </div>
@@ -173,9 +173,9 @@ export function GroupsPage() {
       {/* Delete Confirmation */}
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <Card variant="default" className="max-w-sm w-full">
-            <h3 className="text-lg font-bold text-primary-900 dark:text-primary-50 mb-2">⚠️ Delete Group?</h3>
-            <p className="text-primary-600 dark:text-primary-400 mb-6">
+          <Card variant="default" className="max-w-sm w-full bg-slate-900/50 border-slate-700">
+            <h3 className="text-lg font-bold text-white mb-2">⚠️ Delete Group?</h3>
+            <p className="text-slate-300 mb-6">
               This will delete the group and remove all members. This action cannot be undone.
             </p>
             <div className="flex gap-3">
