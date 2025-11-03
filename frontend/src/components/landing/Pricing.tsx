@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Check, Zap } from 'lucide-react';
 import useAuthStore from '../../stores/authStore';
@@ -66,6 +67,27 @@ export default function Pricing() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 40, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { duration: 0.6 },
+    },
+  };
+
   const handleStartTrial = () => {
     if (isAuthenticated) {
       navigate('/subscribe');
@@ -78,31 +100,87 @@ export default function Pricing() {
     <section id="pricing" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-slate-950 overflow-hidden transition-colors duration-normal">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-1/3 w-96 h-96 bg-accent-500 opacity-10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-accent-400 opacity-15 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <motion.div
+          className="absolute top-0 right-1/3 w-96 h-96 bg-accent-500 opacity-10 rounded-full blur-3xl"
+          animate={{
+            y: [0, -30, 0],
+            x: [0, 20, 0],
+          }}
+          transition={{
+            duration: 9,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        />
+        <motion.div
+          className="absolute bottom-0 left-1/4 w-80 h-80 bg-accent-400 opacity-15 rounded-full blur-3xl"
+          animate={{
+            y: [0, 25, 0],
+            x: [0, -15, 0],
+          }}
+          transition={{
+            duration: 11,
+            repeat: Infinity,
+            ease: 'easeInOut',
+            delay: 1,
+          }}
+        />
       </div>
 
       <div className="relative max-w-7xl mx-auto">
         {/* Section Header */}
-        <div className="text-center mb-16 animate-fadeIn">
+        <motion.div
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true, margin: '-100px' }}
+        >
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight tracking-tight">
             Simple, Transparent{' '}
-            <span className="bg-gradient-to-r from-accent-400 to-accent-500 bg-clip-text text-transparent">Pricing</span>
+            <motion.span
+              className="bg-gradient-to-r from-accent-400 to-accent-500 bg-clip-text text-transparent inline-block"
+              animate={{
+                backgroundPosition: ['0%', '100%'],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                repeatType: 'reverse',
+              }}
+              style={{
+                backgroundSize: '200% 200%',
+              }}
+            >
+              Pricing
+            </motion.span>
           </h2>
-          <p className="text-lg text-slate-300 max-w-3xl mx-auto font-light leading-relaxed">
+          <motion.p
+            className="text-lg text-slate-300 max-w-3xl mx-auto font-light leading-relaxed"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
             Choose the plan that fits your church. All plans include a 14-day free trial. No credit card required.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <motion.div
+          className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-100px' }}
+        >
           {plans.map((plan, index) => (
-            <div
+            <motion.div
               key={index}
-              className={`group relative animate-slideUp transition-all duration-300 ${
+              variants={itemVariants}
+              className={`group relative transition-all duration-300 ${
                 plan.highlight ? 'md:scale-105' : ''
               }`}
-              style={{ animationDelay: `${index * 0.1}s` }}
             >
               {/* Glow effect for highlighted card */}
               {plan.highlight && (
@@ -158,12 +236,18 @@ export default function Pricing() {
                   </Button>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* Additional Info */}
-        <div className="mt-16 text-center">
+        <motion.div
+          className="mt-16 text-center"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          viewport={{ once: true }}
+        >
           <p className="text-slate-300 mb-4 text-sm">
             All plans include: Secure messaging, message history, reply inbox, and mobile access
           </p>
@@ -173,7 +257,7 @@ export default function Pricing() {
               Contact us
             </a>
           </p>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
