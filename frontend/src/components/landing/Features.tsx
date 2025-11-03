@@ -42,7 +42,7 @@ const features: Feature[] = [
 
 export default function Features() {
   return (
-    <section id="features" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-primary-800 via-primary-850 to-primary-900 overflow-hidden transition-colors duration-normal">
+    <section id="features" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-slate-950 overflow-hidden transition-colors duration-normal">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-1/4 w-80 h-80 bg-accent-400 opacity-10 rounded-full blur-3xl animate-pulse"></div>
@@ -54,9 +54,9 @@ export default function Features() {
         <div className="text-center mb-16 animate-fadeIn">
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight tracking-tight">
             Everything You Need to{' '}
-            <span className="bg-gradient-to-r from-accent-500 via-accent-400 to-accent-300 bg-clip-text text-transparent">Stay Connected</span>
+            <span className="bg-gradient-to-r from-accent-400 to-accent-500 bg-clip-text text-transparent">Stay Connected</span>
           </h2>
-          <p className="text-lg text-primary-100 max-w-3xl mx-auto font-light leading-relaxed">
+          <p className="text-lg text-slate-300 max-w-3xl mx-auto font-light leading-relaxed">
             Powerful features designed specifically for churches managing multiple locations and hundreds of members.
           </p>
         </div>
@@ -67,7 +67,7 @@ export default function Features() {
             <Card
               key={index}
               variant="default"
-              className="group animate-slideUp relative p-8 bg-gradient-to-br from-primary-700/40 to-primary-800/40 border border-primary-600/40 hover:border-primary-500/80 backdrop-blur-xl rounded-2xl transition-all duration-300 overflow-hidden"
+              className="group animate-slideUp relative p-8 bg-slate-900/50 border border-slate-700/50 hover:border-accent-400/50 backdrop-blur-xl rounded-lg transition-all duration-300 overflow-hidden"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               {/* Glow effect on hover */}
@@ -75,11 +75,11 @@ export default function Features() {
 
               {/* Content */}
               <div className="relative z-10">
-                <div className="w-12 h-12 bg-gradient-to-br from-accent-500 to-accent-400 text-primary-900 rounded-lg flex items-center justify-center mb-5 group-hover:shadow-lg group-hover:shadow-accent-400/50 transition-all duration-300">
+                <div className="w-12 h-12 bg-accent-500 text-slate-950 rounded-lg flex items-center justify-center mb-5 group-hover:shadow-lg group-hover:shadow-accent-500/50 transition-all duration-300">
                   {feature.icon}
                 </div>
                 <h3 className="text-lg font-semibold text-white mb-3">{feature.title}</h3>
-                <p className="text-primary-100 text-sm leading-relaxed">{feature.description}</p>
+                <p className="text-slate-300 text-sm leading-relaxed">{feature.description}</p>
               </div>
             </Card>
           ))}

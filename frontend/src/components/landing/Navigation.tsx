@@ -57,13 +57,13 @@ export default function Navigation() {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-sticky bg-primary-900/85 backdrop-blur-md border-b border-accent-500/30 shadow-lg transition-colors duration-normal">
+    <nav className="fixed top-0 left-0 right-0 z-sticky bg-slate-900/85 backdrop-blur-md border-b border-accent-500/30 shadow-lg transition-colors duration-normal">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
             <div className="w-9 h-9 bg-accent-500 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-normal">
-              <span className="text-primary-900 font-bold text-base">C</span>
+              <span className="text-slate-950 font-bold text-base">C</span>
             </div>
             <span className="text-lg font-semibold text-white hidden sm:block">Connect</span>
           </Link>
@@ -77,8 +77,8 @@ export default function Navigation() {
                 onClick={(e) => handleNavClick(e, link.href)}
                 className={`text-sm font-medium transition-colors duration-normal pb-1 border-b-2 ${
                   activeSection === link.href.substring(1)
-                    ? 'text-accent-500 border-accent-500'
-                    : 'text-primary-100 border-transparent hover:text-accent-500'
+                    ? 'text-accent-400 border-accent-400'
+                    : 'text-slate-300 border-transparent hover:text-accent-400'
                 }`}
               >
                 {link.label}
@@ -95,7 +95,7 @@ export default function Navigation() {
             {!isAuthenticated && (
               <button
                 onClick={handleSignIn}
-                className="hidden sm:block text-primary-100 hover:text-accent-500 font-medium transition-colors duration-normal text-sm"
+                className="hidden sm:block text-slate-300 hover:text-accent-400 font-medium transition-colors duration-normal text-sm"
               >
                 Sign In
               </button>
@@ -106,7 +106,7 @@ export default function Navigation() {
               variant="primary"
               size="sm"
               onClick={handleStartTrial}
-              className="hidden xs:block bg-accent-500 hover:bg-accent-400 text-primary-900"
+              className="hidden xs:block bg-accent-500 hover:bg-accent-400 text-slate-950"
             >
               {isAuthenticated ? 'Dashboard' : 'Start Free'}
             </Button>
@@ -114,7 +114,7 @@ export default function Navigation() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-md hover:bg-primary-800 transition-colors duration-normal"
+              className="md:hidden p-2 rounded-md hover:bg-slate-800 transition-colors duration-normal"
               aria-label="Toggle menu"
             >
               <div className="w-6 h-6 flex flex-col justify-between">
@@ -140,13 +140,13 @@ export default function Navigation() {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-accent-500/30 py-4 space-y-2 animate-slide-down bg-primary-800/50 backdrop-blur-md">
+          <div className="md:hidden border-t border-accent-500/30 py-4 space-y-2 animate-slide-down bg-slate-800/50 backdrop-blur-md">
             {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
-                className="block px-4 py-2 text-primary-100 hover:text-accent-500 hover:bg-primary-700 rounded-lg transition-colors duration-normal font-medium text-sm"
+                className="block px-4 py-2 text-slate-300 hover:text-accent-400 hover:bg-slate-700 rounded-lg transition-colors duration-normal font-medium text-sm"
               >
                 {link.label}
               </a>
@@ -155,7 +155,7 @@ export default function Navigation() {
               {!isAuthenticated && (
                 <button
                   onClick={handleSignIn}
-                  className="w-full px-4 py-2 text-primary-100 hover:text-accent-500 font-medium transition-colors duration-normal text-left text-sm"
+                  className="w-full px-4 py-2 text-slate-300 hover:text-accent-400 font-medium transition-colors duration-normal text-left text-sm"
                 >
                   Sign In
                 </button>
