@@ -1,0 +1,7 @@
+import { jsx as _jsx } from "react/jsx-runtime";
+import { useTheme } from '../contexts/ThemeContext';
+export default function ThemeToggle() {
+    const { theme, toggleTheme } = useTheme();
+    return (_jsx("button", { onClick: toggleTheme, className: "p-2 rounded-lg bg-secondary-100 dark:bg-secondary-800 hover:bg-secondary-200 dark:hover:bg-secondary-700 transition-colors", "aria-label": `Switch to ${theme === 'light' ? 'dark' : 'light'} mode`, children: theme === 'light' ? (_jsx("svg", { className: "w-5 h-5 text-secondary-700", fill: "currentColor", viewBox: "0 0 20 20", children: _jsx("path", { d: "M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" }) })) : (_jsx("svg", { className: "w-5 h-5 text-secondary-300", fill: "currentColor", viewBox: "0 0 20 20", children: _jsx("path", { fillRule: "evenodd", d: "M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.536l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.121-10.071l.707-.707a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zm5.657-9.193l.707.707A1 1 0 005.05 6.464l-.707-.707a1 1 0 011.414-1.414zM5 11a1 1 0 100-2H4a1 1 0 100 2h1z", clipRule: "evenodd" }) })) }));
+}
+//# sourceMappingURL=ThemeToggle.js.map

@@ -12,8 +12,6 @@
 
 html {
   scroll-behavior: smooth;
-  /* Default to dark mode for Expo theme */
-  @apply bg-slate-950 text-slate-50;
 }
 
 html,
@@ -350,24 +348,25 @@ pre {
 
 @layer base {
   :root {
-    --background: 0 0% 5%;
-    --foreground: 0 0% 98%;
-    --card: 215 13% 10%;
-    --card-foreground: 0 0% 98%;
-    --popover: 215 13% 10%;
-    --popover-foreground: 0 0% 98%;
+    /* Light Mode Colors */
+    --background: 0 0% 100%;
+    --foreground: 220 13% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 13% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 13% 20%;
     --primary: 217 91% 55%;
-    --primary-foreground: 0 0% 5%;
+    --primary-foreground: 0 0% 100%;
     --secondary: 220 17% 32%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 215 17% 35%;
-    --muted-foreground: 220 14% 71%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 220 14% 71%;
+    --muted-foreground: 220 13% 20%;
     --accent: 197 71% 55%;
-    --accent-foreground: 0 0% 5%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 215 13% 20%;
-    --input: 215 13% 20%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
     --ring: 217 91% 55%;
     --chart-1: 217 91% 55%;
     --chart-2: 197 71% 55%;
@@ -377,6 +376,7 @@ pre {
     --radius: 0.5rem;
   }
   .dark {
+    /* Dark Mode Colors */
     --background: 0 0% 5%;
     --foreground: 0 0% 98%;
     --card: 215 13% 10%;

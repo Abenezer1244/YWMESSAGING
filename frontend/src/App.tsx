@@ -9,6 +9,7 @@ import useBranchStore from './stores/branchStore';
 import { fetchCsrfToken } from './api/client';
 import { getBranches } from './api/branches';
 import { getMe } from './api/auth';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 // Lazy load pages for route-based code splitting
 const LandingPage = lazy(() => import('./pages/LandingPage'));
@@ -108,9 +109,10 @@ function App() {
   }, [isAuthenticated, church?.id, setBranches]);
 
   return (
-    <Router>
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
+    <ThemeProvider>
+      <Router>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
           <Route
@@ -236,9 +238,10 @@ function App() {
             }
           />
         </Routes>
-      </Suspense>
-      <Toaster position="top-right" />
-    </Router>
+        </Suspense>
+        <Toaster position="top-right" />
+      </Router>
+    </ThemeProvider>
   );
 }
 
