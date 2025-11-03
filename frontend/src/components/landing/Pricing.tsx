@@ -97,7 +97,7 @@ export default function Pricing() {
   };
 
   return (
-    <section id="pricing" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-slate-950 overflow-hidden transition-colors duration-normal">
+    <section id="pricing" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-950 overflow-hidden transition-colors duration-normal">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -136,7 +136,7 @@ export default function Pricing() {
           transition={{ duration: 0.8 }}
           viewport={{ once: true, margin: '-100px' }}
         >
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight tracking-tight">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white mb-4 leading-tight tracking-tight">
             Simple, Transparent{' '}
             <motion.span
               className="bg-gradient-to-r from-accent-400 to-accent-500 bg-clip-text text-transparent inline-block"
@@ -156,7 +156,7 @@ export default function Pricing() {
             </motion.span>
           </h2>
           <motion.p
-            className="text-lg text-slate-300 max-w-3xl mx-auto font-light leading-relaxed"
+            className="text-lg text-slate-700 dark:text-slate-300 max-w-3xl mx-auto font-light leading-relaxed"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -189,11 +189,11 @@ export default function Pricing() {
 
               <div className={`relative bg-gradient-to-br rounded-lg p-8 border transition-all duration-300 overflow-hidden h-full ${
                 plan.highlight
-                  ? 'from-slate-800/60 to-slate-900/60 border-accent-400/50 shadow-2xl'
-                  : 'from-slate-900/50 to-slate-950/50 border-slate-700/50 hover:border-accent-400/50'
+                  ? 'from-slate-200/60 dark:from-slate-800/60 to-slate-300/60 dark:to-slate-900/60 border-accent-400/50 shadow-2xl'
+                  : 'from-slate-100/50 dark:from-slate-900/50 to-slate-150/50 dark:to-slate-950/50 border-slate-300/50 dark:border-slate-700/50 hover:border-accent-400/50'
               }`}>
                 {/* Background gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 to-transparent pointer-events-none"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-300/20 dark:from-slate-900/20 to-transparent pointer-events-none"></div>
 
                 {/* Popular Badge */}
                 {plan.highlight && (
@@ -208,19 +208,19 @@ export default function Pricing() {
                 {/* Content */}
                 <div className="relative z-10">
                   <div className="text-center mb-8 pt-4">
-                    <h3 className="text-2xl font-semibold text-white mb-3">{plan.name}</h3>
+                    <h3 className="text-2xl font-semibold text-slate-900 dark:text-white mb-3">{plan.name}</h3>
                     <div className="mb-4">
                       <span className="text-5xl font-bold bg-gradient-to-r from-accent-400 to-accent-500 bg-clip-text text-transparent">{plan.price}</span>
-                      <span className="text-slate-300 text-sm">/month</span>
+                      <span className="text-slate-700 dark:text-slate-300 text-sm">/month</span>
                     </div>
-                    <p className="text-slate-300 text-sm">{plan.description}</p>
+                    <p className="text-slate-700 dark:text-slate-300 text-sm">{plan.description}</p>
                   </div>
 
                   <ul className="space-y-3 mb-8">
                     {plan.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-start gap-3">
                         <Check className="w-5 h-5 text-accent-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-slate-300 text-sm">{feature}</span>
+                        <span className="text-slate-700 dark:text-slate-300 text-sm">{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -248,10 +248,10 @@ export default function Pricing() {
           transition={{ duration: 0.8, delay: 0.3 }}
           viewport={{ once: true }}
         >
-          <p className="text-slate-300 mb-4 text-sm">
+          <p className="text-slate-700 dark:text-slate-300 mb-4 text-sm">
             All plans include: Secure messaging, message history, reply inbox, and mobile access
           </p>
-          <p className="text-sm text-slate-300">
+          <p className="text-sm text-slate-700 dark:text-slate-300">
             Need a custom plan?{' '}
             <a href="mailto:support@connect.com" className="text-accent-400 hover:text-accent-300 font-semibold transition-colors">
               Contact us

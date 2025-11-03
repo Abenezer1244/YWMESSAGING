@@ -54,7 +54,7 @@ export default function Testimonials() {
   };
 
   return (
-    <section id="testimonials" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-slate-950 overflow-hidden transition-colors duration-normal">
+    <section id="testimonials" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-950 overflow-hidden transition-colors duration-normal">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -93,7 +93,7 @@ export default function Testimonials() {
           transition={{ duration: 0.8 }}
           viewport={{ once: true, margin: '-100px' }}
         >
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight tracking-tight">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white mb-4 leading-tight tracking-tight">
             Trusted by{' '}
             <motion.span
               className="bg-gradient-to-r from-accent-400 to-accent-500 bg-clip-text text-transparent inline-block"
@@ -113,7 +113,7 @@ export default function Testimonials() {
             </motion.span>
           </h2>
           <motion.p
-            className="text-lg text-slate-300 max-w-3xl mx-auto font-light leading-relaxed"
+            className="text-lg text-slate-700 dark:text-slate-300 max-w-3xl mx-auto font-light leading-relaxed"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -138,7 +138,7 @@ export default function Testimonials() {
             >
               <Card
                 variant="default"
-                className="group relative p-8 bg-slate-900/50 border border-slate-700/50 hover:border-accent-400/50 backdrop-blur-xl rounded-lg transition-all duration-300 overflow-hidden h-full"
+                className="group relative p-8 bg-slate-100/50 dark:bg-slate-900/50 border border-slate-300/50 dark:border-slate-700/50 hover:border-accent-400/50 backdrop-blur-xl rounded-lg transition-all duration-300 overflow-hidden h-full"
               >
               {/* Glow effect on hover */}
               <div className="absolute inset-0 bg-gradient-to-r from-accent-500/0 via-accent-400/0 to-accent-300/0 group-hover:from-accent-500/5 group-hover:via-accent-400/5 group-hover:to-accent-300/5 transition-all duration-300 pointer-events-none"></div>
@@ -162,7 +162,7 @@ export default function Testimonials() {
                 </motion.div>
 
                 {/* Testimonial Content */}
-                <p className="text-slate-100 mb-6 leading-relaxed italic text-sm">
+                <p className="text-slate-900 dark:text-slate-100 mb-6 leading-relaxed italic text-sm">
                   "{testimonial.content}"
                 </p>
 
@@ -172,8 +172,8 @@ export default function Testimonials() {
                     {testimonial.name.charAt(0)}
                   </div>
                   <div>
-                    <div className="font-semibold text-white text-sm">{testimonial.name}</div>
-                    <div className="text-xs text-slate-400">
+                    <div className="font-semibold text-slate-900 dark:text-white text-sm">{testimonial.name}</div>
+                    <div className="text-xs text-slate-600 dark:text-slate-400">
                       {testimonial.role}, {testimonial.church}
                     </div>
                   </div>
@@ -217,7 +217,7 @@ export default function Testimonials() {
               >
                 100+
               </motion.div>
-              <div className="text-slate-300 text-sm">Churches</div>
+              <div className="text-slate-700 dark:text-slate-300 text-sm">Churches</div>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -237,7 +237,7 @@ export default function Testimonials() {
               >
                 25K+
               </motion.div>
-              <div className="text-slate-300 text-sm">Members</div>
+              <div className="text-slate-700 dark:text-slate-300 text-sm">Members</div>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -257,7 +257,7 @@ export default function Testimonials() {
               >
                 500K+
               </motion.div>
-              <div className="text-slate-300 text-sm">Messages Sent</div>
+              <div className="text-slate-700 dark:text-slate-300 text-sm">Messages Sent</div>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -277,7 +277,7 @@ export default function Testimonials() {
               >
                 99.9%
               </motion.div>
-              <div className="text-slate-300 text-sm">Uptime</div>
+              <div className="text-slate-700 dark:text-slate-300 text-sm">Uptime</div>
             </motion.div>
           </motion.div>
         </motion.div>

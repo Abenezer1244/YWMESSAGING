@@ -48,7 +48,8 @@
       "Bash(curl:*)",
       "WebFetch(domain:www.svgator.com)",
       "mcp__playwright__browser_hover",
-      "Bash(timeout 120 npm run build:*)"
+      "Bash(timeout 120 npm run build:*)",
+      "Bash(timeout 30 npx tsc:*)"
     ],
     "deny": [],
     "ask": []

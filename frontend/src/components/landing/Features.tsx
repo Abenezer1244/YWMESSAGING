@@ -63,7 +63,7 @@ export default function Features() {
   };
 
   return (
-    <section id="features" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-slate-950 overflow-hidden transition-colors duration-normal">
+    <section id="features" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-950 overflow-hidden transition-colors duration-normal">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -102,7 +102,7 @@ export default function Features() {
           transition={{ duration: 0.8 }}
           viewport={{ once: true, margin: '-100px' }}
         >
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight tracking-tight">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white mb-4 leading-tight tracking-tight">
             Everything You Need to{' '}
             <motion.span
               className="bg-gradient-to-r from-accent-400 to-accent-500 bg-clip-text text-transparent inline-block"
@@ -122,7 +122,7 @@ export default function Features() {
             </motion.span>
           </h2>
           <motion.p
-            className="text-lg text-slate-300 max-w-3xl mx-auto font-light leading-relaxed"
+            className="text-lg text-slate-700 dark:text-slate-300 max-w-3xl mx-auto font-light leading-relaxed"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -147,7 +147,7 @@ export default function Features() {
             >
               <Card
                 variant="default"
-                className="group relative p-8 bg-slate-900/50 border border-slate-700/50 hover:border-accent-400/50 backdrop-blur-xl rounded-lg overflow-hidden h-full"
+                className="group relative p-8 bg-slate-100/50 dark:bg-slate-900/50 border border-slate-300/50 dark:border-slate-700/50 hover:border-accent-400/50 backdrop-blur-xl rounded-lg overflow-hidden h-full"
               >
                 <motion.div
                   whileHover={{
@@ -190,8 +190,8 @@ export default function Features() {
                   >
                     {feature.icon}
                   </motion.div>
-                  <h3 className="text-lg font-semibold text-white mb-3">{feature.title}</h3>
-                  <p className="text-slate-300 text-sm leading-relaxed">{feature.description}</p>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">{feature.title}</h3>
+                  <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">{feature.description}</p>
                 </motion.div>
               </Card>
             </motion.div>

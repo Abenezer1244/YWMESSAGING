@@ -33,7 +33,7 @@ export default function DashboardPreview() {
   };
 
   return (
-    <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+    <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white via-gray-50 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       {/* Animated Background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -71,7 +71,7 @@ export default function DashboardPreview() {
           transition={{ duration: 0.8 }}
           viewport={{ once: true, margin: '-100px' }}
         >
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white">
             Powerful Dashboard
             <br />
             <motion.span
@@ -92,7 +92,7 @@ export default function DashboardPreview() {
             </motion.span>
           </h2>
           <motion.p
-            className="text-xl text-primary-100/90 max-w-2xl mx-auto"
+            className="text-xl text-slate-700 dark:text-primary-100/90 max-w-2xl mx-auto"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -156,7 +156,7 @@ export default function DashboardPreview() {
                 />
                 <div className="text-sm font-semibold text-blue-100">Dashboard Preview</div>
               </div>
-              <h3 className="text-2xl lg:text-3xl font-bold text-white">Message Analytics</h3>
+              <h3 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">Message Analytics</h3>
             </motion.div>
 
             {/* Stats Grid */}
@@ -295,7 +295,7 @@ export default function DashboardPreview() {
             <motion.div
               key={i}
               variants={itemVariants}
-              className="p-6 bg-slate-900/50 border border-slate-700 rounded-lg hover:border-accent-500/50 transition-colors duration-300 text-center"
+              className="p-6 bg-slate-100/50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg hover:border-accent-500/50 transition-colors duration-300 text-center"
               whileHover={{
                 scale: 1.05,
                 backgroundColor: 'rgba(15, 23, 42, 0.8)',
@@ -303,7 +303,7 @@ export default function DashboardPreview() {
               }}
             >
               <motion.h4
-                className="text-lg font-semibold text-white mb-3"
+                className="text-lg font-semibold text-slate-900 dark:text-white mb-3"
                 animate={{
                   y: [0, -5, 0],
                 }}
@@ -315,7 +315,7 @@ export default function DashboardPreview() {
               >
                 {feature.title}
               </motion.h4>
-              <p className="text-slate-400">{feature.description}</p>
+              <p className="text-slate-700 dark:text-slate-400">{feature.description}</p>
             </motion.div>
           ))}
         </motion.div>

@@ -50,7 +50,7 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 overflow-hidden pt-24">
+    <section className="relative min-h-screen flex items-center px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white via-gray-50 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 overflow-hidden pt-24">
       {/* Animated background elements with floating motion */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -103,7 +103,7 @@ export default function Hero() {
             {/* Modern Badge */}
             <motion.div variants={floatingVariants} className="flex justify-center">
               <motion.div
-                className="inline-flex items-center gap-2 px-4 py-2 bg-accent-500/15 border border-accent-400/50 rounded-full text-sm font-medium text-accent-100 backdrop-blur-sm hover:bg-accent-500/25 transition-colors duration-300"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-accent-500/15 border border-accent-400/50 rounded-full text-sm font-medium text-accent-600 dark:text-accent-100 backdrop-blur-sm hover:bg-accent-500/25 transition-colors duration-300"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -126,7 +126,7 @@ export default function Hero() {
             <motion.div variants={itemVariants} className="space-y-4">
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
                 <motion.span
-                  className="text-white inline-block"
+                  className="text-slate-900 dark:text-white inline-block"
                   animate={{
                     opacity: [0.5, 1, 0.5],
                   }}
@@ -160,7 +160,7 @@ export default function Hero() {
             {/* Subheading - Modern typography */}
             <motion.p
               variants={itemVariants}
-              className="text-xs sm:text-sm text-primary-100/90 max-w-sm leading-relaxed font-light mx-auto"
+              className="text-xs sm:text-sm text-slate-700 dark:text-primary-100/90 max-w-sm leading-relaxed font-light mx-auto"
             >
               Enterprise SMS communication platform built for churches. Strengthen community engagement, manage multiple locations, and communicate with confidence.
             </motion.p>
@@ -210,7 +210,7 @@ export default function Hero() {
               ].map((item, i) => (
                 <motion.div
                   key={i}
-                  className="flex items-center gap-3 p-3 bg-primary-700/20 rounded-lg border border-accent-400/30 backdrop-blur-sm hover:bg-primary-700/40 transition-colors duration-300"
+                  className="flex items-center gap-3 p-3 bg-slate-200/50 dark:bg-primary-700/20 rounded-lg border border-slate-300 dark:border-accent-400/30 backdrop-blur-sm hover:bg-slate-300/50 dark:hover:bg-primary-700/40 transition-colors duration-300"
                   whileHover={{
                     scale: 1.05,
                     backgroundColor: 'rgba(55, 65, 81, 0.5)',
@@ -229,7 +229,7 @@ export default function Hero() {
                   >
                     <item.icon className="w-5 h-5 text-accent-400 flex-shrink-0" />
                   </motion.div>
-                  <span className="text-sm text-primary-100">{item.text}</span>
+                  <span className="text-sm text-slate-700 dark:text-primary-100">{item.text}</span>
                 </motion.div>
               ))}
             </motion.div>
@@ -247,7 +247,7 @@ export default function Hero() {
             repeat: Infinity,
           }}
         >
-          <div className="flex flex-col items-center gap-2 text-blue-300">
+          <div className="flex flex-col items-center gap-2 text-slate-600 dark:text-blue-300">
             <span className="text-sm font-medium">Scroll to explore</span>
             <svg className="w-6 h-6 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />

@@ -29,7 +29,7 @@ export default function DashboardPreview() {
             transition: { duration: 1, ease: 'easeOut' },
         },
     };
-    return (_jsxs("section", { className: "relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950", children: [_jsxs("div", { className: "absolute inset-0 overflow-hidden pointer-events-none", children: [_jsx(motion.div, { className: "absolute top-0 right-10 w-96 h-96 bg-accent-500 opacity-10 rounded-full blur-3xl", animate: {
+    return (_jsxs("section", { className: "relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white via-gray-50 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950", children: [_jsxs("div", { className: "absolute inset-0 overflow-hidden pointer-events-none", children: [_jsx(motion.div, { className: "absolute top-0 right-10 w-96 h-96 bg-accent-500 opacity-10 rounded-full blur-3xl", animate: {
                             x: [0, 30, 0],
                             y: [0, -20, 0],
                         }, transition: {
@@ -43,7 +43,7 @@ export default function DashboardPreview() {
                             duration: 10,
                             repeat: Infinity,
                             ease: 'easeInOut',
-                        } })] }), _jsxs("div", { className: "relative max-w-6xl mx-auto", children: [_jsxs(motion.div, { className: "text-center mb-16 space-y-4", initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, transition: { duration: 0.8 }, viewport: { once: true, margin: '-100px' }, children: [_jsxs("h2", { className: "text-4xl sm:text-5xl lg:text-6xl font-bold text-white", children: ["Powerful Dashboard", _jsx("br", {}), _jsx(motion.span, { className: "bg-gradient-to-r from-accent-300 via-accent-500 to-primary-400 bg-clip-text text-transparent inline-block", animate: {
+                        } })] }), _jsxs("div", { className: "relative max-w-6xl mx-auto", children: [_jsxs(motion.div, { className: "text-center mb-16 space-y-4", initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, transition: { duration: 0.8 }, viewport: { once: true, margin: '-100px' }, children: [_jsxs("h2", { className: "text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white", children: ["Powerful Dashboard", _jsx("br", {}), _jsx(motion.span, { className: "bg-gradient-to-r from-accent-300 via-accent-500 to-primary-400 bg-clip-text text-transparent inline-block", animate: {
                                             backgroundPosition: ['0%', '100%'],
                                         }, transition: {
                                             duration: 4,
@@ -51,7 +51,7 @@ export default function DashboardPreview() {
                                             repeatType: 'reverse',
                                         }, style: {
                                             backgroundSize: '200% 200%',
-                                        }, children: "Real-Time Insights" })] }), _jsx(motion.p, { className: "text-xl text-primary-100/90 max-w-2xl mx-auto", initial: { opacity: 0 }, whileInView: { opacity: 1 }, transition: { duration: 0.8, delay: 0.2 }, viewport: { once: true }, children: "Monitor your church communication with comprehensive analytics, detailed activity logs, and actionable metrics." })] }), _jsxs(motion.div, { className: "relative group", initial: { opacity: 0, scale: 0.8, y: 50 }, whileInView: { opacity: 1, scale: 1, y: 0 }, transition: { duration: 0.8 }, viewport: { once: true, margin: '-100px' }, children: [_jsx(motion.div, { className: "absolute -inset-1 bg-gradient-to-r from-blue-pacific via-blue-sky-blue to-blue-honolulu rounded-2xl blur-2xl opacity-20 group-hover:opacity-40 transition duration-500", animate: {
+                                        }, children: "Real-Time Insights" })] }), _jsx(motion.p, { className: "text-xl text-slate-700 dark:text-primary-100/90 max-w-2xl mx-auto", initial: { opacity: 0 }, whileInView: { opacity: 1 }, transition: { duration: 0.8, delay: 0.2 }, viewport: { once: true }, children: "Monitor your church communication with comprehensive analytics, detailed activity logs, and actionable metrics." })] }), _jsxs(motion.div, { className: "relative group", initial: { opacity: 0, scale: 0.8, y: 50 }, whileInView: { opacity: 1, scale: 1, y: 0 }, transition: { duration: 0.8 }, viewport: { once: true, margin: '-100px' }, children: [_jsx(motion.div, { className: "absolute -inset-1 bg-gradient-to-r from-blue-pacific via-blue-sky-blue to-blue-honolulu rounded-2xl blur-2xl opacity-20 group-hover:opacity-40 transition duration-500", animate: {
                                     opacity: [0.2, 0.4, 0.2],
                                     scale: [1, 1.05, 1],
                                 }, transition: {
@@ -66,7 +66,7 @@ export default function DashboardPreview() {
                                                         }, transition: {
                                                             duration: 2,
                                                             repeat: Infinity,
-                                                        } }), _jsx("div", { className: "text-sm font-semibold text-blue-100", children: "Dashboard Preview" })] }), _jsx("h3", { className: "text-2xl lg:text-3xl font-bold text-white", children: "Message Analytics" })] }), _jsxs(motion.div, { className: "grid grid-cols-2 gap-4 mb-8", variants: containerVariants, initial: "hidden", whileInView: "visible", viewport: { once: true }, children: [_jsxs(motion.div, { variants: itemVariants, className: "p-4 bg-blue-600/30 rounded-lg border border-blue-500/20", whileHover: {
+                                                        } }), _jsx("div", { className: "text-sm font-semibold text-blue-100", children: "Dashboard Preview" })] }), _jsx("h3", { className: "text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white", children: "Message Analytics" })] }), _jsxs(motion.div, { className: "grid grid-cols-2 gap-4 mb-8", variants: containerVariants, initial: "hidden", whileInView: "visible", viewport: { once: true }, children: [_jsxs(motion.div, { variants: itemVariants, className: "p-4 bg-blue-600/30 rounded-lg border border-blue-500/20", whileHover: {
                                                     scale: 1.05,
                                                     backgroundColor: 'rgba(37, 99, 235, 0.4)',
                                                 }, children: [_jsx("div", { className: "text-xs text-blue-300 mb-2", children: "DELIVERED" }), _jsx(motion.div, { className: "text-2xl lg:text-3xl font-bold text-blue-pacific", initial: { opacity: 0 }, whileInView: { opacity: 1 }, transition: { duration: 1, delay: 0.4 }, viewport: { once: true }, children: _jsx(CountUp, { target: 2847 }) })] }), _jsxs(motion.div, { variants: itemVariants, className: "p-4 bg-blue-600/30 rounded-lg border border-blue-500/20", whileHover: {
@@ -91,17 +91,17 @@ export default function DashboardPreview() {
                                 title: 'Smart Insights',
                                 description: 'Get AI-powered recommendations to improve your communication strategy.'
                             }
-                        ].map((feature, i) => (_jsxs(motion.div, { variants: itemVariants, className: "p-6 bg-slate-900/50 border border-slate-700 rounded-lg hover:border-accent-500/50 transition-colors duration-300 text-center", whileHover: {
+                        ].map((feature, i) => (_jsxs(motion.div, { variants: itemVariants, className: "p-6 bg-slate-100/50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg hover:border-accent-500/50 transition-colors duration-300 text-center", whileHover: {
                                 scale: 1.05,
                                 backgroundColor: 'rgba(15, 23, 42, 0.8)',
                                 borderColor: 'rgba(234, 179, 8, 0.5)',
-                            }, children: [_jsx(motion.h4, { className: "text-lg font-semibold text-white mb-3", animate: {
+                            }, children: [_jsx(motion.h4, { className: "text-lg font-semibold text-slate-900 dark:text-white mb-3", animate: {
                                         y: [0, -5, 0],
                                     }, transition: {
                                         duration: 2,
                                         repeat: Infinity,
                                         delay: i * 0.3,
-                                    }, children: feature.title }), _jsx("p", { className: "text-slate-400", children: feature.description })] }, i))) })] })] }));
+                                    }, children: feature.title }), _jsx("p", { className: "text-slate-700 dark:text-slate-400", children: feature.description })] }, i))) })] })] }));
 }
 // Helper component for animated counter
 function CountUp({ target, suffix = '' }) {

@@ -37,7 +37,7 @@ export default function FinalCTA() {
   };
 
   return (
-    <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-slate-950 overflow-hidden transition-colors duration-normal">
+    <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-950 overflow-hidden transition-colors duration-normal">
       {/* Animated gradient accents */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -88,7 +88,7 @@ export default function FinalCTA() {
           transition={{ duration: 0.8 }}
           viewport={{ once: true, margin: '-100px' }}
         >
-          <h2 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white mb-6 leading-tight tracking-tight">
+          <h2 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-slate-900 dark:text-white mb-6 leading-tight tracking-tight">
             Ready to{' '}
             <motion.span
               className="bg-gradient-to-r from-accent-400 to-accent-500 bg-clip-text text-transparent inline-block"
@@ -108,7 +108,7 @@ export default function FinalCTA() {
             </motion.span>
           </h2>
           <motion.p
-            className="text-lg sm:text-xl text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed font-light"
+            className="text-lg sm:text-xl text-slate-700 dark:text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed font-light"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -149,7 +149,7 @@ export default function FinalCTA() {
               variant="outline"
               size="lg"
               onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
-              className="border-2 border-accent-400/50 text-slate-300 hover:bg-slate-900/40 hover:border-accent-400 font-semibold backdrop-blur-sm transition-all duration-300"
+              className="border-2 border-accent-400/50 text-slate-700 dark:text-slate-300 hover:bg-slate-300/40 dark:hover:bg-slate-900/40 hover:border-accent-400 font-semibold backdrop-blur-sm transition-all duration-300"
             >
               View Pricing
             </Button>
@@ -157,7 +157,7 @@ export default function FinalCTA() {
         </motion.div>
 
         <motion.div
-          className="flex flex-col sm:flex-row gap-6 justify-center text-slate-300 text-sm"
+          className="flex flex-col sm:flex-row gap-6 justify-center text-slate-700 dark:text-slate-300 text-sm"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
