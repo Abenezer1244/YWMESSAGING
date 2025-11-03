@@ -52,23 +52,23 @@ export default function Hero() {
             </div>
 
             {/* Subheading - Modern typography */}
-            <p className="text-xl sm:text-2xl text-primary-100/90 max-w-lg leading-relaxed font-light">
+            <p className="text-xl sm:text-2xl text-primary-100/90 max-w-sm leading-relaxed font-light mx-auto">
               Enterprise SMS communication platform built for churches. Strengthen community engagement, manage multiple locations, and communicate with confidence.
             </p>
 
             {/* Modern CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row gap-3 pt-4 justify-center">
               <Button
-                size="lg"
+                size="md"
                 onClick={handleStartTrial}
                 className="bg-gradient-to-r from-accent-400 to-accent-500 hover:from-accent-300 hover:to-accent-400 text-primary-900 font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
               >
                 <span>Start Free Trial</span>
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
               <Button
                 variant="outline"
-                size="lg"
+                size="md"
                 onClick={handleLearnMore}
                 className="border-2 border-accent-400/50 text-primary-100 hover:bg-primary-700/30 hover:border-accent-400 font-semibold rounded-lg backdrop-blur-sm transition-all duration-300"
               >
