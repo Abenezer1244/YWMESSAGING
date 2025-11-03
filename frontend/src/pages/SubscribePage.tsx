@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { subscribe } from '../api/billing';
+import BackButton from '../components/BackButton';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 

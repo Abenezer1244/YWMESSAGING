@@ -5,6 +5,7 @@ import useGroupStore from '../../stores/groupStore';
 import { getMembers, Member } from '../../api/members';
 import { AddMemberModal } from '../../components/members/AddMemberModal';
 import { ImportCSVModal } from '../../components/members/ImportCSVModal';
+import BackButton from '../../components/BackButton';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Input from '../../components/ui/Input';
@@ -77,6 +78,11 @@ export function MembersPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 dark:from-primary-900 to-primary-100 dark:to-primary-950 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
+        {/* Back Button */}
+        <div className="mb-6">
+          <BackButton variant="ghost" />
+        </div>
+
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">

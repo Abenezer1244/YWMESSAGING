@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import useMessageStore, { SentMessage } from '../../stores/messageStore';
 import { getMessageHistory } from '../../api/messages';
+import BackButton from '../../components/BackButton';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import { Spinner } from '../../components/ui';
@@ -52,6 +53,11 @@ export function MessageHistoryPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 dark:from-primary-900 to-primary-100 dark:to-primary-950 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
+        {/* Back Button */}
+        <div className="mb-6">
+          <BackButton variant="ghost" />
+        </div>
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-primary-900 dark:text-primary-50 mb-2">📜 Message History</h1>

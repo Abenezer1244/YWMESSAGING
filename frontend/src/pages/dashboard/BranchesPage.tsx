@@ -4,6 +4,7 @@ import useAuthStore from '../../stores/authStore';
 import useBranchStore, { Branch } from '../../stores/branchStore';
 import { getBranches, deleteBranch } from '../../api/branches';
 import BranchFormModal from '../../components/branches/BranchFormModal';
+import BackButton from '../../components/BackButton';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import { Spinner } from '../../components/ui';
@@ -86,6 +87,11 @@ export function BranchesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 dark:from-primary-900 to-primary-100 dark:to-primary-950 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
+        {/* Back Button */}
+        <div className="mb-6">
+          <BackButton variant="ghost" />
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>

@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { register as registerChurch } from '../api/auth';
 import { fetchCsrfToken } from '../api/client';
 import useAuthStore from '../stores/authStore';
+import BackButton from '../components/BackButton';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Card from '../components/ui/Card';
@@ -85,6 +86,10 @@ export function RegisterPage() {
       <div className="absolute top-0 right-0 w-96 h-96 bg-accent-500 opacity-10 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="w-full max-w-2xl relative z-10 animate-fadeIn">
+        <div className="mb-6">
+          <BackButton variant="ghost" size="sm" />
+        </div>
+
         <div className="text-center mb-12">
           {/* Logo */}
           <div className="flex items-center justify-center mb-6">

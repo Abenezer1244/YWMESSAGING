@@ -12,6 +12,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import BackButton from '../../components/BackButton';
 import {
   getMessageStats,
   getBranchStats,
@@ -57,6 +58,11 @@ export function AnalyticsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 dark:from-primary-900 to-primary-100 dark:to-primary-950 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
+        {/* Back Button */}
+        <div className="mb-6">
+          <BackButton variant="ghost" />
+        </div>
+
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>

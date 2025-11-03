@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { getProfile, updateProfile } from '../api/admin';
 import CoAdminPanel from '../components/admin/CoAdminPanel';
 import ActivityLogsPanel from '../components/admin/ActivityLogsPanel';
+import BackButton from '../components/BackButton';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
@@ -98,6 +99,11 @@ export function AdminSettingsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-primary-50 dark:from-primary-950 dark:to-primary-900 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
+        {/* Back Button */}
+        <div className="mb-6">
+          <BackButton variant="ghost" />
+        </div>
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-primary-900 dark:text-primary-50 mb-2">⚙️ Admin Settings</h1>

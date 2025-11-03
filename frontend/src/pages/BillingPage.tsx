@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { getPlan, cancelSubscription } from '../api/billing';
+import BackButton from '../components/BackButton';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import { Spinner } from '../components/ui';

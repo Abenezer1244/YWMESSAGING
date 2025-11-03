@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { getTemplates, deleteTemplate, MessageTemplate } from '../../api/templates';
 import TemplateFormModal from '../../components/templates/TemplateFormModal';
+import BackButton from '../../components/BackButton';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import { Spinner } from '../../components/ui';
@@ -78,6 +79,11 @@ export function TemplatesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 dark:from-primary-900 to-primary-100 dark:to-primary-950 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
+        {/* Back Button */}
+        <div className="mb-6">
+          <BackButton variant="ghost" />
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
