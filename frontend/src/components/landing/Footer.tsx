@@ -103,24 +103,24 @@ export default function Footer() {
             <h3 className="text-white font-semibold mb-5 text-sm tracking-tight">Legal</h3>
             <ul className="space-y-3 text-sm">
               <li>
-                <a href="#" className="text-slate-300 hover:text-accent-400 transition-colors">
+                <Link to="/privacy" className="text-slate-300 hover:text-accent-400 transition-colors">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-slate-300 hover:text-accent-400 transition-colors">
+                <Link to="/terms" className="text-slate-300 hover:text-accent-400 transition-colors">
                   Terms of Service
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-slate-300 hover:text-accent-400 transition-colors">
+                <Link to="/cookie-policy" className="text-slate-300 hover:text-accent-400 transition-colors">
                   Cookie Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-slate-300 hover:text-accent-400 transition-colors">
+                <Link to="/security" className="text-slate-300 hover:text-accent-400 transition-colors">
                   Security
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

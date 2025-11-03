@@ -80,12 +80,12 @@ export function SubscribePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-primary-50 dark:from-primary-950 dark:to-primary-900 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-slate-950 p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-12">
-          <h1 className="text-4xl font-bold text-neutral-900 dark:text-white mb-2">Choose Your Plan</h1>
-          <p className="text-neutral-600 dark:text-neutral-400">
+          <h1 className="text-4xl font-bold text-white mb-2">Choose Your Plan</h1>
+          <p className="text-slate-300">
             Start with a 14-day free trial. No credit card required.
           </p>
         </div>
@@ -98,30 +98,30 @@ export function SubscribePage() {
               variant="default"
               className={`overflow-hidden transform transition hover:shadow-lg border ${
                 plan.highlighted
-                  ? 'ring-2 ring-accent-500 md:scale-105 border-accent-300 dark:border-accent-700 bg-white dark:bg-neutral-900'
-                  : 'border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900'
+                  ? 'ring-2 ring-accent-500 md:scale-105 border-accent-500 bg-slate-900 border-accent-500'
+                  : 'border-slate-700 bg-slate-900/50'
               }`}
             >
               {/* Card Header */}
-              <div className={`-m-6 mb-6 px-6 py-8 ${plan.highlighted ? 'bg-accent-50 dark:bg-accent-950/30' : 'bg-neutral-50 dark:bg-neutral-900'}`}>
+              <div className={`-m-6 mb-6 px-6 py-8 ${plan.highlighted ? 'bg-accent-500/20' : 'bg-slate-800/50'}`}>
                 {plan.highlighted && (
-                  <div className="text-sm font-semibold text-accent-600 dark:text-accent-400 mb-2">
+                  <div className="text-sm font-semibold text-accent-400 mb-2">
                     ⭐ Most Popular
                   </div>
                 )}
-                <h2 className={`text-2xl font-bold ${plan.highlighted ? 'text-neutral-900 dark:text-white' : 'text-neutral-900 dark:text-white'}`}>{plan.name}</h2>
-                <p className={`text-sm mt-2 ${plan.highlighted ? 'text-accent-600 dark:text-accent-400' : 'text-neutral-600 dark:text-neutral-400'}`}>
+                <h2 className={`text-2xl font-bold text-white`}>{plan.name}</h2>
+                <p className={`text-sm mt-2 ${plan.highlighted ? 'text-accent-300' : 'text-slate-300'}`}>
                   {plan.description}
                 </p>
               </div>
 
               {/* Pricing */}
-              <div className="pb-6 mb-6 border-b border-neutral-200 dark:border-neutral-800">
-                <div className="text-4xl font-bold text-neutral-900 dark:text-white">
+              <div className="pb-6 mb-6 border-b border-slate-700">
+                <div className="text-4xl font-bold text-white">
                   ${plan.price}
-                  <span className="text-lg font-normal text-neutral-600 dark:text-neutral-400">/month</span>
+                  <span className="text-lg font-normal text-slate-400">/month</span>
                 </div>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-2">
+                <p className="text-sm text-slate-400 mt-2">
                   Billed monthly, cancel anytime
                 </p>
               </div>
@@ -131,15 +131,15 @@ export function SubscribePage() {
                 <ul className="space-y-4">
                   {plan.features.map((feature, idx) => (
                     <li key={idx} className="flex items-start">
-                      <span className="text-success-500 dark:text-success-400 mr-3 mt-0.5">✓</span>
-                      <span className="text-neutral-700 dark:text-neutral-300">{feature}</span>
+                      <span className="text-green-400 mr-3 mt-0.5">✓</span>
+                      <span className="text-slate-300">{feature}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
               {/* CTA */}
-              <div className="pt-6 border-t border-neutral-200 dark:border-neutral-800">
+              <div className="pt-6 border-t border-slate-700">
                 <Button
                   onClick={() => handleSubscribe(plan.id)}
                   disabled={isLoading}
@@ -155,43 +155,43 @@ export function SubscribePage() {
         </div>
 
         {/* FAQ / Support */}
-        <Card variant="default" className="mt-16 border border-neutral-200 dark:border-neutral-800">
-          <h3 className="text-2xl font-bold text-neutral-900 dark:text-white mb-6">
+        <Card variant="default" className="mt-16 border border-slate-700 bg-slate-900/50">
+          <h3 className="text-2xl font-bold text-white mb-6">
             ❓ Frequently Asked Questions
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <h4 className="font-semibold text-neutral-900 dark:text-white mb-2">
+              <h4 className="font-semibold text-white mb-2">
                 Do you offer a free trial?
               </h4>
-              <p className="text-neutral-600 dark:text-neutral-400">
+              <p className="text-slate-300">
                 Yes! All plans include a 14-day free trial with full access to
                 all features. No credit card required.
               </p>
             </div>
             <div>
-              <h4 className="font-semibold text-neutral-900 dark:text-white mb-2">
+              <h4 className="font-semibold text-white mb-2">
                 Can I cancel anytime?
               </h4>
-              <p className="text-neutral-600 dark:text-neutral-400">
+              <p className="text-slate-300">
                 Absolutely. You can cancel your subscription at any time from
                 your billing settings. No questions asked.
               </p>
             </div>
             <div>
-              <h4 className="font-semibold text-neutral-900 dark:text-white mb-2">
+              <h4 className="font-semibold text-white mb-2">
                 Can I upgrade or downgrade?
               </h4>
-              <p className="text-neutral-600 dark:text-neutral-400">
+              <p className="text-slate-300">
                 Yes, you can change your plan at any time. Changes take effect
                 on your next billing cycle.
               </p>
             </div>
             <div>
-              <h4 className="font-semibold text-neutral-900 dark:text-white mb-2">
+              <h4 className="font-semibold text-white mb-2">
                 What payment methods do you accept?
               </h4>
-              <p className="text-neutral-600 dark:text-neutral-400">
+              <p className="text-slate-300">
                 We accept all major credit and debit cards through Stripe's
                 secure payment processing.
               </p>

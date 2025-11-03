@@ -27,6 +27,10 @@ const SubscribePage = lazy(() => import('./pages/SubscribePage'));
 const BillingPage = lazy(() => import('./pages/BillingPage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const AdminSettingsPage = lazy(() => import('./pages/AdminSettingsPage'));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const TermsPage = lazy(() => import('./pages/TermsPage'));
+const CookiePolicyPage = lazy(() => import('./pages/CookiePolicyPage'));
+const SecurityPage = lazy(() => import('./pages/SecurityPage'));
 
 // Loading component for Suspense fallback
 const PageLoader = () => (
@@ -113,6 +117,10 @@ function App() {
             path="/register"
             element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <RegisterPage />}
           />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/cookie-policy" element={<CookiePolicyPage />} />
+          <Route path="/security" element={<SecurityPage />} />
 
           {/* Protected Routes */}
           <Route
