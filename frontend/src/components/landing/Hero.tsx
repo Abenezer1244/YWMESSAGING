@@ -160,7 +160,7 @@ export default function Hero() {
             {/* Subheading - Modern typography */}
             <motion.p
               variants={itemVariants}
-              className="text-xl sm:text-2xl text-primary-100/90 max-w-sm leading-relaxed font-light mx-auto"
+              className="text-xs sm:text-sm text-primary-100/90 max-w-sm leading-relaxed font-light mx-auto"
             >
               Enterprise SMS communication platform built for churches. Strengthen community engagement, manage multiple locations, and communicate with confidence.
             </motion.p>
