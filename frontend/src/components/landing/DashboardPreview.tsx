@@ -33,11 +33,11 @@ export default function DashboardPreview() {
   };
 
   return (
-    <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white via-gray-50 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+    <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-background via-muted to-background">
       {/* Animated Background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          className="absolute top-0 right-10 w-96 h-96 bg-primary-500 opacity-10 rounded-full blur-3xl"
+          className="absolute top-0 right-10 w-96 h-96 bg-primary opacity-10 rounded-full blur-3xl"
           animate={{
             x: [0, 30, 0],
             y: [0, -20, 0],
@@ -49,7 +49,7 @@ export default function DashboardPreview() {
           }}
         />
         <motion.div
-          className="absolute bottom-0 left-1/4 w-80 h-80 bg-primary-400 opacity-5 rounded-full blur-3xl"
+          className="absolute bottom-0 left-1/4 w-80 h-80 bg-primary opacity-5 rounded-full blur-3xl"
           animate={{
             x: [0, -25, 0],
             y: [0, 20, 0],
@@ -75,7 +75,7 @@ export default function DashboardPreview() {
             Powerful Dashboard
             <br />
             <motion.span
-              className="bg-gradient-to-r from-primary-300 via-primary-500 to-primary-400 bg-clip-text text-transparent inline-block"
+              className="bg-gradient-to-r from-primary via-primary to-primary bg-clip-text text-transparent inline-block"
               animate={{
                 backgroundPosition: ['0%', '100%'],
               }}
@@ -92,7 +92,7 @@ export default function DashboardPreview() {
             </motion.span>
           </h2>
           <motion.p
-            className="text-xl text-foreground/80 dark:text-primary-100/90 max-w-2xl mx-auto"
+            className="text-xl text-muted-foreground max-w-2xl mx-auto"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -112,7 +112,7 @@ export default function DashboardPreview() {
         >
           {/* Animated Glow effect behind card */}
           <motion.div
-            className="absolute -inset-1 bg-gradient-to-r from-blue-pacific via-blue-sky-blue to-blue-honolulu rounded-2xl blur-2xl opacity-20 group-hover:opacity-40 transition duration-500"
+            className="absolute -inset-1 bg-gradient-to-r from-primary via-primary to-primary rounded-2xl blur-2xl opacity-20 group-hover:opacity-40 transition duration-500"
             animate={{
               opacity: [0.2, 0.4, 0.2],
               scale: [1, 1.05, 1],
@@ -126,17 +126,17 @@ export default function DashboardPreview() {
 
           {/* Modern Card */}
           <motion.div
-            className="relative bg-gradient-to-br from-blue-700/40 to-blue-marian/40 rounded-2xl p-8 lg:p-12 border border-primary-600/40 backdrop-blur-xl shadow-2xl overflow-hidden group-hover:shadow-blue-900/50 transition-shadow duration-500"
+            className="relative bg-gradient-to-br from-primary/40 to-primary/40 rounded-2xl p-8 lg:p-12 border border-primary/40 backdrop-blur-xl shadow-2xl overflow-hidden group-hover:shadow-primary/50 transition-shadow duration-500"
             whileHover={{
               boxShadow: '0 0 40px rgba(59, 130, 246, 0.3)',
             }}
           >
             {/* Accent gradient top */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-pacific to-transparent"></div>
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent"></div>
 
             {/* Card Header */}
             <motion.div
-              className="mb-8 pb-6 border-b border-primary-600/20"
+              className="mb-8 pb-6 border-b border-primary/20"
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
@@ -144,7 +144,7 @@ export default function DashboardPreview() {
             >
               <div className="flex items-center gap-3 mb-4">
                 <motion.div
-                  className="w-3 h-3 rounded-full bg-primary-pacific"
+                  className="w-3 h-3 rounded-full bg-primary"
                   animate={{
                     scale: [1, 1.3, 1],
                     boxShadow: ['0 0 0px rgba(59, 130, 246, 0.5)', '0 0 10px rgba(59, 130, 246, 0.8)', '0 0 0px rgba(59, 130, 246, 0.5)'],
@@ -154,7 +154,7 @@ export default function DashboardPreview() {
                     repeat: Infinity,
                   }}
                 />
-                <div className="text-sm font-semibold text-blue-100">Dashboard Preview</div>
+                <div className="text-sm font-semibold text-primary">Dashboard Preview</div>
               </div>
               <h3 className="text-2xl lg:text-3xl font-bold text-foreground dark:text-foreground">Message Analytics</h3>
             </motion.div>
@@ -169,15 +169,15 @@ export default function DashboardPreview() {
             >
               <motion.div
                 variants={itemVariants}
-                className="p-4 bg-primary-600/30 rounded-lg border border-primary-500/20"
+                className="p-4 bg-primary/30 rounded-lg border border-primary/20"
                 whileHover={{
                   scale: 1.05,
                   backgroundColor: 'rgba(37, 99, 235, 0.4)',
                 }}
               >
-                <div className="text-xs text-blue-300 mb-2">DELIVERED</div>
+                <div className="text-xs text-primary mb-2">DELIVERED</div>
                 <motion.div
-                  className="text-2xl lg:text-3xl font-bold text-blue-pacific"
+                  className="text-2xl lg:text-3xl font-bold text-primary"
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
                   transition={{ duration: 1, delay: 0.4 }}
@@ -188,13 +188,13 @@ export default function DashboardPreview() {
               </motion.div>
               <motion.div
                 variants={itemVariants}
-                className="p-4 bg-primary-600/30 rounded-lg border border-primary-500/20"
+                className="p-4 bg-primary/30 rounded-lg border border-primary/20"
                 whileHover={{
                   scale: 1.05,
                   backgroundColor: 'rgba(37, 99, 235, 0.4)',
                 }}
               >
-                <div className="text-xs text-blue-300 mb-2">ENGAGED</div>
+                <div className="text-xs text-primary mb-2">ENGAGED</div>
                 <motion.div
                   className="text-2xl lg:text-3xl font-bold text-success-500"
                   initial={{ opacity: 0 }}
@@ -215,7 +215,7 @@ export default function DashboardPreview() {
               transition={{ duration: 0.6, delay: 0.3 }}
               viewport={{ once: true }}
             >
-              <div className="text-sm font-semibold text-blue-100">Recent Activity</div>
+              <div className="text-sm font-semibold text-primary">Recent Activity</div>
               {[80, 65, 90, 45, 75].map((height, i) => (
                 <motion.div
                   key={i}
@@ -227,7 +227,7 @@ export default function DashboardPreview() {
                   style={{ originY: 'bottom' }}
                 >
                   <motion.div
-                    className="flex-1 bg-gradient-to-t from-blue-pacific to-blue-sky-blue rounded-t opacity-80 hover:opacity-100 transition-opacity"
+                    className="flex-1 bg-gradient-to-t from-primary to-primary rounded-t opacity-80 hover:opacity-100 transition-opacity"
                     style={{ height: `${height}%` }}
                     whileHover={{ opacity: 1 }}
                     animate={{
@@ -252,14 +252,14 @@ export default function DashboardPreview() {
               viewport={{ once: true }}
             >
               <motion.button
-                className="flex-1 py-3 px-4 bg-primary-pacific hover:bg-primary-sky-blue text-blue-900 font-semibold rounded-lg transition-colors duration-300"
+                className="flex-1 py-3 px-4 bg-primary hover:bg-primary/90 text-background font-semibold rounded-lg transition-colors duration-300"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 Export
               </motion.button>
               <motion.button
-                className="px-4 py-3 bg-primary-600/40 hover:bg-primary-600/60 text-blue-100 rounded-lg transition-colors duration-300"
+                className="px-4 py-3 bg-primary/40 hover:bg-primary/60 text-primary rounded-lg transition-colors duration-300"
                 whileHover={{ scale: 1.02, rotate: 90 }}
                 whileTap={{ scale: 0.98 }}
                 transition={{ type: 'spring', stiffness: 400 }}
@@ -295,7 +295,7 @@ export default function DashboardPreview() {
             <motion.div
               key={i}
               variants={itemVariants}
-              className="p-6 bg-slate-100/50 dark:bg-muted/50 border border-border dark:border-border rounded-lg hover:border-primary-500/50 transition-colors duration-300 text-center"
+              className="p-6 bg-muted/50 border border-border rounded-lg hover:border-primary/50 transition-colors duration-300 text-center"
               whileHover={{
                 scale: 1.05,
                 backgroundColor: 'rgba(15, 23, 42, 0.8)',
@@ -315,7 +315,7 @@ export default function DashboardPreview() {
               >
                 {feature.title}
               </motion.h4>
-              <p className="text-foreground/80 dark:text-slate-400">{feature.description}</p>
+              <p className="text-muted-foreground">{feature.description}</p>
             </motion.div>
           ))}
         </motion.div>

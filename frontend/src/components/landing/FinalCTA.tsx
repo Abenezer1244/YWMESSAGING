@@ -37,11 +37,11 @@ export default function FinalCTA() {
   };
 
   return (
-    <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-background overflow-hidden transition-colors duration-normal">
+    <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-background overflow-hidden transition-colors duration-normal">
       {/* Animated gradient accents */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          className="absolute top-0 right-1/3 w-96 h-96 bg-primary-500 opacity-15 rounded-full blur-3xl"
+          className="absolute top-0 right-1/3 w-96 h-96 bg-primary opacity-15 rounded-full blur-3xl"
           animate={{
             y: [0, -40, 0],
             x: [0, -25, 0],
@@ -53,7 +53,7 @@ export default function FinalCTA() {
           }}
         />
         <motion.div
-          className="absolute bottom-0 left-1/4 w-80 h-80 bg-primary-400 opacity-20 rounded-full blur-3xl"
+          className="absolute bottom-0 left-1/4 w-80 h-80 bg-primary opacity-20 rounded-full blur-3xl"
           animate={{
             y: [0, 35, 0],
             x: [0, 20, 0],
@@ -66,7 +66,7 @@ export default function FinalCTA() {
           }}
         />
         <motion.div
-          className="absolute top-1/2 right-0 w-80 h-80 bg-primary-300 opacity-10 rounded-full blur-3xl"
+          className="absolute top-1/2 right-0 w-80 h-80 bg-primary opacity-10 rounded-full blur-3xl"
           animate={{
             y: [0, 25, 0],
             x: [0, 15, 0],
@@ -91,7 +91,7 @@ export default function FinalCTA() {
           <h2 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-foreground dark:text-foreground mb-6 leading-tight tracking-tight">
             Ready to{' '}
             <motion.span
-              className="bg-gradient-to-r from-primary-400 to-primary-500 bg-clip-text text-transparent inline-block"
+              className="bg-gradient-to-r from-primary to-primary bg-clip-text text-transparent inline-block"
               animate={{
                 backgroundPosition: ['0%', '100%'],
               }}
@@ -108,7 +108,7 @@ export default function FinalCTA() {
             </motion.span>
           </h2>
           <motion.p
-            className="text-lg sm:text-xl text-foreground/80 dark:text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed font-light"
+            className="text-lg sm:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed font-light"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -135,7 +135,7 @@ export default function FinalCTA() {
               variant="primary"
               size="lg"
               onClick={handleStartTrial}
-              className="bg-gradient-to-r from-primary-500 to-primary-400 hover:from-primary-400 hover:to-primary-300 text-background font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-gradient-to-r from-primary to-primary hover:from-primary hover:to-primary text-background font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
             >
               Start Free Trial
             </Button>
@@ -149,7 +149,7 @@ export default function FinalCTA() {
               variant="outline"
               size="lg"
               onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
-              className="border-2 border-primary-400/50 text-foreground/80 dark:text-muted-foreground hover:bg-slate-300/40 dark:hover:bg-muted/40 hover:border-primary-400 font-semibold backdrop-blur-sm transition-all duration-300"
+              className="border-2 border-primary/50 text-muted-foreground hover:bg-muted/40 hover:border-primary font-semibold backdrop-blur-sm transition-all duration-300"
             >
               View Pricing
             </Button>
@@ -157,7 +157,7 @@ export default function FinalCTA() {
         </motion.div>
 
         <motion.div
-          className="flex flex-col sm:flex-row gap-6 justify-center text-foreground/80 dark:text-muted-foreground text-sm"
+          className="flex flex-col sm:flex-row gap-6 justify-center text-muted-foreground text-sm"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
@@ -176,7 +176,7 @@ export default function FinalCTA() {
                 repeat: Infinity,
               }}
             >
-              <CheckCircle className="w-5 h-5 text-primary-500 flex-shrink-0" />
+              <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
             </motion.div>
             <span>No credit card required</span>
           </motion.div>
@@ -194,7 +194,7 @@ export default function FinalCTA() {
                 delay: 0.3,
               }}
             >
-              <CheckCircle className="w-5 h-5 text-primary-500 flex-shrink-0" />
+              <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
             </motion.div>
             <span>Setup in 5 minutes</span>
           </motion.div>
@@ -212,7 +212,7 @@ export default function FinalCTA() {
                 delay: 0.6,
               }}
             >
-              <CheckCircle className="w-5 h-5 text-primary-500 flex-shrink-0" />
+              <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
             </motion.div>
             <span>Cancel anytime</span>
           </motion.div>

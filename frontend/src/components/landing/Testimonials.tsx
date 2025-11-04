@@ -54,11 +54,11 @@ export default function Testimonials() {
   };
 
   return (
-    <section id="testimonials" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-background overflow-hidden transition-colors duration-normal">
+    <section id="testimonials" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-background overflow-hidden transition-colors duration-normal">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          className="absolute top-1/3 right-0 w-96 h-96 bg-primary-500 opacity-10 rounded-full blur-3xl"
+          className="absolute top-1/3 right-0 w-96 h-96 bg-primary opacity-10 rounded-full blur-3xl"
           animate={{
             y: [0, 40, 0],
             x: [0, 30, 0],
@@ -70,7 +70,7 @@ export default function Testimonials() {
           }}
         />
         <motion.div
-          className="absolute bottom-0 left-1/4 w-80 h-80 bg-primary-400 opacity-15 rounded-full blur-3xl"
+          className="absolute bottom-0 left-1/4 w-80 h-80 bg-primary opacity-15 rounded-full blur-3xl"
           animate={{
             y: [0, -35, 0],
             x: [0, -20, 0],
@@ -96,7 +96,7 @@ export default function Testimonials() {
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground dark:text-foreground mb-4 leading-tight tracking-tight">
             Trusted by{' '}
             <motion.span
-              className="bg-gradient-to-r from-primary-400 to-primary-500 bg-clip-text text-transparent inline-block"
+              className="bg-gradient-to-r from-primary to-primary bg-clip-text text-transparent inline-block"
               animate={{
                 backgroundPosition: ['0%', '100%'],
               }}
@@ -113,7 +113,7 @@ export default function Testimonials() {
             </motion.span>
           </h2>
           <motion.p
-            className="text-lg text-foreground/80 dark:text-muted-foreground max-w-3xl mx-auto font-light leading-relaxed"
+            className="text-lg text-muted-foreground max-w-3xl mx-auto font-light leading-relaxed"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -138,10 +138,10 @@ export default function Testimonials() {
             >
               <Card
                 variant="default"
-                className="group relative p-8 bg-slate-100/50 dark:bg-muted/50 border border-border/50 dark:border-border/50 hover:border-primary-400/50 backdrop-blur-xl rounded-lg transition-all duration-300 overflow-hidden h-full"
+                className="group relative p-8 bg-muted/50 border border-border/50 hover:border-primary/50 backdrop-blur-xl rounded-lg transition-all duration-300 overflow-hidden h-full"
               >
               {/* Glow effect on hover */}
-              <div className="absolute inset-0 bg-gradient-to-r from-primary-500/0 via-primary-400/0 to-primary-300/0 group-hover:from-primary-500/5 group-hover:via-primary-400/5 group-hover:to-primary-300/5 transition-all duration-300 pointer-events-none"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/0 to-primary/0 group-hover:from-primary/5 group-hover:via-primary/5 group-hover:to-primary/5 transition-all duration-300 pointer-events-none"></div>
 
               {/* Content */}
               <div className="relative z-10">
@@ -158,22 +158,22 @@ export default function Testimonials() {
                     delay: index * 0.3,
                   }}
                 >
-                  <Quote className="w-10 h-10 text-primary-400 opacity-70" />
+                  <Quote className="w-10 h-10 text-primary opacity-70" />
                 </motion.div>
 
                 {/* Testimonial Content */}
-                <p className="text-foreground dark:text-slate-100 mb-6 leading-relaxed italic text-sm">
+                <p className="text-foreground mb-6 leading-relaxed italic text-sm">
                   "{testimonial.content}"
                 </p>
 
                 {/* Author */}
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center text-background font-semibold text-base flex-shrink-0">
+                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-background font-semibold text-base flex-shrink-0">
                     {testimonial.name.charAt(0)}
                   </div>
                   <div>
                     <div className="font-semibold text-foreground dark:text-foreground text-sm">{testimonial.name}</div>
-                    <div className="text-xs text-muted-foreground dark:text-slate-400">
+                    <div className="text-xs text-muted-foreground">
                       {testimonial.role}, {testimonial.church}
                     </div>
                   </div>
@@ -186,7 +186,7 @@ export default function Testimonials() {
 
         {/* Trust Indicators */}
         <motion.div
-          className="mt-16 pt-12 border-t border-primary-500/30"
+          className="mt-16 pt-12 border-t border-primary/30"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
@@ -206,7 +206,7 @@ export default function Testimonials() {
               viewport={{ once: true }}
             >
               <motion.div
-                className="text-4xl font-bold bg-gradient-to-r from-primary-400 to-primary-500 bg-clip-text text-transparent mb-2"
+                className="text-4xl font-bold bg-gradient-to-r from-primary to-primary bg-clip-text text-transparent mb-2"
                 animate={{
                   y: [0, -3, 0],
                 }}
@@ -217,7 +217,7 @@ export default function Testimonials() {
               >
                 100+
               </motion.div>
-              <div className="text-foreground/80 dark:text-muted-foreground text-sm">Churches</div>
+              <div className="text-muted-foreground text-sm">Churches</div>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -226,7 +226,7 @@ export default function Testimonials() {
               viewport={{ once: true }}
             >
               <motion.div
-                className="text-4xl font-bold bg-gradient-to-r from-primary-400 to-primary-500 bg-clip-text text-transparent mb-2"
+                className="text-4xl font-bold bg-gradient-to-r from-primary to-primary bg-clip-text text-transparent mb-2"
                 animate={{
                   y: [0, -3, 0],
                 }}
@@ -237,7 +237,7 @@ export default function Testimonials() {
               >
                 25K+
               </motion.div>
-              <div className="text-foreground/80 dark:text-muted-foreground text-sm">Members</div>
+              <div className="text-muted-foreground text-sm">Members</div>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -246,7 +246,7 @@ export default function Testimonials() {
               viewport={{ once: true }}
             >
               <motion.div
-                className="text-4xl font-bold bg-gradient-to-r from-primary-400 to-primary-500 bg-clip-text text-transparent mb-2"
+                className="text-4xl font-bold bg-gradient-to-r from-primary to-primary bg-clip-text text-transparent mb-2"
                 animate={{
                   y: [0, -3, 0],
                 }}
@@ -257,7 +257,7 @@ export default function Testimonials() {
               >
                 500K+
               </motion.div>
-              <div className="text-foreground/80 dark:text-muted-foreground text-sm">Messages Sent</div>
+              <div className="text-muted-foreground text-sm">Messages Sent</div>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -266,7 +266,7 @@ export default function Testimonials() {
               viewport={{ once: true }}
             >
               <motion.div
-                className="text-4xl font-bold bg-gradient-to-r from-primary-400 to-primary-500 bg-clip-text text-transparent mb-2"
+                className="text-4xl font-bold bg-gradient-to-r from-primary to-primary bg-clip-text text-transparent mb-2"
                 animate={{
                   y: [0, -3, 0],
                 }}
@@ -277,7 +277,7 @@ export default function Testimonials() {
               >
                 99.9%
               </motion.div>
-              <div className="text-foreground/80 dark:text-muted-foreground text-sm">Uptime</div>
+              <div className="text-muted-foreground text-sm">Uptime</div>
             </motion.div>
           </motion.div>
         </motion.div>

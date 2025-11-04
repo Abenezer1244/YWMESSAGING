@@ -50,11 +50,11 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white via-gray-50 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 overflow-hidden pt-24">
+    <section className="relative min-h-screen flex items-center px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-background via-muted to-background dark:from-background dark:via-muted dark:to-background overflow-hidden pt-24">
       {/* Animated background elements with floating motion */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          className="absolute top-20 right-10 w-96 h-96 bg-primary-500 opacity-15 rounded-full blur-3xl"
+          className="absolute top-20 right-10 w-96 h-96 bg-primary opacity-15 rounded-full blur-3xl"
           animate={{
             y: [0, 20, 0],
             x: [0, 10, 0],
@@ -66,7 +66,7 @@ export default function Hero() {
           }}
         />
         <motion.div
-          className="absolute bottom-0 left-0 w-80 h-80 bg-primary-400 opacity-10 rounded-full blur-3xl"
+          className="absolute bottom-0 left-0 w-80 h-80 bg-primary opacity-10 rounded-full blur-3xl"
           animate={{
             y: [0, -15, 0],
             x: [0, -10, 0],
@@ -78,7 +78,7 @@ export default function Hero() {
           }}
         />
         <motion.div
-          className="absolute top-1/2 right-1/4 w-64 h-64 bg-primary-700 opacity-10 rounded-full blur-3xl"
+          className="absolute top-1/2 right-1/4 w-64 h-64 bg-primary opacity-10 rounded-full blur-3xl"
           animate={{
             y: [0, 25, 0],
             x: [0, 15, 0],
@@ -103,12 +103,12 @@ export default function Hero() {
             {/* Modern Badge */}
             <motion.div variants={floatingVariants} className="flex justify-center">
               <motion.div
-                className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500/15 border border-primary-400/50 rounded-full text-sm font-medium text-primary-600 dark:text-primary-100 backdrop-blur-sm hover:bg-primary-500/25 transition-colors duration-300"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-primary/15 border border-primary/50 rounded-full text-sm font-medium text-primary dark:text-primary backdrop-blur-sm hover:bg-primary/25 transition-colors duration-300"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <motion.div
-                  className="w-2 h-2 bg-gradient-to-r from-primary-400 to-primary-500 rounded-full"
+                  className="w-2 h-2 bg-gradient-to-r from-primary to-primary rounded-full"
                   animate={{
                     scale: [1, 1.2, 1],
                     opacity: [1, 0.6, 1],
@@ -139,7 +139,7 @@ export default function Hero() {
                 </motion.span>
                 <br />
                 <motion.span
-                  className="bg-gradient-to-r from-primary-300 via-primary-500 to-primary-400 bg-clip-text text-transparent inline-block"
+                  className="bg-gradient-to-r from-primary via-primary to-primary bg-clip-text text-transparent inline-block"
                   animate={{
                     backgroundPosition: ['0%', '100%'],
                   }}
@@ -160,7 +160,7 @@ export default function Hero() {
             {/* Subheading - Modern typography */}
             <motion.p
               variants={itemVariants}
-              className="text-xs sm:text-sm text-foreground/80 dark:text-primary-100/90 max-w-sm leading-relaxed font-light mx-auto"
+              className="text-xs sm:text-sm text-muted-foreground dark:text-muted-foreground max-w-sm leading-relaxed font-light mx-auto"
             >
               Enterprise SMS communication platform built for churches. Strengthen community engagement, manage multiple locations, and communicate with confidence.
             </motion.p>
@@ -177,7 +177,7 @@ export default function Hero() {
                 <Button
                   size="md"
                   onClick={handleStartTrial}
-                  className="bg-gradient-to-r from-primary-400 to-primary-500 hover:from-primary-300 hover:to-primary-400 text-primary-900 font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
+                  className="bg-gradient-to-r from-primary to-primary hover:from-primary hover:to-primary text-background font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
                 >
                   <span>Start Free Trial</span>
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -191,7 +191,7 @@ export default function Hero() {
                   variant="outline"
                   size="md"
                   onClick={handleLearnMore}
-                  className="border-2 border-primary-400/50 text-primary-100 hover:bg-primary-700/30 hover:border-primary-400 font-semibold rounded-lg backdrop-blur-sm transition-all duration-300"
+                  className="border-2 border-primary/50 text-primary hover:bg-primary/30 hover:border-primary font-semibold rounded-lg backdrop-blur-sm transition-all duration-300"
                 >
                   Learn More
                 </Button>
@@ -210,7 +210,7 @@ export default function Hero() {
               ].map((item, i) => (
                 <motion.div
                   key={i}
-                  className="flex items-center gap-3 p-3 bg-slate-200/50 dark:bg-primary-700/20 rounded-lg border border-border dark:border-primary-400/30 backdrop-blur-sm hover:bg-slate-300/50 dark:hover:bg-primary-700/40 transition-colors duration-300"
+                  className="flex items-center gap-3 p-3 bg-muted/50 dark:bg-primary/20 rounded-lg border border-border dark:border-primary/30 backdrop-blur-sm hover:bg-muted/50 dark:hover:bg-primary/40 transition-colors duration-300"
                   whileHover={{
                     scale: 1.05,
                     backgroundColor: 'rgba(55, 65, 81, 0.5)',
@@ -227,9 +227,9 @@ export default function Hero() {
                       delay: i * 0.3,
                     }}
                   >
-                    <item.icon className="w-5 h-5 text-primary-400 flex-shrink-0" />
+                    <item.icon className="w-5 h-5 text-primary flex-shrink-0" />
                   </motion.div>
-                  <span className="text-sm text-foreground/80 dark:text-primary-100">{item.text}</span>
+                  <span className="text-sm text-muted-foreground">{item.text}</span>
                 </motion.div>
               ))}
             </motion.div>
@@ -247,7 +247,7 @@ export default function Hero() {
             repeat: Infinity,
           }}
         >
-          <div className="flex flex-col items-center gap-2 text-muted-foreground dark:text-blue-300">
+          <div className="flex flex-col items-center gap-2 text-muted-foreground">
             <span className="text-sm font-medium">Scroll to explore</span>
             <svg className="w-6 h-6 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
