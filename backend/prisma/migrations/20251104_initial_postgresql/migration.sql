@@ -219,22 +219,13 @@ CREATE INDEX IF NOT EXISTS "Group_branchId_idx" ON "Group"("branchId");
 CREATE INDEX IF NOT EXISTS "Group_churchId_idx" ON "Group"("churchId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX IF NOT EXISTS "Member_phone_key" ON "Member"("phone");
-
--- CreateIndex
 CREATE UNIQUE INDEX IF NOT EXISTS "Member_email_key" ON "Member"("email");
-
--- CreateIndex
-CREATE UNIQUE INDEX IF NOT EXISTS "Member_phoneHash_key" ON "Member"("phoneHash");
 
 -- CreateIndex
 CREATE INDEX IF NOT EXISTS "Member_phone_idx" ON "Member"("phone");
 
 -- CreateIndex
 CREATE INDEX IF NOT EXISTS "Member_email_idx" ON "Member"("email");
-
--- CreateIndex
-CREATE INDEX IF NOT EXISTS "Member_phoneHash_idx" ON "Member"("phoneHash");
 
 -- CreateIndex
 CREATE INDEX IF NOT EXISTS "GroupMember_groupId_idx" ON "GroupMember"("groupId");
