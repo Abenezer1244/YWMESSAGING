@@ -29,11 +29,13 @@ export function SoftButton({
 
   const variants = {
     primary:
-      'bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:shadow-lg disabled:opacity-50',
+      'text-white hover:shadow-lg disabled:opacity-50',
     secondary: 'bg-muted hover:bg-muted/80 text-foreground disabled:opacity-50',
     danger: 'bg-red-500/20 text-red-400 hover:bg-red-500/30 disabled:opacity-50',
     ghost: 'text-foreground hover:bg-muted/50 disabled:opacity-50',
   };
+
+  const primaryBgColor = '#527575';
 
   const sizes = {
     sm: 'px-4 py-2 text-sm',
@@ -48,6 +50,7 @@ export function SoftButton({
       whileTap={!disabled ? { scale: 0.98 } : {}}
       onClick={onClick}
       disabled={disabled}
+      style={variant === 'primary' ? { backgroundColor: primaryBgColor } : undefined}
       className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${
         fullWidth ? 'w-full' : ''
       } ${className}`}
