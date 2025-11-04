@@ -121,3 +121,131 @@ Refactor all 24 pages in frontend/src/pages to use semantic CSS tokens instead o
 ✅ Improved maintainability and dark mode support
 ✅ No breaking changes - all functionality preserved
 ✅ Single source of truth for color scheme
+
+---
+
+# Session Review: API Fixes, OAuth Integration, and Comparison Section
+
+## Objective
+Verify deployed application functionality, implement OAuth sign-in options, and add competitive comparison section to landing page.
+
+## Work Completed
+
+### 1. API Endpoint Fixes (Priority - Production Bug Fix)
+**Status:** ✅ COMPLETED
+
+**Changes Made:**
+- Fixed all 9 API module endpoint paths to include module-level prefixes
+- Root cause: Backend routes mounted with prefixes (e.g., `/api/branches`) but frontend calls missing the prefix
+- Files updated:
+  - `frontend/src/api/branches.ts` - Added `/branches/` prefix
+  - `frontend/src/api/groups.ts` - Added `/groups/` prefix
+  - `frontend/src/api/members.ts` - Added `/groups/` prefix (part of groups module)
+  - `frontend/src/api/messages.ts` - Added `/messages/` prefix
+  - `frontend/src/api/templates.ts` - Added `/templates/` prefix
+  - `frontend/src/api/recurring.ts` - Added `/recurring/` prefix
+  - `frontend/src/api/analytics.ts` - Added `/analytics/` prefix
+  - `frontend/src/api/billing.ts` - Added `/billing/` prefix
+  - `frontend/src/api/admin.ts` - Added `/admin/` prefix
+
+**Result:** All 404 errors on branches page and other features now resolved
+
+**Commit:** `c8f70d0 - Fix TypeScript source files: Add module-level prefix to all API endpoint paths`
+
+### 2. OAuth Integration (Google & Apple Sign-In)
+**Status:** ✅ COMPLETED (UI Layer)
+
+**Changes Made:**
+- Added Google Sign-In button to LoginPage.tsx with OAuth handler
+- Added Apple Sign-In button to LoginPage.tsx with OAuth handler
+- Added Google Sign-Up button to RegisterPage.tsx with matching OAuth handler
+- Added Apple Sign-Up button to RegisterPage.tsx with matching OAuth handler
+
+**Features:**
+- Consistent styling across login and registration flows
+- Proper loading states and disabled behavior during authentication
+- Placeholder handlers with TODO comments for backend OAuth flow implementation
+- Clean, organized UI with divider sections ("Or continue with" / "Or sign up with")
+
+**Commits:**
+- `d081773 - Add Google and Apple OAuth sign-in options to login page`
+- `bd72e72 - Add Google and Apple OAuth sign-up options to registration page`
+
+### 3. Comparison Section (Landing Page Enhancement)
+**Status:** ✅ COMPLETED
+
+**Changes Made:**
+- Created new `frontend/src/components/landing/Comparison.tsx` component
+- Displays competitive comparison table: Connect vs Twilio vs Pushpay vs Planning Center
+- Shows 10 key features with checkmarks for included/excluded features
+- Highlights Connect's unique features with "Unique" badges
+- Includes three feature highlight cards below the table:
+  - End-to-End Encryption (AES-256-GCM, HMAC-SHA256)
+  - Enterprise Security (CSRF, rate limiting, logging, audit trails)
+  - Church-First Design (affordable pricing, 14-day free trial)
+
+**Component Features:**
+- Clean grid-based comparison table layout
+- Icon-based unique feature indicators
+- Feature-specific styling (Connect column prominent, competitor columns muted)
+- Responsive design with proper spacing and borders
+
+**Updated LandingPage.tsx:**
+- Added Comparison import
+- Placed Comparison section between Features and Pricing sections
+- Maintains proper page flow and visual hierarchy
+
+**Commits:**
+- `d8713aa - Add comparison section to landing page showing competitive advantage`
+- `54154c9 - Simplify Comparison component to basic table layout`
+
+## Technical Details
+
+### API Path Pattern Discovered
+Backend routing structure:
+```
+app.use('/api/branches', branchRoutes)  // mounts at /api/branches
+router.get('/churches/:id/branches', ...)  // route within module
+// Full path: /api/branches/churches/:id/branches
+```
+
+Frontend must include module prefix when making API calls.
+
+### Component Implementation Details
+- Comparison component uses semantic HTML with proper Grid layout
+- No external animation libraries needed for basic version
+- Lucide React icons (Check, X) for feature indicators
+- Tailwind CSS for responsive design and theming
+
+## Commits in Order
+1. `c8f70d0` - API endpoint path fixes
+2. `d081773` - Google/Apple OAuth on LoginPage
+3. `bd72e72` - Google/Apple OAuth on RegisterPage
+4. `d8713aa` - Initial Comparison section with animations
+5. `54154c9` - Simplified Comparison component layout
+
+## Files Modified
+- `frontend/src/api/*.ts` (9 files)
+- `frontend/src/pages/LoginPage.tsx`
+- `frontend/src/pages/RegisterPage.tsx`
+- `frontend/src/pages/LandingPage.tsx`
+- `frontend/src/components/landing/Comparison.tsx` (NEW)
+
+## Production Deployment
+All changes pushed to GitHub and automatically deployed to Render:
+- Frontend: https://connect-yw-frontend.onrender.com
+- Backend: https://connect-yw-backend.onrender.com
+
+## Next Steps / Future Work
+1. **Backend OAuth Implementation:** Set up Google OAuth 2.0 and Apple Sign In credentials, implement token exchange
+2. **Comparison Section Enhancement:** Add animations and interactive states (if needed based on user feedback)
+3. **Additional Features:**
+   - iMessage integration exploration
+   - Payment processing implementation
+   - Analytics dashboard enhancements
+
+## Notes
+- All changes maintain existing functionality
+- No breaking changes introduced
+- CSS token refactoring from previous session continues to provide consistent theming
+- Application now properly handles API requests across all modules
