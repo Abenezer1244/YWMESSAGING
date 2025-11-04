@@ -8,6 +8,7 @@ import BackButton from '../components/BackButton';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
+import AnimatedBlobs from '../components/AnimatedBlobs';
 import { themeColors } from '../utils/themeColors';
 import { designTokens } from '../utils/designTokens';
 
@@ -223,6 +224,7 @@ export function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-background p-6 transition-colors duration-normal">
+      <AnimatedBlobs variant="minimal" />
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="mb-8">

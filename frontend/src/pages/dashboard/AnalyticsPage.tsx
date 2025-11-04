@@ -25,6 +25,7 @@ import {
 import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
 import { themeColors } from '../../utils/themeColors';
 import { designTokens } from '../../utils/designTokens';
+import AnimatedBlobs from '../../components/AnimatedBlobs';
 
 // Reusable tooltip style configuration
 const tooltipStyle = {
@@ -66,6 +67,7 @@ export function AnalyticsPage() {
 
   return (
     <SoftLayout>
+      <AnimatedBlobs variant="minimal" />
       <div className="px-4 md:px-8 py-8 w-full">
         {/* Header */}
         <motion.div

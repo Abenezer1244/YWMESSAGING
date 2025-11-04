@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import BackButton from '../components/BackButton';
+import AnimatedBlobs from '../components/AnimatedBlobs';
 
 export default function BlogPage() {
   const blogPosts = [
@@ -57,6 +58,7 @@ export default function BlogPage() {
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-normal">
+      <AnimatedBlobs />
       {/* Back Button */}
       <div className="p-6">
         <BackButton variant="ghost" />

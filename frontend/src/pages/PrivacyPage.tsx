@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
 import BackButton from '../components/BackButton';
+import AnimatedBlobs from '../components/AnimatedBlobs';
 
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-background p-6 transition-colors duration-normal">
+      <AnimatedBlobs />
       <div className="max-w-4xl mx-auto">
         {/* Back Button */}
         <div className="mb-6">

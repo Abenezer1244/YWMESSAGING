@@ -5,6 +5,7 @@ import { subscribe } from '../api/billing';
 import BackButton from '../components/BackButton';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
+import AnimatedBlobs from '../components/AnimatedBlobs';
 
 const PLANS = [
   {
@@ -81,6 +82,7 @@ export function SubscribePage() {
 
   return (
     <div className="min-h-screen bg-background p-6 transition-colors duration-normal">
+      <AnimatedBlobs variant="minimal" />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-12">

@@ -7,6 +7,7 @@ import CoAdminPanel from '../components/admin/CoAdminPanel';
 import ActivityLogsPanel from '../components/admin/ActivityLogsPanel';
 import { SoftLayout, SoftCard, SoftButton } from '../components/SoftUI';
 import Input from '../components/ui/Input';
+import AnimatedBlobs from '../components/AnimatedBlobs';
 
 // Email validation regex (RFC 5322 simplified)
 const isValidEmail = (email: string): boolean => {
@@ -97,6 +98,7 @@ export function AdminSettingsPage() {
 
   return (
     <SoftLayout>
+      <AnimatedBlobs variant="minimal" />
       <div className="px-4 md:px-8 py-8 w-full">
         {/* Header */}
         <motion.div

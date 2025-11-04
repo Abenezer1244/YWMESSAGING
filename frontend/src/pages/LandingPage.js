@@ -9,6 +9,7 @@ import Pricing from '../components/landing/Pricing';
 import Testimonials from '../components/landing/Testimonials';
 import FinalCTA from '../components/landing/FinalCTA';
 import Footer from '../components/landing/Footer';
+import AnimatedBlobs from '../components/AnimatedBlobs';
 export default function LandingPage() {
     // Smooth scroll behavior for anchor links
     useEffect(() => {
@@ -55,6 +56,6 @@ export default function LandingPage() {
             sections.forEach((section) => observer.unobserve(section));
         };
     }, []);
-    return (_jsxs("div", { className: "min-h-screen bg-background text-foreground", children: [_jsx(Navigation, {}), _jsxs("main", { children: [_jsx(Hero, {}), _jsx(DashboardPreview, {}), _jsx(Features, {}), _jsx(Comparison, {}), _jsx(Pricing, {}), _jsx(Testimonials, {}), _jsx(FinalCTA, {})] }), _jsx(Footer, {})] }));
+    return (_jsxs("div", { className: "min-h-screen bg-background text-foreground", children: [_jsx(AnimatedBlobs, {}), _jsx(Navigation, {}), _jsxs("main", { children: [_jsx(Hero, {}), _jsx(DashboardPreview, {}), _jsx(Features, {}), _jsx(Comparison, {}), _jsx(Pricing, {}), _jsx(Testimonials, {}), _jsx(FinalCTA, {})] }), _jsx(Footer, {})] }));
 }
 //# sourceMappingURL=LandingPage.js.map

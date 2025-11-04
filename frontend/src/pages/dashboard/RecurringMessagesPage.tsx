@@ -10,6 +10,7 @@ import {
 } from '../../api/recurring';
 import RecurringMessageModal from '../../components/recurring/RecurringMessageModal';
 import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
+import AnimatedBlobs from '../../components/AnimatedBlobs';
 
 export function RecurringMessagesPage() {
   const [messages, setMessages] = useState<RecurringMessage[]>([]);
@@ -104,6 +105,7 @@ export function RecurringMessagesPage() {
 
   return (
     <SoftLayout>
+      <AnimatedBlobs variant="minimal" />
       <div className="px-4 md:px-8 py-8 w-full">
         {/* Header */}
         <motion.div

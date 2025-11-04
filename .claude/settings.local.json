@@ -86,7 +86,8 @@
       "Bash(head:*)",
       "Bash(done)",
       "Bash(git reset:*)",
-      "Bash(do sed -i 's/from-blue-500 to-cyan-500/from-primary to-accent/g' \"$file\")"
+      "Bash(do sed -i 's/from-blue-500 to-cyan-500/from-primary to-accent/g' \"$file\")",
+      "Bash(do echo \"Processing $file\")"
     ],
     "deny": [],
     "ask": []

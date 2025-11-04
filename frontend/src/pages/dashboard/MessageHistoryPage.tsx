@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import useMessageStore, { SentMessage } from '../../stores/messageStore';
 import { getMessageHistory } from '../../api/messages';
 import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
+import AnimatedBlobs from '../../components/AnimatedBlobs';
 
 export function MessageHistoryPage() {
   const { messages, setMessages, isLoading, setLoading } = useMessageStore();
@@ -51,6 +52,7 @@ export function MessageHistoryPage() {
 
   return (
     <SoftLayout>
+      <AnimatedBlobs variant="minimal" />
       <div className="px-4 md:px-8 py-8 w-full">
         {/* Header */}
         <motion.div

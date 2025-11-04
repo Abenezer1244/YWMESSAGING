@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import BackButton from '../components/BackButton';
+import AnimatedBlobs from '../components/AnimatedBlobs';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -82,6 +83,7 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-normal">
+      <AnimatedBlobs />
       {/* Back Button */}
       <div className="p-6">
         <BackButton variant="ghost" />

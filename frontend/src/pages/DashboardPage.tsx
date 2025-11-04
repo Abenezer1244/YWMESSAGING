@@ -19,6 +19,7 @@ import { getMembers } from '../api/members';
 import { getGroups } from '../api/groups';
 import { SoftLayout, SoftCard, SoftStat, SoftButton } from '../components/SoftUI';
 import TrialBanner from '../components/TrialBanner';
+import AnimatedBlobs from '../components/AnimatedBlobs';
 
 // Get CSS variable value and convert oklch to hex approximation
 const getCSSColor = (varName: string): string => {
@@ -111,6 +112,7 @@ export function DashboardPage() {
 
   return (
     <SoftLayout>
+      <AnimatedBlobs variant="minimal" />
       {/* Content Wrapper */}
       <div className="px-4 md:px-8 py-8 w-full">
         {/* Trial Banner */}
