@@ -204,24 +204,9 @@ export default {
   			]
   		},
   		fontFamily: {
-  			sans: [
-  				'Inter',
-  				'-apple-system',
-  				'BlinkMacSystemFont',
-  				'Segoe UI',
-  				'Roboto',
-  				'sans-serif'
-  			],
-  			display: [
-  				'Inter',
-  				'system-ui',
-  				'sans-serif'
-  			],
-  			mono: [
-  				'Fira Code"',
-  				'Courier New',
-  				'monospace'
-  			]
+  			sans: 'var(--font-sans)',
+  			serif: 'var(--font-serif)',
+  			mono: 'var(--font-mono)'
   		},
   		fontWeight: {
   			light: '300',
