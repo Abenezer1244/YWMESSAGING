@@ -10,14 +10,14 @@ export async function getMembers(groupId, options = {}) {
         params.append('limit', options.limit.toString());
     if (options.search)
         params.append('search', options.search);
-    const response = await client.get(`/groups/${groupId}/members?${params.toString()}`);
+    const response = await client.get(`/groups/groups/${groupId}/members?${params.toString()}`);
     return response.data;
 }
 /**
  * Add a single member to a group
  */
 export async function addMember(groupId, data) {
-    const response = await client.post(`/groups/${groupId}/members`, data);
+    const response = await client.post(`/groups/groups/${groupId}/members`, data);
     return response.data.data;
 }
 /**
@@ -26,21 +26,21 @@ export async function addMember(groupId, data) {
 export async function importMembers(groupId, file) {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await client.post(`/groups/${groupId}/members/import`, formData);
+    const response = await client.post(`/groups/groups/${groupId}/members/import`, formData);
     return response.data.data;
 }
 /**
  * Update a member
  */
 export async function updateMember(memberId, data) {
-    const response = await client.put(`/members/${memberId}`, data);
+    const response = await client.put(`/groups/members/${memberId}`, data);
     return response.data.data;
 }
 /**
  * Remove a member from a group
  */
 export async function removeMember(groupId, memberId) {
-    const response = await client.delete(`/groups/${groupId}/members/${memberId}`);
+    const response = await client.delete(`/groups/groups/${groupId}/members/${memberId}`);
     return response.data.data;
 }
 //# sourceMappingURL=members.js.map
