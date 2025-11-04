@@ -61,6 +61,18 @@ CREATE TABLE IF NOT EXISTS "Member" (
     CONSTRAINT "Member_pkey" PRIMARY KEY ("id")
 );
 
+-- Backfill phoneHash for existing members with placeholder to prevent NULL uniqueness issues
+DO $$
+DECLARE
+    v_member_id TEXT;
+    v_counter INT := 1;
+BEGIN
+    FOR v_member_id IN SELECT "id" FROM "Member" WHERE "phoneHash" IS NULL LOOP
+        UPDATE "Member" SET "phoneHash" = 'placeholder_' || v_counter WHERE "id" = v_member_id;
+        v_counter := v_counter + 1;
+    END LOOP;
+END $$;
+
 -- CreateTable GroupMember
 CREATE TABLE IF NOT EXISTS "GroupMember" (
     "id" TEXT NOT NULL,

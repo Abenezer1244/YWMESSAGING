@@ -85,7 +85,7 @@ model Member {
   firstName String
   lastName  String
   phone     String   // ENCRYPTED: E.164 format (encrypted in database)
-  phoneHash String   @unique // Hash of phone for searchable lookups (HMAC-SHA256)
+  phoneHash String?  @unique // Hash of phone for searchable lookups (HMAC-SHA256)
   email     String?  @unique
   optInSms  Boolean  @default(true)
   createdAt DateTime @default(now())
