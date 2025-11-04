@@ -127,6 +127,13 @@ export async function addMember(groupId: string, data: CreateMemberData) {
     where: { phoneHash },
   });
 
+  // Also check by email if phoneHash didn't match
+  if (!member && data.email?.trim()) {
+    member = await prisma.member.findFirst({
+      where: { email: data.email.trim() },
+    });
+  }
+
   // Create member if doesn't exist
   if (!member) {
     member = await prisma.member.create({
@@ -216,6 +223,13 @@ export async function importMembers(
       let member = await prisma.member.findFirst({
         where: { phoneHash },
       });
+
+      // Also check by email if phoneHash didn't match
+      if (!member && data.email?.trim()) {
+        member = await prisma.member.findFirst({
+          where: { email: data.email.trim() },
+        });
+      }
 
       if (!member) {
         member = await prisma.member.create({
