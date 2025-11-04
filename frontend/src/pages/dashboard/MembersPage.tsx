@@ -28,8 +28,13 @@ export function MembersPage() {
   const pages = Math.ceil(total / limit);
   const currentGroup = groups.find((g) => g.id === groupId);
 
+  // Debounce search - wait 500ms after user stops typing before searching
   useEffect(() => {
-    loadMembers();
+    const searchTimer = setTimeout(() => {
+      loadMembers();
+    }, 500);
+
+    return () => clearTimeout(searchTimer);
   }, [groupId, page, search]);
 
   const loadMembers = async () => {

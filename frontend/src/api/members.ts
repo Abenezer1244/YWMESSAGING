@@ -44,7 +44,7 @@ export async function getMembers(
   if (options.limit) params.append('limit', options.limit.toString());
   if (options.search) params.append('search', options.search);
 
-  const response = await client.get(`/groups/groups/${groupId}/members?${params.toString()}`);
+  const response = await client.get(`/groups/${groupId}/members?${params.toString()}`);
   return response.data;
 }
 
