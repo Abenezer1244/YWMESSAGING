@@ -73,10 +73,26 @@ function App() {
     });
 
     // Restore authentication from session
-    // Tokens are in HTTPOnly cookies, frontend just needs to restore user state
+    // First, try to restore from sessionStorage (survives page refresh)
     setIsCheckingAuth(true);
 
-    // Try to get current user
+    try {
+      const savedAuthState = sessionStorage.getItem('authState');
+      if (savedAuthState) {
+        const authState = JSON.parse(savedAuthState);
+        // Restore from sessionStorage
+        setAuth(authState.user, authState.church, authState.accessToken, authState.refreshToken, authState.tokenExpiresAt ? Math.ceil((authState.tokenExpiresAt - Date.now()) / 1000) : 3600);
+        setIsCheckingAuth(false);
+        if (process.env.NODE_ENV === 'development') {
+          console.debug('Session restored from sessionStorage');
+        }
+        return;
+      }
+    } catch (e) {
+      console.warn('Failed to restore auth state from sessionStorage');
+    }
+
+    // If not in sessionStorage, try to get current user from backend
     getMe()
       .then((response) => {
         // User has valid session, restore auth state
