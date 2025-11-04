@@ -1,4 +1,5 @@
 import { verifyAccessToken } from '../utils/jwt.utils.js';
+import { logPermissionDenied } from '../utils/security-logger.js';
 /**
  * Middleware to authenticate JWT token
  * Checks cookies first, then falls back to Authorization header
@@ -33,6 +34,8 @@ export function requireRole(roles) {
             return;
         }
         if (!roles.includes(req.user.role)) {
+            const ipAddress = (req.ip || req.socket.remoteAddress || 'unknown');
+            logPermissionDenied(req.user.adminId, req.originalUrl || req.path, roles.join(', '), req.user.role, ipAddress);
             res.status(403).json({ error: 'Insufficient permissions' });
             return;
         }
@@ -49,6 +52,8 @@ export function authorizeChurch(req, res, next) {
     }
     const churchId = req.params.churchId;
     if (churchId && req.user.churchId !== churchId) {
+        const ipAddress = (req.ip || req.socket.remoteAddress || 'unknown');
+        logPermissionDenied(req.user.adminId, req.originalUrl || req.path, `Church: ${req.user.churchId}`, `Church: ${churchId}`, ipAddress);
         res.status(403).json({ error: 'Unauthorized church access' });
         return;
     }

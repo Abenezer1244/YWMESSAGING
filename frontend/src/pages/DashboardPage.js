@@ -1,47 +1,67 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Zap, Users, MessageSquare, TrendingUp, Settings, LogOut, } from 'lucide-react';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import useAuthStore from '../stores/authStore';
 import useBranchStore from '../stores/branchStore';
 import BranchSelector from '../components/BranchSelector';
 import TrialBanner from '../components/TrialBanner';
-import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
+import { StatCard } from '../components/dashboard/StatCard';
+import { FeaturedCard } from '../components/dashboard/FeaturedCard';
+import { ChartCard } from '../components/dashboard/ChartCard';
+import { useState } from 'react';
 export function DashboardPage() {
     const navigate = useNavigate();
     const { user, church, logout } = useAuthStore();
     const { currentBranchId } = useBranchStore();
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const handleLogout = () => {
         logout();
         navigate('/login');
     };
-    const daysUntilTrialEnd = church ? Math.ceil((new Date(church.trialEndsAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : 0;
-    const trialStatus = daysUntilTrialEnd > 0 ? 'active' : 'expired';
-    const trialColor = daysUntilTrialEnd >= 8 ? 'success' : daysUntilTrialEnd >= 4 ? 'warning' : 'danger';
-    const navigationItems = [
-        { label: '📍 Branches', action: () => navigate('/branches'), always: true },
-        { label: '👥 Groups', action: () => navigate(`/branches/${currentBranchId}/groups`), conditional: true },
-        { label: '👤 Members', action: () => navigate(`/members?groupId=`), conditional: true },
-        { label: '📨 Send Message', action: () => navigate('/send-message'), conditional: true },
-        { label: '📜 History', action: () => navigate('/message-history'), conditional: true },
-        { label: '📋 Templates', action: () => navigate('/templates'), conditional: true },
-        { label: '🔄 Recurring', action: () => navigate('/recurring-messages'), conditional: true },
-        { label: '📊 Analytics', action: () => navigate('/analytics'), conditional: true },
-        { label: '💳 Billing', action: () => navigate('/billing'), always: true },
-        { label: '⚙️ Settings', action: () => navigate('/admin/settings'), always: true },
+    // Mock data for charts
+    const barChartData = [
+        { name: 'Mon', active: 240 },
+        { name: 'Tue', active: 320 },
+        { name: 'Wed', active: 180 },
+        { name: 'Thu', active: 400 },
+        { name: 'Fri', active: 290 },
+        { name: 'Sat', active: 150 },
+        { name: 'Sun', active: 200 },
     ];
-    return (_jsxs("div", { className: "min-h-screen bg-background transition-colors duration-normal", children: [_jsx("header", { className: "bg-muted shadow-sm border-b border-border transition-colors duration-normal", children: _jsxs("div", { className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6", children: [_jsxs("div", { className: "flex justify-between items-center mb-6", children: [_jsxs("div", { className: "flex items-center gap-4", children: [_jsx("div", { className: "w-12 h-12 bg-primary rounded-lg flex items-center justify-center shadow-md", children: _jsx("span", { className: "text-background font-bold text-base", children: "C" }) }), _jsxs("div", { children: [_jsx("h1", { className: "text-3xl font-bold text-foreground", children: "Dashboard" }), _jsx("p", { className: "text-muted-foreground", children: church?.name })] })] }), _jsx(Button, { variant: "outline", size: "md", onClick: handleLogout, className: "border-border text-foreground hover:bg-muted", children: "Logout" })] }), _jsxs("div", { className: "flex flex-wrap gap-2 items-center", children: [navigationItems.map((item) => {
-                                    const shouldShow = item.always || (item.conditional && currentBranchId);
-                                    if (!shouldShow)
-                                        return null;
-                                    return (_jsx("button", { onClick: item.action, className: "px-4 py-2 text-foreground font-medium text-sm hover:bg-muted/50 rounded-lg transition-colors duration-normal border border-border hover:border-primary", children: item.label }, item.label));
-                                }), _jsx(BranchSelector, {})] })] }) }), _jsxs("main", { className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8", children: [_jsx(TrialBanner, {}), _jsxs("div", { className: "mb-8 animate-fadeIn", children: [_jsxs("h2", { className: "text-3xl font-bold text-foreground mb-6 tracking-tight", children: ["Welcome back, ", user?.firstName, "! \uD83D\uDC4B"] }), _jsxs("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6", children: [_jsx(Card, { variant: "default", className: "border border-border bg-card hover:shadow-md transition-all", children: _jsxs("div", { className: "flex items-start gap-4", children: [_jsx("div", { className: "w-12 h-12 bg-muted rounded-lg flex items-center justify-center text-2xl", children: "\uD83D\uDC64" }), _jsxs("div", { className: "flex-1", children: [_jsx("h3", { className: "text-lg font-semibold text-foreground mb-3", children: "Your Account" }), _jsxs("div", { className: "space-y-2 text-sm", children: [_jsx("p", { className: "text-foreground/80", children: _jsxs("span", { className: "font-medium text-foreground", children: [user?.firstName, " ", user?.lastName] }) }), _jsx("p", { className: "text-foreground/80", children: _jsx("span", { className: "text-muted-foreground", children: user?.email }) }), _jsx("p", { className: "text-foreground/80", children: _jsx("span", { className: "inline-block px-2 py-1 bg-primary/20 text-primary rounded text-xs font-semibold", children: user?.role }) })] })] })] }) }), _jsx(Card, { variant: "default", className: "border border-border bg-card hover:shadow-md transition-all", children: _jsxs("div", { className: "flex items-start gap-4", children: [_jsx("div", { className: "w-12 h-12 bg-muted rounded-lg flex items-center justify-center text-2xl", children: "\u26EA" }), _jsxs("div", { className: "flex-1", children: [_jsx("h3", { className: "text-lg font-semibold text-foreground mb-3", children: "Church Details" }), _jsxs("div", { className: "space-y-2 text-sm", children: [_jsx("p", { className: "text-foreground/80", children: _jsx("span", { className: "font-medium text-foreground", children: church?.name }) }), _jsx("p", { className: "text-foreground/80", children: _jsx("span", { className: "text-muted-foreground", children: church?.email }) }), _jsxs("p", { className: "text-foreground/80", children: ["Trial ends ", _jsx("span", { className: "font-semibold text-foreground", children: new Date(church?.trialEndsAt || '').toLocaleDateString() })] })] })] })] }) })] })] }), _jsxs("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-6 mb-8", children: [_jsxs(Card, { variant: "default", className: "text-center border border-border bg-card hover:shadow-md transition-all", children: [_jsx("div", { className: "w-16 h-16 bg-muted rounded-lg flex items-center justify-center mx-auto mb-4 text-3xl", children: "\uD83D\uDCCD" }), _jsx("div", { className: "text-4xl font-bold text-primary mb-2", children: "0" }), _jsx("p", { className: "text-muted-foreground font-medium mb-4", children: "Active Branches" }), _jsx(Button, { variant: "outline", size: "sm", onClick: () => navigate('/branches'), fullWidth: true, className: "border-border text-foreground hover:bg-muted", children: "View Branches" })] }), _jsxs(Card, { variant: "default", className: "text-center border border-border bg-card hover:shadow-md transition-all", children: [_jsx("div", { className: "w-16 h-16 bg-muted rounded-lg flex items-center justify-center mx-auto mb-4 text-3xl", children: "\uD83D\uDC65" }), _jsx("div", { className: "text-4xl font-bold text-primary mb-2", children: "0" }), _jsx("p", { className: "text-muted-foreground font-medium mb-4", children: "Total Members" }), _jsx(Button, { variant: "outline", size: "sm", onClick: () => navigate(`/members?groupId=`), fullWidth: true, className: "border-border text-foreground hover:bg-muted", children: "Manage Members" })] }), _jsxs(Card, { variant: "default", className: "text-center border border-border bg-card hover:shadow-md transition-all", children: [_jsx("div", { className: "w-16 h-16 bg-muted rounded-lg flex items-center justify-center mx-auto mb-4 text-3xl", children: "\uD83D\uDCE8" }), _jsx("div", { className: "text-4xl font-bold text-primary mb-2", children: "0" }), _jsx("p", { className: "text-muted-foreground font-medium mb-4", children: "Messages Sent" }), _jsx(Button, { variant: "outline", size: "sm", onClick: () => navigate('/send-message'), fullWidth: true, className: "border-border text-foreground hover:bg-muted", children: "Send Message" })] })] }), _jsxs(Card, { variant: "default", className: "border border-border bg-card", children: [_jsx("h3", { className: "text-xl font-bold text-foreground mb-6", children: "\u2728 Key Features" }), _jsx("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4", children: [
-                                    { icon: '📍', title: 'Multi-Branch', desc: 'Manage multiple church locations' },
-                                    { icon: '👥', title: 'Groups & Members', desc: 'Organize and segment your congregation' },
-                                    { icon: '📨', title: 'SMS Messaging', desc: 'Send direct messages to members' },
-                                    { icon: '📋', title: 'Templates', desc: 'Reuse pre-built message templates' },
-                                    { icon: '🔄', title: 'Recurring Messages', desc: 'Automate regular communications' },
-                                    { icon: '📊', title: 'Analytics', desc: 'Track engagement and delivery rates' },
-                                ].map((feature, idx) => (_jsxs("div", { className: "p-4 bg-muted border border-border rounded-lg hover:shadow-md transition-all", children: [_jsx("div", { className: "text-3xl mb-3", children: feature.icon }), _jsx("h4", { className: "font-semibold text-foreground mb-1", children: feature.title }), _jsx("p", { className: "text-sm text-muted-foreground", children: feature.desc })] }, idx))) })] })] })] }));
+    const lineChartData = [
+        { name: 'Week 1', sent: 100, delivered: 90 },
+        { name: 'Week 2', sent: 150, delivered: 140 },
+        { name: 'Week 3', sent: 200, delivered: 180 },
+        { name: 'Week 4', sent: 250, delivered: 230 },
+    ];
+    const navigationItems = [
+        { label: 'Branches', action: () => navigate('/branches'), always: true },
+        { label: 'Groups', action: () => navigate(`/branches/${currentBranchId}/groups`), conditional: true },
+        { label: 'Members', action: () => navigate(`/members?groupId=`), conditional: true },
+        { label: 'Send Message', action: () => navigate('/send-message'), conditional: true },
+        { label: 'History', action: () => navigate('/message-history'), conditional: true },
+        { label: 'Templates', action: () => navigate('/templates'), conditional: true },
+        { label: 'Recurring', action: () => navigate('/recurring-messages'), conditional: true },
+        { label: 'Analytics', action: () => navigate('/analytics'), conditional: true },
+        { label: 'Billing', action: () => navigate('/billing'), always: true },
+    ];
+    return (_jsxs("div", { className: "min-h-screen bg-background", children: [_jsx("header", { className: "sticky top-0 z-40 bg-card border-b border-border backdrop-blur-md", children: _jsx("div", { className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8", children: _jsxs("div", { className: "flex items-center justify-between h-16", children: [_jsxs(motion.div, { initial: { opacity: 0, x: -20 }, animate: { opacity: 1, x: 0 }, className: "flex items-center gap-3", children: [_jsx("div", { className: "w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-lg", children: _jsx(Zap, { className: "w-6 h-6 text-white" }) }), _jsxs("div", { children: [_jsx("h1", { className: "text-xl font-bold text-foreground", children: "Koinonia" }), _jsx("p", { className: "text-xs text-muted-foreground", children: church?.name })] })] }), _jsxs("div", { className: "flex items-center gap-4", children: [_jsx(BranchSelector, {}), _jsx(motion.button, { whileHover: { scale: 1.05 }, onClick: () => navigate('/admin/settings'), className: "p-2 hover:bg-muted rounded-lg transition-colors", title: "Settings", children: _jsx(Settings, { className: "w-5 h-5 text-muted-foreground" }) }), _jsx(motion.button, { whileHover: { scale: 1.05 }, onClick: handleLogout, className: "p-2 hover:bg-muted rounded-lg transition-colors", title: "Logout", children: _jsx(LogOut, { className: "w-5 h-5 text-muted-foreground" }) })] })] }) }) }), _jsxs("main", { className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12", children: [_jsx("div", { className: "mb-12", children: _jsx(TrialBanner, {}) }), _jsxs(motion.div, { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.5 }, className: "mb-12", children: [_jsxs("h2", { className: "text-4xl font-bold text-foreground mb-2", children: ["Welcome back, ", _jsx("span", { className: "bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent", children: user?.firstName })] }), _jsx("p", { className: "text-lg text-muted-foreground", children: "Here's what's happening with your church today" })] }), _jsxs("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12", children: [_jsx(StatCard, { icon: MessageSquare, label: "Messages Sent", value: "1,234", change: 55, changeType: "positive", bgColor: "bg-blue-500", iconColor: "text-blue-500", index: 0 }), _jsx(StatCard, { icon: Users, label: "Total Members", value: "2,890", change: 12, changeType: "positive", bgColor: "bg-green-500", iconColor: "text-green-500", index: 1 }), _jsx(StatCard, { icon: TrendingUp, label: "Delivery Rate", value: "94.2%", change: -2, changeType: "negative", bgColor: "bg-purple-500", iconColor: "text-purple-500", index: 2 }), _jsx(StatCard, { icon: Zap, label: "Active Groups", value: "45", change: 8, changeType: "positive", bgColor: "bg-orange-500", iconColor: "text-orange-500", index: 3 })] }), _jsxs("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12", children: [_jsx(FeaturedCard, { title: "Quick Actions", description: "Access your most-used features in one place. Send messages, manage members, or view analytics instantly.", gradient: "bg-gradient-to-br from-blue-400 to-blue-600", actionLabel: "Get Started", onAction: () => navigate('/send-message'), index: 0 }), _jsx(FeaturedCard, { title: "Organization Tips", description: "Learn best practices for managing your congregation. Improve engagement and communication with smart segmentation.", gradient: "bg-gradient-to-br from-slate-800 to-slate-900", actionLabel: "Learn More", isDark: true, index: 1 })] }), _jsxs("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12", children: [_jsx(ChartCard, { title: "Active Users", subtitle: "(+23%) than last week", index: 0, children: _jsx(ResponsiveContainer, { width: "100%", height: 300, children: _jsxs(BarChart, { data: barChartData, children: [_jsx(CartesianGrid, { strokeDasharray: "3 3", stroke: "rgba(120,120,120,0.1)" }), _jsx(XAxis, { dataKey: "name", stroke: "rgba(120,120,120,0.5)" }), _jsx(YAxis, { stroke: "rgba(120,120,120,0.5)" }), _jsx(Tooltip, { contentStyle: {
+                                                    backgroundColor: 'rgba(20,20,30,0.8)',
+                                                    border: '1px solid rgba(120,120,120,0.2)',
+                                                    borderRadius: '8px',
+                                                } }), _jsx(Bar, { dataKey: "active", fill: "url(#colorGradient)", radius: [8, 8, 0, 0], animationDuration: 800 }), _jsx("defs", { children: _jsxs("linearGradient", { id: "colorGradient", x1: "0", y1: "0", x2: "0", y2: "1", children: [_jsx("stop", { offset: "5%", stopColor: "#3b82f6", stopOpacity: 0.8 }), _jsx("stop", { offset: "95%", stopColor: "#06b6d4", stopOpacity: 0.1 })] }) })] }) }) }), _jsx(ChartCard, { title: "Message Analytics", subtitle: "Sent vs Delivered", index: 1, children: _jsx(ResponsiveContainer, { width: "100%", height: 300, children: _jsxs(LineChart, { data: lineChartData, children: [_jsx(CartesianGrid, { strokeDasharray: "3 3", stroke: "rgba(120,120,120,0.1)" }), _jsx(XAxis, { dataKey: "name", stroke: "rgba(120,120,120,0.5)" }), _jsx(YAxis, { stroke: "rgba(120,120,120,0.5)" }), _jsx(Tooltip, { contentStyle: {
+                                                    backgroundColor: 'rgba(20,20,30,0.8)',
+                                                    border: '1px solid rgba(120,120,120,0.2)',
+                                                    borderRadius: '8px',
+                                                } }), _jsx(Line, { type: "monotone", dataKey: "sent", stroke: "#3b82f6", strokeWidth: 3, dot: { fill: '#3b82f6', r: 5 }, activeDot: { r: 7 } }), _jsx(Line, { type: "monotone", dataKey: "delivered", stroke: "#06b6d4", strokeWidth: 3, dot: { fill: '#06b6d4', r: 5 }, activeDot: { r: 7 } })] }) }) })] }), _jsx(motion.div, { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { delay: 0.3, duration: 0.5 }, children: _jsxs(Card, { variant: "default", className: "border border-border bg-card", children: [_jsx("h3", { className: "text-xl font-bold text-foreground mb-6", children: "Quick Navigation" }), _jsx("div", { className: "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4", children: navigationItems.map((item) => {
+                                        const shouldShow = item.always || (item.conditional && currentBranchId);
+                                        if (!shouldShow)
+                                            return null;
+                                        return (_jsx(motion.button, { whileHover: { y: -4, boxShadow: '0 12px 24px rgba(0,0,0,0.1)' }, onClick: item.action, className: "p-4 rounded-xl bg-muted/50 hover:bg-muted border border-border/50 hover:border-border transition-all text-center group", children: _jsx("div", { className: "text-sm font-medium text-foreground group-hover:text-primary transition-colors", children: item.label }) }, item.label));
+                                    }) })] }) })] })] }));
 }
 export default DashboardPage;
 //# sourceMappingURL=DashboardPage.js.map

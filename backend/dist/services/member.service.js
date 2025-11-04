@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { formatToE164 } from '../utils/phone.utils.js';
+import { encrypt, decrypt, hashForSearch } from '../utils/encryption.utils.js';
 import { queueWelcomeMessage } from '../jobs/welcomeMessage.job.js';
+import { getUsage, getCurrentPlan, getPlanLimits } from './billing.service.js';
 const prisma = new PrismaClient();
 /**
  * Get members for a group with pagination and search
@@ -20,12 +22,24 @@ export async function getMembers(groupId, options = {}) {
         },
     };
     if (search) {
-        where.OR = [
-            { firstName: { contains: search, mode: 'insensitive' } },
-            { lastName: { contains: search, mode: 'insensitive' } },
-            { phone: { contains: search } },
-            { email: { contains: search, mode: 'insensitive' } },
-        ];
+        try {
+            const formattedPhone = formatToE164(search);
+            const phoneHash = hashForSearch(formattedPhone);
+            where.OR = [
+                { firstName: { contains: search, mode: 'insensitive' } },
+                { lastName: { contains: search, mode: 'insensitive' } },
+                { phoneHash },
+                { email: { contains: search, mode: 'insensitive' } },
+            ];
+        }
+        catch (error) {
+            // If phone formatting fails, just search text fields
+            where.OR = [
+                { firstName: { contains: search, mode: 'insensitive' } },
+                { lastName: { contains: search, mode: 'insensitive' } },
+                { email: { contains: search, mode: 'insensitive' } },
+            ];
+        }
     }
     const [members, total] = await Promise.all([
         prisma.member.findMany({
@@ -45,8 +59,13 @@ export async function getMembers(groupId, options = {}) {
         }),
         prisma.member.count({ where }),
     ]);
+    // Decrypt phone numbers in results
+    const decryptedMembers = members.map((member) => ({
+        ...member,
+        phone: decrypt(member.phone),
+    }));
     return {
-        data: members,
+        data: decryptedMembers,
         pagination: {
             page,
             limit,
@@ -65,19 +84,34 @@ export async function addMember(groupId, data) {
     if (!group) {
         throw new Error('Group not found');
     }
+    // Check plan limits before adding member
+    const usage = await getUsage(group.churchId);
+    const plan = await getCurrentPlan(group.churchId);
+    const limits = getPlanLimits(plan);
+    if (usage.members >= limits.members) {
+        throw new Error(`Member limit of ${limits.members} reached for ${plan} plan. Please upgrade your plan to add more members.`);
+    }
     // Format phone to E.164
     const formattedPhone = formatToE164(data.phone);
+    const phoneHash = hashForSearch(formattedPhone);
     // Check if member with this phone exists
-    let member = await prisma.member.findUnique({
-        where: { phone: formattedPhone },
+    let member = await prisma.member.findFirst({
+        where: { phoneHash },
     });
+    // Also check by email if phoneHash didn't match
+    if (!member && data.email?.trim()) {
+        member = await prisma.member.findFirst({
+            where: { email: data.email.trim() },
+        });
+    }
     // Create member if doesn't exist
     if (!member) {
         member = await prisma.member.create({
             data: {
                 firstName: data.firstName.trim(),
                 lastName: data.lastName.trim(),
-                phone: formattedPhone,
+                phone: encrypt(formattedPhone),
+                phoneHash,
                 email: data.email?.trim(),
                 optInSms: data.optInSms ?? true,
             },
@@ -116,7 +150,7 @@ export async function addMember(groupId, data) {
         id: groupMember.member.id,
         firstName: groupMember.member.firstName,
         lastName: groupMember.member.lastName,
-        phone: groupMember.member.phone,
+        phone: decrypt(groupMember.member.phone),
         email: groupMember.member.email,
         optInSms: groupMember.member.optInSms,
         createdAt: groupMember.member.createdAt,
@@ -132,21 +166,40 @@ export async function importMembers(groupId, membersData) {
     if (!group) {
         throw new Error('Group not found');
     }
+    // Check plan limits before importing
+    const usage = await getUsage(group.churchId);
+    const plan = await getCurrentPlan(group.churchId);
+    const limits = getPlanLimits(plan);
+    const remainingCapacity = limits.members - usage.members;
+    if (remainingCapacity <= 0) {
+        throw new Error(`Member limit of ${limits.members} reached for ${plan} plan. Please upgrade your plan to add more members.`);
+    }
+    if (membersData.length > remainingCapacity) {
+        throw new Error(`Import would exceed member limit. You have ${remainingCapacity} member slot(s) remaining, but are trying to import ${membersData.length} members.`);
+    }
     const imported = [];
     const failed = [];
     for (const data of membersData) {
         try {
             const formattedPhone = formatToE164(data.phone);
+            const phoneHash = hashForSearch(formattedPhone);
             // Find or create member
-            let member = await prisma.member.findUnique({
-                where: { phone: formattedPhone },
+            let member = await prisma.member.findFirst({
+                where: { phoneHash },
             });
+            // Also check by email if phoneHash didn't match
+            if (!member && data.email?.trim()) {
+                member = await prisma.member.findFirst({
+                    where: { email: data.email.trim() },
+                });
+            }
             if (!member) {
                 member = await prisma.member.create({
                     data: {
                         firstName: data.firstName.trim(),
                         lastName: data.lastName.trim(),
-                        phone: formattedPhone,
+                        phone: encrypt(formattedPhone),
+                        phoneHash,
                         email: data.email?.trim(),
                         optInSms: true,
                     },
@@ -187,7 +240,7 @@ export async function importMembers(groupId, membersData) {
                 id: member.id,
                 firstName: member.firstName,
                 lastName: member.lastName,
-                phone: member.phone,
+                phone: decrypt(member.phone),
                 email: member.email,
             });
         }
@@ -219,8 +272,11 @@ export async function updateMember(memberId, data) {
         updateData.firstName = data.firstName.trim();
     if (data.lastName)
         updateData.lastName = data.lastName.trim();
-    if (data.phone)
-        updateData.phone = formatToE164(data.phone);
+    if (data.phone) {
+        const formattedPhone = formatToE164(data.phone);
+        updateData.phone = encrypt(formattedPhone);
+        updateData.phoneHash = hashForSearch(formattedPhone);
+    }
     if (data.email !== undefined)
         updateData.email = data.email?.trim();
     if (data.optInSms !== undefined)
@@ -233,7 +289,7 @@ export async function updateMember(memberId, data) {
         id: updated.id,
         firstName: updated.firstName,
         lastName: updated.lastName,
-        phone: updated.phone,
+        phone: decrypt(updated.phone),
         email: updated.email,
         optInSms: updated.optInSms,
         createdAt: updated.createdAt,

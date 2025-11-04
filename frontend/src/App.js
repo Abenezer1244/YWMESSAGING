@@ -3,13 +3,15 @@ import { useEffect, useState, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { initializePostHog } from './hooks/useAnalytics';
+import { useIdleLogout } from './hooks/useIdleLogout';
 import ProtectedRoute from './components/ProtectedRoute';
+import { IdleLogoutWarning } from './components/IdleLogoutWarning';
 import { Spinner } from './components/ui';
 import useAuthStore from './stores/authStore';
 import useBranchStore from './stores/branchStore';
 import { fetchCsrfToken } from './api/client';
 import { getBranches } from './api/branches';
-import { getMe } from './api/auth';
+import { getMe, refreshToken } from './api/auth';
 import { ThemeProvider } from './contexts/ThemeContext';
 // Lazy load pages for route-based code splitting
 const LandingPage = lazy(() => import('./pages/LandingPage'));
@@ -41,7 +43,9 @@ const PageLoader = () => (_jsx("div", { className: "min-h-screen flex items-cent
 function App() {
     const { isAuthenticated, church, setAuth } = useAuthStore();
     const { setBranches } = useBranchStore();
-    const [isCheckingAuth, setIsCheckingAuth] = useState(false);
+    const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+    // Idle logout detection
+    const { showWarning, secondsUntilLogout, handleLogout, dismissWarning } = useIdleLogout();
     // Debug logging only in development
     if (process.env.NODE_ENV === 'development') {
         console.debug('App initialized, auth state:', { isAuthenticated, churchId: church?.id });
@@ -58,8 +62,25 @@ function App() {
             }
         });
         // Restore authentication from session
-        // Tokens are in HTTPOnly cookies, frontend just needs to restore user state
+        // First, try to restore from sessionStorage (survives page refresh)
         setIsCheckingAuth(true);
+        try {
+            const savedAuthState = sessionStorage.getItem('authState');
+            if (savedAuthState) {
+                const authState = JSON.parse(savedAuthState);
+                // Restore from sessionStorage
+                setAuth(authState.user, authState.church, authState.accessToken, authState.refreshToken, authState.tokenExpiresAt ? Math.ceil((authState.tokenExpiresAt - Date.now()) / 1000) : 3600);
+                setIsCheckingAuth(false);
+                if (process.env.NODE_ENV === 'development') {
+                    console.debug('Session restored from sessionStorage');
+                }
+                return;
+            }
+        }
+        catch (e) {
+            console.warn('Failed to restore auth state from sessionStorage');
+        }
+        // If not in sessionStorage, try to get current user from backend
         getMe()
             .then((response) => {
             // User has valid session, restore auth state
@@ -73,16 +94,45 @@ function App() {
                 };
                 // Tokens come from HTTPOnly cookies, only pass placeholder tokens for state
                 setAuth(admin, response.data.church, 'cookie-based', 'cookie-based');
+                setIsCheckingAuth(false);
             }
         })
-            .catch(() => {
-            // User doesn't have valid session, auth will remain cleared
-            // Log error details only in development
-            if (process.env.NODE_ENV === 'development') {
-                console.debug('No active session found');
+            .catch(async (error) => {
+            // getMe() failed - try refreshing token to extend session
+            // This handles case where access token expired but refresh token is valid
+            try {
+                if (process.env.NODE_ENV === 'development') {
+                    console.debug('getMe() failed, attempting token refresh...', error.response?.status);
+                }
+                // Try to refresh the token
+                const refreshResponse = await refreshToken();
+                if (!refreshResponse.success) {
+                    throw new Error('Token refresh failed');
+                }
+                // Refresh succeeded - tokens now updated in cookies + Zustand store (by interceptor)
+                // Now retry getMe() with fresh token
+                const retryResponse = await getMe();
+                if (retryResponse.success && retryResponse.data) {
+                    const admin = {
+                        id: retryResponse.data.id,
+                        email: retryResponse.data.email,
+                        firstName: retryResponse.data.firstName,
+                        lastName: retryResponse.data.lastName,
+                        role: retryResponse.data.role,
+                    };
+                    // Use refreshed tokens if available, otherwise use cookies
+                    const newAccessToken = refreshResponse.data?.accessToken || 'cookie-based';
+                    const newRefreshToken = refreshResponse.data?.refreshToken || 'cookie-based';
+                    setAuth(admin, retryResponse.data.church, newAccessToken, newRefreshToken);
+                }
             }
-        })
-            .finally(() => {
+            catch (err) {
+                // Both getMe() and refresh failed - user is not authenticated
+                if (process.env.NODE_ENV === 'development') {
+                    console.debug('Session restoration failed, user not authenticated', err);
+                }
+                // Let auth remain logged out
+            }
             setIsCheckingAuth(false);
         });
     }, [setAuth]);
@@ -96,7 +146,7 @@ function App() {
             });
         }
     }, [isAuthenticated, church?.id, setBranches]);
-    return (_jsx(ThemeProvider, { children: _jsxs(Router, { children: [_jsx(Suspense, { fallback: _jsx(PageLoader, {}), children: _jsxs(Routes, { children: [_jsx(Route, { path: "/", element: _jsx(LandingPage, {}) }), _jsx(Route, { path: "/login", element: isAuthenticated ? _jsx(Navigate, { to: "/dashboard", replace: true }) : _jsx(LoginPage, {}) }), _jsx(Route, { path: "/register", element: isAuthenticated ? _jsx(Navigate, { to: "/dashboard", replace: true }) : _jsx(RegisterPage, {}) }), _jsx(Route, { path: "/privacy", element: _jsx(PrivacyPage, {}) }), _jsx(Route, { path: "/terms", element: _jsx(TermsPage, {}) }), _jsx(Route, { path: "/cookie-policy", element: _jsx(CookiePolicyPage, {}) }), _jsx(Route, { path: "/security", element: _jsx(SecurityPage, {}) }), _jsx(Route, { path: "/about", element: _jsx(AboutPage, {}) }), _jsx(Route, { path: "/contact", element: _jsx(ContactPage, {}) }), _jsx(Route, { path: "/blog", element: _jsx(BlogPage, {}) }), _jsx(Route, { path: "/careers", element: _jsx(CareersPage, {}) }), _jsx(Route, { path: "/dashboard", element: _jsx(ProtectedRoute, { children: _jsx(DashboardPage, {}) }) }), _jsx(Route, { path: "/branches", element: _jsx(ProtectedRoute, { children: _jsx(BranchesPage, {}) }) }), _jsx(Route, { path: "/branches/:branchId/groups", element: _jsx(ProtectedRoute, { children: _jsx(GroupsPage, {}) }) }), _jsx(Route, { path: "/members", element: _jsx(ProtectedRoute, { children: _jsx(MembersPage, {}) }) }), _jsx(Route, { path: "/send-message", element: _jsx(ProtectedRoute, { children: _jsx(SendMessagePage, {}) }) }), _jsx(Route, { path: "/message-history", element: _jsx(ProtectedRoute, { children: _jsx(MessageHistoryPage, {}) }) }), _jsx(Route, { path: "/templates", element: _jsx(ProtectedRoute, { children: _jsx(TemplatesPage, {}) }) }), _jsx(Route, { path: "/recurring-messages", element: _jsx(ProtectedRoute, { children: _jsx(RecurringMessagesPage, {}) }) }), _jsx(Route, { path: "/analytics", element: _jsx(ProtectedRoute, { children: _jsx(AnalyticsPage, {}) }) }), _jsx(Route, { path: "/subscribe", element: _jsx(ProtectedRoute, { children: _jsx(SubscribePage, {}) }) }), _jsx(Route, { path: "/billing", element: _jsx(ProtectedRoute, { children: _jsx(BillingPage, {}) }) }), _jsx(Route, { path: "/checkout", element: _jsx(ProtectedRoute, { children: _jsx(CheckoutPage, {}) }) }), _jsx(Route, { path: "/admin/settings", element: _jsx(ProtectedRoute, { children: _jsx(AdminSettingsPage, {}) }) })] }) }), _jsx(Toaster, { position: "top-right" })] }) }));
+    return (_jsx(ThemeProvider, { children: _jsxs(Router, { children: [_jsxs(Suspense, { fallback: _jsx(PageLoader, {}), children: [_jsx(IdleLogoutWarning, { isOpen: showWarning, secondsUntilLogout: secondsUntilLogout, onDismiss: dismissWarning, onLogout: handleLogout }), _jsxs(Routes, { children: [_jsx(Route, { path: "/", element: _jsx(LandingPage, {}) }), _jsx(Route, { path: "/login", element: isAuthenticated ? _jsx(Navigate, { to: "/dashboard", replace: true }) : _jsx(LoginPage, {}) }), _jsx(Route, { path: "/register", element: isAuthenticated ? _jsx(Navigate, { to: "/dashboard", replace: true }) : _jsx(RegisterPage, {}) }), _jsx(Route, { path: "/privacy", element: _jsx(PrivacyPage, {}) }), _jsx(Route, { path: "/terms", element: _jsx(TermsPage, {}) }), _jsx(Route, { path: "/cookie-policy", element: _jsx(CookiePolicyPage, {}) }), _jsx(Route, { path: "/security", element: _jsx(SecurityPage, {}) }), _jsx(Route, { path: "/about", element: _jsx(AboutPage, {}) }), _jsx(Route, { path: "/contact", element: _jsx(ContactPage, {}) }), _jsx(Route, { path: "/blog", element: _jsx(BlogPage, {}) }), _jsx(Route, { path: "/careers", element: _jsx(CareersPage, {}) }), _jsx(Route, { path: "/dashboard", element: _jsx(ProtectedRoute, { children: _jsx(DashboardPage, {}) }) }), _jsx(Route, { path: "/branches", element: _jsx(ProtectedRoute, { children: _jsx(BranchesPage, {}) }) }), _jsx(Route, { path: "/branches/:branchId/groups", element: _jsx(ProtectedRoute, { children: _jsx(GroupsPage, {}) }) }), _jsx(Route, { path: "/members", element: _jsx(ProtectedRoute, { children: _jsx(MembersPage, {}) }) }), _jsx(Route, { path: "/send-message", element: _jsx(ProtectedRoute, { children: _jsx(SendMessagePage, {}) }) }), _jsx(Route, { path: "/message-history", element: _jsx(ProtectedRoute, { children: _jsx(MessageHistoryPage, {}) }) }), _jsx(Route, { path: "/templates", element: _jsx(ProtectedRoute, { children: _jsx(TemplatesPage, {}) }) }), _jsx(Route, { path: "/recurring-messages", element: _jsx(ProtectedRoute, { children: _jsx(RecurringMessagesPage, {}) }) }), _jsx(Route, { path: "/analytics", element: _jsx(ProtectedRoute, { children: _jsx(AnalyticsPage, {}) }) }), _jsx(Route, { path: "/subscribe", element: _jsx(ProtectedRoute, { children: _jsx(SubscribePage, {}) }) }), _jsx(Route, { path: "/billing", element: _jsx(ProtectedRoute, { children: _jsx(BillingPage, {}) }) }), _jsx(Route, { path: "/checkout", element: _jsx(ProtectedRoute, { children: _jsx(CheckoutPage, {}) }) }), _jsx(Route, { path: "/admin/settings", element: _jsx(ProtectedRoute, { children: _jsx(AdminSettingsPage, {}) }) })] })] }), _jsx(Toaster, { position: "top-right" })] }) }));
 }
 export default App;
 //# sourceMappingURL=App.js.map

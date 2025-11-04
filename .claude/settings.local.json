@@ -80,7 +80,12 @@
       "Bash(timeout:*)",
       "Bash(gh api:*)",
       "Bash(psql:*)",
-      "mcp__playwright__browser_press_key"
+      "mcp__playwright__browser_press_key",
+      "Bash(for:*)",
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(head:*)",
+      "Bash(done)",
+      "Bash(git reset:*)"
     ],
     "deny": [],
     "ask": []

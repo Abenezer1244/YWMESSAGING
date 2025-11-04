@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 /**
  * POST /api/churches/:churchId/twilio/connect
- * Connect Twilio credentials
+ * Koinonia Twilio credentials
  */
 export declare function connectTwilio(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**

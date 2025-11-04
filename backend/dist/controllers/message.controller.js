@@ -20,7 +20,7 @@ function validateTwilioSignature(req, twilioAuthToken) {
 }
 /**
  * POST /api/churches/:churchId/twilio/connect
- * Connect Twilio credentials
+ * Koinonia Twilio credentials
  */
 export async function connectTwilio(req, res) {
     try {

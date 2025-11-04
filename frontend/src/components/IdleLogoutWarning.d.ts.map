@@ -1,0 +1,1 @@
+{"version":3,"file":"IdleLogoutWarning.d.ts","sourceRoot":"","sources":["IdleLogoutWarning.tsx"],"names":[],"mappings":"AAGA,UAAU,sBAAsB;IAC9B,MAAM,EAAE,OAAO,CAAC;IAChB,kBAAkB,EAAE,MAAM,CAAC;IAC3B,SAAS,EAAE,MAAM,IAAI,CAAC;IACtB,QAAQ,EAAE,MAAM,IAAI,CAAC;CACtB;AAED,wBAAgB,iBAAiB,CAAC,EAChC,MAAM,EACN,kBAAkB,EAClB,SAAS,EACT,QAAQ,GACT,EAAE,sBAAsB,kDA+CxB"}

@@ -3,6 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
+import { logRateLimitExceeded } from './utils/security-logger.js';
+import { csrfProtection } from './middleware/csrf.middleware.js';
 import authRoutes from './routes/auth.routes.js';
 import branchRoutes from './routes/branch.routes.js';
 import groupRoutes from './routes/group.routes.js';
@@ -18,15 +20,27 @@ const app = express();
 app.set('trust proxy', 1);
 // Rate Limiting Middleware Configurations
 // Auth endpoints: strict limits to prevent brute-force attacks
+// Development: more lenient, Production: strict
+const authMaxRequests = process.env.NODE_ENV === 'production' ? 5 : 50;
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // 5 requests per 15 minutes for login/register
+    max: authMaxRequests, // 5 in production, 50 in development
     message: 'Too many login/signup attempts. Please try again later.',
     standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
     legacyHeaders: false, // Disable `X-RateLimit-*` headers
+    skipSuccessfulRequests: true, // Only count failed attempts, not successful logins
+    skip: (req) => {
+        // Skip rate limiting for refresh endpoint - it's essential for session persistence
+        return req.path === '/refresh';
+    },
     keyGenerator: (req) => {
         // Use IP address for rate limiting
         return (req.ip || req.socket.remoteAddress);
+    },
+    handler: (req, res) => {
+        const ipAddress = (req.ip || req.socket.remoteAddress || 'unknown');
+        logRateLimitExceeded(req.originalUrl || req.path, ipAddress, authMaxRequests);
+        res.status(429).json({ error: 'Too many login/signup attempts. Please try again later.' });
     },
 });
 // Password reset: even stricter
@@ -37,15 +51,25 @@ const passwordResetLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
     keyGenerator: (req) => (req.ip || req.socket.remoteAddress),
+    handler: (req, res) => {
+        const ipAddress = (req.ip || req.socket.remoteAddress || 'unknown');
+        logRateLimitExceeded(req.originalUrl || req.path, ipAddress, 3);
+        res.status(429).json({ error: 'Too many password reset attempts. Please try again later.' });
+    },
 });
-// Billing/Payment endpoints: very strict to prevent fraud
+// Billing/Payment endpoints: strict to prevent fraud but allow frequent checks
 const billingLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // 5 requests per 15 minutes
-    message: 'Too many payment attempts. Please try again later.',
+    max: 30, // 30 requests per 15 minutes (includes trial checks, billing checks, etc.)
+    message: 'Too many billing requests. Please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
     keyGenerator: (req) => (req.ip || req.socket.remoteAddress),
+    handler: (req, res) => {
+        const ipAddress = (req.ip || req.socket.remoteAddress || 'unknown');
+        logRateLimitExceeded(req.originalUrl || req.path, ipAddress, 30);
+        res.status(429).json({ error: 'Too many billing requests. Please try again later.' });
+    },
 });
 // General API endpoints: moderate limits
 const apiLimiter = rateLimit({
@@ -54,6 +78,11 @@ const apiLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
     keyGenerator: (req) => (req.ip || req.socket.remoteAddress),
+    handler: (req, res) => {
+        const ipAddress = (req.ip || req.socket.remoteAddress || 'unknown');
+        logRateLimitExceeded(req.originalUrl || req.path, ipAddress, 100);
+        res.status(429).json({ error: 'Too many requests. Please try again later.' });
+    },
 });
 // Middleware
 // Enhanced security headers with Content Security Policy
@@ -117,14 +146,14 @@ app.use(cookieParser());
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
-// Webhook routes (must be before CSRF protection, no rate limiting on webhooks)
-app.use('/api', webhookRoutes);
-// Public auth routes with rate limiting (must be before CSRF protection)
-app.use('/api/auth', authLimiter, authRoutes);
-// CSRF token endpoint - GET to retrieve a fresh CSRF token (before CSRF protection)
-app.get('/api/csrf-token', (req, res) => {
+// CSRF token endpoint - GET to retrieve a fresh CSRF token
+app.get('/api/csrf-token', csrfProtection, (req, res) => {
     res.json({ csrfToken: req.csrfToken() });
 });
+// Webhook routes (must be after CSRF protection for security)
+app.use('/api', webhookRoutes);
+// Public auth routes with rate limiting
+app.use('/api/auth', authLimiter, authRoutes);
 // Protected API Routes - JWT-based, no CSRF needed
 // Apply moderate rate limiting to general API endpoints
 app.use('/api/branches', apiLimiter, branchRoutes);

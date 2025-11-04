@@ -3,28 +3,28 @@ import client from './client';
  * Get current usage
  */
 export async function getUsage() {
-    const response = await client.get('/billing/billing/usage');
+    const response = await client.get('/billing/usage');
     return response.data;
 }
 /**
  * Get current plan and limits
  */
 export async function getPlan() {
-    const response = await client.get('/billing/billing/plan');
+    const response = await client.get('/billing/plan');
     return response.data;
 }
 /**
  * Get trial status
  */
 export async function getTrial() {
-    const response = await client.get('/billing/billing/trial');
+    const response = await client.get('/billing/trial');
     return response.data;
 }
 /**
  * Subscribe to a plan
  */
 export async function subscribe(planName, paymentMethodId) {
-    const response = await client.post('/billing/billing/subscribe', {
+    const response = await client.post('/billing/subscribe', {
         planName,
         paymentMethodId,
     });
@@ -34,7 +34,7 @@ export async function subscribe(planName, paymentMethodId) {
  * Upgrade/downgrade plan
  */
 export async function upgradePlan(newPlan) {
-    const response = await client.put('/billing/billing/upgrade', {
+    const response = await client.put('/billing/upgrade', {
         newPlan,
     });
     return response.data;
@@ -43,14 +43,14 @@ export async function upgradePlan(newPlan) {
  * Cancel subscription
  */
 export async function cancelSubscription() {
-    const response = await client.delete('/billing/billing/cancel');
+    const response = await client.delete('/billing/cancel');
     return response.data;
 }
 /**
  * Create payment intent for subscription
  */
 export async function createPaymentIntent(planName) {
-    const response = await client.post('/billing/billing/payment-intent', {
+    const response = await client.post('/billing/payment-intent', {
         planName,
     });
     return response.data;

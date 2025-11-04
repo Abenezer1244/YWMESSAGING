@@ -1,5 +1,6 @@
 import { registerChurch, login, refreshAccessToken, getAdmin } from '../services/auth.service.js';
 import { verifyRefreshToken } from '../utils/jwt.utils.js';
+import { logFailedLogin } from '../utils/security-logger.js';
 /**
  * POST /api/auth/register
  */
@@ -41,12 +42,14 @@ export async function register(req, res) {
             domain: cookieDomain,
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
-        // ✅ SECURITY: Return only user info, NOT tokens (tokens are in HTTPOnly cookies)
+        // ✅ SECURITY: Return tokens for frontend Zustand state (also in HTTPOnly cookies for security)
         res.status(201).json({
             success: true,
             data: {
                 admin: result.admin,
                 church: result.church,
+                accessToken: result.accessToken,
+                refreshToken: result.refreshToken,
             },
         });
     }
@@ -63,7 +66,9 @@ export async function register(req, res) {
 export async function loginHandler(req, res) {
     try {
         const { email, password } = req.body;
+        const ipAddress = (req.ip || req.socket.remoteAddress || 'unknown');
         if (!email || !password) {
+            logFailedLogin(email || 'unknown', ipAddress, 'Missing email or password');
             res.status(400).json({ error: 'Email and password required' });
             return;
         }
@@ -85,17 +90,22 @@ export async function loginHandler(req, res) {
             domain: cookieDomain,
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
-        // ✅ SECURITY: Return only user info, NOT tokens (tokens are in HTTPOnly cookies)
+        // ✅ SECURITY: Return tokens for frontend Zustand state (also in HTTPOnly cookies for security)
         res.status(200).json({
             success: true,
             data: {
                 admin: result.admin,
                 church: result.church,
+                accessToken: result.accessToken,
+                refreshToken: result.refreshToken,
             },
         });
     }
     catch (error) {
+        const { email, password } = req.body;
+        const ipAddress = (req.ip || req.socket.remoteAddress || 'unknown');
         console.error('Login error:', error);
+        logFailedLogin(email || 'unknown', ipAddress, error.message || 'Authentication failed');
         res.status(401).json({ error: error.message || 'Login failed' });
     }
 }
@@ -133,11 +143,12 @@ export async function refreshToken(req, res) {
             domain: cookieDomain,
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
-        // ✅ SECURITY: Return success only, NOT tokens (tokens are in HTTPOnly cookies)
+        // ✅ SECURITY: Return tokens for frontend Zustand state (also in HTTPOnly cookies for security)
         res.status(200).json({
             success: true,
             data: {
-                success: true,
+                accessToken: result.accessToken,
+                refreshToken: result.refreshToken,
             },
         });
     }

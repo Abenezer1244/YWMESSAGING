@@ -31,8 +31,8 @@ export declare function getMessageHistory(churchId: string, options?: {
         deliveryRate: number;
         id: string;
         createdAt: Date;
-        content: string;
         status: string;
+        content: string;
         targetType: string;
         totalRecipients: number;
         deliveredCount: number;

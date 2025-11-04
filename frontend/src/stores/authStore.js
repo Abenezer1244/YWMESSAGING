@@ -11,10 +11,10 @@ const useAuthStore = create()((set, get) => ({
     // Actions
     setAuth: (user, church, accessToken, refreshToken, expiresIn = 3600) => {
         // ✅ SECURITY: Tokens are stored in HTTPOnly cookies by the backend
-        // Frontend keeps tokens in Zustand state only for UI purposes
-        // Tokens are NOT stored in localStorage (prevents XSS attacks)
+        // Frontend keeps tokens in Zustand state + sessionStorage for page refresh persistence
+        // sessionStorage is automatically cleared when browser closes (safer than localStorage)
         const expiresAt = Date.now() + expiresIn * 1000;
-        set({
+        const authState = {
             user,
             church,
             isLoading: false,
@@ -22,10 +22,18 @@ const useAuthStore = create()((set, get) => ({
             accessToken,
             refreshToken,
             tokenExpiresAt: expiresAt,
-        });
+        };
+        set(authState);
+        // Persist to sessionStorage so session survives page refresh
+        try {
+            sessionStorage.setItem('authState', JSON.stringify(authState));
+        }
+        catch (e) {
+            console.warn('Failed to persist auth state to sessionStorage');
+        }
     },
     clearAuth: () => {
-        // Tokens are cleared from state only (already removed from localStorage for security)
+        // Clear from state and sessionStorage
         set({
             user: null,
             church: null,
@@ -35,9 +43,15 @@ const useAuthStore = create()((set, get) => ({
             refreshToken: null,
             tokenExpiresAt: null,
         });
+        try {
+            sessionStorage.removeItem('authState');
+        }
+        catch (e) {
+            console.warn('Failed to clear auth state from sessionStorage');
+        }
     },
     logout: () => {
-        // Tokens are cleared from state and cookies (via backend logout endpoint)
+        // Tokens are cleared from state, sessionStorage, and cookies (via backend logout endpoint)
         set({
             user: null,
             church: null,
@@ -47,6 +61,12 @@ const useAuthStore = create()((set, get) => ({
             refreshToken: null,
             tokenExpiresAt: null,
         });
+        try {
+            sessionStorage.removeItem('authState');
+        }
+        catch (e) {
+            console.warn('Failed to clear auth state from sessionStorage');
+        }
     },
     isTokenExpired: () => {
         const expiresAt = get().tokenExpiresAt;

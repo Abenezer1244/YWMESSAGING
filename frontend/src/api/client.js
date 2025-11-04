@@ -32,13 +32,11 @@ client.interceptors.request.use((config) => {
     if (!(config.data instanceof FormData)) {
         config.headers['Content-Type'] = 'application/json';
     }
-
     // Add access token to Authorization header for all requests
     const state = useAuthStore.getState();
     if (state.accessToken) {
         config.headers['Authorization'] = `Bearer ${state.accessToken}`;
     }
-
     // Add CSRF token to POST, PUT, DELETE, PATCH requests
     if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(config.method?.toUpperCase() || '')) {
         if (csrfToken) {

@@ -7,21 +7,21 @@ export async function getMessageStats(options = {}) {
     if (options.days) {
         params.append('days', options.days.toString());
     }
-    const response = await client.get(`/analytics/analytics/messages?${params.toString()}`);
+    const response = await client.get(`/analytics/messages?${params.toString()}`);
     return response.data;
 }
 /**
  * Get branch comparison statistics
  */
 export async function getBranchStats() {
-    const response = await client.get('/analytics/analytics/branches');
+    const response = await client.get('/analytics/branches');
     return response.data;
 }
 /**
  * Get overall summary statistics
  */
 export async function getSummaryStats() {
-    const response = await client.get('/analytics/analytics/summary');
+    const response = await client.get('/analytics/summary');
     return response.data;
 }
 //# sourceMappingURL=analytics.js.map

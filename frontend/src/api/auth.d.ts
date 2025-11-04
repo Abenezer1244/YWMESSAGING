@@ -44,6 +44,10 @@ export declare function login(data: LoginRequest): Promise<AuthResponse>;
  */
 export declare function refreshToken(): Promise<{
     success: boolean;
+    data?: {
+        accessToken: string;
+        refreshToken: string;
+    };
 }>;
 /**
  * Get current user

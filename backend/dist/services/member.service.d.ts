@@ -21,12 +21,12 @@ export declare function getMembers(groupId: string, options?: {
     search?: string;
 }): Promise<{
     data: {
+        phone: string;
         email: string | null;
         id: string;
         firstName: string;
         lastName: string;
         createdAt: Date;
-        phone: string;
         optInSms: boolean;
     }[];
     pagination: {

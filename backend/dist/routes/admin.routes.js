@@ -5,14 +5,14 @@ const router = Router();
 // All admin routes require authentication
 router.use(authenticateToken);
 // Church profile endpoints
-router.get('/admin/profile', getProfileHandler);
-router.put('/admin/profile', updateProfileHandler);
+router.get('/profile', getProfileHandler);
+router.put('/profile', updateProfileHandler);
 // Co-admin endpoints
-router.get('/admin/co-admins', getCoAdminsHandler);
-router.post('/admin/co-admins', inviteCoAdminHandler);
-router.delete('/admin/co-admins/:adminId', removeCoAdminHandler);
+router.get('/co-admins', getCoAdminsHandler);
+router.post('/co-admins', inviteCoAdminHandler);
+router.delete('/co-admins/:adminId', removeCoAdminHandler);
 // Activity log endpoints
-router.get('/admin/activity-logs', getActivityLogsHandler);
-router.post('/admin/activity-log', logActivityHandler);
+router.get('/activity-logs', getActivityLogsHandler);
+router.post('/activity-log', logActivityHandler);
 export default router;
 //# sourceMappingURL=admin.routes.js.map

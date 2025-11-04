@@ -9,7 +9,7 @@ redisClient.on('error', (err) => {
 redisClient.on('connect', () => {
     console.log('✅ Redis connected');
 });
-// Connect to Redis
+// Koinonia to Redis
 export async function connectRedis() {
     if (!redisClient.isOpen) {
         await redisClient.connect();
