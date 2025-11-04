@@ -22,15 +22,23 @@ export async function fetchCsrfToken() {
         throw error;
     }
 }
-// Request interceptor - attach CSRF token
+// Request interceptor - attach tokens and CSRF token
 client.interceptors.request.use((config) => {
-    // ✅ SECURITY: Access tokens are in HTTPOnly cookies (sent automatically with withCredentials: true)
-    // Frontend does NOT add Authorization header (tokens are in secure cookies)
+    // ✅ SECURITY: Tokens are in HTTPOnly cookies AND Authorization header
+    // HTTPOnly cookies: secure, sent automatically by browser with withCredentials: true
+    // Authorization header: backup for cross-domain requests (cookies sometimes unreliable)
     // Set Content-Type for JSON requests (not FormData)
     // FormData requests will have Content-Type auto-set by axios with boundary
     if (!(config.data instanceof FormData)) {
         config.headers['Content-Type'] = 'application/json';
     }
+
+    // Add access token to Authorization header for all requests
+    const state = useAuthStore.getState();
+    if (state.accessToken) {
+        config.headers['Authorization'] = `Bearer ${state.accessToken}`;
+    }
+
     // Add CSRF token to POST, PUT, DELETE, PATCH requests
     if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(config.method?.toUpperCase() || '')) {
         if (csrfToken) {
