@@ -6,8 +6,8 @@ const router = Router();
 
 router.use(authenticateToken);
 
-router.get('/analytics/messages', analyticsController.getMessageStats);
-router.get('/analytics/branches', analyticsController.getBranchStats);
-router.get('/analytics/summary', analyticsController.getSummaryStats);
+router.get('/messages', analyticsController.getMessageStats);
+router.get('/branches', analyticsController.getBranchStats);
+router.get('/summary', analyticsController.getSummaryStats);
 
 export default router;

@@ -19,9 +19,9 @@ router.get('/churches/:churchId/branches', listBranches);
 router.post('/churches/:churchId/branches', createBranchHandler);
 
 // Update a branch
-router.put('/branches/:branchId', updateBranchHandler);
+router.put('/:branchId', updateBranchHandler);
 
 // Delete a branch
-router.delete('/branches/:branchId', deleteBranchHandler);
+router.delete('/:branchId', deleteBranchHandler);
 
 export default router;
