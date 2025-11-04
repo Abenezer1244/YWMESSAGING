@@ -74,9 +74,25 @@ export function RegisterPage() {
         navigate('/dashboard', { replace: true });
       }, 100);
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Registration failed. Please try again.';
-      toast.error(errorMessage);
       setIsLoading(false);
+
+      // Handle rate limit errors (429)
+      if (error.response?.status === 429) {
+        const resetTime = error.response?.headers?.['ratelimit-reset'];
+        if (resetTime) {
+          const resetMs = parseInt(resetTime) * 1000;
+          const now = Date.now();
+          const waitSeconds = Math.ceil((resetMs - now) / 1000);
+          const waitMinutes = Math.ceil(waitSeconds / 60);
+          const message = `Too many registration attempts. Please try again in ${waitMinutes} minute${waitMinutes > 1 ? 's' : ''}.`;
+          toast.error(message, { duration: 5000 });
+        } else {
+          toast.error('Too many registration attempts. Please try again in 1 hour.');
+        }
+      } else {
+        const errorMessage = error.response?.data?.error || 'Registration failed. Please try again.';
+        toast.error(errorMessage);
+      }
     }
   };
 

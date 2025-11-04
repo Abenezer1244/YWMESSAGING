@@ -52,9 +52,25 @@ export function LoginPage() {
 
     } catch (error: any) {
       console.error('Login error:', error);
-      const errorMessage = error.response?.data?.error || 'Login failed. Please try again.';
-      toast.error(errorMessage);
       setIsLoading(false);
+
+      // Handle rate limit errors (429)
+      if (error.response?.status === 429) {
+        const resetTime = error.response?.headers?.['ratelimit-reset'];
+        if (resetTime) {
+          const resetMs = parseInt(resetTime) * 1000;
+          const now = Date.now();
+          const waitSeconds = Math.ceil((resetMs - now) / 1000);
+          const waitMinutes = Math.ceil(waitSeconds / 60);
+          const message = `Too many login attempts. Please try again in ${waitMinutes} minute${waitMinutes > 1 ? 's' : ''}.`;
+          toast.error(message, { duration: 5000 });
+        } else {
+          toast.error('Too many login attempts. Please try again in 15 minutes.');
+        }
+      } else {
+        const errorMessage = error.response?.data?.error || 'Login failed. Please try again.';
+        toast.error(errorMessage);
+      }
     }
   };
 
