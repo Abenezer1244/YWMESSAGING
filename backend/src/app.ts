@@ -32,6 +32,10 @@ const authLimiter = rateLimit({
   standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
   legacyHeaders: false, // Disable `X-RateLimit-*` headers
   skipSuccessfulRequests: true, // Only count failed attempts, not successful logins
+  skip: (req) => {
+    // Skip rate limiting for refresh endpoint - it's essential for session persistence
+    return req.path === '/refresh';
+  },
   keyGenerator: (req) => {
     // Use IP address for rate limiting
     return (req.ip || req.socket.remoteAddress) as string;
