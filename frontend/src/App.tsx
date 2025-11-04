@@ -2,13 +2,15 @@ import { useEffect, useState, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { initializePostHog } from './hooks/useAnalytics';
+import { useIdleLogout } from './hooks/useIdleLogout';
 import ProtectedRoute from './components/ProtectedRoute';
+import { IdleLogoutWarning } from './components/IdleLogoutWarning';
 import { Spinner } from './components/ui';
 import useAuthStore from './stores/authStore';
 import useBranchStore from './stores/branchStore';
 import { fetchCsrfToken } from './api/client';
 import { getBranches } from './api/branches';
-import { getMe } from './api/auth';
+import { getMe, refreshToken } from './api/auth';
 import { ThemeProvider } from './contexts/ThemeContext';
 
 // Lazy load pages for route-based code splitting
@@ -47,7 +49,10 @@ const PageLoader = () => (
 function App() {
   const { isAuthenticated, church, setAuth } = useAuthStore();
   const { setBranches } = useBranchStore();
-  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Idle logout detection
+  const { showWarning, secondsUntilLogout, handleLogout, dismissWarning } = useIdleLogout();
 
   // Debug logging only in development
   if (process.env.NODE_ENV === 'development') {
@@ -70,6 +75,8 @@ function App() {
     // Restore authentication from session
     // Tokens are in HTTPOnly cookies, frontend just needs to restore user state
     setIsCheckingAuth(true);
+
+    // Try to get current user
     getMe()
       .then((response) => {
         // User has valid session, restore auth state
@@ -85,11 +92,36 @@ function App() {
           setAuth(admin, response.data.church, 'cookie-based', 'cookie-based');
         }
       })
-      .catch(() => {
-        // User doesn't have valid session, auth will remain cleared
-        // Log error details only in development
-        if (process.env.NODE_ENV === 'development') {
-          console.debug('No active session found');
+      .catch(async (error) => {
+        // getMe() failed - try refreshing token first
+        // This handles the case where cookies expired but refresh token is still valid
+        if (error.response?.status === 401) {
+          try {
+            // Try to refresh the token
+            await refreshToken();
+            // If refresh succeeded, retry getMe()
+            const retryResponse = await getMe();
+            if (retryResponse.success && retryResponse.data) {
+              const admin = {
+                id: retryResponse.data.id,
+                email: retryResponse.data.email,
+                firstName: retryResponse.data.firstName,
+                lastName: retryResponse.data.lastName,
+                role: retryResponse.data.role,
+              };
+              setAuth(admin, retryResponse.data.church, 'cookie-based', 'cookie-based');
+            }
+          } catch (refreshError) {
+            // Refresh also failed, user is not authenticated
+            if (process.env.NODE_ENV === 'development') {
+              console.debug('Token refresh failed, no active session');
+            }
+          }
+        } else {
+          // Other error, not a 401
+          if (process.env.NODE_ENV === 'development') {
+            console.debug('Session check failed:', error.message);
+          }
         }
       })
       .finally(() => {
@@ -112,6 +144,14 @@ function App() {
     <ThemeProvider>
       <Router>
         <Suspense fallback={<PageLoader />}>
+          {/* Idle logout warning modal */}
+          <IdleLogoutWarning
+            isOpen={showWarning}
+            secondsUntilLogout={secondsUntilLogout}
+            onDismiss={dismissWarning}
+            onLogout={handleLogout}
+          />
+
           <Routes>
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
