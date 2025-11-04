@@ -36,24 +36,24 @@ body {
    ============================================ */
 
 :focus-visible {
-  @apply outline-none ring-2 ring-primary-500 ring-offset-2;
+  @apply outline-none ring-2 ring-primary ring-offset-2;
 }
 
 button:focus-visible {
-  @apply outline-none ring-2 ring-primary-500 ring-offset-2 rounded-sm;
+  @apply outline-none ring-2 ring-primary ring-offset-2 rounded-sm;
 }
 
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  @apply outline-none ring-2 ring-primary-500 ring-offset-2;
+  @apply outline-none ring-2 ring-primary ring-offset-2;
 }
 
 .dark button:focus-visible,
 .dark input:focus-visible,
 .dark textarea:focus-visible,
 .dark select:focus-visible {
-  @apply ring-offset-secondary-900;
+  @apply ring-offset-background;
 }
 
 /* ============================================

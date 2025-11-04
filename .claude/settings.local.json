@@ -52,7 +52,8 @@
       "Bash(timeout 30 npx tsc:*)",
       "Bash(npx shadcn-ui@latest add:*)",
       "Bash(powershell -Command:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "mcp__playwright__browser_evaluate"
     ],
     "deny": [],
     "ask": []
