@@ -62,18 +62,18 @@ const passwordResetLimiter = rateLimit({
   },
 });
 
-// Billing/Payment endpoints: very strict to prevent fraud
+// Billing/Payment endpoints: strict to prevent fraud but allow frequent checks
 const billingLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 requests per 15 minutes
-  message: 'Too many payment attempts. Please try again later.',
+  max: 30, // 30 requests per 15 minutes (includes trial checks, billing checks, etc.)
+  message: 'Too many billing requests. Please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => (req.ip || req.socket.remoteAddress) as string,
   handler: (req, res) => {
     const ipAddress = (req.ip || req.socket.remoteAddress || 'unknown') as string;
-    logRateLimitExceeded(req.originalUrl || req.path, ipAddress, 5);
-    res.status(429).json({ error: 'Too many payment attempts. Please try again later.' });
+    logRateLimitExceeded(req.originalUrl || req.path, ipAddress, 30);
+    res.status(429).json({ error: 'Too many billing requests. Please try again later.' });
   },
 });
 
