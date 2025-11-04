@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import useAuthStore from '../../stores/authStore';
+import useBranchStore from '../../stores/branchStore';
 import useGroupStore from '../../stores/groupStore';
 import { getMembers, Member } from '../../api/members';
+import { getBranches } from '../../api/branches';
+import { getGroups } from '../../api/groups';
 import { AddMemberModal } from '../../components/members/AddMemberModal';
 import { ImportCSVModal } from '../../components/members/ImportCSVModal';
 import BackButton from '../../components/BackButton';
@@ -12,8 +16,12 @@ import Input from '../../components/ui/Input';
 import { Spinner } from '../../components/ui';
 
 export function MembersPage() {
-  const { groups, setLoading: setGroupsLoading } = useGroupStore();
+  const auth = useAuthStore();
+  const { branches } = useBranchStore();
+  const { groups, setGroups } = useGroupStore();
   const [searchParams] = useSearchParams();
+  const [isInitialLoading, setIsInitialLoading] = useState(!groups.length);
+
   const groupId = searchParams.get('groupId') || groups[0]?.id || '';
 
   const [members, setMembers] = useState<Member[]>([]);
@@ -27,6 +35,26 @@ export function MembersPage() {
   const limit = 50;
   const pages = Math.ceil(total / limit);
   const currentGroup = groups.find((g) => g.id === groupId);
+
+  // Load branches and groups on mount if not already loaded
+  useEffect(() => {
+    if (!groups.length && auth.church?.id && branches.length > 0) {
+      const loadGroupsForFirstBranch = async () => {
+        try {
+          const firstBranch = branches[0];
+          const branchGroups = await getGroups(firstBranch.id);
+          setGroups(branchGroups);
+        } catch (error) {
+          console.error('Failed to load groups:', error);
+        } finally {
+          setIsInitialLoading(false);
+        }
+      };
+      loadGroupsForFirstBranch();
+    } else {
+      setIsInitialLoading(false);
+    }
+  }, [auth.church?.id, branches, groups.length, setGroups]);
 
   // Debounce search - wait 500ms after user stops typing before searching
   useEffect(() => {
@@ -68,14 +96,19 @@ export function MembersPage() {
     setIsImportModalOpen(false);
   };
 
-  if (!currentGroup) {
+  // Show loading spinner while initially loading groups
+  if (isInitialLoading || !currentGroup) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
-        <Card variant="default" className="text-center max-w-md bg-muted border-border">
-          <p className="text-foreground/80 text-lg">
-            No group selected. Create or select a group first.
-          </p>
-        </Card>
+        {isInitialLoading ? (
+          <Spinner size="lg" text="Loading groups..." />
+        ) : (
+          <Card variant="default" className="text-center max-w-md bg-muted border-border">
+            <p className="text-foreground/80 text-lg">
+              No group selected. Create or select a group first.
+            </p>
+          </Card>
+        )}
       </div>
     );
   }
