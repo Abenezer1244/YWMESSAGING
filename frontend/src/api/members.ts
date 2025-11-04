@@ -70,7 +70,14 @@ export async function importMembers(
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await client.post(`/groups/groups/${groupId}/members/import`, formData);
+  // Note: Do NOT set Content-Type header - let axios set it with the boundary
+  // Authorization header is automatically added by the client interceptor
+  const response = await client.post(`/groups/groups/${groupId}/members/import`, formData, {
+    headers: {
+      // Let axios auto-set Content-Type with multipart boundary
+      // 'Content-Type': 'multipart/form-data' - DO NOT SET, let axios handle it
+    },
+  });
 
   return response.data.data;
 }
