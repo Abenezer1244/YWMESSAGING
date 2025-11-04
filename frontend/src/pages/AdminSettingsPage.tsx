@@ -1,13 +1,12 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Settings, Loader } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getProfile, updateProfile } from '../api/admin';
 import CoAdminPanel from '../components/admin/CoAdminPanel';
 import ActivityLogsPanel from '../components/admin/ActivityLogsPanel';
-import BackButton from '../components/BackButton';
-import Button from '../components/ui/Button';
-import Card from '../components/ui/Card';
+import { SoftLayout, SoftCard, SoftButton } from '../components/SoftUI';
 import Input from '../components/ui/Input';
-import { Spinner } from '../components/ui';
 
 // Email validation regex (RFC 5322 simplified)
 const isValidEmail = (email: string): boolean => {
@@ -97,138 +96,174 @@ export function AdminSettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6 transition-colors duration-normal">
-      <div className="max-w-7xl mx-auto">
-        {/* Back Button */}
-        <div className="mb-6">
-          <BackButton variant="ghost" />
-        </div>
-
+    <SoftLayout>
+      <div className="px-4 md:px-8 py-8 w-full">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">⚙️ Admin Settings</h1>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8"
+        >
+          <h1 className="text-4xl font-bold text-foreground mb-2">
+            <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">Settings</span>
+          </h1>
           <p className="text-muted-foreground">Manage your church account and permissions</p>
-        </div>
+        </motion.div>
 
         {/* Tab Navigation */}
-        <Card variant="default" className="mb-8 border border-border bg-muted">
-          <div className="border-b border-border">
-            <div className="flex">
-              <button
-                onClick={() => setActiveTab('profile')}
-                className={`flex-1 px-4 py-4 text-center font-medium border-b-2 transition ${
-                  activeTab === 'profile'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                ⛪ Church Profile
-              </button>
-              <button
-                onClick={() => setActiveTab('coadmins')}
-                className={`flex-1 px-4 py-4 text-center font-medium border-b-2 transition ${
-                  activeTab === 'coadmins'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                👥 Co-Admins
-              </button>
-              <button
-                onClick={() => setActiveTab('logs')}
-                className={`flex-1 px-4 py-4 text-center font-medium border-b-2 transition ${
-                  activeTab === 'logs'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                📋 Activity Logs
-              </button>
-            </div>
-          </div>
-
-          {/* Tab Content */}
-          <div className="p-8">
-            {/* Church Profile Tab */}
-            {activeTab === 'profile' && (
-              <div>
-                <h2 className="text-2xl font-bold text-foreground mb-6">Church Profile</h2>
-
-                {isLoading ? (
-                  <div className="flex justify-center py-12">
-                    <Spinner size="lg" text="Loading profile..." />
-                  </div>
-                ) : (
-                  <form onSubmit={handleSaveProfile} className="max-w-2xl">
-                    {/* Church Name */}
-                    <Input
-                      label="⛪ Church Name"
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                      placeholder="Your church name"
-                      className="mb-6"
-                    />
-
-                    {/* Email */}
-                    <Input
-                      label="📧 Email Address"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                      placeholder="contact@church.com"
-                      className="mb-6"
-                    />
-
-                    {/* Account Info */}
-                    {profile && (
-                      <Card variant="highlight" className="mb-6 bg-primary/10 border border-primary/30">
-                        <h3 className="font-semibold text-foreground mb-3">Account Information</h3>
-                        <div className="space-y-2 text-sm">
-                          <p>
-                            <span className="text-muted-foreground">Status:</span>{' '}
-                            <span className="font-medium text-foreground">
-                              {profile.subscriptionStatus}
-                            </span>
-                          </p>
-                          <p>
-                            <span className="text-muted-foreground">Created:</span>{' '}
-                            <span className="font-medium text-foreground">
-                              {new Date(profile.createdAt).toLocaleDateString()}
-                            </span>
-                          </p>
-                        </div>
-                      </Card>
-                    )}
-
-                    {/* Save Button */}
-                    <Button
-                      type="submit"
-                      variant="primary"
-                      size="md"
-                      isLoading={isSaving}
-                      disabled={isSaving}
-                    >
-                      💾 Save Changes
-                    </Button>
-                  </form>
-                )}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="mb-8"
+        >
+          <SoftCard>
+            <div className="border-b border-border/40">
+              <div className="flex flex-wrap">
+                {(['profile', 'coadmins', 'logs'] as const).map((tab, idx) => (
+                  <motion.button
+                    key={tab}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    onClick={() => setActiveTab(tab)}
+                    className={`flex-1 min-w-[120px] px-4 py-4 text-center font-medium border-b-2 transition ${
+                      activeTab === tab
+                        ? 'border-primary text-primary'
+                        : 'border-transparent text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {tab === 'profile' && 'Church Profile'}
+                    {tab === 'coadmins' && 'Co-Admins'}
+                    {tab === 'logs' && 'Activity Logs'}
+                  </motion.button>
+                ))}
               </div>
-            )}
+            </div>
 
-            {/* Co-Admins Tab */}
-            {activeTab === 'coadmins' && <CoAdminPanel />}
+            {/* Tab Content */}
+            <div className="p-8">
+              {/* Church Profile Tab */}
+              {activeTab === 'profile' && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <h2 className="text-2xl font-bold text-foreground mb-6">Church Profile</h2>
 
-            {/* Activity Logs Tab */}
-            {activeTab === 'logs' && <ActivityLogsPanel />}
-          </div>
-        </Card>
+                  {isLoading ? (
+                    <div className="flex justify-center py-12">
+                      <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity }}>
+                        <Loader className="w-8 h-8 text-primary" />
+                      </motion.div>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleSaveProfile} className="max-w-2xl">
+                      {/* Church Name */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="mb-6"
+                      >
+                        <Input
+                          label="Church Name"
+                          type="text"
+                          value={formData.name}
+                          onChange={(e) =>
+                            setFormData({ ...formData, name: e.target.value })
+                          }
+                          placeholder="Your church name"
+                        />
+                      </motion.div>
+
+                      {/* Email */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.15 }}
+                        className="mb-6"
+                      >
+                        <Input
+                          label="Email Address"
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) =>
+                            setFormData({ ...formData, email: e.target.value })
+                          }
+                          placeholder="contact@church.com"
+                        />
+                      </motion.div>
+
+                      {/* Account Info */}
+                      {profile && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2 }}
+                          className="mb-6"
+                        >
+                          <SoftCard variant="gradient">
+                            <h3 className="font-semibold text-foreground mb-3">Account Information</h3>
+                            <div className="space-y-2 text-sm">
+                              <p>
+                                <span className="text-muted-foreground">Status:</span>{' '}
+                                <span className="font-medium text-foreground">
+                                  {profile.subscriptionStatus}
+                                </span>
+                              </p>
+                              <p>
+                                <span className="text-muted-foreground">Created:</span>{' '}
+                                <span className="font-medium text-foreground">
+                                  {new Date(profile.createdAt).toLocaleDateString()}
+                                </span>
+                              </p>
+                            </div>
+                          </SoftCard>
+                        </motion.div>
+                      )}
+
+                      {/* Save Button */}
+                      <SoftButton
+                        type="submit"
+                        variant="primary"
+                        disabled={isSaving}
+                      >
+                        {isSaving ? 'Saving...' : 'Save Changes'}
+                      </SoftButton>
+                    </form>
+                  )}
+                </motion.div>
+              )}
+
+              {/* Co-Admins Tab */}
+              {activeTab === 'coadmins' && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <CoAdminPanel />
+                </motion.div>
+              )}
+
+              {/* Activity Logs Tab */}
+              {activeTab === 'logs' && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <ActivityLogsPanel />
+                </motion.div>
+              )}
+            </div>
+          </SoftCard>
+        </motion.div>
       </div>
-    </div>
+    </SoftLayout>
   );
 }
 

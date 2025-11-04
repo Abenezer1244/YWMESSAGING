@@ -10,6 +10,7 @@ interface SoftButtonProps {
   fullWidth?: boolean;
   icon?: ReactNode;
   className?: string;
+  type?: 'button' | 'submit' | 'reset';
 }
 
 export function SoftButton({
@@ -21,6 +22,7 @@ export function SoftButton({
   fullWidth = false,
   icon,
   className = '',
+  type = 'button',
 }: SoftButtonProps) {
   const baseClasses =
     'font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2';
@@ -41,6 +43,7 @@ export function SoftButton({
 
   return (
     <motion.button
+      type={type}
       whileHover={!disabled ? { scale: 1.02 } : {}}
       whileTap={!disabled ? { scale: 0.98 } : {}}
       onClick={onClick}

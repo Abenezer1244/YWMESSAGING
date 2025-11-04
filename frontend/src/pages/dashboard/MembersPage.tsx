@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Users, Trash2, Loader } from 'lucide-react';
 import toast from 'react-hot-toast';
 import useAuthStore from '../../stores/authStore';
 import useBranchStore from '../../stores/branchStore';
@@ -9,9 +11,7 @@ import { getBranches } from '../../api/branches';
 import { getGroups } from '../../api/groups';
 import { AddMemberModal } from '../../components/members/AddMemberModal';
 import { ImportCSVModal } from '../../components/members/ImportCSVModal';
-import BackButton from '../../components/BackButton';
-import Button from '../../components/ui/Button';
-import Card from '../../components/ui/Card';
+import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
 import Input from '../../components/ui/Input';
 import { Spinner } from '../../components/ui';
 
@@ -118,44 +118,50 @@ export function MembersPage() {
   // Show loading spinner while initially loading groups
   if (isInitialLoading || !currentGroup) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6">
-        {isInitialLoading ? (
-          <Spinner size="lg" text="Loading groups..." />
-        ) : (
-          <Card variant="default" className="text-center max-w-md bg-muted border-border">
-            <p className="text-foreground/80 text-lg">
-              No group selected. Create or select a group first.
-            </p>
-          </Card>
-        )}
-      </div>
+      <SoftLayout>
+        <div className="min-h-screen bg-background flex items-center justify-center p-6">
+          {isInitialLoading ? (
+            <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity }}>
+              <Loader className="w-8 h-8 text-primary" />
+            </motion.div>
+          ) : (
+            <SoftCard className="text-center max-w-md">
+              <p className="text-foreground/80 text-lg">
+                No group selected. Create or select a group first.
+              </p>
+            </SoftCard>
+          )}
+        </div>
+      </SoftLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background p-6 transition-colors duration-normal">
-      <div className="max-w-7xl mx-auto">
-        {/* Back Button */}
-        <div className="mb-6">
-          <BackButton variant="ghost" />
-        </div>
-
+    <SoftLayout>
+      <div className="px-4 md:px-8 py-8 w-full">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8"
+        >
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
             <div>
-              <h1 className="text-4xl font-bold text-foreground mb-2">👤 Members</h1>
-              <p className="text-foreground/80">
+              <h1 className="text-4xl font-bold text-foreground mb-2">
+                <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">Members</span>
+              </h1>
+              <p className="text-muted-foreground">
                 {currentGroup.name} • {total} members
               </p>
             </div>
-            <Button
+            <SoftButton
               variant="primary"
               size="lg"
               onClick={() => setIsAddModalOpen(true)}
             >
-              + Add Member
-            </Button>
+              Add Member
+            </SoftButton>
           </div>
 
           <div className="flex gap-4 items-center flex-wrap">
@@ -169,102 +175,110 @@ export function MembersPage() {
               }}
               className="flex-1 min-w-xs"
             />
-            <Button
-              variant="primary"
+            <SoftButton
+              variant="secondary"
               size="md"
               onClick={() => setIsImportModalOpen(true)}
             >
-              📥 Import CSV
-            </Button>
+              Import CSV
+            </SoftButton>
           </div>
-        </div>
+        </motion.div>
 
         {/* Main Content */}
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Spinner size="lg" text="Loading members..." />
+            <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity }}>
+              <Loader className="w-8 h-8 text-primary" />
+            </motion.div>
           </div>
         ) : members.length === 0 ? (
-          <Card variant="highlight" className="text-center py-16 bg-muted border-border">
+          <SoftCard className="text-center py-16">
             <div className="mb-6">
-              <span className="text-6xl">👤</span>
+              <Users className="w-16 h-16 text-muted-foreground/50 mx-auto" />
             </div>
             <h2 className="text-2xl font-bold text-foreground mb-3">
               {search ? 'No Results' : 'No Members Yet'}
             </h2>
-            <p className="text-foreground/80 mb-6 max-w-md mx-auto">
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
               {search ? 'No members found matching your search' : 'Add your first member to get started'}
             </p>
             {!search && (
-              <Button
+              <SoftButton
                 variant="primary"
-                size="md"
                 onClick={() => setIsAddModalOpen(true)}
               >
                 Add First Member
-              </Button>
+              </SoftButton>
             )}
-          </Card>
+          </SoftCard>
         ) : (
           <>
             {/* Table */}
-            <Card variant="default" className="overflow-hidden bg-muted border-border">
+            <SoftCard variant="default" className="overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full">
-                  <thead className="bg-card border-b border-border">
+                  <thead className="border-b border-border/40">
                     <tr>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
                         Name
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
                         Phone
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
                         Email
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
                         Added
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border">
-                    {members.map((member) => (
-                      <tr key={member.id} className="hover:bg-muted/50 transition-colors duration-normal">
+                  <tbody className="divide-y divide-border/40">
+                    {members.map((member, idx) => (
+                      <motion.tr
+                        key={member.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.05 }}
+                        className="hover:bg-muted/30 transition-colors duration-normal"
+                      >
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-foreground">
                             {member.firstName} {member.lastName}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-foreground/80">{member.phone}</div>
+                          <div className="text-sm text-muted-foreground">{member.phone}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-foreground/80">
+                          <div className="text-sm text-muted-foreground">
                             {member.email || '—'}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
-                            className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${
+                            className={`inline-block px-3 py-1 text-xs font-semibold rounded-lg ${
                               member.optInSms
                                 ? 'bg-green-500/20 text-green-400'
                                 : 'bg-red-500/20 text-red-400'
                             }`}
                           >
-                            {member.optInSms ? '✅ Opted In' : '❌ Opted Out'}
+                            {member.optInSms ? 'Opted In' : 'Opted Out'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground/80">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                           {new Date(member.createdAt).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <button
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
                             onClick={() =>
                               handleDeleteMember(
                                 member.id,
@@ -272,40 +286,39 @@ export function MembersPage() {
                               )
                             }
                             disabled={deletingMemberId === member.id}
-                            className="text-red-400 hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors"
+                            className="text-red-400 hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors flex items-center gap-2"
                           >
+                            <Trash2 className="w-4 h-4" />
                             {deletingMemberId === member.id ? 'Removing...' : 'Remove'}
-                          </button>
+                          </motion.button>
                         </td>
-                      </tr>
+                      </motion.tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-            </Card>
+            </SoftCard>
 
             {/* Pagination */}
             {pages > 1 && (
-              <div className="mt-6 flex justify-center gap-2">
-                <Button
+              <div className="mt-8 flex justify-center gap-2 items-center">
+                <SoftButton
                   variant="secondary"
-                  size="md"
                   onClick={() => setPage(Math.max(1, page - 1))}
                   disabled={page === 1}
                 >
-                  ← Previous
-                </Button>
-                <div className="px-4 py-2 text-foreground/80 font-medium">
+                  Previous
+                </SoftButton>
+                <div className="px-4 py-2 text-muted-foreground font-medium">
                   Page {page} of {pages}
                 </div>
-                <Button
+                <SoftButton
                   variant="secondary"
-                  size="md"
                   onClick={() => setPage(Math.min(pages, page + 1))}
                   disabled={page === pages}
                 >
-                  Next →
-                </Button>
+                  Next
+                </SoftButton>
               </div>
             )}
           </>
@@ -326,7 +339,7 @@ export function MembersPage() {
         onClose={() => setIsImportModalOpen(false)}
         onSuccess={handleImportSuccess}
       />
-    </div>
+    </SoftLayout>
   );
 }
 
