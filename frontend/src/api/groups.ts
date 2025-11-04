@@ -38,7 +38,7 @@ export async function createGroup(
  * Update a group
  */
 export async function updateGroup(groupId: string, data: UpdateGroupData): Promise<Group> {
-  const response = await client.put(`/groups/groups/${groupId}`, data);
+  const response = await client.put(`/groups/${groupId}`, data);
   return response.data.data;
 }
 
@@ -46,6 +46,6 @@ export async function updateGroup(groupId: string, data: UpdateGroupData): Promi
  * Delete a group
  */
 export async function deleteGroup(groupId: string): Promise<any> {
-  const response = await client.delete(`/groups/groups/${groupId}`);
+  const response = await client.delete(`/groups/${groupId}`);
   return response.data.data;
 }
