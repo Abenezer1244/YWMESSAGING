@@ -32,7 +32,20 @@ export function parseCSV(fileBuffer: Buffer): MemberCSVRow[] {
   const result = Papa.parse<MemberCSVRow>(csvString, {
     header: true,
     skipEmptyLines: true,
-    transformHeader: (h) => h.trim().toLowerCase(),
+    transformHeader: (h) => {
+      // Normalize header to camelCase format expected by validation
+      const trimmed = h.trim();
+      const lower = trimmed.toLowerCase();
+
+      // Map common CSV header variations to camelCase field names
+      if (lower === 'firstname' || lower === 'first name' || lower === 'first_name') return 'firstName';
+      if (lower === 'lastname' || lower === 'last name' || lower === 'last_name') return 'lastName';
+      if (lower === 'phone' || lower === 'phone number') return 'phone';
+      if (lower === 'email' || lower === 'email address') return 'email';
+
+      // Return original if not recognized (for case-sensitive usage)
+      return trimmed;
+    },
   });
 
   if (result.errors.length > 0) {
