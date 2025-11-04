@@ -23,19 +23,22 @@ app.set('trust proxy', 1);
 
 // Rate Limiting Middleware Configurations
 // Auth endpoints: strict limits to prevent brute-force attacks
+// Development: more lenient, Production: strict
+const authMaxRequests = process.env.NODE_ENV === 'production' ? 5 : 50;
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 requests per 15 minutes for login/register
+  max: authMaxRequests, // 5 in production, 50 in development
   message: 'Too many login/signup attempts. Please try again later.',
   standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
   legacyHeaders: false, // Disable `X-RateLimit-*` headers
+  skipSuccessfulRequests: true, // Only count failed attempts, not successful logins
   keyGenerator: (req) => {
     // Use IP address for rate limiting
     return (req.ip || req.socket.remoteAddress) as string;
   },
   handler: (req, res) => {
     const ipAddress = (req.ip || req.socket.remoteAddress || 'unknown') as string;
-    logRateLimitExceeded(req.originalUrl || req.path, ipAddress, 5);
+    logRateLimitExceeded(req.originalUrl || req.path, ipAddress, authMaxRequests);
     res.status(429).json({ error: 'Too many login/signup attempts. Please try again later.' });
   },
 });
