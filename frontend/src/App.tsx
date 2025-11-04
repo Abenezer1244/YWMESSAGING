@@ -90,41 +90,48 @@ function App() {
           };
           // Tokens come from HTTPOnly cookies, only pass placeholder tokens for state
           setAuth(admin, response.data.church, 'cookie-based', 'cookie-based');
+          setIsCheckingAuth(false);
         }
       })
       .catch(async (error) => {
-        // getMe() failed - try refreshing token first
-        // This handles the case where cookies expired but refresh token is still valid
-        if (error.response?.status === 401) {
-          try {
-            // Try to refresh the token
-            await refreshToken();
-            // If refresh succeeded, retry getMe()
-            const retryResponse = await getMe();
-            if (retryResponse.success && retryResponse.data) {
-              const admin = {
-                id: retryResponse.data.id,
-                email: retryResponse.data.email,
-                firstName: retryResponse.data.firstName,
-                lastName: retryResponse.data.lastName,
-                role: retryResponse.data.role,
-              };
-              setAuth(admin, retryResponse.data.church, 'cookie-based', 'cookie-based');
-            }
-          } catch (refreshError) {
-            // Refresh also failed, user is not authenticated
-            if (process.env.NODE_ENV === 'development') {
-              console.debug('Token refresh failed, no active session');
-            }
-          }
-        } else {
-          // Other error, not a 401
+        // getMe() failed - try refreshing token to extend session
+        // This handles case where access token expired but refresh token is valid
+        try {
           if (process.env.NODE_ENV === 'development') {
-            console.debug('Session check failed:', error.message);
+            console.debug('getMe() failed, attempting token refresh...', error.response?.status);
           }
+
+          // Try to refresh the token
+          const refreshResponse = await refreshToken();
+
+          if (!refreshResponse.success) {
+            throw new Error('Token refresh failed');
+          }
+
+          // Refresh succeeded - tokens now updated in cookies + Zustand store (by interceptor)
+          // Now retry getMe() with fresh token
+          const retryResponse = await getMe();
+          if (retryResponse.success && retryResponse.data) {
+            const admin = {
+              id: retryResponse.data.id,
+              email: retryResponse.data.email,
+              firstName: retryResponse.data.firstName,
+              lastName: retryResponse.data.lastName,
+              role: retryResponse.data.role,
+            };
+            // Use refreshed tokens if available, otherwise use cookies
+            const newAccessToken = refreshResponse.data?.accessToken || 'cookie-based';
+            const newRefreshToken = refreshResponse.data?.refreshToken || 'cookie-based';
+            setAuth(admin, retryResponse.data.church, newAccessToken, newRefreshToken);
+          }
+        } catch (err) {
+          // Both getMe() and refresh failed - user is not authenticated
+          if (process.env.NODE_ENV === 'development') {
+            console.debug('Session restoration failed, user not authenticated', err);
+          }
+          // Let auth remain logged out
         }
-      })
-      .finally(() => {
+
         setIsCheckingAuth(false);
       });
   }, [setAuth]);

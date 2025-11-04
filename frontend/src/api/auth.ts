@@ -57,6 +57,10 @@ export async function login(data: LoginRequest): Promise<AuthResponse> {
  */
 export async function refreshToken(): Promise<{
   success: boolean;
+  data?: {
+    accessToken: string;
+    refreshToken: string;
+  };
 }> {
   const response = await client.post('/auth/refresh', {});
   return response.data;
