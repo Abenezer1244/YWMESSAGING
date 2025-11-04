@@ -117,7 +117,7 @@ export function RegisterPage() {
                 placeholder="John"
                 disabled={isLoading}
                 error={errors.firstName?.message}
-                className="bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white"
+                className="bg-muted border-border text-foreground"
                 {...register('firstName', { required: 'First name is required' })}
               />
 
@@ -126,7 +126,7 @@ export function RegisterPage() {
                 placeholder="Doe"
                 disabled={isLoading}
                 error={errors.lastName?.message}
-                className="bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white"
+                className="bg-muted border-border text-foreground"
                 {...register('lastName', { required: 'Last name is required' })}
               />
             </div>
@@ -196,7 +196,7 @@ export function RegisterPage() {
               fullWidth
               isLoading={isLoading}
               disabled={isLoading}
-              className="font-semibold mt-6 bg-accent-500 hover:bg-accent-400 text-slate-950"
+              className="font-semibold mt-6 bg-primary hover:bg-primary/90 text-background"
             >
               {isLoading ? 'Creating account...' : 'Create Account'}
             </Button>

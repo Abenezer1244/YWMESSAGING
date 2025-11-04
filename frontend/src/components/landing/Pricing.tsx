@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+﻿import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Check, Zap } from 'lucide-react';
 import useAuthStore from '../../stores/authStore';
@@ -97,11 +97,11 @@ export default function Pricing() {
   };
 
   return (
-    <section id="pricing" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-950 overflow-hidden transition-colors duration-normal">
+    <section id="pricing" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-background overflow-hidden transition-colors duration-normal">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          className="absolute top-0 right-1/3 w-96 h-96 bg-accent-500 opacity-10 rounded-full blur-3xl"
+          className="absolute top-0 right-1/3 w-96 h-96 bg-primary-500 opacity-10 rounded-full blur-3xl"
           animate={{
             y: [0, -30, 0],
             x: [0, 20, 0],
@@ -113,7 +113,7 @@ export default function Pricing() {
           }}
         />
         <motion.div
-          className="absolute bottom-0 left-1/4 w-80 h-80 bg-accent-400 opacity-15 rounded-full blur-3xl"
+          className="absolute bottom-0 left-1/4 w-80 h-80 bg-primary-400 opacity-15 rounded-full blur-3xl"
           animate={{
             y: [0, 25, 0],
             x: [0, -15, 0],
@@ -136,10 +136,10 @@ export default function Pricing() {
           transition={{ duration: 0.8 }}
           viewport={{ once: true, margin: '-100px' }}
         >
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white mb-4 leading-tight tracking-tight">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground dark:text-foreground mb-4 leading-tight tracking-tight">
             Simple, Transparent{' '}
             <motion.span
-              className="bg-gradient-to-r from-accent-400 to-accent-500 bg-clip-text text-transparent inline-block"
+              className="bg-gradient-to-r from-primary-400 to-primary-500 bg-clip-text text-transparent inline-block"
               animate={{
                 backgroundPosition: ['0%', '100%'],
               }}
@@ -156,7 +156,7 @@ export default function Pricing() {
             </motion.span>
           </h2>
           <motion.p
-            className="text-lg text-slate-700 dark:text-slate-300 max-w-3xl mx-auto font-light leading-relaxed"
+            className="text-lg text-foreground/80 dark:text-muted-foreground max-w-3xl mx-auto font-light leading-relaxed"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -184,13 +184,13 @@ export default function Pricing() {
             >
               {/* Glow effect for highlighted card */}
               {plan.highlight && (
-                <div className="absolute -inset-1 bg-gradient-to-r from-accent-500 via-accent-400 to-accent-300 rounded-lg blur-2xl opacity-30 group-hover:opacity-50 transition duration-500 animate-pulse -z-10"></div>
+                <div className="absolute -inset-1 bg-gradient-to-r from-primary-500 via-primary-400 to-primary-300 rounded-lg blur-2xl opacity-30 group-hover:opacity-50 transition duration-500 animate-pulse -z-10"></div>
               )}
 
               <div className={`relative bg-gradient-to-br rounded-lg p-8 border transition-all duration-300 overflow-hidden h-full ${
                 plan.highlight
-                  ? 'from-slate-200/60 dark:from-slate-800/60 to-slate-300/60 dark:to-slate-900/60 border-accent-400/50 shadow-2xl'
-                  : 'from-slate-100/50 dark:from-slate-900/50 to-slate-150/50 dark:to-slate-950/50 border-slate-300/50 dark:border-slate-700/50 hover:border-accent-400/50'
+                  ? 'from-slate-200/60 dark:from-slate-800/60 to-slate-300/60 dark:to-slate-900/60 border-primary-400/50 shadow-2xl'
+                  : 'from-slate-100/50 dark:from-slate-900/50 to-slate-150/50 dark:to-slate-950/50 border-border/50 dark:border-border/50 hover:border-primary-400/50'
               }`}>
                 {/* Background gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-300/20 dark:from-slate-900/20 to-transparent pointer-events-none"></div>
@@ -198,7 +198,7 @@ export default function Pricing() {
                 {/* Popular Badge */}
                 {plan.highlight && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-                    <div className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-accent-500 to-accent-400 rounded-full text-slate-950 text-xs font-semibold">
+                    <div className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-primary-500 to-primary-400 rounded-full text-background text-xs font-semibold">
                       <Zap className="w-3 h-3" />
                       Most Popular
                     </div>
@@ -208,19 +208,19 @@ export default function Pricing() {
                 {/* Content */}
                 <div className="relative z-10">
                   <div className="text-center mb-8 pt-4">
-                    <h3 className="text-2xl font-semibold text-slate-900 dark:text-white mb-3">{plan.name}</h3>
+                    <h3 className="text-2xl font-semibold text-foreground dark:text-foreground mb-3">{plan.name}</h3>
                     <div className="mb-4">
-                      <span className="text-5xl font-bold bg-gradient-to-r from-accent-400 to-accent-500 bg-clip-text text-transparent">{plan.price}</span>
-                      <span className="text-slate-700 dark:text-slate-300 text-sm">/month</span>
+                      <span className="text-5xl font-bold bg-gradient-to-r from-primary-400 to-primary-500 bg-clip-text text-transparent">{plan.price}</span>
+                      <span className="text-foreground/80 dark:text-muted-foreground text-sm">/month</span>
                     </div>
-                    <p className="text-slate-700 dark:text-slate-300 text-sm">{plan.description}</p>
+                    <p className="text-foreground/80 dark:text-muted-foreground text-sm">{plan.description}</p>
                   </div>
 
                   <ul className="space-y-3 mb-8">
                     {plan.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-start gap-3">
-                        <Check className="w-5 h-5 text-accent-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-slate-700 dark:text-slate-300 text-sm">{feature}</span>
+                        <Check className="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-foreground/80 dark:text-muted-foreground text-sm">{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -230,7 +230,7 @@ export default function Pricing() {
                     size="md"
                     onClick={handleStartTrial}
                     fullWidth
-                    className={plan.highlight ? 'bg-gradient-to-r from-accent-500 to-accent-400 hover:from-accent-400 hover:to-accent-300 text-slate-950' : ''}
+                    className={plan.highlight ? 'bg-gradient-to-r from-primary-500 to-primary-400 hover:from-primary-400 hover:to-primary-300 text-background' : ''}
                   >
                     {plan.ctaText}
                   </Button>
@@ -248,12 +248,12 @@ export default function Pricing() {
           transition={{ duration: 0.8, delay: 0.3 }}
           viewport={{ once: true }}
         >
-          <p className="text-slate-700 dark:text-slate-300 mb-4 text-sm">
+          <p className="text-foreground/80 dark:text-muted-foreground mb-4 text-sm">
             All plans include: Secure messaging, message history, reply inbox, and mobile access
           </p>
-          <p className="text-sm text-slate-700 dark:text-slate-300">
+          <p className="text-sm text-foreground/80 dark:text-muted-foreground">
             Need a custom plan?{' '}
-            <a href="mailto:support@connect.com" className="text-accent-400 hover:text-accent-300 font-semibold transition-colors">
+            <a href="mailto:support@connect.com" className="text-primary-400 hover:text-primary-300 font-semibold transition-colors">
               Contact us
             </a>
           </p>
@@ -262,4 +262,5 @@ export default function Pricing() {
     </section>
   );
 }
+
 

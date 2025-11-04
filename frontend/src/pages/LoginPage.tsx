@@ -103,7 +103,7 @@ export function LoginPage() {
                     message: 'Invalid email format',
                   },
                 })}
-                className="bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white"
+                className="bg-muted border-border text-foreground"
               />
             </div>
 
@@ -122,7 +122,7 @@ export function LoginPage() {
                     message: 'Password must be at least 8 characters',
                   },
                 })}
-                className="bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white"
+                className="bg-muted border-border text-foreground"
               />
             </div>
 
@@ -134,7 +134,7 @@ export function LoginPage() {
               fullWidth
               isLoading={isLoading}
               disabled={isLoading}
-              className="font-semibold mt-6 bg-accent-500 hover:bg-accent-400 text-slate-950"
+              className="font-semibold mt-6 bg-primary hover:bg-primary/90 text-background"
             >
               {isLoading ? 'Logging in...' : 'Login'}
             </Button>

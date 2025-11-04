@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { motion } from 'framer-motion';
 
 export default function DashboardPreview() {
@@ -37,7 +37,7 @@ export default function DashboardPreview() {
       {/* Animated Background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          className="absolute top-0 right-10 w-96 h-96 bg-accent-500 opacity-10 rounded-full blur-3xl"
+          className="absolute top-0 right-10 w-96 h-96 bg-primary-500 opacity-10 rounded-full blur-3xl"
           animate={{
             x: [0, 30, 0],
             y: [0, -20, 0],
@@ -49,7 +49,7 @@ export default function DashboardPreview() {
           }}
         />
         <motion.div
-          className="absolute bottom-0 left-1/4 w-80 h-80 bg-accent-400 opacity-5 rounded-full blur-3xl"
+          className="absolute bottom-0 left-1/4 w-80 h-80 bg-primary-400 opacity-5 rounded-full blur-3xl"
           animate={{
             x: [0, -25, 0],
             y: [0, 20, 0],
@@ -71,11 +71,11 @@ export default function DashboardPreview() {
           transition={{ duration: 0.8 }}
           viewport={{ once: true, margin: '-100px' }}
         >
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground dark:text-foreground">
             Powerful Dashboard
             <br />
             <motion.span
-              className="bg-gradient-to-r from-accent-300 via-accent-500 to-primary-400 bg-clip-text text-transparent inline-block"
+              className="bg-gradient-to-r from-primary-300 via-primary-500 to-primary-400 bg-clip-text text-transparent inline-block"
               animate={{
                 backgroundPosition: ['0%', '100%'],
               }}
@@ -92,7 +92,7 @@ export default function DashboardPreview() {
             </motion.span>
           </h2>
           <motion.p
-            className="text-xl text-slate-700 dark:text-primary-100/90 max-w-2xl mx-auto"
+            className="text-xl text-foreground/80 dark:text-primary-100/90 max-w-2xl mx-auto"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -126,7 +126,7 @@ export default function DashboardPreview() {
 
           {/* Modern Card */}
           <motion.div
-            className="relative bg-gradient-to-br from-blue-700/40 to-blue-marian/40 rounded-2xl p-8 lg:p-12 border border-blue-600/40 backdrop-blur-xl shadow-2xl overflow-hidden group-hover:shadow-blue-900/50 transition-shadow duration-500"
+            className="relative bg-gradient-to-br from-blue-700/40 to-blue-marian/40 rounded-2xl p-8 lg:p-12 border border-primary-600/40 backdrop-blur-xl shadow-2xl overflow-hidden group-hover:shadow-blue-900/50 transition-shadow duration-500"
             whileHover={{
               boxShadow: '0 0 40px rgba(59, 130, 246, 0.3)',
             }}
@@ -136,7 +136,7 @@ export default function DashboardPreview() {
 
             {/* Card Header */}
             <motion.div
-              className="mb-8 pb-6 border-b border-blue-600/20"
+              className="mb-8 pb-6 border-b border-primary-600/20"
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
@@ -144,7 +144,7 @@ export default function DashboardPreview() {
             >
               <div className="flex items-center gap-3 mb-4">
                 <motion.div
-                  className="w-3 h-3 rounded-full bg-blue-pacific"
+                  className="w-3 h-3 rounded-full bg-primary-pacific"
                   animate={{
                     scale: [1, 1.3, 1],
                     boxShadow: ['0 0 0px rgba(59, 130, 246, 0.5)', '0 0 10px rgba(59, 130, 246, 0.8)', '0 0 0px rgba(59, 130, 246, 0.5)'],
@@ -156,7 +156,7 @@ export default function DashboardPreview() {
                 />
                 <div className="text-sm font-semibold text-blue-100">Dashboard Preview</div>
               </div>
-              <h3 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">Message Analytics</h3>
+              <h3 className="text-2xl lg:text-3xl font-bold text-foreground dark:text-foreground">Message Analytics</h3>
             </motion.div>
 
             {/* Stats Grid */}
@@ -169,7 +169,7 @@ export default function DashboardPreview() {
             >
               <motion.div
                 variants={itemVariants}
-                className="p-4 bg-blue-600/30 rounded-lg border border-blue-500/20"
+                className="p-4 bg-primary-600/30 rounded-lg border border-primary-500/20"
                 whileHover={{
                   scale: 1.05,
                   backgroundColor: 'rgba(37, 99, 235, 0.4)',
@@ -188,7 +188,7 @@ export default function DashboardPreview() {
               </motion.div>
               <motion.div
                 variants={itemVariants}
-                className="p-4 bg-blue-600/30 rounded-lg border border-blue-500/20"
+                className="p-4 bg-primary-600/30 rounded-lg border border-primary-500/20"
                 whileHover={{
                   scale: 1.05,
                   backgroundColor: 'rgba(37, 99, 235, 0.4)',
@@ -252,19 +252,19 @@ export default function DashboardPreview() {
               viewport={{ once: true }}
             >
               <motion.button
-                className="flex-1 py-3 px-4 bg-blue-pacific hover:bg-blue-sky-blue text-blue-900 font-semibold rounded-lg transition-colors duration-300"
+                className="flex-1 py-3 px-4 bg-primary-pacific hover:bg-primary-sky-blue text-blue-900 font-semibold rounded-lg transition-colors duration-300"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 Export
               </motion.button>
               <motion.button
-                className="px-4 py-3 bg-blue-600/40 hover:bg-blue-600/60 text-blue-100 rounded-lg transition-colors duration-300"
+                className="px-4 py-3 bg-primary-600/40 hover:bg-primary-600/60 text-blue-100 rounded-lg transition-colors duration-300"
                 whileHover={{ scale: 1.02, rotate: 90 }}
                 whileTap={{ scale: 0.98 }}
                 transition={{ type: 'spring', stiffness: 400 }}
               >
-                ⋯
+                â‹¯
               </motion.button>
             </motion.div>
           </motion.div>
@@ -295,7 +295,7 @@ export default function DashboardPreview() {
             <motion.div
               key={i}
               variants={itemVariants}
-              className="p-6 bg-slate-100/50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg hover:border-accent-500/50 transition-colors duration-300 text-center"
+              className="p-6 bg-slate-100/50 dark:bg-muted/50 border border-border dark:border-border rounded-lg hover:border-primary-500/50 transition-colors duration-300 text-center"
               whileHover={{
                 scale: 1.05,
                 backgroundColor: 'rgba(15, 23, 42, 0.8)',
@@ -303,7 +303,7 @@ export default function DashboardPreview() {
               }}
             >
               <motion.h4
-                className="text-lg font-semibold text-slate-900 dark:text-white mb-3"
+                className="text-lg font-semibold text-foreground dark:text-foreground mb-3"
                 animate={{
                   y: [0, -5, 0],
                 }}
@@ -315,7 +315,7 @@ export default function DashboardPreview() {
               >
                 {feature.title}
               </motion.h4>
-              <p className="text-slate-700 dark:text-slate-400">{feature.description}</p>
+              <p className="text-foreground/80 dark:text-slate-400">{feature.description}</p>
             </motion.div>
           ))}
         </motion.div>
@@ -344,3 +344,4 @@ function CountUp({ target, suffix = '' }: { target: number; suffix?: string }) {
 
   return <>{count.toLocaleString()}{suffix}</>;
 }
+

@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+﻿import { motion } from 'framer-motion';
 import { Users, MessageSquare, Clock, FileText, BarChart3, UserPlus } from 'lucide-react';
 import Card from '../ui/Card';
 
@@ -63,11 +63,11 @@ export default function Features() {
   };
 
   return (
-    <section id="features" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-950 overflow-hidden transition-colors duration-normal">
+    <section id="features" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-background overflow-hidden transition-colors duration-normal">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          className="absolute top-20 left-1/4 w-80 h-80 bg-accent-400 opacity-10 rounded-full blur-3xl"
+          className="absolute top-20 left-1/4 w-80 h-80 bg-primary-400 opacity-10 rounded-full blur-3xl"
           animate={{
             y: [0, -30, 0],
             x: [0, 15, 0],
@@ -79,7 +79,7 @@ export default function Features() {
           }}
         />
         <motion.div
-          className="absolute bottom-20 right-1/4 w-96 h-96 bg-accent-500 opacity-15 rounded-full blur-3xl"
+          className="absolute bottom-20 right-1/4 w-96 h-96 bg-primary-500 opacity-15 rounded-full blur-3xl"
           animate={{
             y: [0, 20, 0],
             x: [0, -20, 0],
@@ -102,10 +102,10 @@ export default function Features() {
           transition={{ duration: 0.8 }}
           viewport={{ once: true, margin: '-100px' }}
         >
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white mb-4 leading-tight tracking-tight">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground dark:text-foreground mb-4 leading-tight tracking-tight">
             Everything You Need to{' '}
             <motion.span
-              className="bg-gradient-to-r from-accent-400 to-accent-500 bg-clip-text text-transparent inline-block"
+              className="bg-gradient-to-r from-primary-400 to-primary-500 bg-clip-text text-transparent inline-block"
               animate={{
                 backgroundPosition: ['0%', '100%'],
               }}
@@ -122,7 +122,7 @@ export default function Features() {
             </motion.span>
           </h2>
           <motion.p
-            className="text-lg text-slate-700 dark:text-slate-300 max-w-3xl mx-auto font-light leading-relaxed"
+            className="text-lg text-foreground/80 dark:text-muted-foreground max-w-3xl mx-auto font-light leading-relaxed"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -147,7 +147,7 @@ export default function Features() {
             >
               <Card
                 variant="default"
-                className="group relative p-8 bg-slate-100/50 dark:bg-slate-900/50 border border-slate-300/50 dark:border-slate-700/50 hover:border-accent-400/50 backdrop-blur-xl rounded-lg overflow-hidden h-full"
+                className="group relative p-8 bg-slate-100/50 dark:bg-muted/50 border border-border/50 dark:border-border/50 hover:border-primary-400/50 backdrop-blur-xl rounded-lg overflow-hidden h-full"
               >
                 <motion.div
                   whileHover={{
@@ -161,7 +161,7 @@ export default function Features() {
 
                 {/* Animated Glow effect on hover */}
                 <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-accent-500/0 via-accent-400/0 to-accent-300/0 group-hover:from-accent-500/5 group-hover:via-accent-400/5 group-hover:to-accent-300/5 rounded-lg pointer-events-none"
+                  className="absolute inset-0 bg-gradient-to-r from-primary-500/0 via-primary-400/0 to-primary-300/0 group-hover:from-primary-500/5 group-hover:via-primary-400/5 group-hover:to-primary-300/5 rounded-lg pointer-events-none"
                   animate={{
                     opacity: [0, 0.3, 0],
                   }}
@@ -181,7 +181,7 @@ export default function Features() {
                   viewport={{ once: true }}
                 >
                   <motion.div
-                    className="w-12 h-12 bg-accent-500 text-slate-950 rounded-lg flex items-center justify-center mb-5 group-hover:shadow-lg group-hover:shadow-accent-500/50"
+                    className="w-12 h-12 bg-primary-500 text-background rounded-lg flex items-center justify-center mb-5 group-hover:shadow-lg group-hover:shadow-primary-500/50"
                     whileHover={{
                       scale: 1.15,
                       rotate: [0, -10, 10, -5, 5, 0],
@@ -190,8 +190,8 @@ export default function Features() {
                   >
                     {feature.icon}
                   </motion.div>
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">{feature.title}</h3>
-                  <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">{feature.description}</p>
+                  <h3 className="text-lg font-semibold text-foreground dark:text-foreground mb-3">{feature.title}</h3>
+                  <p className="text-foreground/80 dark:text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
                 </motion.div>
               </Card>
             </motion.div>
@@ -201,4 +201,5 @@ export default function Features() {
     </section>
   );
 }
+
 
