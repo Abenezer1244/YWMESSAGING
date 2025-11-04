@@ -52,7 +52,7 @@ export async function getMembers(
  * Add a single member to a group
  */
 export async function addMember(groupId: string, data: CreateMemberData): Promise<Member> {
-  const response = await client.post(`/groups/groups/${groupId}/members`, data);
+  const response = await client.post(`/groups/${groupId}/members`, data);
   return response.data.data;
 }
 
@@ -72,7 +72,7 @@ export async function importMembers(
 
   // Note: Do NOT set Content-Type header - let axios set it with the boundary
   // Authorization header is automatically added by the client interceptor
-  const response = await client.post(`/groups/groups/${groupId}/members/import`, formData, {
+  const response = await client.post(`/groups/${groupId}/members/import`, formData, {
     headers: {
       // Let axios auto-set Content-Type with multipart boundary
       // 'Content-Type': 'multipart/form-data' - DO NOT SET, let axios handle it
@@ -89,7 +89,7 @@ export async function updateMember(
   memberId: string,
   data: Partial<CreateMemberData>
 ): Promise<Member> {
-  const response = await client.put(`/groups/members/${memberId}`, data);
+  const response = await client.put(`/members/${memberId}`, data);
   return response.data.data;
 }
 
@@ -97,6 +97,6 @@ export async function updateMember(
  * Remove a member from a group
  */
 export async function removeMember(groupId: string, memberId: string): Promise<any> {
-  const response = await client.delete(`/groups/groups/${groupId}/members/${memberId}`);
+  const response = await client.delete(`/groups/${groupId}/members/${memberId}`);
   return response.data.data;
 }
