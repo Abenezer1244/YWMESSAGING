@@ -1,5 +1,5 @@
 -- CreateTable Church
-CREATE TABLE "Church" (
+CREATE TABLE IF NOT EXISTS "Church" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE "Church" (
 );
 
 -- CreateTable Branch
-CREATE TABLE "Branch" (
+CREATE TABLE IF NOT EXISTS "Branch" (
     "id" TEXT NOT NULL,
     "churchId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE "Branch" (
 );
 
 -- CreateTable Group
-CREATE TABLE "Group" (
+CREATE TABLE IF NOT EXISTS "Group" (
     "id" TEXT NOT NULL,
     "branchId" TEXT NOT NULL,
     "churchId" TEXT NOT NULL,
@@ -47,7 +47,7 @@ CREATE TABLE "Group" (
 );
 
 -- CreateTable Member
-CREATE TABLE "Member" (
+CREATE TABLE IF NOT EXISTS "Member" (
     "id" TEXT NOT NULL,
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
@@ -62,7 +62,7 @@ CREATE TABLE "Member" (
 );
 
 -- CreateTable GroupMember
-CREATE TABLE "GroupMember" (
+CREATE TABLE IF NOT EXISTS "GroupMember" (
     "id" TEXT NOT NULL,
     "groupId" TEXT NOT NULL,
     "memberId" TEXT NOT NULL,
@@ -73,7 +73,7 @@ CREATE TABLE "GroupMember" (
 );
 
 -- CreateTable Message
-CREATE TABLE "Message" (
+CREATE TABLE IF NOT EXISTS "Message" (
     "id" TEXT NOT NULL,
     "churchId" TEXT NOT NULL,
     "content" TEXT NOT NULL,
@@ -90,7 +90,7 @@ CREATE TABLE "Message" (
 );
 
 -- CreateTable MessageRecipient
-CREATE TABLE "MessageRecipient" (
+CREATE TABLE IF NOT EXISTS "MessageRecipient" (
     "id" TEXT NOT NULL,
     "messageId" TEXT NOT NULL,
     "memberId" TEXT NOT NULL,
@@ -104,7 +104,7 @@ CREATE TABLE "MessageRecipient" (
 );
 
 -- CreateTable MessageTemplate
-CREATE TABLE "MessageTemplate" (
+CREATE TABLE IF NOT EXISTS "MessageTemplate" (
     "id" TEXT NOT NULL,
     "churchId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -119,7 +119,7 @@ CREATE TABLE "MessageTemplate" (
 );
 
 -- CreateTable RecurringMessage
-CREATE TABLE "RecurringMessage" (
+CREATE TABLE IF NOT EXISTS "RecurringMessage" (
     "id" TEXT NOT NULL,
     "churchId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -138,7 +138,7 @@ CREATE TABLE "RecurringMessage" (
 );
 
 -- CreateTable Admin
-CREATE TABLE "Admin" (
+CREATE TABLE IF NOT EXISTS "Admin" (
     "id" TEXT NOT NULL,
     "churchId" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -156,7 +156,7 @@ CREATE TABLE "Admin" (
 );
 
 -- CreateTable Subscription
-CREATE TABLE "Subscription" (
+CREATE TABLE IF NOT EXISTS "Subscription" (
     "id" TEXT NOT NULL,
     "churchId" TEXT NOT NULL,
     "stripeSubId" TEXT,
@@ -172,7 +172,7 @@ CREATE TABLE "Subscription" (
 );
 
 -- CreateTable AnalyticsEvent
-CREATE TABLE "AnalyticsEvent" (
+CREATE TABLE IF NOT EXISTS "AnalyticsEvent" (
     "id" TEXT NOT NULL,
     "churchId" TEXT,
     "eventName" TEXT NOT NULL,
@@ -183,151 +183,188 @@ CREATE TABLE "AnalyticsEvent" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Church_email_key" ON "Church"("email");
+CREATE UNIQUE INDEX IF NOT EXISTS "Church_email_key" ON "Church"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Church_stripeCustomerId_key" ON "Church"("stripeCustomerId");
+CREATE UNIQUE INDEX IF NOT EXISTS "Church_stripeCustomerId_key" ON "Church"("stripeCustomerId");
 
 -- CreateIndex
-CREATE INDEX "Church_subscriptionStatus_idx" ON "Church"("subscriptionStatus");
+CREATE INDEX IF NOT EXISTS "Church_subscriptionStatus_idx" ON "Church"("subscriptionStatus");
 
 -- CreateIndex
-CREATE INDEX "Church_trialEndsAt_idx" ON "Church"("trialEndsAt");
+CREATE INDEX IF NOT EXISTS "Church_trialEndsAt_idx" ON "Church"("trialEndsAt");
 
 -- CreateIndex
-CREATE INDEX "Branch_churchId_idx" ON "Branch"("churchId");
+CREATE INDEX IF NOT EXISTS "Branch_churchId_idx" ON "Branch"("churchId");
 
 -- CreateIndex
-CREATE INDEX "Branch_isActive_idx" ON "Branch"("isActive");
+CREATE INDEX IF NOT EXISTS "Branch_isActive_idx" ON "Branch"("isActive");
 
 -- CreateIndex
-CREATE INDEX "Group_branchId_idx" ON "Group"("branchId");
+CREATE INDEX IF NOT EXISTS "Group_branchId_idx" ON "Group"("branchId");
 
 -- CreateIndex
-CREATE INDEX "Group_churchId_idx" ON "Group"("churchId");
+CREATE INDEX IF NOT EXISTS "Group_churchId_idx" ON "Group"("churchId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Member_phone_key" ON "Member"("phone");
+CREATE UNIQUE INDEX IF NOT EXISTS "Member_phone_key" ON "Member"("phone");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Member_email_key" ON "Member"("email");
+CREATE UNIQUE INDEX IF NOT EXISTS "Member_email_key" ON "Member"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Member_phoneHash_key" ON "Member"("phoneHash");
+CREATE UNIQUE INDEX IF NOT EXISTS "Member_phoneHash_key" ON "Member"("phoneHash");
 
 -- CreateIndex
-CREATE INDEX "Member_phone_idx" ON "Member"("phone");
+CREATE INDEX IF NOT EXISTS "Member_phone_idx" ON "Member"("phone");
 
 -- CreateIndex
-CREATE INDEX "Member_email_idx" ON "Member"("email");
+CREATE INDEX IF NOT EXISTS "Member_email_idx" ON "Member"("email");
 
 -- CreateIndex
-CREATE INDEX "Member_phoneHash_idx" ON "Member"("phoneHash");
+CREATE INDEX IF NOT EXISTS "Member_phoneHash_idx" ON "Member"("phoneHash");
 
 -- CreateIndex
-CREATE INDEX "GroupMember_groupId_idx" ON "GroupMember"("groupId");
+CREATE INDEX IF NOT EXISTS "GroupMember_groupId_idx" ON "GroupMember"("groupId");
 
 -- CreateIndex
-CREATE INDEX "GroupMember_memberId_idx" ON "GroupMember"("memberId");
+CREATE INDEX IF NOT EXISTS "GroupMember_memberId_idx" ON "GroupMember"("memberId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "GroupMember_groupId_memberId_key" ON "GroupMember"("groupId", "memberId");
+CREATE UNIQUE INDEX IF NOT EXISTS "GroupMember_groupId_memberId_key" ON "GroupMember"("groupId", "memberId");
 
 -- CreateIndex
-CREATE INDEX "Message_churchId_idx" ON "Message"("churchId");
+CREATE INDEX IF NOT EXISTS "Message_churchId_idx" ON "Message"("churchId");
 
 -- CreateIndex
-CREATE INDEX "Message_status_idx" ON "Message"("status");
+CREATE INDEX IF NOT EXISTS "Message_status_idx" ON "Message"("status");
 
 -- CreateIndex
-CREATE INDEX "Message_sentAt_idx" ON "Message"("sentAt");
+CREATE INDEX IF NOT EXISTS "Message_sentAt_idx" ON "Message"("sentAt");
 
 -- CreateIndex
-CREATE INDEX "MessageRecipient_messageId_idx" ON "MessageRecipient"("messageId");
+CREATE INDEX IF NOT EXISTS "MessageRecipient_messageId_idx" ON "MessageRecipient"("messageId");
 
 -- CreateIndex
-CREATE INDEX "MessageRecipient_memberId_idx" ON "MessageRecipient"("memberId");
+CREATE INDEX IF NOT EXISTS "MessageRecipient_memberId_idx" ON "MessageRecipient"("memberId");
 
 -- CreateIndex
-CREATE INDEX "MessageRecipient_status_idx" ON "MessageRecipient"("status");
+CREATE INDEX IF NOT EXISTS "MessageRecipient_status_idx" ON "MessageRecipient"("status");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "MessageRecipient_messageId_memberId_key" ON "MessageRecipient"("messageId", "memberId");
+CREATE UNIQUE INDEX IF NOT EXISTS "MessageRecipient_messageId_memberId_key" ON "MessageRecipient"("messageId", "memberId");
 
 -- CreateIndex
-CREATE INDEX "MessageTemplate_churchId_idx" ON "MessageTemplate"("churchId");
+CREATE INDEX IF NOT EXISTS "MessageTemplate_churchId_idx" ON "MessageTemplate"("churchId");
 
 -- CreateIndex
-CREATE INDEX "MessageTemplate_category_idx" ON "MessageTemplate"("category");
+CREATE INDEX IF NOT EXISTS "MessageTemplate_category_idx" ON "MessageTemplate"("category");
 
 -- CreateIndex
-CREATE INDEX "RecurringMessage_churchId_idx" ON "RecurringMessage"("churchId");
+CREATE INDEX IF NOT EXISTS "RecurringMessage_churchId_idx" ON "RecurringMessage"("churchId");
 
 -- CreateIndex
-CREATE INDEX "RecurringMessage_isActive_idx" ON "RecurringMessage"("isActive");
+CREATE INDEX IF NOT EXISTS "RecurringMessage_isActive_idx" ON "RecurringMessage"("isActive");
 
 -- CreateIndex
-CREATE INDEX "RecurringMessage_nextSendAt_idx" ON "RecurringMessage"("nextSendAt");
+CREATE INDEX IF NOT EXISTS "RecurringMessage_nextSendAt_idx" ON "RecurringMessage"("nextSendAt");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Admin_email_key" ON "Admin"("email");
+CREATE UNIQUE INDEX IF NOT EXISTS "Admin_email_key" ON "Admin"("email");
 
 -- CreateIndex
-CREATE INDEX "Admin_churchId_idx" ON "Admin"("churchId");
+CREATE INDEX IF NOT EXISTS "Admin_churchId_idx" ON "Admin"("churchId");
 
 -- CreateIndex
-CREATE INDEX "Admin_role_idx" ON "Admin"("role");
+CREATE INDEX IF NOT EXISTS "Admin_role_idx" ON "Admin"("role");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Subscription_churchId_key" ON "Subscription"("churchId");
+CREATE UNIQUE INDEX IF NOT EXISTS "Subscription_churchId_key" ON "Subscription"("churchId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Subscription_stripeSubId_key" ON "Subscription"("stripeSubId");
+CREATE UNIQUE INDEX IF NOT EXISTS "Subscription_stripeSubId_key" ON "Subscription"("stripeSubId");
 
 -- CreateIndex
-CREATE INDEX "Subscription_plan_idx" ON "Subscription"("plan");
+CREATE INDEX IF NOT EXISTS "Subscription_plan_idx" ON "Subscription"("plan");
 
 -- CreateIndex
-CREATE INDEX "Subscription_status_idx" ON "Subscription"("status");
+CREATE INDEX IF NOT EXISTS "Subscription_status_idx" ON "Subscription"("status");
 
 -- CreateIndex
-CREATE INDEX "AnalyticsEvent_churchId_idx" ON "AnalyticsEvent"("churchId");
+CREATE INDEX IF NOT EXISTS "AnalyticsEvent_churchId_idx" ON "AnalyticsEvent"("churchId");
 
 -- CreateIndex
-CREATE INDEX "AnalyticsEvent_eventName_idx" ON "AnalyticsEvent"("eventName");
+CREATE INDEX IF NOT EXISTS "AnalyticsEvent_eventName_idx" ON "AnalyticsEvent"("eventName");
 
--- AddForeignKey
-ALTER TABLE "Branch" ADD CONSTRAINT "Branch_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+-- AddForeignKey (with error handling for existing constraints)
+DO $$
+BEGIN
+    ALTER TABLE "Branch" ADD CONSTRAINT "Branch_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
--- AddForeignKey
-ALTER TABLE "Group" ADD CONSTRAINT "Group_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$
+BEGIN
+    ALTER TABLE "Group" ADD CONSTRAINT "Group_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
--- AddForeignKey
-ALTER TABLE "Group" ADD CONSTRAINT "Group_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$
+BEGIN
+    ALTER TABLE "Group" ADD CONSTRAINT "Group_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
--- AddForeignKey
-ALTER TABLE "GroupMember" ADD CONSTRAINT "GroupMember_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "Group"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$
+BEGIN
+    ALTER TABLE "GroupMember" ADD CONSTRAINT "GroupMember_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "Group"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
--- AddForeignKey
-ALTER TABLE "GroupMember" ADD CONSTRAINT "GroupMember_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "Member"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$
+BEGIN
+    ALTER TABLE "GroupMember" ADD CONSTRAINT "GroupMember_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "Member"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
--- AddForeignKey
-ALTER TABLE "Message" ADD CONSTRAINT "Message_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$
+BEGIN
+    ALTER TABLE "Message" ADD CONSTRAINT "Message_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
--- AddForeignKey
-ALTER TABLE "MessageRecipient" ADD CONSTRAINT "MessageRecipient_messageId_fkey" FOREIGN KEY ("messageId") REFERENCES "Message"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$
+BEGIN
+    ALTER TABLE "MessageRecipient" ADD CONSTRAINT "MessageRecipient_messageId_fkey" FOREIGN KEY ("messageId") REFERENCES "Message"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
--- AddForeignKey
-ALTER TABLE "MessageRecipient" ADD CONSTRAINT "MessageRecipient_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "Member"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$
+BEGIN
+    ALTER TABLE "MessageRecipient" ADD CONSTRAINT "MessageRecipient_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "Member"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
--- AddForeignKey
-ALTER TABLE "MessageTemplate" ADD CONSTRAINT "MessageTemplate_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$
+BEGIN
+    ALTER TABLE "MessageTemplate" ADD CONSTRAINT "MessageTemplate_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
--- AddForeignKey
-ALTER TABLE "RecurringMessage" ADD CONSTRAINT "RecurringMessage_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$
+BEGIN
+    ALTER TABLE "RecurringMessage" ADD CONSTRAINT "RecurringMessage_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
--- AddForeignKey
-ALTER TABLE "Admin" ADD CONSTRAINT "Admin_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$
+BEGIN
+    ALTER TABLE "Admin" ADD CONSTRAINT "Admin_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
--- AddForeignKey
-ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$
+BEGIN
+    ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
