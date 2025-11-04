@@ -123,7 +123,7 @@ export async function addMember(groupId: string, data: CreateMemberData) {
   const phoneHash = hashForSearch(formattedPhone);
 
   // Check if member with this phone exists
-  let member = await prisma.member.findUnique({
+  let member = await prisma.member.findFirst({
     where: { phoneHash },
   });
 
@@ -213,7 +213,7 @@ export async function importMembers(
       const phoneHash = hashForSearch(formattedPhone);
 
       // Find or create member
-      let member = await prisma.member.findUnique({
+      let member = await prisma.member.findFirst({
         where: { phoneHash },
       });
 
