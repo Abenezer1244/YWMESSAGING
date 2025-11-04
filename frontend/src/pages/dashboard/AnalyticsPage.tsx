@@ -24,13 +24,14 @@ import {
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import { themeColors } from '../../utils/themeColors';
+import { designTokens } from '../../utils/designTokens';
 import { Spinner } from '../../components/ui';
 
 // Reusable tooltip style configuration
 const tooltipStyle = {
   backgroundColor: themeColors.background.darkDim,
-  border: `1px solid ${themeColors.border.darkDim}`,
-  borderRadius: '8px',
+  border: `${designTokens.borderWidth.base} solid ${themeColors.border.darkDim}`,
+  borderRadius: designTokens.borderRadius.md,
   color: themeColors.text.white,
 };
 
@@ -147,7 +148,7 @@ export function AnalyticsPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke={themeColors.border.dark} />
                     <XAxis
                       dataKey="date"
-                      tick={{ fontSize: 12 }}
+                      tick={{ fontSize: parseInt(designTokens.typography.fontSize.xs) }}
                       angle={-45}
                       textAnchor="end"
                       height={80}
@@ -189,7 +190,7 @@ export function AnalyticsPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke={themeColors.border.dark} />
                     <XAxis
                       dataKey="name"
-                      tick={{ fontSize: 12 }}
+                      tick={{ fontSize: parseInt(designTokens.typography.fontSize.xs) }}
                       angle={-45}
                       textAnchor="end"
                       height={80}

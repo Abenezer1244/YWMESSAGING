@@ -8,6 +8,7 @@ import { createPaymentIntent } from '../api/billing';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import { themeColors } from '../utils/themeColors';
+import { designTokens } from '../utils/designTokens';
 // Initialize Stripe - use environment variable for key
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 // Separate component for payment form
@@ -72,7 +73,7 @@ function PaymentForm({ planName, planPrice, onSubmit }) {
     const cardElementOptions = {
         style: {
             base: {
-                fontSize: '16px',
+                fontSize: designTokens.typography.fontSize.base,
                 color: themeColors.text.white,
                 '::placeholder': {
                     color: themeColors.text.lightGray,

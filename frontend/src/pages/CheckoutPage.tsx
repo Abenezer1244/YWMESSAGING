@@ -9,6 +9,7 @@ import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
 import { themeColors } from '../utils/themeColors';
+import { designTokens } from '../utils/designTokens';
 
 // Initialize Stripe - use environment variable for key
 const stripePromise = loadStripe(
@@ -82,7 +83,7 @@ function PaymentForm({ planName, planPrice, onSubmit }: any) {
   const cardElementOptions = {
     style: {
       base: {
-        fontSize: '16px',
+        fontSize: designTokens.typography.fontSize.base,
         color: themeColors.text.white,
         '::placeholder': {
           color: themeColors.text.lightGray,
