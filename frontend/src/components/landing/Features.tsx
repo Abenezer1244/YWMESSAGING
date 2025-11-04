@@ -1,6 +1,7 @@
 ﻿import { motion } from 'framer-motion';
 import { Users, MessageSquare, Clock, FileText, BarChart3, UserPlus } from 'lucide-react';
 import Card from '../ui/Card';
+import { themeColors } from '../../utils/themeColors';
 
 interface Feature {
   icon: React.ReactNode;
@@ -152,8 +153,8 @@ export default function Features() {
                 <motion.div
                   whileHover={{
                     scale: 1.02,
-                    backgroundColor: 'rgba(15, 23, 42, 0.8)',
-                    borderColor: 'rgba(234, 179, 8, 0.5)',
+                    backgroundColor: themeColors.background.op80,
+                    borderColor: themeColors.accent.op50,
                   }}
                   transition={{ duration: 0.3 }}
                   className="absolute inset-0 rounded-lg"

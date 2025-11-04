@@ -3,6 +3,7 @@ import { CheckCircle2, Zap, Smartphone, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import useAuthStore from '../../stores/authStore';
 import Button from '../ui/Button';
+import { themeColors } from '../../utils/themeColors';
 
 export default function Hero() {
   const navigate = useNavigate();
@@ -213,7 +214,7 @@ export default function Hero() {
                   className="flex items-center gap-3 p-3 bg-muted/50 dark:bg-primary/20 rounded-lg border border-border dark:border-primary/30 backdrop-blur-sm hover:bg-muted/50 dark:hover:bg-primary/40 transition-colors duration-300"
                   whileHover={{
                     scale: 1.05,
-                    backgroundColor: 'rgba(55, 65, 81, 0.5)',
+                    backgroundColor: themeColors.muted.op50,
                   }}
                   transition={{ type: 'spring', stiffness: 300 }}
                 >

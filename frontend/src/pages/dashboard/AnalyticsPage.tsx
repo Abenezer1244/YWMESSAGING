@@ -23,6 +23,7 @@ import {
 } from '../../api/analytics';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
+import { themeColors } from '../../utils/themeColors';
 import { Spinner } from '../../components/ui';
 
 export function AnalyticsPage() {
@@ -135,7 +136,7 @@ export function AnalyticsPage() {
                 </h2>
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={messageStats.byDay}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+                    <CartesianGrid strokeDasharray="3 3" stroke={themeColors.border.dark} />
                     <XAxis
                       dataKey="date"
                       tick={{ fontSize: 12 }}
@@ -177,7 +178,7 @@ export function AnalyticsPage() {
                 </h2>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={branchStats}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+                    <CartesianGrid strokeDasharray="3 3" stroke={themeColors.border.dark} />
                     <XAxis
                       dataKey="name"
                       tick={{ fontSize: 12 }}

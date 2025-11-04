@@ -1,0 +1,126 @@
+DETAILED HARDCODED CSS MAPPING REFERENCE
+
+=== FILE-BY-FILE BREAKDOWN ===
+
+1. AnalyticsPage.tsx (frontend/src/pages/dashboard/AnalyticsPage.tsx)
+   Line 100-126: bg-slate-900/50 -> bg-muted, border-slate-700 -> border-border
+   Line 102: text-green-400 -> text-success
+   Line 109: text-blue-400 -> text-primary
+   Line 116: text-yellow-400 -> text-warning
+   Line 123: text-red-400 -> text-destructive
+   Line 147: backgroundColor: '#1f2937' -> var(--muted), border: '1px solid #374151' -> var(--border), color: '#fff' -> var(--foreground)
+   Line 152: stroke="#3b82f6" -> need color utility
+   Line 158: stroke="#10b981" -> need color utility
+   Line 164: stroke="#ef4444" -> need color utility
+   Line 190: Same tooltip styles as line 147
+   Line 195: fill="#3b82f6" -> need color utility
+   Line 201: fill="#10b981" -> need color utility
+
+2. CheckoutPage.tsx (frontend/src/pages/CheckoutPage.tsx)
+   Line 85: color: '#ffffff' -> var(--foreground)
+   Line 87: color: '#94a3b8' -> var(--muted-foreground)
+   Line 91: color: '#EF4444' -> var(--destructive)
+
+3. ActivityLogsPanel.tsx (frontend/src/components/admin/ActivityLogsPanel.tsx)
+   Line 45: text-gray-500 -> text-muted-foreground
+   Line 50: bg-gray-50 -> bg-muted
+   Line 51: text-gray-600 -> text-muted-foreground
+   Line 58: text-gray-900 -> text-foreground
+   Line 62: bg-gray-50 -> bg-muted
+   Line 64,67,70,73: text-gray-900 -> text-foreground
+   Line 80: hover:bg-gray-50 -> hover:bg-muted
+   Line 81,84,87,90: text-gray-900/gray-600 -> text-foreground/text-muted-foreground
+   Line 106: bg-blue-50 -> bg-primary/10
+   Line 106: border-blue-200 -> border-primary/30
+   Line 107: text-blue-800 -> text-primary
+
+4. CoAdminPanel.tsx (frontend/src/components/admin/CoAdminPanel.tsx)
+   Line 89: text-gray-500 -> text-muted-foreground
+   Line 95: text-gray-900 -> text-foreground
+   Line 98: bg-blue-600 -> bg-primary, hover:bg-blue-700 -> hover:bg-primary/90
+   Line 106: bg-white -> bg-background, border-gray-200 -> border-border
+   Line 107: text-gray-900 -> text-foreground
+   Line 111: text-gray-700 -> text-foreground/70
+   Line 120: border-gray-300 -> border-border, focus:ring-blue-500 -> focus:ring-primary
+   Line 126: text-gray-700 -> text-foreground/70
+   Line 135: border-gray-300 -> border-border, focus:ring-blue-500 -> focus:ring-primary
+   Line 142: text-gray-700 -> text-foreground/70
+
+5. Form Modal Components (6 files)
+   BranchFormModal.tsx, GroupFormModal.tsx, AddMemberModal.tsx, 
+   ImportCSVModal.tsx, TemplateFormModal.tsx, RecurringMessageModal.tsx
+   
+   Common patterns:
+   - bg-white -> bg-background
+   - text-gray-900 -> text-foreground
+   - text-gray-700 -> text-foreground/70
+   - text-gray-500 -> text-muted-foreground
+   - bg-gray-50 -> bg-muted
+   - border-gray-200/300 -> border-border
+   - hover:bg-gray-50 -> hover:bg-muted
+   - bg-blue-600 -> bg-primary
+   - hover:bg-blue-700 -> hover:bg-primary/90
+   - text-blue-600 -> text-primary
+   - focus:ring-blue-500 -> focus:ring-primary
+
+6. Dashboard Pages (5 files)
+   BillingPage.tsx, GroupsPage.tsx, MembersPage.tsx, 
+   MessageHistoryPage.tsx, RecurringMessagesPage.tsx
+   
+   Same patterns as form modals
+
+7. BranchSelector.tsx
+   Common gray/blue patterns as above
+
+8. TrialBanner.tsx
+   Common gray/blue patterns as above
+
+9. Authentication Pages (2 files)
+   RegisterPage.tsx, SubscribePage.tsx
+   
+   Common gray/blue patterns as above
+
+10. Footer.tsx
+    Mixed usage of semantic and non-semantic classes
+
+=== PRIORITY IMPLEMENTATION ===
+
+TIER 1 (Critical):
+1. AnalyticsPage.tsx - breaks theme in charts
+2. CheckoutPage.tsx - payment form not respecting theme
+3. ActivityLogsPanel.tsx - admin UI affected
+4. CoAdminPanel.tsx - admin UI affected
+
+TIER 2 (High):
+5. Form Modal Components (6 files)
+6. BranchSelector.tsx
+
+TIER 3 (Medium):
+7. Dashboard Pages (5 files)
+8. Authentication Pages (2 files)
+9. TrialBanner.tsx
+
+TIER 4 (Low):
+10. Footer.tsx
+
+=== UTILITY FUNCTION NEEDED ===
+
+For inline hex colors in Stripe and Recharts:
+
+function getCSSVariable(varName) {
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue(varName)
+    .trim();
+}
+
+Usage:
+- For hex conversion to OKLCH at runtime
+- For Stripe CardElement styling
+- For Recharts chart colors
+
+=== TOTAL IMPACT ===
+
+Files affected: 20
+Tailwind color classes: 186
+Inline hex values: ~15
+Lines of code to update: 300+

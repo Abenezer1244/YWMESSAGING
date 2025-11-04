@@ -1,0 +1,190 @@
+QUICK COLOR REPLACEMENT REFERENCE
+==================================
+
+GRAY COLORS
+-----------
+bg-white                    -> bg-background
+bg-gray-50                  -> bg-muted
+bg-gray-100                 -> bg-muted
+bg-gray-200                 -> bg-input or bg-border
+bg-gray-300                 -> bg-input or bg-border
+bg-gray-400                 -> bg-secondary
+bg-gray-500                 -> bg-secondary
+
+text-gray-50                -> text-background
+text-gray-100               -> text-background
+text-gray-300               -> text-muted-foreground
+text-gray-400               -> text-muted-foreground
+text-gray-500               -> text-muted-foreground
+text-gray-600               -> text-muted-foreground
+text-gray-700               -> text-foreground/70
+text-gray-800               -> text-foreground
+text-gray-900               -> text-foreground
+
+border-gray-50              -> border-border
+border-gray-100             -> border-border
+border-gray-200             -> border-border
+border-gray-300             -> border-border
+border-gray-400             -> border-border
+border-gray-500             -> border-secondary
+
+hover:bg-gray-50            -> hover:bg-muted
+hover:text-gray-900         -> hover:text-foreground
+
+
+BLUE COLORS (PRIMARY)
+---------------------
+bg-blue-50                  -> bg-primary/10
+bg-blue-100                 -> bg-primary/10
+bg-blue-200                 -> bg-primary/20
+bg-blue-300                 -> bg-primary/30
+bg-blue-400                 -> bg-primary
+bg-blue-500                 -> bg-primary
+bg-blue-600                 -> bg-primary
+bg-blue-700                 -> hover:bg-primary/90
+
+text-blue-50                -> text-primary-foreground
+text-blue-100               -> text-primary-foreground
+text-blue-300               -> text-primary
+text-blue-400               -> text-primary
+text-blue-500               -> text-primary
+text-blue-600               -> text-primary
+text-blue-700               -> text-primary
+text-blue-800               -> text-primary
+text-blue-900               -> text-primary
+
+border-blue-50              -> border-primary/10
+border-blue-100             -> border-primary/10
+border-blue-200             -> border-primary/30
+border-blue-300             -> border-primary/40
+border-blue-400             -> border-primary
+border-blue-500             -> border-primary
+border-blue-600             -> border-primary
+
+focus:ring-blue-500         -> focus:ring-primary
+
+
+RED COLORS (DESTRUCTIVE)
+------------------------
+bg-red-50                   -> bg-destructive/10
+bg-red-100                  -> bg-destructive/10
+bg-red-200                  -> bg-destructive/20
+bg-red-500                  -> bg-destructive
+bg-red-600                  -> bg-destructive
+
+text-red-400                -> text-destructive
+text-red-500                -> text-destructive
+text-red-600                -> text-destructive
+text-red-700                -> text-destructive
+
+border-red-50               -> border-destructive/10
+border-red-200              -> border-destructive/30
+border-red-500              -> border-destructive
+
+
+GREEN COLORS (SUCCESS)
+----------------------
+bg-green-50                 -> bg-success/10 (or custom token)
+bg-green-100                -> bg-success/10
+bg-green-200                -> bg-success/20
+bg-green-500                -> bg-success
+bg-green-600                -> bg-success
+
+text-green-400              -> text-success
+text-green-500              -> text-success
+text-green-600              -> text-success
+
+border-green-50             -> border-success/10
+border-green-200            -> border-success/30
+border-green-500            -> border-success
+
+
+YELLOW/AMBER COLORS (WARNING)
+-----------------------------
+text-yellow-400             -> text-warning (or text-amber-400)
+text-yellow-500             -> text-warning
+
+
+SLATE COLORS
+------------
+bg-slate-800                -> bg-muted or bg-card
+bg-slate-900                -> bg-muted or bg-background (dark mode)
+bg-slate-900/50             -> bg-muted with opacity
+
+border-slate-600            -> border-border
+border-slate-700            -> border-border
+
+
+INLINE HEX COLORS TO CSS VARIABLES
+-----------------------------------
+#ffffff                     -> var(--foreground) or var(--primary-foreground)
+#f8fafc (slate-50)          -> var(--muted)
+#1f2937 (gray-800)          -> var(--muted)
+#374151 (gray-700)          -> var(--border)
+#94a3b8 (slate-400)         -> var(--muted-foreground)
+#3b82f6 (blue-500)          -> var(--primary)
+#10b981 (emerald-500)       -> var(--success)
+#ef4444 (red-500)           -> var(--destructive)
+#EF4444 (red-500)           -> var(--destructive)
+
+
+FOCUS STATES
+------------
+focus:ring-blue-500         -> focus:ring-primary
+focus:border-blue-500       -> focus:border-primary
+focus:ring-2                -> (keep as is)
+focus:outline-none          -> (keep as is)
+
+
+HOVER STATES
+------------
+hover:bg-gray-50            -> hover:bg-muted
+hover:bg-blue-700           -> hover:bg-primary/90
+hover:text-gray-900         -> hover:text-foreground
+hover:text-blue-600         -> hover:text-primary
+hover:border-gray-300       -> hover:border-border
+hover:border-blue-500       -> hover:border-primary
+
+
+OPACITY VARIANTS
+----------------
+bg-primary/10               -> (keep as is, but ensure primary is semantic)
+bg-primary/20               -> (keep as is)
+text-foreground/80          -> (keep as is)
+text-foreground/70          -> (keep as is)
+
+For hardcoded: Create from CSS variables
+Example: #3b82f6 with 10% opacity -> rgba(59, 130, 246, 0.1)
+
+
+FILES TO UPDATE (Priority Order)
+=================================
+CRITICAL (4):
+- frontend/src/pages/dashboard/AnalyticsPage.tsx
+- frontend/src/pages/CheckoutPage.tsx
+- frontend/src/components/admin/ActivityLogsPanel.tsx
+- frontend/src/components/admin/CoAdminPanel.tsx
+
+HIGH (7):
+- frontend/src/components/branches/BranchFormModal.tsx
+- frontend/src/components/groups/GroupFormModal.tsx
+- frontend/src/components/members/AddMemberModal.tsx
+- frontend/src/components/members/ImportCSVModal.tsx
+- frontend/src/components/templates/TemplateFormModal.tsx
+- frontend/src/components/recurring/RecurringMessageModal.tsx
+- frontend/src/components/BranchSelector.tsx
+
+MEDIUM (8):
+- frontend/src/pages/BillingPage.tsx
+- frontend/src/pages/dashboard/GroupsPage.tsx
+- frontend/src/pages/dashboard/MembersPage.tsx
+- frontend/src/pages/dashboard/MessageHistoryPage.tsx
+- frontend/src/pages/dashboard/RecurringMessagesPage.tsx
+- frontend/src/pages/RegisterPage.tsx
+- frontend/src/pages/SubscribePage.tsx
+- frontend/src/components/TrialBanner.tsx
+
+LOW (1):
+- frontend/src/components/landing/Footer.tsx
+
+TOTAL: 20 files, 186+ hardcoded color classes

@@ -1,5 +1,6 @@
 ﻿import React from 'react';
 import { motion } from 'framer-motion';
+import { themeColors } from '../../utils/themeColors';
 
 export default function DashboardPreview() {
   const containerVariants = {
@@ -128,7 +129,7 @@ export default function DashboardPreview() {
           <motion.div
             className="relative bg-gradient-to-br from-primary/40 to-primary/40 rounded-2xl p-8 lg:p-12 border border-primary/40 backdrop-blur-xl shadow-2xl overflow-hidden group-hover:shadow-primary/50 transition-shadow duration-500"
             whileHover={{
-              boxShadow: '0 0 40px rgba(59, 130, 246, 0.3)',
+              boxShadow: `0 0 40px ${themeColors.primary.op30}`,
             }}
           >
             {/* Accent gradient top */}
@@ -147,7 +148,7 @@ export default function DashboardPreview() {
                   className="w-3 h-3 rounded-full bg-primary"
                   animate={{
                     scale: [1, 1.3, 1],
-                    boxShadow: ['0 0 0px rgba(59, 130, 246, 0.5)', '0 0 10px rgba(59, 130, 246, 0.8)', '0 0 0px rgba(59, 130, 246, 0.5)'],
+                    boxShadow: [`0 0 0px ${themeColors.primary.op50}`, `0 0 10px ${themeColors.primary.op80}`, `0 0 0px ${themeColors.primary.op50}`],
                   }}
                   transition={{
                     duration: 2,
@@ -172,7 +173,7 @@ export default function DashboardPreview() {
                 className="p-4 bg-primary/30 rounded-lg border border-primary/20"
                 whileHover={{
                   scale: 1.05,
-                  backgroundColor: 'rgba(37, 99, 235, 0.4)',
+                  backgroundColor: themeColors.primary.op40,
                 }}
               >
                 <div className="text-xs text-primary mb-2">DELIVERED</div>
@@ -191,7 +192,7 @@ export default function DashboardPreview() {
                 className="p-4 bg-primary/30 rounded-lg border border-primary/20"
                 whileHover={{
                   scale: 1.05,
-                  backgroundColor: 'rgba(37, 99, 235, 0.4)',
+                  backgroundColor: themeColors.primary.op40,
                 }}
               >
                 <div className="text-xs text-primary mb-2">ENGAGED</div>
@@ -298,8 +299,8 @@ export default function DashboardPreview() {
               className="p-6 bg-muted/50 border border-border rounded-lg hover:border-primary/50 transition-colors duration-300 text-center"
               whileHover={{
                 scale: 1.05,
-                backgroundColor: 'rgba(15, 23, 42, 0.8)',
-                borderColor: 'rgba(234, 179, 8, 0.5)',
+                backgroundColor: themeColors.background.op80,
+                borderColor: themeColors.accent.op50,
               }}
             >
               <motion.h4

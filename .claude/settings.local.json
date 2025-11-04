@@ -51,7 +51,8 @@
       "Bash(timeout 120 npm run build:*)",
       "Bash(timeout 30 npx tsc:*)",
       "Bash(npx shadcn-ui@latest add:*)",
-      "Bash(powershell -Command:*)"
+      "Bash(powershell -Command:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []
