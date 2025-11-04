@@ -8,6 +8,7 @@ import BackButton from '../components/BackButton';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
+import { themeColors } from '../utils/themeColors';
 
 // Initialize Stripe - use environment variable for key
 const stripePromise = loadStripe(
@@ -82,13 +83,13 @@ function PaymentForm({ planName, planPrice, onSubmit }: any) {
     style: {
       base: {
         fontSize: '16px',
-        color: '#ffffff',
+        color: themeColors.text.white,
         '::placeholder': {
-          color: '#94a3b8',
+          color: themeColors.text.lightGray,
         },
       },
       invalid: {
-        color: '#EF4444',
+        color: themeColors.danger.base,
       },
     },
   };

@@ -1,0 +1,2 @@
+const r={primary:{base:"rgb(59, 130, 246)",op30:"rgba(59, 130, 246, 0.3)",op40:"rgba(59, 130, 246, 0.4)",op50:"rgba(59, 130, 246, 0.5)",op80:"rgba(59, 130, 246, 0.8)"},background:{darkDim:"rgb(31, 41, 55)",op80:"rgba(15, 23, 42, 0.8)"},muted:{op50:"rgba(55, 65, 81, 0.5)"},accent:{op50:"rgba(234, 179, 8, 0.5)"},success:{base:"rgb(16, 185, 129)"},danger:{base:"rgb(239, 68, 68)"},border:{dark:"rgba(0, 0, 0, 0.1)",darkDim:"rgb(55, 65, 81)"},text:{white:"rgb(255, 255, 255)",lightGray:"rgb(148, 163, 184)"}};export{r as t};
+//# sourceMappingURL=themeColors-Cduerava.js.map

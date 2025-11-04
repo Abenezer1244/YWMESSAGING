@@ -23,6 +23,7 @@ export const themeColors = {
         base: 'rgb(15, 23, 42)',
         light: 'rgb(30, 41, 59)',
         lighter: 'rgb(51, 65, 85)',
+        darkDim: 'rgb(31, 41, 55)', // #1f2937 converted to RGB
         // With opacity
         op80: 'rgba(15, 23, 42, 0.8)',
     },
@@ -41,11 +42,27 @@ export const themeColors = {
         // With opacity
         op50: 'rgba(234, 179, 8, 0.5)',
     },
+    // Success/Green colors
+    success: {
+        base: 'rgb(16, 185, 129)', // #10b981
+        dark: 'rgb(5, 150, 105)',
+    },
+    // Danger/Red colors
+    danger: {
+        base: 'rgb(239, 68, 68)', // #ef4444
+        light: 'rgb(248, 113, 113)',
+    },
     // Border/divider colors
     border: {
         base: 'rgb(100, 116, 139)',
         light: 'rgb(148, 163, 184)',
         dark: 'rgba(0, 0, 0, 0.1)',
+        darkDim: 'rgb(55, 65, 81)', // #374151 converted to RGB
+    },
+    // Text colors
+    text: {
+        white: 'rgb(255, 255, 255)', // #ffffff
+        lightGray: 'rgb(148, 163, 184)', // #94a3b8
     },
     // Semantic shadows
     shadow: {

@@ -20,6 +20,7 @@ export declare const themeColors: {
         base: string;
         light: string;
         lighter: string;
+        darkDim: string;
         op80: string;
     };
     muted: {
@@ -33,10 +34,23 @@ export declare const themeColors: {
         light: string;
         op50: string;
     };
+    success: {
+        base: string;
+        dark: string;
+    };
+    danger: {
+        base: string;
+        light: string;
+    };
     border: {
         base: string;
         light: string;
         dark: string;
+        darkDim: string;
+    };
+    text: {
+        white: string;
+        lightGray: string;
     };
     shadow: {
         primary: string;

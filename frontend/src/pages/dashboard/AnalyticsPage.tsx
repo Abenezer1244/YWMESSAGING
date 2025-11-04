@@ -26,6 +26,14 @@ import Card from '../../components/ui/Card';
 import { themeColors } from '../../utils/themeColors';
 import { Spinner } from '../../components/ui';
 
+// Reusable tooltip style configuration
+const tooltipStyle = {
+  backgroundColor: themeColors.background.darkDim,
+  border: `1px solid ${themeColors.border.darkDim}`,
+  borderRadius: '8px',
+  color: themeColors.text.white,
+};
+
 export function AnalyticsPage() {
   const [messageStats, setMessageStats] = useState<MessageStats | null>(null);
   const [branchStats, setBranchStats] = useState<BranchStats[]>([]);
@@ -145,24 +153,24 @@ export function AnalyticsPage() {
                       height={80}
                     />
                     <YAxis />
-                    <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px', color: '#fff' }} />
+                    <Tooltip contentStyle={tooltipStyle} />
                     <Legend />
                     <Line
                       type="monotone"
                       dataKey="count"
-                      stroke="#3b82f6"
+                      stroke={themeColors.primary.base}
                       name="Messages Sent"
                     />
                     <Line
                       type="monotone"
                       dataKey="delivered"
-                      stroke="#10b981"
+                      stroke={themeColors.success.base}
                       name="Delivered"
                     />
                     <Line
                       type="monotone"
                       dataKey="failed"
-                      stroke="#ef4444"
+                      stroke={themeColors.danger.base}
                       name="Failed"
                     />
                   </LineChart>
@@ -188,18 +196,18 @@ export function AnalyticsPage() {
                     />
                     <YAxis yAxisId="left" />
                     <YAxis yAxisId="right" orientation="right" />
-                    <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px', color: '#fff' }} />
+                    <Tooltip contentStyle={tooltipStyle} />
                     <Legend />
                     <Bar
                       yAxisId="left"
                       dataKey="messageCount"
-                      fill="#3b82f6"
+                      fill={themeColors.primary.base}
                       name="Messages Sent"
                     />
                     <Bar
                       yAxisId="right"
                       dataKey="deliveryRate"
-                      fill="#10b981"
+                      fill={themeColors.success.base}
                       name="Delivery Rate (%)"
                     />
                   </BarChart>
