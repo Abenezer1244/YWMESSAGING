@@ -24,16 +24,16 @@ export function DashboardPage() {
   const trialColor = daysUntilTrialEnd >= 8 ? 'success' : daysUntilTrialEnd >= 4 ? 'warning' : 'danger';
 
   const navigationItems = [
-    { label: '📍 Branches', action: () => navigate('/branches'), always: true },
-    { label: '👥 Groups', action: () => navigate(`/branches/${currentBranchId}/groups`), conditional: true },
-    { label: '👤 Members', action: () => navigate(`/members?groupId=`), conditional: true },
-    { label: '📨 Send Message', action: () => navigate('/send-message'), conditional: true },
-    { label: '📜 History', action: () => navigate('/message-history'), conditional: true },
-    { label: '📋 Templates', action: () => navigate('/templates'), conditional: true },
-    { label: '🔄 Recurring', action: () => navigate('/recurring-messages'), conditional: true },
-    { label: '📊 Analytics', action: () => navigate('/analytics'), conditional: true },
-    { label: '💳 Billing', action: () => navigate('/billing'), always: true },
-    { label: '⚙️ Settings', action: () => navigate('/admin/settings'), always: true },
+    { label: 'Branches', action: () => navigate('/branches'), always: true },
+    { label: 'Groups', action: () => navigate(`/branches/${currentBranchId}/groups`), conditional: true },
+    { label: 'Members', action: () => navigate(`/members?groupId=`), conditional: true },
+    { label: 'Send Message', action: () => navigate('/send-message'), conditional: true },
+    { label: 'History', action: () => navigate('/message-history'), conditional: true },
+    { label: 'Templates', action: () => navigate('/templates'), conditional: true },
+    { label: 'Recurring', action: () => navigate('/recurring-messages'), conditional: true },
+    { label: 'Analytics', action: () => navigate('/analytics'), conditional: true },
+    { label: 'Billing', action: () => navigate('/billing'), always: true },
+    { label: 'Settings', action: () => navigate('/admin/settings'), always: true },
   ];
 
   return (
@@ -89,7 +89,7 @@ export function DashboardPage() {
         {/* Welcome Section */}
         <div className="mb-8 animate-fadeIn">
           <h2 className="text-3xl font-bold text-foreground mb-6 tracking-tight">
-            Welcome back, {user?.firstName}! 👋
+            Welcome back, {user?.firstName}!
           </h2>
 
           {/* Info Cards Grid */}
@@ -97,8 +97,8 @@ export function DashboardPage() {
             {/* User Info Card */}
             <Card variant="default" className="border border-border bg-card hover:shadow-md transition-all">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center text-2xl">
-                  👤
+                <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center">
+                  <div className="w-6 h-6 bg-blue-500 rounded-full"></div>
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-foreground mb-3">Your Account</h3>
@@ -120,8 +120,8 @@ export function DashboardPage() {
             {/* Church Info Card */}
             <Card variant="default" className="border border-border bg-card hover:shadow-md transition-all">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center text-2xl">
-                  ⛪
+                <div className="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center">
+                  <div className="w-6 h-6 bg-purple-500 rounded-full"></div>
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-foreground mb-3">Church Details</h3>
@@ -145,8 +145,8 @@ export function DashboardPage() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card variant="default" className="text-center border border-border bg-card hover:shadow-md transition-all">
-            <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center mx-auto mb-4 text-3xl">
-              📍
+            <div className="w-14 h-14 bg-blue-500/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <div className="w-7 h-7 bg-blue-500 rounded-full"></div>
             </div>
             <div className="text-4xl font-bold text-primary mb-2">0</div>
             <p className="text-muted-foreground font-medium mb-4">Active Branches</p>
@@ -162,8 +162,8 @@ export function DashboardPage() {
           </Card>
 
           <Card variant="default" className="text-center border border-border bg-card hover:shadow-md transition-all">
-            <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center mx-auto mb-4 text-3xl">
-              👥
+            <div className="w-14 h-14 bg-green-500/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <div className="w-7 h-7 bg-green-500 rounded-full"></div>
             </div>
             <div className="text-4xl font-bold text-primary mb-2">0</div>
             <p className="text-muted-foreground font-medium mb-4">Total Members</p>
@@ -179,8 +179,8 @@ export function DashboardPage() {
           </Card>
 
           <Card variant="default" className="text-center border border-border bg-card hover:shadow-md transition-all">
-            <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center mx-auto mb-4 text-3xl">
-              📨
+            <div className="w-14 h-14 bg-orange-500/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <div className="w-7 h-7 bg-orange-500 rounded-full"></div>
             </div>
             <div className="text-4xl font-bold text-primary mb-2">0</div>
             <p className="text-muted-foreground font-medium mb-4">Messages Sent</p>
@@ -198,22 +198,42 @@ export function DashboardPage() {
 
         {/* Quick Features */}
         <Card variant="default" className="border border-border bg-card">
-          <h3 className="text-xl font-bold text-foreground mb-6">✨ Key Features</h3>
+          <h3 className="text-xl font-bold text-foreground mb-6">Key Features</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              { icon: '📍', title: 'Multi-Branch', desc: 'Manage multiple church locations' },
-              { icon: '👥', title: 'Groups & Members', desc: 'Organize and segment your congregation' },
-              { icon: '📨', title: 'SMS Messaging', desc: 'Send direct messages to members' },
-              { icon: '📋', title: 'Templates', desc: 'Reuse pre-built message templates' },
-              { icon: '🔄', title: 'Recurring Messages', desc: 'Automate regular communications' },
-              { icon: '📊', title: 'Analytics', desc: 'Track engagement and delivery rates' },
-            ].map((feature, idx) => (
-              <div key={idx} className="p-4 bg-muted border border-border rounded-lg hover:shadow-md transition-all">
-                <div className="text-3xl mb-3">{feature.icon}</div>
-                <h4 className="font-semibold text-foreground mb-1">{feature.title}</h4>
-                <p className="text-sm text-muted-foreground">{feature.desc}</p>
-              </div>
-            ))}
+              { color: 'blue', title: 'Multi-Branch', desc: 'Manage multiple church locations' },
+              { color: 'green', title: 'Groups & Members', desc: 'Organize and segment your congregation' },
+              { color: 'orange', title: 'SMS Messaging', desc: 'Send direct messages to members' },
+              { color: 'purple', title: 'Templates', desc: 'Reuse pre-built message templates' },
+              { color: 'pink', title: 'Recurring Messages', desc: 'Automate regular communications' },
+              { color: 'cyan', title: 'Analytics', desc: 'Track engagement and delivery rates' },
+            ].map((feature, idx) => {
+              const colorMap: any = {
+                blue: 'bg-blue-500/10 border-blue-500/20',
+                green: 'bg-green-500/10 border-green-500/20',
+                orange: 'bg-orange-500/10 border-orange-500/20',
+                purple: 'bg-purple-500/10 border-purple-500/20',
+                pink: 'bg-pink-500/10 border-pink-500/20',
+                cyan: 'bg-cyan-500/10 border-cyan-500/20',
+              };
+              const dotColorMap: any = {
+                blue: 'bg-blue-500',
+                green: 'bg-green-500',
+                orange: 'bg-orange-500',
+                purple: 'bg-purple-500',
+                pink: 'bg-pink-500',
+                cyan: 'bg-cyan-500',
+              };
+              return (
+                <div key={idx} className={`p-4 ${colorMap[feature.color]} border rounded-lg hover:shadow-md transition-all`}>
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className={`w-3 h-3 ${dotColorMap[feature.color]} rounded-full flex-shrink-0 mt-1`}></div>
+                  </div>
+                  <h4 className="font-semibold text-foreground mb-1">{feature.title}</h4>
+                  <p className="text-sm text-muted-foreground">{feature.desc}</p>
+                </div>
+              );
+            })}
           </div>
         </Card>
       </main>
