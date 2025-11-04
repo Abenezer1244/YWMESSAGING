@@ -3,6 +3,7 @@ import Navigation from '../components/landing/Navigation';
 import Hero from '../components/landing/Hero';
 import DashboardPreview from '../components/landing/DashboardPreview';
 import Features from '../components/landing/Features';
+import Comparison from '../components/landing/Comparison';
 import Pricing from '../components/landing/Pricing';
 import Testimonials from '../components/landing/Testimonials';
 import FinalCTA from '../components/landing/FinalCTA';
@@ -70,6 +71,7 @@ export default function LandingPage() {
         <Hero />
         <DashboardPreview />
         <Features />
+        <Comparison />
         <Pricing />
         <Testimonials />
         <FinalCTA />
