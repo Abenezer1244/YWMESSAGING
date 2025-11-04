@@ -1,0 +1,175 @@
+=============================================================================
+HARDCODED COLORS & STYLING ISSUES - COMPLETE FILE LIST
+=============================================================================
+
+CRITICAL PRIORITY (Must Fix)
+=============================================================================
+
+1. DashboardPage.tsx
+   Location: frontend/src/pages/DashboardPage.tsx
+   Issues: 
+   - Line 23: Hardcoded color array for charts ['#3b82f6', '#06b6d4', '#10b981', '#f59e0b']
+   - Line 110: Hardcoded gradient "from-blue-500 to-cyan-500"
+   - Lines 134, 143, 152: Multiple gradient props with hardcoded colors
+   - Lines 186-187: Bar chart colors hardcoded ('#3b82f6', '#ef4444')
+   - Lines 258, 260, 265, 267: Line chart colors hardcoded
+   Impact: HIGH - Primary dashboard UI
+
+HIGH PRIORITY (Important)
+=============================================================================
+
+2. AdminSettingsPage.tsx
+   Location: frontend/src/pages/AdminSettingsPage.tsx
+   Issues: Hardcoded gradient "from-blue-500 to-cyan-500 to-cyan-500"
+   Impact: MEDIUM - Admin settings page
+
+3. BillingPage.tsx
+   Location: frontend/src/pages/BillingPage.tsx
+   Issues: Hardcoded gradient "from-blue-500 to-cyan-500"
+   Impact: MEDIUM - Payment/billing page
+
+4. AnalyticsPage.tsx
+   Location: frontend/src/pages/dashboard/AnalyticsPage.tsx
+   Issues: Hardcoded gradient "from-blue-500 to-cyan-500"
+   Impact: MEDIUM - Analytics dashboard
+
+5. BranchesPage.tsx
+   Location: frontend/src/pages/dashboard/BranchesPage.tsx
+   Issues: Hardcoded gradient "from-blue-500 to-cyan-500"
+   Impact: MEDIUM - Branch management
+
+6. GroupsPage.tsx
+   Location: frontend/src/pages/dashboard/GroupsPage.tsx
+   Issues: Hardcoded gradient "from-blue-500 to-cyan-500"
+   Impact: MEDIUM - Group management
+
+7. MembersPage.tsx
+   Location: frontend/src/pages/dashboard/MembersPage.tsx
+   Issues: Hardcoded gradient "from-blue-500 to-cyan-500"
+   Impact: MEDIUM - Member management
+
+8. MessageHistoryPage.tsx
+   Location: frontend/src/pages/dashboard/MessageHistoryPage.tsx
+   Issues: Hardcoded gradient "from-blue-500 to-cyan-500"
+   Impact: MEDIUM - Message history view
+
+9. RecurringMessagesPage.tsx
+   Location: frontend/src/pages/dashboard/RecurringMessagesPage.tsx
+   Issues: Hardcoded gradient "from-blue-500 to-cyan-500"
+   Impact: MEDIUM - Recurring messages
+
+10. SendMessagePage.tsx
+    Location: frontend/src/pages/dashboard/SendMessagePage.tsx
+    Issues: Hardcoded gradient "from-blue-500 to-cyan-500"
+    Impact: MEDIUM - Send message interface
+
+11. TemplatesPage.tsx
+    Location: frontend/src/pages/dashboard/TemplatesPage.tsx
+    Issues: Hardcoded gradient "from-blue-500 to-cyan-500"
+    Impact: MEDIUM - Message templates
+
+MEDIUM PRIORITY (Secondary)
+=============================================================================
+
+12. AboutPage.tsx
+    Location: frontend/src/pages/AboutPage.tsx
+    Issues: Line 145: Mixed gradient "from-primary/10 to-blue-500/10"
+    Impact: LOW-MEDIUM - Public about page (mostly compliant)
+
+13. BlogPage.tsx
+    Location: frontend/src/pages/BlogPage.tsx
+    Issues: Line 134: Mixed gradient "from-primary/10 to-blue-500/10"
+    Impact: LOW-MEDIUM - Public blog page
+
+14. CareersPage.tsx
+    Location: frontend/src/pages/CareersPage.tsx
+    Issues: Similar mixed gradient pattern
+    Impact: LOW - Public careers page
+
+=============================================================================
+COMPLIANT PAGES (No Action Needed)
+=============================================================================
+
+Public Pages:
+- LoginPage.tsx - COMPLIANT
+- RegisterPage.tsx - COMPLIANT
+- TermsPage.tsx - COMPLIANT
+- PrivacyPage.tsx - COMPLIANT
+- SecurityPage.tsx - COMPLIANT
+- LandingPage.tsx - COMPLIANT
+- CheckoutPage.tsx - COMPLIANT
+- CookiePolicyPage.tsx - COMPLIANT
+
+Landing Components:
+- Hero.tsx - COMPLIANT
+- Features.tsx - COMPLIANT
+- Comparison.tsx - COMPLIANT
+- Pricing.tsx - COMPLIANT
+- Testimonials.tsx - COMPLIANT
+- FinalCTA.tsx - COMPLIANT
+- Footer.tsx - COMPLIANT
+- Navigation.tsx - COMPLIANT
+
+=============================================================================
+HARDCODED COLORS FOUND
+=============================================================================
+
+HEX Colors:
+- #3b82f6 (Tailwind blue-500)
+- #06b6d4 (Tailwind cyan-500)
+- #10b981 (Tailwind green-500)
+- #f59e0b (Tailwind amber-500)
+- #ef4444 (Tailwind red-500)
+
+Tailwind Classes (Should Use Design Tokens):
+- from-blue-500 to-cyan-500
+- from-green-500 to-emerald-500
+- from-purple-500 to-pink-500
+- to-blue-500/10
+
+=============================================================================
+AVAILABLE DESIGN TOKENS (Should Use Instead)
+=============================================================================
+
+Primary Colors:
+- --primary / bg-primary
+- --secondary / bg-secondary
+- --accent / bg-accent
+
+Semantic Colors:
+- --muted / bg-muted
+- --destructive / bg-destructive
+- --background / bg-background
+- --foreground / text-foreground
+
+Chart Colors:
+- --chart-1 through --chart-5
+
+Opacity Modifiers Available:
+- /10, /20, /30, /40, /50, /60, /70, /80, /90
+
+=============================================================================
+REMEDIATION STRATEGY
+=============================================================================
+
+1. DashboardPage.tsx
+   - Replace COLORS array with design token references
+   - Update chart fill/stroke to use --primary, --secondary, --chart-1, etc.
+   - Replace gradient classes with design token combinations
+
+2. Admin Pages & Dashboard Sub-pages
+   - Replace all "from-blue-500 to-cyan-500" with design token gradients
+   - Use "from-primary to-secondary" or similar patterns
+   - Ensure consistency across all admin pages
+
+3. Public Pages (AboutPage, BlogPage, CareersPage)
+   - Replace "blue-500" references with "primary" or "secondary"
+   - Keep "primary/10" pattern but remove blue-500 hardcoding
+
+4. Long-term
+   - Add ESLint rule: no-hardcoded-colors
+   - Create reusable gradient component wrapper
+   - Add design token documentation
+   - Add pre-commit hook validation
+
+=============================================================================

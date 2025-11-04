@@ -163,7 +163,7 @@ export function BillingPage() {
           className="mb-8"
         >
           <h1 className="text-4xl font-bold text-foreground mb-2">
-            <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">Billing</span>
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Billing</span>
           </h1>
           <p className="text-muted-foreground">Manage your subscription and view usage</p>
         </motion.div>

@@ -95,7 +95,7 @@ export function SendMessagePage() {
         >
           <div>
             <h1 className="text-4xl font-bold text-foreground mb-2">
-              <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">Send Message</span>
+              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Send Message</span>
             </h1>
             <p className="text-muted-foreground">Reach your congregation with direct SMS messages</p>
           </div>

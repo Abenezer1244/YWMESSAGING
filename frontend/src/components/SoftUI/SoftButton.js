@@ -1,6 +1,6 @@
 import { jsxs as _jsxs } from "react/jsx-runtime";
 import { motion } from 'framer-motion';
-export function SoftButton({ children, variant = 'primary', size = 'md', onClick, disabled = false, fullWidth = false, icon, className = '', }) {
+export function SoftButton({ children, variant = 'primary', size = 'md', onClick, disabled = false, fullWidth = false, icon, className = '', type = 'button', }) {
     const baseClasses = 'font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2';
     const variants = {
         primary: 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:shadow-lg disabled:opacity-50',
@@ -13,6 +13,6 @@ export function SoftButton({ children, variant = 'primary', size = 'md', onClick
         md: 'px-6 py-3 text-base',
         lg: 'px-8 py-4 text-lg',
     };
-    return (_jsxs(motion.button, { whileHover: !disabled ? { scale: 1.02 } : {}, whileTap: !disabled ? { scale: 0.98 } : {}, onClick: onClick, disabled: disabled, className: `${baseClasses} ${variants[variant]} ${sizes[size]} ${fullWidth ? 'w-full' : ''} ${className}`, children: [icon, children] }));
+    return (_jsxs(motion.button, { type: type, whileHover: !disabled ? { scale: 1.02 } : {}, whileTap: !disabled ? { scale: 0.98 } : {}, onClick: onClick, disabled: disabled, className: `${baseClasses} ${variants[variant]} ${sizes[size]} ${fullWidth ? 'w-full' : ''} ${className}`, children: [icon, children] }));
 }
 //# sourceMappingURL=SoftButton.js.map

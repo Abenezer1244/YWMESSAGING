@@ -149,7 +149,7 @@ export function MembersPage() {
           <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
             <div>
               <h1 className="text-4xl font-bold text-foreground mb-2">
-                <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">Members</span>
+                <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Members</span>
               </h1>
               <p className="text-muted-foreground">
                 {currentGroup.name} • {total} members

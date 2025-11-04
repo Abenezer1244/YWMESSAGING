@@ -20,7 +20,26 @@ import { getGroups } from '../api/groups';
 import { SoftLayout, SoftCard, SoftStat, SoftButton } from '../components/SoftUI';
 import TrialBanner from '../components/TrialBanner';
 
-const COLORS = ['#3b82f6', '#06b6d4', '#10b981', '#f59e0b'];
+// Get CSS variable value and convert oklch to hex approximation
+const getCSSColor = (varName: string): string => {
+  const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  // Return the oklch value or fallback to hex
+  if (value) return value;
+  return '#000000';
+};
+
+// Use theme colors from CSS variables
+const getThemeColors = (): string[] => {
+  return [
+    getCSSColor('--chart-1'), // Blue
+    getCSSColor('--chart-2'), // Orange
+    getCSSColor('--chart-3'), // Green
+    getCSSColor('--chart-4'), // Gray
+  ];
+};
+
+// Initialize with theme colors, fallback to original if CSS vars unavailable
+const COLORS = ['#4A9FBF', '#FFB81C', '#98C26E', '#505050']; // Theme-based hex colors
 
 export function DashboardPage() {
   const { user, church } = useAuthStore();
@@ -107,7 +126,7 @@ export function DashboardPage() {
           className="mb-8"
         >
           <h1 className="text-4xl font-bold text-foreground mb-2">
-            Welcome back, <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">{user?.firstName}</span>
+            Welcome back, <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{user?.firstName}</span>
           </h1>
           <p className="text-muted-foreground">
             {church?.name} • {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
@@ -131,7 +150,7 @@ export function DashboardPage() {
                 value={totalMessagesSent.toLocaleString()}
                 change={12}
                 changeType="positive"
-                gradient="from-blue-500 to-cyan-500"
+                gradient="from-primary to-accent"
                 index={0}
               />
               <SoftStat
@@ -183,8 +202,8 @@ export function DashboardPage() {
                             borderRadius: '8px',
                           }}
                         />
-                        <Bar dataKey="delivered" fill="#3b82f6" radius={[8, 8, 0, 0]} />
-                        <Bar dataKey="failed" fill="#ef4444" radius={[8, 8, 0, 0]} />
+                        <Bar dataKey="delivered" fill={COLORS[0]} radius={[8, 8, 0, 0]} />
+                        <Bar dataKey="failed" fill={COLORS[3]} radius={[8, 8, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
@@ -255,16 +274,16 @@ export function DashboardPage() {
                       <Line
                         type="monotone"
                         dataKey="sent"
-                        stroke="#3b82f6"
+                        stroke={COLORS[0]}
                         strokeWidth={3}
-                        dot={{ fill: '#3b82f6', r: 5 }}
+                        dot={{ fill: COLORS[0], r: 5 }}
                       />
                       <Line
                         type="monotone"
                         dataKey="delivered"
-                        stroke="#06b6d4"
+                        stroke={COLORS[1]}
                         strokeWidth={3}
-                        dot={{ fill: '#06b6d4', r: 5 }}
+                        dot={{ fill: COLORS[1], r: 5 }}
                       />
                     </LineChart>
                   </ResponsiveContainer>

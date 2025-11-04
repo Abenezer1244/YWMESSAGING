@@ -60,7 +60,7 @@ export function MessageHistoryPage() {
           className="mb-8"
         >
           <h1 className="text-4xl font-bold text-foreground mb-2">
-            <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">Message History</span>
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Message History</span>
           </h1>
           <p className="text-muted-foreground">{total} total messages</p>
         </motion.div>
