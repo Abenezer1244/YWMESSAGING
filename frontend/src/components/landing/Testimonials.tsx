@@ -15,7 +15,7 @@ const testimonials: Testimonial[] = [
     name: 'Pastor Michael Thompson',
     role: 'Senior Pastor',
     church: 'Grace Community Church',
-    content: 'Connect has transformed how we communicate with our congregation. Managing messages across our 5 locations is now seamless, and our members love the personal touch.',
+    content: 'Koinonia has transformed how we communicate with our congregation. Managing messages across our 5 locations is now seamless, and our members love the personal touch.',
   },
   {
     name: 'Sarah Johnson',
@@ -119,7 +119,7 @@ export default function Testimonials() {
             transition={{ duration: 0.8, delay: 0.2 }}
             viewport={{ once: true }}
           >
-            See how churches across the country are using Connect to strengthen their communities.
+            See how churches across the country are using Koinonia to strengthen their communities.
           </motion.p>
         </motion.div>
 

@@ -7,7 +7,7 @@ const testimonials = [
         name: 'Pastor Michael Thompson',
         role: 'Senior Pastor',
         church: 'Grace Community Church',
-        content: 'Connect has transformed how we communicate with our congregation. Managing messages across our 5 locations is now seamless, and our members love the personal touch.',
+        content: 'Koinonia has transformed how we communicate with our congregation. Managing messages across our 5 locations is now seamless, and our members love the personal touch.',
     },
     {
         name: 'Sarah Johnson',
@@ -65,7 +65,7 @@ export default function Testimonials() {
                                             repeatType: 'reverse',
                                         }, style: {
                                             backgroundSize: '200% 200%',
-                                        }, children: "Church Leaders" })] }), _jsx(motion.p, { className: "text-lg text-muted-foreground max-w-3xl mx-auto font-light leading-relaxed", initial: { opacity: 0 }, whileInView: { opacity: 1 }, transition: { duration: 0.8, delay: 0.2 }, viewport: { once: true }, children: "See how churches across the country are using Connect to strengthen their communities." })] }), _jsx(motion.div, { className: "grid md:grid-cols-3 gap-6", variants: containerVariants, initial: "hidden", whileInView: "visible", viewport: { once: true, margin: '-100px' }, children: testimonials.map((testimonial, index) => (_jsx(motion.div, { variants: itemVariants, children: _jsxs(Card, { variant: "default", className: "group relative p-8 bg-muted/50 border border-border/50 hover:border-primary/50 backdrop-blur-xl rounded-lg transition-all duration-300 overflow-hidden h-full", children: [_jsx("div", { className: "absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/0 to-primary/0 group-hover:from-primary/5 group-hover:via-primary/5 group-hover:to-primary/5 transition-all duration-300 pointer-events-none" }), _jsxs("div", { className: "relative z-10", children: [_jsx(motion.div, { className: "mb-6", animate: {
+                                        }, children: "Church Leaders" })] }), _jsx(motion.p, { className: "text-lg text-muted-foreground max-w-3xl mx-auto font-light leading-relaxed", initial: { opacity: 0 }, whileInView: { opacity: 1 }, transition: { duration: 0.8, delay: 0.2 }, viewport: { once: true }, children: "See how churches across the country are using Koinonia to strengthen their communities." })] }), _jsx(motion.div, { className: "grid md:grid-cols-3 gap-6", variants: containerVariants, initial: "hidden", whileInView: "visible", viewport: { once: true, margin: '-100px' }, children: testimonials.map((testimonial, index) => (_jsx(motion.div, { variants: itemVariants, children: _jsxs(Card, { variant: "default", className: "group relative p-8 bg-muted/50 border border-border/50 hover:border-primary/50 backdrop-blur-xl rounded-lg transition-all duration-300 overflow-hidden h-full", children: [_jsx("div", { className: "absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/0 to-primary/0 group-hover:from-primary/5 group-hover:via-primary/5 group-hover:to-primary/5 transition-all duration-300 pointer-events-none" }), _jsxs("div", { className: "relative z-10", children: [_jsx(motion.div, { className: "mb-6", animate: {
                                                     y: [0, -5, 0],
                                                     rotate: [0, 5, 0],
                                                 }, transition: {

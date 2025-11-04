@@ -4,14 +4,14 @@ export default function Comparison() {
   return (
     <section id="comparison" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-background overflow-hidden">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-4xl font-bold text-foreground mb-6">Why Choose Connect</h2>
+        <h2 className="text-4xl font-bold text-foreground mb-6">Why Choose Koinonia</h2>
         <p className="text-lg text-muted-foreground mb-12">See how we compare to competitors</p>
 
         <div className="bg-muted/20 rounded-lg border border-border/50 overflow-hidden">
           {/* Simple comparison table */}
           <div className="grid grid-cols-5 gap-4 p-6 border-b border-border/50">
             <div>Feature</div>
-            <div className="text-center font-semibold">Connect</div>
+            <div className="text-center font-semibold">Koinonia</div>
             <div className="text-center font-semibold">Twilio</div>
             <div className="text-center font-semibold">Pushpay</div>
             <div className="text-center font-semibold">Planning Center</div>

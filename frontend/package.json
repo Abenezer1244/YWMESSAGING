@@ -1,7 +1,7 @@
 {
   "name": "connect-frontend",
   "version": "0.1.0",
-  "description": "Frontend for Connect Enterprise Communication Platform",
+  "description": "Frontend for Koinonia Enterprise Communication Platform",
   "private": true,
   "type": "module",
   "scripts": {

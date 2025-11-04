@@ -16,7 +16,7 @@ export default function Footer() {
               <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center">
                 <span className="text-background font-bold text-base">C</span>
               </div>
-              <span className="text-lg font-semibold text-foreground">Connect</span>
+              <span className="text-lg font-semibold text-foreground">Koinonia</span>
             </Link>
             <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
               Enterprise SMS communication platform for churches managing multiple locations and hundreds of members.
@@ -129,7 +129,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-primary/30 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} Connect. All rights reserved.
+            &copy; {new Date().getFullYear()} Koinonia. All rights reserved.
           </p>
           <p className="text-sm text-muted-foreground">
             Made with <span className="text-red-500 animate-pulse">â™¥</span> for churches

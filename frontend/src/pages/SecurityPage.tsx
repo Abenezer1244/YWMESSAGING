@@ -22,7 +22,7 @@ export default function SecurityPage() {
           <section>
             <h2 className="text-2xl font-semibold text-foreground mb-4">1. Our Commitment to Security</h2>
             <p className="leading-relaxed">
-              Connect takes the security of your data seriously. We are committed to implementing industry-leading security measures to protect your personal information, organization data, and communications. This page outlines our security practices and commitments.
+              Koinonia takes the security of your data seriously. We are committed to implementing industry-leading security measures to protect your personal information, organization data, and communications. This page outlines our security practices and commitments.
             </p>
           </section>
 
@@ -79,7 +79,7 @@ export default function SecurityPage() {
               <div>
                 <h3 className="text-lg font-semibold text-foreground/90 mb-2">Hosting & Infrastructure</h3>
                 <p className="leading-relaxed">
-                  Connect is hosted on secure, enterprise-grade cloud infrastructure. Our servers are protected by firewalls, intrusion detection systems, and continuous monitoring.
+                  Koinonia is hosted on secure, enterprise-grade cloud infrastructure. Our servers are protected by firewalls, intrusion detection systems, and continuous monitoring.
                 </p>
               </div>
               <div>
@@ -128,7 +128,7 @@ export default function SecurityPage() {
           <section>
             <h2 className="text-2xl font-semibold text-foreground mb-4">6. Compliance & Certifications</h2>
             <p className="leading-relaxed mb-3">
-              Connect complies with major data protection and security standards:
+              Koinonia complies with major data protection and security standards:
             </p>
             <ul className="space-y-3">
               <li className="flex gap-3">
@@ -193,7 +193,7 @@ export default function SecurityPage() {
               For security-related questions or concerns, please contact:
             </p>
             <div className="bg-muted border border-border rounded-lg p-6">
-              <p className="text-foreground">Connect Support</p>
+              <p className="text-foreground">Koinonia Support</p>
               <p className="text-muted-foreground">Email: support@connect.com</p>
               <p className="text-muted-foreground">Website: www.connect.com</p>
             </div>

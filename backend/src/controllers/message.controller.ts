@@ -26,7 +26,7 @@ function validateTwilioSignature(req: Request, twilioAuthToken: string): boolean
 
 /**
  * POST /api/churches/:churchId/twilio/connect
- * Connect Twilio credentials
+ * Koinonia Twilio credentials
  */
 export async function connectTwilio(req: Request, res: Response) {
   try {

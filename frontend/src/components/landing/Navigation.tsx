@@ -65,7 +65,7 @@ export default function Navigation() {
             <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-normal">
               <span className="text-background font-bold text-base">C</span>
             </div>
-            <span className="text-lg font-semibold text-foreground hidden sm:block">Connect</span>
+            <span className="text-lg font-semibold text-foreground hidden sm:block">Koinonia</span>
           </Link>
 
           {/* Desktop Navigation */}

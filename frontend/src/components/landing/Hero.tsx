@@ -136,7 +136,7 @@ export default function Hero() {
                     repeat: Infinity,
                   }}
                 >
-                  Connect Your
+                  Koinonia Your
                 </motion.span>
                 <br />
                 <motion.span

@@ -1,7 +1,7 @@
 {
   "name": "connect-yw-backend",
   "version": "0.1.0",
-  "description": "Backend API for Connect YW Platform",
+  "description": "Backend API for Koinonia YW Platform",
   "private": true,
   "type": "module",
   "main": "dist/index.js",

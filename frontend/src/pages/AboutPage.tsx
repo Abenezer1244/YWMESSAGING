@@ -52,7 +52,7 @@ export default function AboutPage() {
       {/* Header Section */}
       <div className="px-6 py-12 bg-muted">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold text-foreground mb-4">About Connect</h1>
+          <h1 className="text-5xl font-bold text-foreground mb-4">About Koinonia</h1>
           <p className="text-xl text-foreground/80 max-w-2xl mx-auto">
             Empowering faith communities with modern communication technology
           </p>
@@ -66,13 +66,13 @@ export default function AboutPage() {
           <h2 className="text-3xl font-bold text-foreground mb-6">Our Story</h2>
           <div className="space-y-4 text-foreground/80 leading-relaxed">
             <p>
-              Connect was founded with a simple belief: churches need better tools to communicate with their congregations. Whether it's important announcements, event reminders, or emergency notifications, reliable communication is essential for modern faith communities.
+              Koinonia was founded with a simple belief: churches need better tools to communicate with their congregations. Whether it's important announcements, event reminders, or emergency notifications, reliable communication is essential for modern faith communities.
             </p>
             <p>
               We recognized that churches were struggling with outdated communication methods and fragmented systems. Our mission became clear: build a dedicated SMS platform designed specifically for churches, with their unique needs in mind.
             </p>
             <p>
-              Today, Connect serves hundreds of churches of all sizes, from small parishes to large dioceses, helping them communicate more effectively with their members and strengthen their communities.
+              Today, Koinonia serves hundreds of churches of all sizes, from small parishes to large dioceses, helping them communicate more effectively with their members and strengthen their communities.
             </p>
           </div>
         </section>
@@ -112,7 +112,7 @@ export default function AboutPage() {
 
         {/* Why Choose Us Section */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-foreground mb-6">Why Choose Connect?</h2>
+          <h2 className="text-3xl font-bold text-foreground mb-6">Why Choose Koinonia?</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-primary/10 border border-primary/30 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-foreground mb-3">Built for Churches</h3>
@@ -145,7 +145,7 @@ export default function AboutPage() {
         <section className="bg-gradient-to-r from-primary/10 to-blue-500/10 border border-primary/30 rounded-lg p-8 text-center">
           <h2 className="text-2xl font-bold text-foreground mb-4">Ready to Transform Your Communication?</h2>
           <p className="text-foreground/80 mb-6 max-w-2xl mx-auto">
-            Join hundreds of churches already using Connect to strengthen their communities.
+            Join hundreds of churches already using Koinonia to strengthen their communities.
           </p>
           <Link
             to="/register"

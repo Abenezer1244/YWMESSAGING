@@ -136,7 +136,7 @@ export default function CookiePolicyPage() {
               If you have questions about our use of cookies, please contact us at:
             </p>
             <div className="bg-muted border border-border rounded-lg p-6">
-              <p className="text-foreground">Connect Support</p>
+              <p className="text-foreground">Koinonia Support</p>
               <p className="text-muted-foreground">Email: privacy@connect.com</p>
               <p className="text-muted-foreground">Website: www.connect.com</p>
             </div>

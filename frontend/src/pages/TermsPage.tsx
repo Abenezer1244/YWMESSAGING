@@ -22,7 +22,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-semibold text-foreground mb-4">1. Agreement to Terms</h2>
             <p className="leading-relaxed">
-              By accessing and using the Connect platform, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
+              By accessing and using the Koinonia platform, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
             </p>
           </section>
 
@@ -30,7 +30,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-semibold text-foreground mb-4">2. Use License</h2>
             <p className="leading-relaxed mb-3">
-              Permission is granted to temporarily download one copy of the materials (information or software) on Connect for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
+              Permission is granted to temporarily download one copy of the materials (information or software) on Koinonia for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
             </p>
             <ul className="space-y-3">
               <li className="flex gap-3">
@@ -43,7 +43,7 @@ export default function TermsPage() {
               </li>
               <li className="flex gap-3">
                 <span className="text-primary flex-shrink-0">•</span>
-                <span>Attempting to decompile or reverse engineer any software contained on Connect</span>
+                <span>Attempting to decompile or reverse engineer any software contained on Koinonia</span>
               </li>
               <li className="flex gap-3">
                 <span className="text-primary flex-shrink-0">•</span>
@@ -56,7 +56,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-semibold text-foreground mb-4">3. Disclaimer</h2>
             <p className="leading-relaxed">
-              The materials on Connect are provided "as is". Connect makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
+              The materials on Koinonia are provided "as is". Koinonia makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
             </p>
           </section>
 
@@ -64,7 +64,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-semibold text-foreground mb-4">4. Limitations of Liability</h2>
             <p className="leading-relaxed">
-              In no event shall Connect or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on Connect, even if Connect or an authorized representative has been notified orally or in writing of the possibility of such damage.
+              In no event shall Koinonia or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on Koinonia, even if Koinonia or an authorized representative has been notified orally or in writing of the possibility of such damage.
             </p>
           </section>
 
@@ -72,7 +72,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-semibold text-foreground mb-4">5. Accuracy of Materials</h2>
             <p className="leading-relaxed">
-              The materials appearing on Connect could include technical, typographical, or photographic errors. Connect does not warrant that any of the materials on its website are accurate, complete, or current. Connect may make changes to the materials contained on its website at any time without notice.
+              The materials appearing on Koinonia could include technical, typographical, or photographic errors. Koinonia does not warrant that any of the materials on its website are accurate, complete, or current. Koinonia may make changes to the materials contained on its website at any time without notice.
             </p>
           </section>
 
@@ -80,7 +80,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-semibold text-foreground mb-4">6. User Responsibilities</h2>
             <p className="leading-relaxed mb-3">
-              By using Connect, you agree that you will not:
+              By using Koinonia, you agree that you will not:
             </p>
             <ul className="space-y-3">
               <li className="flex gap-3">
@@ -106,7 +106,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-semibold text-foreground mb-4">7. Termination</h2>
             <p className="leading-relaxed">
-              Connect may terminate or suspend your account and access to the service immediately, without prior notice or liability, for any reason whatsoever, including if you breach the Terms. Upon termination, your right to use the service will immediately cease.
+              Koinonia may terminate or suspend your account and access to the service immediately, without prior notice or liability, for any reason whatsoever, including if you breach the Terms. Upon termination, your right to use the service will immediately cease.
             </p>
           </section>
 
@@ -117,7 +117,7 @@ export default function TermsPage() {
               If you have any questions about these Terms of Service, please contact us at:
             </p>
             <div className="bg-muted border border-border rounded-lg p-6">
-              <p className="text-foreground">Connect Support</p>
+              <p className="text-foreground">Koinonia Support</p>
               <p className="text-muted-foreground">Email: support@connect.com</p>
               <p className="text-muted-foreground">Website: www.connect.com</p>
             </div>

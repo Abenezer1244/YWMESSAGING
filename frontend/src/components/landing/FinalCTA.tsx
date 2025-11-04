@@ -104,7 +104,7 @@ export default function FinalCTA() {
                 backgroundSize: '200% 200%',
               }}
             >
-              Connect Your Church?
+              Koinonia Your Church?
             </motion.span>
           </h2>
           <motion.p
@@ -114,7 +114,7 @@ export default function FinalCTA() {
             transition={{ duration: 0.8, delay: 0.2 }}
             viewport={{ once: true }}
           >
-            Join hundreds of churches using Connect to strengthen their community communication.
+            Join hundreds of churches using Koinonia to strengthen their community communication.
             Start your 14-day free trial todayâ€”no credit card required.
           </motion.p>
         </motion.div>

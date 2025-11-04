@@ -119,7 +119,7 @@ export default function Features() {
                 backgroundSize: '200% 200%',
               }}
             >
-              Stay Connected
+              Stay Koinoniaed
             </motion.span>
           </h2>
           <motion.p

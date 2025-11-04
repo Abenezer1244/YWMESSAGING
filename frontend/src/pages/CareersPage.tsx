@@ -28,7 +28,7 @@ export default function CareersPage() {
       location: 'Remote',
       type: 'Full-time',
       experience: '2+ years',
-      description: 'Help our church customers succeed with Connect.',
+      description: 'Help our church customers succeed with Koinonia.',
     },
     {
       id: 4,
@@ -46,7 +46,7 @@ export default function CareersPage() {
       location: 'Remote',
       type: 'Full-time',
       experience: '3+ years',
-      description: 'Drive growth and awareness of Connect in the faith community.',
+      description: 'Drive growth and awareness of Koinonia in the faith community.',
     },
     {
       id: 6,
@@ -111,12 +111,12 @@ export default function CareersPage() {
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-6 py-12">
-        {/* Why Join Connect Section */}
+        {/* Why Join Koinonia Section */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-foreground mb-6">Why Join Connect?</h2>
+          <h2 className="text-3xl font-bold text-foreground mb-6">Why Join Koinonia?</h2>
           <div className="bg-muted border border-border rounded-lg p-8">
             <p className="text-foreground/80 mb-4">
-              At Connect, we believe that technology should serve a higher purpose. Our mission is to empower faith communities to communicate more effectively with their members and strengthen their communities.
+              At Koinonia, we believe that technology should serve a higher purpose. Our mission is to empower faith communities to communicate more effectively with their members and strengthen their communities.
             </p>
             <p className="text-foreground/80 mb-4">
               If you're passionate about both technology and making a meaningful impact, we'd love to have you on our team. We offer a collaborative environment where your contributions directly impact how churches connect with their congregations.

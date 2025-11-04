@@ -22,7 +22,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-2xl font-semibold text-foreground mb-4">1. Introduction</h2>
             <p className="leading-relaxed">
-              Connect ("we," "us," "our," or "Company") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website and services.
+              Koinonia ("we," "us," "our," or "Company") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website and services.
             </p>
           </section>
 
@@ -119,7 +119,7 @@ export default function PrivacyPage() {
               If you have questions about this Privacy Policy or our privacy practices, please contact us at:
             </p>
             <div className="bg-muted border border-border rounded-lg p-6">
-              <p className="text-foreground">Connect Support</p>
+              <p className="text-foreground">Koinonia Support</p>
               <p className="text-muted-foreground">Email: privacy@connect.com</p>
               <p className="text-muted-foreground">Website: www.connect.com</p>
             </div>

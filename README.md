@@ -1,4 +1,4 @@
-# Connect YW Platform
+# Koinonia YW Platform
 
 Enterprise SMS communication platform for churches with 100-250 members across 3-10 physical locations.
 

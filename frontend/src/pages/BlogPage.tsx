@@ -65,7 +65,7 @@ export default function BlogPage() {
       {/* Header Section */}
       <div className="px-6 py-12 bg-muted">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold text-foreground mb-4">Connect Blog</h1>
+          <h1 className="text-5xl font-bold text-foreground mb-4">Koinonia Blog</h1>
           <p className="text-xl text-foreground/80 max-w-2xl mx-auto">
             Insights, tips, and best practices for church communication and community engagement
           </p>

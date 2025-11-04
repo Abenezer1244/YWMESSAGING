@@ -67,7 +67,7 @@ export async function sendWelcomeEmail(
 ): Promise<void> {
   await sendEmail({
     to: email,
-    subject: `Welcome to Connect YW - ${churchName}`,
+    subject: `Welcome to Koinonia YW - ${churchName}`,
     templateId: emailTemplates.WELCOME,
     dynamicTemplateData: {
       church_name: churchName,
@@ -86,7 +86,7 @@ export async function sendPasswordResetEmail(
 ): Promise<void> {
   await sendEmail({
     to: email,
-    subject: 'Reset Your Connect YW Password',
+    subject: 'Reset Your Koinonia YW Password',
     templateId: emailTemplates.PASSWORD_RESET,
     dynamicTemplateData: {
       reset_link: resetLink,
@@ -106,7 +106,7 @@ export async function sendAdminInviteEmail(
 ): Promise<void> {
   await sendEmail({
     to: email,
-    subject: `Join ${churchName} on Connect YW`,
+    subject: `Join ${churchName} on Koinonia YW`,
     templateId: emailTemplates.INVITE_ADMIN,
     dynamicTemplateData: {
       church_name: churchName,
@@ -127,7 +127,7 @@ export async function sendSubscriptionConfirmEmail(
 ): Promise<void> {
   await sendEmail({
     to: email,
-    subject: `Subscription Confirmed - Connect YW ${plan.toUpperCase()} Plan`,
+    subject: `Subscription Confirmed - Koinonia YW ${plan.toUpperCase()} Plan`,
     templateId: emailTemplates.SUBSCRIPTION_CONFIRM,
     dynamicTemplateData: {
       plan_name: plan.toUpperCase(),

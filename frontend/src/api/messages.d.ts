@@ -1,5 +1,5 @@
 import { SentMessage } from '../stores/messageStore';
-export interface ConnectTwilioData {
+export interface KoinoniaTwilioData {
     accountSid: string;
     authToken: string;
     phoneNumber: string;
@@ -10,9 +10,9 @@ export interface SendMessageData {
     targetIds?: string[];
 }
 /**
- * Connect Twilio credentials
+ * Koinonia Twilio credentials
  */
-export declare function connectTwilio(data: ConnectTwilioData): Promise<any>;
+export declare function connectTwilio(data: KoinoniaTwilioData): Promise<any>;
 /**
  * Send message to recipients
  */

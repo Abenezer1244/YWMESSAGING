@@ -77,7 +77,7 @@ export default function Hero() {
                                                 }, transition: {
                                                     duration: 3,
                                                     repeat: Infinity,
-                                                }, children: "Connect Your" }), _jsx("br", {}), _jsx(motion.span, { className: "bg-gradient-to-r from-primary via-primary to-primary bg-clip-text text-transparent inline-block", animate: {
+                                                }, children: "Koinonia Your" }), _jsx("br", {}), _jsx(motion.span, { className: "bg-gradient-to-r from-primary via-primary to-primary bg-clip-text text-transparent inline-block", animate: {
                                                     backgroundPosition: ['0%', '100%'],
                                                 }, transition: {
                                                     duration: 4,
