@@ -52,12 +52,14 @@ export async function register(req: Request, res: Response): Promise<void> {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    // ✅ SECURITY: Return only user info, NOT tokens (tokens are in HTTPOnly cookies)
+    // ✅ SECURITY: Return tokens for frontend Zustand state (also in HTTPOnly cookies for security)
     res.status(201).json({
       success: true,
       data: {
         admin: result.admin,
         church: result.church,
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
       },
     });
   } catch (error: any) {
@@ -104,12 +106,14 @@ export async function loginHandler(req: Request, res: Response): Promise<void> {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    // ✅ SECURITY: Return only user info, NOT tokens (tokens are in HTTPOnly cookies)
+    // ✅ SECURITY: Return tokens for frontend Zustand state (also in HTTPOnly cookies for security)
     res.status(200).json({
       success: true,
       data: {
         admin: result.admin,
         church: result.church,
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
       },
     });
   } catch (error: any) {
@@ -163,11 +167,12 @@ export async function refreshToken(req: Request, res: Response): Promise<void> {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    // ✅ SECURITY: Return success only, NOT tokens (tokens are in HTTPOnly cookies)
+    // ✅ SECURITY: Return tokens for frontend Zustand state (also in HTTPOnly cookies for security)
     res.status(200).json({
       success: true,
       data: {
-        success: true,
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
       },
     });
   } catch (error: any) {
