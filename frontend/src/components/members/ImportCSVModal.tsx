@@ -46,6 +46,14 @@ export function ImportCSVModal({ isOpen, groupId, onClose, onSuccess }: ImportCS
         toast.error(`${importResult.failed} rows failed to import`);
       }
     } catch (error: any) {
+      // Log full error for debugging
+      console.error('CSV Import Error:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message,
+      });
+
       // Check if error has details from backend
       const errorMessage = error.response?.data?.error || error.message || 'Failed to import members';
       const failedDetails = error.response?.data?.failedDetails;
