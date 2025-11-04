@@ -19,7 +19,7 @@ export interface UpdateGroupData {
  * Get all groups for a branch
  */
 export async function getGroups(branchId: string): Promise<Group[]> {
-  const response = await client.get(`/branches/${branchId}/groups`);
+  const response = await client.get(`/groups/branches/${branchId}/groups`);
   return response.data.data;
 }
 
@@ -30,7 +30,7 @@ export async function createGroup(
   branchId: string,
   data: CreateGroupData
 ): Promise<Group> {
-  const response = await client.post(`/branches/${branchId}/groups`, data);
+  const response = await client.post(`/groups/branches/${branchId}/groups`, data);
   return response.data.data;
 }
 
@@ -38,7 +38,7 @@ export async function createGroup(
  * Update a group
  */
 export async function updateGroup(groupId: string, data: UpdateGroupData): Promise<Group> {
-  const response = await client.put(`/groups/${groupId}`, data);
+  const response = await client.put(`/groups/groups/${groupId}`, data);
   return response.data.data;
 }
 
@@ -46,6 +46,6 @@ export async function updateGroup(groupId: string, data: UpdateGroupData): Promi
  * Delete a group
  */
 export async function deleteGroup(groupId: string): Promise<any> {
-  const response = await client.delete(`/groups/${groupId}`);
+  const response = await client.delete(`/groups/groups/${groupId}`);
   return response.data.data;
 }

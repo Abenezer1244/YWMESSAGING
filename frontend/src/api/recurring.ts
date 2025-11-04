@@ -30,7 +30,7 @@ export interface CreateRecurringMessageData {
  * Get all recurring messages
  */
 export async function getRecurringMessages(): Promise<RecurringMessage[]> {
-  const response = await client.get('/recurring-messages');
+  const response = await client.get('/recurring/recurring-messages');
   return response.data;
 }
 
@@ -40,7 +40,7 @@ export async function getRecurringMessages(): Promise<RecurringMessage[]> {
 export async function createRecurringMessage(
   data: CreateRecurringMessageData
 ): Promise<RecurringMessage> {
-  const response = await client.post('/recurring-messages', data);
+  const response = await client.post('/recurring/recurring-messages', data);
   return response.data;
 }
 
@@ -51,7 +51,7 @@ export async function updateRecurringMessage(
   messageId: string,
   data: Partial<CreateRecurringMessageData>
 ): Promise<RecurringMessage> {
-  const response = await client.put(`/recurring-messages/${messageId}`, data);
+  const response = await client.put(`/recurring/recurring-messages/${messageId}`, data);
   return response.data;
 }
 
@@ -59,7 +59,7 @@ export async function updateRecurringMessage(
  * Delete recurring message
  */
 export async function deleteRecurringMessage(messageId: string): Promise<any> {
-  const response = await client.delete(`/recurring-messages/${messageId}`);
+  const response = await client.delete(`/recurring/recurring-messages/${messageId}`);
   return response.data;
 }
 
@@ -70,7 +70,7 @@ export async function toggleRecurringMessage(
   messageId: string,
   isActive: boolean
 ): Promise<RecurringMessage> {
-  const response = await client.put(`/recurring-messages/${messageId}/toggle`, {
+  const response = await client.put(`/recurring/recurring-messages/${messageId}/toggle`, {
     isActive,
   });
   return response.data;

@@ -20,7 +20,7 @@ export interface UpdateBranchInput {
  * Get all branches for a church
  */
 export async function getBranches(churchId: string): Promise<Branch[]> {
-  const response = await client.get(`/churches/${churchId}/branches`);
+  const response = await client.get(`/branches/churches/${churchId}/branches`);
   return response.data.data;
 }
 
@@ -31,7 +31,7 @@ export async function createBranch(
   churchId: string,
   data: CreateBranchInput
 ): Promise<Branch> {
-  const response = await client.post(`/churches/${churchId}/branches`, data);
+  const response = await client.post(`/branches/churches/${churchId}/branches`, data);
   return response.data.data;
 }
 
@@ -42,7 +42,7 @@ export async function updateBranch(
   branchId: string,
   data: UpdateBranchInput
 ): Promise<Branch> {
-  const response = await client.put(`/branches/${branchId}`, data);
+  const response = await client.put(`/branches/branches/${branchId}`, data);
   return response.data.data;
 }
 
@@ -56,6 +56,6 @@ export async function deleteBranch(
   groupsDeleted: number;
   membersDeleted: number;
 }> {
-  const response = await client.delete(`/branches/${branchId}`);
+  const response = await client.delete(`/branches/branches/${branchId}`);
   return response.data.data;
 }

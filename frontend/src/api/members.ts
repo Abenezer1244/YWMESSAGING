@@ -44,7 +44,7 @@ export async function getMembers(
   if (options.limit) params.append('limit', options.limit.toString());
   if (options.search) params.append('search', options.search);
 
-  const response = await client.get(`/groups/${groupId}/members?${params.toString()}`);
+  const response = await client.get(`/groups/groups/${groupId}/members?${params.toString()}`);
   return response.data;
 }
 
@@ -52,7 +52,7 @@ export async function getMembers(
  * Add a single member to a group
  */
 export async function addMember(groupId: string, data: CreateMemberData): Promise<Member> {
-  const response = await client.post(`/groups/${groupId}/members`, data);
+  const response = await client.post(`/groups/groups/${groupId}/members`, data);
   return response.data.data;
 }
 
@@ -70,7 +70,7 @@ export async function importMembers(
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await client.post(`/groups/${groupId}/members/import`, formData);
+  const response = await client.post(`/groups/groups/${groupId}/members/import`, formData);
 
   return response.data.data;
 }
@@ -82,7 +82,7 @@ export async function updateMember(
   memberId: string,
   data: Partial<CreateMemberData>
 ): Promise<Member> {
-  const response = await client.put(`/members/${memberId}`, data);
+  const response = await client.put(`/groups/members/${memberId}`, data);
   return response.data.data;
 }
 
@@ -90,6 +90,6 @@ export async function updateMember(
  * Remove a member from a group
  */
 export async function removeMember(groupId: string, memberId: string): Promise<any> {
-  const response = await client.delete(`/groups/${groupId}/members/${memberId}`);
+  const response = await client.delete(`/groups/groups/${groupId}/members/${memberId}`);
   return response.data.data;
 }

@@ -22,7 +22,7 @@ export interface CreateTemplateData {
  * Get all templates (default + custom)
  */
 export async function getTemplates(): Promise<MessageTemplate[]> {
-  const response = await client.get('/templates');
+  const response = await client.get('/templates/templates');
   return response.data;
 }
 
@@ -30,7 +30,7 @@ export async function getTemplates(): Promise<MessageTemplate[]> {
  * Create custom template
  */
 export async function createTemplate(data: CreateTemplateData): Promise<MessageTemplate> {
-  const response = await client.post('/templates', data);
+  const response = await client.post('/templates/templates', data);
   return response.data;
 }
 
@@ -41,7 +41,7 @@ export async function updateTemplate(
   templateId: string,
   data: Partial<CreateTemplateData>
 ): Promise<MessageTemplate> {
-  const response = await client.put(`/templates/${templateId}`, data);
+  const response = await client.put(`/templates/templates/${templateId}`, data);
   return response.data;
 }
 
@@ -49,6 +49,6 @@ export async function updateTemplate(
  * Delete template (custom only)
  */
 export async function deleteTemplate(templateId: string): Promise<any> {
-  const response = await client.delete(`/templates/${templateId}`);
+  const response = await client.delete(`/templates/templates/${templateId}`);
   return response.data;
 }
