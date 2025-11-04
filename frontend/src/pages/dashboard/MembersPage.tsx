@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import useAuthStore from '../../stores/authStore';
 import useBranchStore from '../../stores/branchStore';
 import useGroupStore from '../../stores/groupStore';
-import { getMembers, Member } from '../../api/members';
+import { getMembers, Member, removeMember } from '../../api/members';
 import { getBranches } from '../../api/branches';
 import { getGroups } from '../../api/groups';
 import { AddMemberModal } from '../../components/members/AddMemberModal';
@@ -31,6 +31,7 @@ export function MembersPage() {
   const [total, setTotal] = useState(0);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [deletingMemberId, setDeletingMemberId] = useState<string | null>(null);
 
   const limit = 50;
   const pages = Math.ceil(total / limit);
@@ -94,6 +95,24 @@ export function MembersPage() {
     setPage(1);
     loadMembers();
     setIsImportModalOpen(false);
+  };
+
+  const handleDeleteMember = async (memberId: string, memberName: string) => {
+    if (!window.confirm(`Are you sure you want to remove ${memberName} from this group?`)) {
+      return;
+    }
+
+    try {
+      setDeletingMemberId(memberId);
+      await removeMember(groupId, memberId);
+      setMembers(members.filter((m) => m.id !== memberId));
+      setTotal(total - 1);
+      toast.success('Member removed successfully');
+    } catch (error) {
+      toast.error((error as Error).message || 'Failed to remove member');
+    } finally {
+      setDeletingMemberId(null);
+    }
   };
 
   // Show loading spinner while initially loading groups
@@ -209,6 +228,9 @@ export function MembersPage() {
                       <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
                         Added
                       </th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -240,6 +262,20 @@ export function MembersPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground/80">
                           {new Date(member.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <button
+                            onClick={() =>
+                              handleDeleteMember(
+                                member.id,
+                                `${member.firstName} ${member.lastName}`
+                              )
+                            }
+                            disabled={deletingMemberId === member.id}
+                            className="text-red-400 hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors"
+                          >
+                            {deletingMemberId === member.id ? 'Removing...' : 'Remove'}
+                          </button>
                         </td>
                       </tr>
                     ))}
