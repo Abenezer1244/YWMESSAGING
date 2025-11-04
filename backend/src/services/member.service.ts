@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { formatToE164 } from '../utils/phone.utils.js';
+import { encrypt, decrypt, hashForSearch } from '../utils/encryption.utils.js';
 import { queueWelcomeMessage } from '../jobs/welcomeMessage.job.js';
 
 const prisma = new PrismaClient();
@@ -49,12 +50,24 @@ export async function getMembers(
   };
 
   if (search) {
-    where.OR = [
-      { firstName: { contains: search, mode: 'insensitive' } },
-      { lastName: { contains: search, mode: 'insensitive' } },
-      { phone: { contains: search } },
-      { email: { contains: search, mode: 'insensitive' } },
-    ];
+    try {
+      const formattedPhone = formatToE164(search);
+      const phoneHash = hashForSearch(formattedPhone);
+
+      where.OR = [
+        { firstName: { contains: search, mode: 'insensitive' } },
+        { lastName: { contains: search, mode: 'insensitive' } },
+        { phoneHash },
+        { email: { contains: search, mode: 'insensitive' } },
+      ];
+    } catch (error) {
+      // If phone formatting fails, just search text fields
+      where.OR = [
+        { firstName: { contains: search, mode: 'insensitive' } },
+        { lastName: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+      ];
+    }
   }
 
   const [members, total] = await Promise.all([
@@ -76,8 +89,14 @@ export async function getMembers(
     prisma.member.count({ where }),
   ]);
 
+  // Decrypt phone numbers in results
+  const decryptedMembers = members.map((member) => ({
+    ...member,
+    phone: decrypt(member.phone),
+  }));
+
   return {
-    data: members,
+    data: decryptedMembers,
     pagination: {
       page,
       limit,
@@ -101,10 +120,11 @@ export async function addMember(groupId: string, data: CreateMemberData) {
 
   // Format phone to E.164
   const formattedPhone = formatToE164(data.phone);
+  const phoneHash = hashForSearch(formattedPhone);
 
   // Check if member with this phone exists
   let member = await prisma.member.findUnique({
-    where: { phone: formattedPhone },
+    where: { phoneHash },
   });
 
   // Create member if doesn't exist
@@ -113,7 +133,8 @@ export async function addMember(groupId: string, data: CreateMemberData) {
       data: {
         firstName: data.firstName.trim(),
         lastName: data.lastName.trim(),
-        phone: formattedPhone,
+        phone: encrypt(formattedPhone),
+        phoneHash,
         email: data.email?.trim(),
         optInSms: data.optInSms ?? true,
       },
@@ -156,7 +177,7 @@ export async function addMember(groupId: string, data: CreateMemberData) {
     id: groupMember.member.id,
     firstName: groupMember.member.firstName,
     lastName: groupMember.member.lastName,
-    phone: groupMember.member.phone,
+    phone: decrypt(groupMember.member.phone),
     email: groupMember.member.email,
     optInSms: groupMember.member.optInSms,
     createdAt: groupMember.member.createdAt,
@@ -189,10 +210,11 @@ export async function importMembers(
   for (const data of membersData) {
     try {
       const formattedPhone = formatToE164(data.phone);
+      const phoneHash = hashForSearch(formattedPhone);
 
       // Find or create member
       let member = await prisma.member.findUnique({
-        where: { phone: formattedPhone },
+        where: { phoneHash },
       });
 
       if (!member) {
@@ -200,7 +222,8 @@ export async function importMembers(
           data: {
             firstName: data.firstName.trim(),
             lastName: data.lastName.trim(),
-            phone: formattedPhone,
+            phone: encrypt(formattedPhone),
+            phoneHash,
             email: data.email?.trim(),
             optInSms: true,
           },
@@ -245,7 +268,7 @@ export async function importMembers(
         id: member.id,
         firstName: member.firstName,
         lastName: member.lastName,
-        phone: member.phone,
+        phone: decrypt(member.phone),
         email: member.email,
       });
     } catch (error) {
@@ -279,7 +302,11 @@ export async function updateMember(memberId: string, data: UpdateMemberData) {
 
   if (data.firstName) updateData.firstName = data.firstName.trim();
   if (data.lastName) updateData.lastName = data.lastName.trim();
-  if (data.phone) updateData.phone = formatToE164(data.phone);
+  if (data.phone) {
+    const formattedPhone = formatToE164(data.phone);
+    updateData.phone = encrypt(formattedPhone);
+    updateData.phoneHash = hashForSearch(formattedPhone);
+  }
   if (data.email !== undefined) updateData.email = data.email?.trim();
   if (data.optInSms !== undefined) updateData.optInSms = data.optInSms;
 
@@ -292,7 +319,7 @@ export async function updateMember(memberId: string, data: UpdateMemberData) {
     id: updated.id,
     firstName: updated.firstName,
     lastName: updated.lastName,
-    phone: updated.phone,
+    phone: decrypt(updated.phone),
     email: updated.email,
     optInSms: updated.optInSms,
     createdAt: updated.createdAt,

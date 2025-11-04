@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { registerChurch, login, refreshAccessToken, getAdmin } from '../services/auth.service.js';
 import { verifyRefreshToken } from '../utils/jwt.utils.js';
+import { logFailedLogin } from '../utils/security-logger.js';
 
 /**
  * POST /api/auth/register
@@ -73,8 +74,10 @@ export async function register(req: Request, res: Response): Promise<void> {
 export async function loginHandler(req: Request, res: Response): Promise<void> {
   try {
     const { email, password } = req.body;
+    const ipAddress = (req.ip || req.socket.remoteAddress || 'unknown') as string;
 
     if (!email || !password) {
+      logFailedLogin(email || 'unknown', ipAddress, 'Missing email or password');
       res.status(400).json({ error: 'Email and password required' });
       return;
     }
@@ -110,7 +113,11 @@ export async function loginHandler(req: Request, res: Response): Promise<void> {
       },
     });
   } catch (error: any) {
+    const { email, password } = req.body;
+    const ipAddress = (req.ip || req.socket.remoteAddress || 'unknown') as string;
+
     console.error('Login error:', error);
+    logFailedLogin(email || 'unknown', ipAddress, error.message || 'Authentication failed');
     res.status(401).json({ error: error.message || 'Login failed' });
   }
 }

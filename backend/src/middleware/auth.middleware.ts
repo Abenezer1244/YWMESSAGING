@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyAccessToken, AccessTokenPayload } from '../utils/jwt.utils.js';
+import { logPermissionDenied } from '../utils/security-logger.js';
 
 // Extend Express Request type to include user
 declare global {
@@ -50,6 +51,14 @@ export function requireRole(roles: string[]) {
     }
 
     if (!roles.includes(req.user.role)) {
+      const ipAddress = (req.ip || req.socket.remoteAddress || 'unknown') as string;
+      logPermissionDenied(
+        req.user.adminId,
+        req.originalUrl || req.path,
+        roles.join(', '),
+        req.user.role,
+        ipAddress
+      );
       res.status(403).json({ error: 'Insufficient permissions' });
       return;
     }
@@ -69,6 +78,14 @@ export function authorizeChurch(req: Request, res: Response, next: NextFunction)
 
   const churchId = req.params.churchId;
   if (churchId && req.user.churchId !== churchId) {
+    const ipAddress = (req.ip || req.socket.remoteAddress || 'unknown') as string;
+    logPermissionDenied(
+      req.user.adminId,
+      req.originalUrl || req.path,
+      `Church: ${req.user.churchId}`,
+      `Church: ${churchId}`,
+      ipAddress
+    );
     res.status(403).json({ error: 'Unauthorized church access' });
     return;
   }
