@@ -16,24 +16,24 @@ const router = Router();
 router.use(authenticateToken);
 
 // Get current usage
-router.get('/billing/usage', getUsageHandler);
+router.get('/usage', getUsageHandler);
 
 // Get current plan and limits
-router.get('/billing/plan', getPlanHandler);
+router.get('/plan', getPlanHandler);
 
 // Get trial status
-router.get('/billing/trial', getTrialHandler);
+router.get('/trial', getTrialHandler);
 
 // Subscribe to a plan
-router.post('/billing/subscribe', subscribeHandler);
+router.post('/subscribe', subscribeHandler);
 
 // Upgrade/downgrade plan
-router.put('/billing/upgrade', upgradeHandler);
+router.put('/upgrade', upgradeHandler);
 
 // Cancel subscription
-router.delete('/billing/cancel', cancelHandler);
+router.delete('/cancel', cancelHandler);
 
 // Create payment intent
-router.post('/billing/payment-intent', createPaymentIntentHandler);
+router.post('/payment-intent', createPaymentIntentHandler);
 
 export default router;
