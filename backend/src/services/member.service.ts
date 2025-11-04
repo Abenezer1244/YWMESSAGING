@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { formatToE164 } from '../utils/phone.utils.js';
 import { encrypt, decrypt, hashForSearch } from '../utils/encryption.utils.js';
 import { queueWelcomeMessage } from '../jobs/welcomeMessage.job.js';
+import { getUsage, getCurrentPlan, getPlanLimits } from './billing.service.js';
 
 const prisma = new PrismaClient();
 
@@ -118,6 +119,17 @@ export async function addMember(groupId: string, data: CreateMemberData) {
     throw new Error('Group not found');
   }
 
+  // Check plan limits before adding member
+  const usage = await getUsage(group.churchId);
+  const plan = await getCurrentPlan(group.churchId);
+  const limits = getPlanLimits(plan);
+
+  if (usage.members >= limits.members) {
+    throw new Error(
+      `Member limit of ${limits.members} reached for ${plan} plan. Please upgrade your plan to add more members.`
+    );
+  }
+
   // Format phone to E.164
   const formattedPhone = formatToE164(data.phone);
   const phoneHash = hashForSearch(formattedPhone);
@@ -209,6 +221,24 @@ export async function importMembers(
 
   if (!group) {
     throw new Error('Group not found');
+  }
+
+  // Check plan limits before importing
+  const usage = await getUsage(group.churchId);
+  const plan = await getCurrentPlan(group.churchId);
+  const limits = getPlanLimits(plan);
+  const remainingCapacity = limits.members - usage.members;
+
+  if (remainingCapacity <= 0) {
+    throw new Error(
+      `Member limit of ${limits.members} reached for ${plan} plan. Please upgrade your plan to add more members.`
+    );
+  }
+
+  if (membersData.length > remainingCapacity) {
+    throw new Error(
+      `Import would exceed member limit. You have ${remainingCapacity} member slot(s) remaining, but are trying to import ${membersData.length} members.`
+    );
   }
 
   const imported: any[] = [];
