@@ -1,6 +1,6 @@
--- CreateTable
+-- CreateTable Church
 CREATE TABLE "Church" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "stripeCustomerId" TEXT,
@@ -8,67 +8,73 @@ CREATE TABLE "Church" (
     "twilioAuthToken" TEXT,
     "twilioPhoneNumber" TEXT,
     "twilioVerified" BOOLEAN NOT NULL DEFAULT false,
-    "trialEndsAt" DATETIME NOT NULL,
+    "trialEndsAt" TIMESTAMP(3) NOT NULL,
     "subscriptionStatus" TEXT NOT NULL DEFAULT 'trial',
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Church_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
+-- CreateTable Branch
 CREATE TABLE "Branch" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "churchId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "address" TEXT,
     "phone" TEXT,
     "description" TEXT,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
-    CONSTRAINT "Branch_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Branch_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
+-- CreateTable Group
 CREATE TABLE "Group" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "branchId" TEXT NOT NULL,
     "churchId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
     "welcomeMessageEnabled" BOOLEAN NOT NULL DEFAULT false,
     "welcomeMessageText" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
-    CONSTRAINT "Group_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "Group_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Group_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
+-- CreateTable Member
 CREATE TABLE "Member" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
     "phone" TEXT NOT NULL,
+    "phoneHash" TEXT,
     "email" TEXT,
     "optInSms" BOOLEAN NOT NULL DEFAULT true,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Member_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
+-- CreateTable GroupMember
 CREATE TABLE "GroupMember" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "groupId" TEXT NOT NULL,
     "memberId" TEXT NOT NULL,
     "welcomeMessageSent" BOOLEAN NOT NULL DEFAULT false,
-    "joinedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "GroupMember_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "Group" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "GroupMember_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "Member" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "joinedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "GroupMember_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
+-- CreateTable Message
 CREATE TABLE "Message" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "churchId" TEXT NOT NULL,
     "content" TEXT NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'pending',
@@ -77,42 +83,44 @@ CREATE TABLE "Message" (
     "totalRecipients" INTEGER NOT NULL DEFAULT 0,
     "deliveredCount" INTEGER NOT NULL DEFAULT 0,
     "failedCount" INTEGER NOT NULL DEFAULT 0,
-    "sentAt" DATETIME,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "Message_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "sentAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Message_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
+-- CreateTable MessageRecipient
 CREATE TABLE "MessageRecipient" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "messageId" TEXT NOT NULL,
     "memberId" TEXT NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'pending',
     "twilioMessageSid" TEXT,
-    "deliveredAt" DATETIME,
-    "failedAt" DATETIME,
+    "deliveredAt" TIMESTAMP(3),
+    "failedAt" TIMESTAMP(3),
     "failureReason" TEXT,
-    CONSTRAINT "MessageRecipient_messageId_fkey" FOREIGN KEY ("messageId") REFERENCES "Message" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "MessageRecipient_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "Member" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+
+    CONSTRAINT "MessageRecipient_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
+-- CreateTable MessageTemplate
 CREATE TABLE "MessageTemplate" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "churchId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "content" TEXT NOT NULL,
     "category" TEXT NOT NULL,
     "isDefault" BOOLEAN NOT NULL DEFAULT false,
     "usageCount" INTEGER NOT NULL DEFAULT 0,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
-    CONSTRAINT "MessageTemplate_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "MessageTemplate_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
+-- CreateTable RecurringMessage
 CREATE TABLE "RecurringMessage" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "churchId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "content" TEXT NOT NULL,
@@ -121,16 +129,17 @@ CREATE TABLE "RecurringMessage" (
     "frequency" TEXT NOT NULL,
     "dayOfWeek" INTEGER,
     "timeOfDay" TEXT,
-    "nextSendAt" DATETIME NOT NULL,
+    "nextSendAt" TIMESTAMP(3) NOT NULL,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
-    CONSTRAINT "RecurringMessage_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "RecurringMessage_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
+-- CreateTable Admin
 CREATE TABLE "Admin" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "churchId" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "passwordHash" TEXT NOT NULL,
@@ -138,35 +147,39 @@ CREATE TABLE "Admin" (
     "lastName" TEXT NOT NULL,
     "role" TEXT NOT NULL DEFAULT 'CO_ADMIN',
     "invitationToken" TEXT,
-    "invitationExpiresAt" DATETIME,
-    "lastLoginAt" DATETIME,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
-    CONSTRAINT "Admin_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "invitationExpiresAt" TIMESTAMP(3),
+    "lastLoginAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Admin_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
+-- CreateTable Subscription
 CREATE TABLE "Subscription" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "churchId" TEXT NOT NULL,
     "stripeSubId" TEXT,
     "plan" TEXT NOT NULL DEFAULT 'starter',
     "status" TEXT NOT NULL DEFAULT 'active',
-    "currentPeriodStart" DATETIME,
-    "currentPeriodEnd" DATETIME,
-    "cancelledAt" DATETIME,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
-    CONSTRAINT "Subscription_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "currentPeriodStart" TIMESTAMP(3),
+    "currentPeriodEnd" TIMESTAMP(3),
+    "cancelledAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Subscription_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
+-- CreateTable AnalyticsEvent
 CREATE TABLE "AnalyticsEvent" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "churchId" TEXT,
     "eventName" TEXT NOT NULL,
     "properties" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "AnalyticsEvent_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -200,10 +213,16 @@ CREATE UNIQUE INDEX "Member_phone_key" ON "Member"("phone");
 CREATE UNIQUE INDEX "Member_email_key" ON "Member"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Member_phoneHash_key" ON "Member"("phoneHash");
+
+-- CreateIndex
 CREATE INDEX "Member_phone_idx" ON "Member"("phone");
 
 -- CreateIndex
 CREATE INDEX "Member_email_idx" ON "Member"("email");
+
+-- CreateIndex
+CREATE INDEX "Member_phoneHash_idx" ON "Member"("phoneHash");
 
 -- CreateIndex
 CREATE INDEX "GroupMember_groupId_idx" ON "GroupMember"("groupId");
@@ -276,3 +295,39 @@ CREATE INDEX "AnalyticsEvent_churchId_idx" ON "AnalyticsEvent"("churchId");
 
 -- CreateIndex
 CREATE INDEX "AnalyticsEvent_eventName_idx" ON "AnalyticsEvent"("eventName");
+
+-- AddForeignKey
+ALTER TABLE "Branch" ADD CONSTRAINT "Branch_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Group" ADD CONSTRAINT "Group_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Group" ADD CONSTRAINT "Group_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "GroupMember" ADD CONSTRAINT "GroupMember_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "Group"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "GroupMember" ADD CONSTRAINT "GroupMember_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "Member"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Message" ADD CONSTRAINT "Message_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "MessageRecipient" ADD CONSTRAINT "MessageRecipient_messageId_fkey" FOREIGN KEY ("messageId") REFERENCES "Message"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "MessageRecipient" ADD CONSTRAINT "MessageRecipient_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "Member"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "MessageTemplate" ADD CONSTRAINT "MessageTemplate_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "RecurringMessage" ADD CONSTRAINT "RecurringMessage_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Admin" ADD CONSTRAINT "Admin_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church"("id") ON DELETE CASCADE ON UPDATE CASCADE;
