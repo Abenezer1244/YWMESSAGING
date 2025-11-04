@@ -65,9 +65,9 @@ export function MembersPage() {
 
   if (!currentGroup) {
     return (
-      <div className="min-h-screen bg-white dark:bg-slate-950 flex items-center justify-center p-6">
-        <Card variant="default" className="text-center max-w-md bg-slate-50 dark:bg-slate-900/50 border-slate-300 dark:border-slate-700">
-          <p className="text-slate-700 dark:text-slate-300 text-lg">
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <Card variant="default" className="text-center max-w-md bg-muted border-border">
+          <p className="text-foreground/80 text-lg">
             No group selected. Create or select a group first.
           </p>
         </Card>
@@ -76,7 +76,7 @@ export function MembersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 p-6 transition-colors duration-normal">
+    <div className="min-h-screen bg-background p-6 transition-colors duration-normal">
       <div className="max-w-7xl mx-auto">
         {/* Back Button */}
         <div className="mb-6">
@@ -87,8 +87,8 @@ export function MembersPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">👤 Members</h1>
-              <p className="text-slate-700 dark:text-slate-300">
+              <h1 className="text-4xl font-bold text-foreground mb-2">👤 Members</h1>
+              <p className="text-foreground/80">
                 {currentGroup.name} • {total} members
               </p>
             </div>
@@ -128,14 +128,14 @@ export function MembersPage() {
             <Spinner size="lg" text="Loading members..." />
           </div>
         ) : members.length === 0 ? (
-          <Card variant="highlight" className="text-center py-16 bg-slate-50 dark:bg-slate-900/50 border-slate-300 dark:border-slate-700">
+          <Card variant="highlight" className="text-center py-16 bg-muted border-border">
             <div className="mb-6">
               <span className="text-6xl">👤</span>
             </div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
+            <h2 className="text-2xl font-bold text-foreground mb-3">
               {search ? 'No Results' : 'No Members Yet'}
             </h2>
-            <p className="text-slate-700 dark:text-slate-300 mb-6 max-w-md mx-auto">
+            <p className="text-foreground/80 mb-6 max-w-md mx-auto">
               {search ? 'No members found matching your search' : 'Add your first member to get started'}
             </p>
             {!search && (
@@ -151,41 +151,41 @@ export function MembersPage() {
         ) : (
           <>
             {/* Table */}
-            <Card variant="default" className="overflow-hidden bg-slate-50 dark:bg-slate-900/50 border-slate-300 dark:border-slate-700">
+            <Card variant="default" className="overflow-hidden bg-muted border-border">
               <div className="overflow-x-auto">
                 <table className="min-w-full">
-                  <thead className="bg-slate-100 dark:bg-slate-800/70 border-b border-slate-300 dark:border-slate-700">
+                  <thead className="bg-card border-b border-border">
                     <tr>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 dark:text-white">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
                         Name
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 dark:text-white">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
                         Phone
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 dark:text-white">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
                         Email
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 dark:text-white">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 dark:text-white">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
                         Added
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-300 dark:divide-slate-700">
+                  <tbody className="divide-y divide-border">
                     {members.map((member) => (
-                      <tr key={member.id} className="hover:bg-slate-200 dark:hover:bg-slate-800/50 transition-colors duration-normal">
+                      <tr key={member.id} className="hover:bg-muted/50 transition-colors duration-normal">
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-slate-900 dark:text-white">
+                          <div className="text-sm font-medium text-foreground">
                             {member.firstName} {member.lastName}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-slate-700 dark:text-slate-300">{member.phone}</div>
+                          <div className="text-sm text-foreground/80">{member.phone}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-slate-700 dark:text-slate-300">
+                          <div className="text-sm text-foreground/80">
                             {member.email || '—'}
                           </div>
                         </td>
@@ -200,7 +200,7 @@ export function MembersPage() {
                             {member.optInSms ? '✅ Opted In' : '❌ Opted Out'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 dark:text-slate-300">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground/80">
                           {new Date(member.createdAt).toLocaleDateString()}
                         </td>
                       </tr>
@@ -221,7 +221,7 @@ export function MembersPage() {
                 >
                   ← Previous
                 </Button>
-                <div className="px-4 py-2 text-slate-700 dark:text-slate-300 font-medium">
+                <div className="px-4 py-2 text-foreground/80 font-medium">
                   Page {page} of {pages}
                 </div>
                 <Button

@@ -59,9 +59,9 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
       {/* Subtle background accent */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-accent-500 opacity-10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-primary opacity-10 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="w-full max-w-md relative z-10 animate-fadeIn">
         <div className="mb-6">
@@ -71,22 +71,22 @@ export function LoginPage() {
         <div className="text-center mb-12">
           {/* Logo */}
           <div className="flex items-center justify-center mb-6">
-            <div className="w-14 h-14 bg-accent-500 rounded-xl flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
-              <span className="text-slate-950 font-bold text-2xl">C</span>
+            <div className="w-14 h-14 bg-primary rounded-xl flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
+              <span className="text-background font-bold text-2xl">C</span>
             </div>
           </div>
 
           {/* Headline */}
-          <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight">
+          <h1 className="text-4xl font-bold text-foreground mb-3 tracking-tight">
             Welcome Back
           </h1>
-          <p className="text-lg text-slate-700 dark:text-slate-300 font-light">
+          <p className="text-lg text-muted-foreground font-light">
             Church SMS Communication Platform
           </p>
         </div>
 
         {/* Login Card */}
-        <Card variant="default" className="p-8 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 shadow-lg">
+        <Card variant="default" className="p-8 border border-border bg-card shadow-lg">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {/* Email Input */}
             <div>
@@ -141,12 +141,12 @@ export function LoginPage() {
           </form>
 
           {/* Divider */}
-          <div className="mt-8 pt-8 border-t border-slate-300 dark:border-slate-700">
-            <p className="text-center text-slate-700 dark:text-slate-300 text-sm">
+          <div className="mt-8 pt-8 border-t border-border">
+            <p className="text-center text-muted-foreground text-sm">
               Don't have an account?{' '}
               <Link
                 to="/register"
-                className="text-accent-400 hover:text-accent-300 font-semibold transition-colors"
+                className="text-primary hover:text-primary/80 font-semibold transition-colors"
               >
                 Sign up
               </Link>
@@ -155,7 +155,7 @@ export function LoginPage() {
         </Card>
 
         {/* Trust Indicator */}
-        <div className="mt-8 flex items-center justify-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+        <div className="mt-8 flex items-center justify-center gap-2 text-sm text-muted-foreground">
           <svg className="w-4 h-4 text-success-500" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 111.414 1.414L7.414 8l3.293 3.293a1 1 0 11-1.414 1.414l-4-4z" clipRule="evenodd" />
           </svg>

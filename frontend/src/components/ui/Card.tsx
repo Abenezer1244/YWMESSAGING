@@ -21,12 +21,12 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
     ...props
   }, ref) => {
 
-    const baseStyles = 'rounded-md bg-white dark:bg-primary-800 transition-all duration-normal';
+    const baseStyles = 'rounded-md bg-card text-card-foreground transition-all duration-normal';
 
     const variantStyles = {
-      default: 'shadow-subtle dark:border dark:border-primary-700',
-      highlight: 'shadow-md border-2 border-accent-200 dark:border-accent-900 bg-gradient-to-br from-white to-accent-50 dark:from-primary-800 dark:to-primary-900',
-      minimal: 'border border-primary-200 dark:border-primary-700',
+      default: 'shadow-subtle border border-border',
+      highlight: 'shadow-md border-2 border-primary bg-gradient-to-br from-card to-muted',
+      minimal: 'border border-border',
     };
 
     const paddingStyles = {

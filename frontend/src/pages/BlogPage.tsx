@@ -56,17 +56,17 @@ export default function BlogPage() {
   const categories = ['All', 'Communication', 'Best Practices', 'Growth', 'Management', 'Security', 'Case Study'];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-normal">
+    <div className="min-h-screen bg-background transition-colors duration-normal">
       {/* Back Button */}
       <div className="p-6">
         <BackButton variant="ghost" />
       </div>
 
       {/* Header Section */}
-      <div className="px-6 py-12 bg-gradient-to-b from-slate-900 to-slate-950">
+      <div className="px-6 py-12 bg-muted">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold text-slate-900 dark:text-white mb-4">Connect Blog</h1>
-          <p className="text-xl text-slate-700 dark:text-slate-300 max-w-2xl mx-auto">
+          <h1 className="text-5xl font-bold text-foreground mb-4">Connect Blog</h1>
+          <p className="text-xl text-foreground/80 max-w-2xl mx-auto">
             Insights, tips, and best practices for church communication and community engagement
           </p>
         </div>
@@ -81,8 +81,8 @@ export default function BlogPage() {
               key={idx}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 idx === 0
-                  ? 'bg-accent-500 text-slate-900 dark:text-white'
-                  : 'bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-accent-500/50 hover:text-accent-400'
+                  ? 'bg-primary text-background'
+                  : 'bg-muted border border-border text-foreground/80 hover:border-primary/50 hover:text-primary'
               }`}
             >
               {category}
@@ -95,34 +95,34 @@ export default function BlogPage() {
           {blogPosts.map((post) => (
             <article
               key={post.id}
-              className="bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg p-6 hover:border-accent-500/50 hover:bg-slate-50 dark:bg-slate-900 transition-all group cursor-pointer"
+              className="bg-muted border border-border rounded-lg p-6 hover:border-primary/50 hover:bg-muted transition-all group cursor-pointer"
             >
               {/* Category Badge */}
               <div className="mb-4">
-                <span className="inline-block px-3 py-1 bg-accent-500/20 text-accent-400 text-xs font-semibold rounded-full">
+                <span className="inline-block px-3 py-1 bg-primary/20 text-primary text-xs font-semibold rounded-full">
                   {post.category}
                 </span>
               </div>
 
               {/* Title */}
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-accent-400 transition-colors">
+              <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
                 {post.title}
               </h3>
 
               {/* Excerpt */}
-              <p className="text-slate-700 dark:text-slate-300 mb-4 line-clamp-2">
+              <p className="text-foreground/80 mb-4 line-clamp-2">
                 {post.excerpt}
               </p>
 
               {/* Meta Information */}
-              <div className="flex justify-between items-center text-sm text-slate-600 dark:text-slate-400 border-t border-slate-300 dark:border-slate-700 pt-4">
+              <div className="flex justify-between items-center text-sm text-muted-foreground border-t border-border pt-4">
                 <time dateTime={post.date}>{post.date}</time>
                 <span>{post.readTime}</span>
               </div>
 
               {/* Read More Link */}
-              <div className="mt-4 pt-4 border-t border-slate-300 dark:border-slate-700">
-                <button className="text-accent-400 hover:text-accent-300 font-medium text-sm group-hover:translate-x-1 transition-transform inline-block">
+              <div className="mt-4 pt-4 border-t border-border">
+                <button className="text-primary hover:text-primary/80 font-medium text-sm group-hover:translate-x-1 transition-transform inline-block">
                   Read Article →
                 </button>
               </div>
@@ -131,23 +131,23 @@ export default function BlogPage() {
         </div>
 
         {/* Newsletter Section */}
-        <div className="bg-gradient-to-r from-accent-500/10 to-blue-500/10 border border-accent-500/30 rounded-lg p-8">
+        <div className="bg-gradient-to-r from-primary/10 to-blue-500/10 border border-primary/30 rounded-lg p-8">
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Subscribe to Our Newsletter</h2>
-            <p className="text-slate-700 dark:text-slate-300 mb-6">
+            <h2 className="text-2xl font-bold text-foreground mb-4">Subscribe to Our Newsletter</h2>
+            <p className="text-foreground/80 mb-6">
               Get the latest insights, tips, and updates delivered to your inbox every week.
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="flex-1 px-4 py-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition-colors"
+                className="flex-1 px-4 py-3 bg-muted border border-border rounded-lg text-foreground placeholder-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
               />
-              <button className="bg-accent-500 hover:bg-accent-600 text-slate-900 dark:text-white font-semibold px-6 py-3 rounded-lg transition-colors">
+              <button className="bg-primary hover:bg-primary/90 text-background font-semibold px-6 py-3 rounded-lg transition-colors">
                 Subscribe
               </button>
             </div>
-            <p className="text-slate-600 dark:text-slate-400 text-sm mt-3">
+            <p className="text-muted-foreground text-sm mt-3">
               We respect your privacy. Unsubscribe at any time.
             </p>
           </div>
@@ -155,7 +155,7 @@ export default function BlogPage() {
 
         {/* FAQ Section */}
         <section className="mt-12">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Frequently Asked Questions</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-6">Frequently Asked Questions</h2>
           <div className="space-y-4">
             {[
               {
@@ -171,9 +171,9 @@ export default function BlogPage() {
                 answer: 'You can share our blog posts with proper attribution and a link back to our site.',
               },
             ].map((faq, idx) => (
-              <div key={idx} className="bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">{faq.question}</h3>
-                <p className="text-slate-600 dark:text-slate-400">{faq.answer}</p>
+              <div key={idx} className="bg-muted border border-border rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-2">{faq.question}</h3>
+                <p className="text-muted-foreground">{faq.answer}</p>
               </div>
             ))}
           </div>
@@ -181,12 +181,12 @@ export default function BlogPage() {
       </div>
 
       {/* Navigation Links */}
-      <div className="max-w-4xl mx-auto px-6 py-8 border-t border-slate-300 dark:border-slate-700 mt-12">
+      <div className="max-w-4xl mx-auto px-6 py-8 border-t border-border mt-12">
         <div className="flex gap-8">
-          <Link to="/" className="text-accent-400 hover:text-accent-300 font-medium">
+          <Link to="/" className="text-primary hover:text-primary/80 font-medium">
             ← Back to Home
           </Link>
-          <Link to="/contact" className="text-accent-400 hover:text-accent-300 font-medium">
+          <Link to="/contact" className="text-primary hover:text-primary/80 font-medium">
             Contact Us →
           </Link>
         </div>

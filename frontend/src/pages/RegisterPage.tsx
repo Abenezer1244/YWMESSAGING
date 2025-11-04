@@ -81,9 +81,9 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 flex items-center justify-center p-4 py-8 relative overflow-hidden">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 py-8 relative overflow-hidden">
       {/* Subtle background accent */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-accent-500 opacity-10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-primary opacity-10 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="w-full max-w-2xl relative z-10 animate-fadeIn">
         <div className="mb-6">
@@ -93,22 +93,22 @@ export function RegisterPage() {
         <div className="text-center mb-12">
           {/* Logo */}
           <div className="flex items-center justify-center mb-6">
-            <div className="w-14 h-14 bg-accent-500 rounded-xl flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
-              <span className="text-slate-950 font-bold text-2xl">C</span>
+            <div className="w-14 h-14 bg-primary rounded-xl flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
+              <span className="text-background font-bold text-2xl">C</span>
             </div>
           </div>
 
           {/* Headline */}
-          <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight">
+          <h1 className="text-4xl font-bold text-foreground mb-3 tracking-tight">
             Create Your Account
           </h1>
-          <p className="text-lg text-slate-700 dark:text-slate-300 font-light">
+          <p className="text-lg text-muted-foreground font-light">
             Start your 14-day free trial • No credit card required
           </p>
         </div>
 
         {/* Registration Card */}
-        <Card variant="default" className="p-8 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 shadow-lg">
+        <Card variant="default" className="p-8 border border-border bg-card shadow-lg">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {/* Name Fields */}
             <div className="grid grid-cols-2 gap-4">
@@ -203,12 +203,12 @@ export function RegisterPage() {
           </form>
 
           {/* Divider */}
-          <div className="mt-8 pt-8 border-t border-slate-300 dark:border-slate-700">
-            <p className="text-center text-slate-700 dark:text-slate-300 text-sm">
+          <div className="mt-8 pt-8 border-t border-border">
+            <p className="text-center text-muted-foreground text-sm">
               Already have an account?{' '}
               <Link
                 to="/login"
-                className="text-accent-400 hover:text-accent-300 font-semibold transition-colors"
+                className="text-primary hover:text-primary/80 font-semibold transition-colors"
               >
                 Login here
               </Link>
@@ -222,19 +222,19 @@ export function RegisterPage() {
             <svg className="w-5 h-5 text-success-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">Setup in Minutes</p>
+            <p className="text-sm text-muted-foreground font-medium">Setup in Minutes</p>
           </div>
           <div className="flex flex-col items-center gap-2">
             <svg className="w-5 h-5 text-success-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">Secure & Reliable</p>
+            <p className="text-sm text-muted-foreground font-medium">Secure & Reliable</p>
           </div>
           <div className="flex flex-col items-center gap-2">
             <svg className="w-5 h-5 text-success-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">No Card Required</p>
+            <p className="text-sm text-muted-foreground font-medium">No Card Required</p>
           </div>
         </div>
       </div>
