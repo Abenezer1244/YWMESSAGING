@@ -42,7 +42,7 @@ export async function updateBranch(
   branchId: string,
   data: UpdateBranchInput
 ): Promise<Branch> {
-  const response = await client.put(`/branches/branches/${branchId}`, data);
+  const response = await client.put(`/branches/${branchId}`, data);
   return response.data.data;
 }
 
@@ -56,6 +56,6 @@ export async function deleteBranch(
   groupsDeleted: number;
   membersDeleted: number;
 }> {
-  const response = await client.delete(`/branches/branches/${branchId}`);
+  const response = await client.delete(`/branches/${branchId}`);
   return response.data.data;
 }

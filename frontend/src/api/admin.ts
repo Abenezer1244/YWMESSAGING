@@ -42,7 +42,7 @@ export interface ActivityLogsResponse {
  * Get church profile
  */
 export async function getProfile(): Promise<ChurchProfile> {
-  const response = await client.get('/admin/admin/profile');
+  const response = await client.get('/admin/profile');
   return response.data;
 }
 
@@ -54,7 +54,7 @@ export async function updateProfile(data: {
   email?: string;
   description?: string;
 }): Promise<{ success: boolean; profile: ChurchProfile }> {
-  const response = await client.put('/admin/admin/profile', data);
+  const response = await client.put('/admin/profile', data);
   return response.data;
 }
 
@@ -62,7 +62,7 @@ export async function updateProfile(data: {
  * Get all co-admins
  */
 export async function getCoAdmins(): Promise<CoAdmin[]> {
-  const response = await client.get('/admin/admin/co-admins');
+  const response = await client.get('/admin/co-admins');
   return response.data;
 }
 
@@ -74,7 +74,7 @@ export async function inviteCoAdmin(data: {
   firstName: string;
   lastName: string;
 }): Promise<{ success: boolean; data: { admin: CoAdmin; tempPassword: string } }> {
-  const response = await client.post('/admin/admin/co-admins', data);
+  const response = await client.post('/admin/co-admins', data);
   return response.data;
 }
 
@@ -82,7 +82,7 @@ export async function inviteCoAdmin(data: {
  * Remove a co-admin
  */
 export async function removeCoAdmin(adminId: string): Promise<{ success: boolean; message: string }> {
-  const response = await client.delete(`/admin/admin/co-admins/${adminId}`);
+  const response = await client.delete(`/admin/co-admins/${adminId}`);
   return response.data;
 }
 
@@ -93,7 +93,7 @@ export async function getActivityLogs(
   page: number = 1,
   limit: number = 50
 ): Promise<ActivityLogsResponse> {
-  const response = await client.get('/admin/admin/activity-logs', {
+  const response = await client.get('/admin/activity-logs', {
     params: { page, limit },
   });
   return response.data;
@@ -106,7 +106,7 @@ export async function logActivity(
   action: string,
   details: Record<string, any>
 ): Promise<{ success: boolean }> {
-  const response = await client.post('/admin/admin/activity-log', {
+  const response = await client.post('/admin/activity-log', {
     action,
     details,
   });

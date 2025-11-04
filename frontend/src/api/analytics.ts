@@ -42,7 +42,7 @@ export async function getMessageStats(options: {
     params.append('days', options.days.toString());
   }
 
-  const response = await client.get(`/analytics/analytics/messages?${params.toString()}`);
+  const response = await client.get(`/analytics/messages?${params.toString()}`);
   return response.data;
 }
 
@@ -50,7 +50,7 @@ export async function getMessageStats(options: {
  * Get branch comparison statistics
  */
 export async function getBranchStats(): Promise<BranchStats[]> {
-  const response = await client.get('/analytics/analytics/branches');
+  const response = await client.get('/analytics/branches');
   return response.data;
 }
 
@@ -58,6 +58,6 @@ export async function getBranchStats(): Promise<BranchStats[]> {
  * Get overall summary statistics
  */
 export async function getSummaryStats(): Promise<SummaryStats> {
-  const response = await client.get('/analytics/analytics/summary');
+  const response = await client.get('/analytics/summary');
   return response.data;
 }
