@@ -53,7 +53,8 @@
       "Bash(npx shadcn-ui@latest add:*)",
       "Bash(powershell -Command:*)",
       "Bash(find:*)",
-      "mcp__playwright__browser_evaluate"
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_network_requests"
     ],
     "deny": [],
     "ask": []
