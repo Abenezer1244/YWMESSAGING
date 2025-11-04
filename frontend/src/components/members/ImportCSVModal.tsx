@@ -45,15 +45,35 @@ export function ImportCSVModal({ isOpen, groupId, onClose, onSuccess }: ImportCS
       if (importResult.failed > 0) {
         toast.error(`${importResult.failed} rows failed to import`);
       }
-    } catch (error) {
-      toast.error((error as Error).message || 'Failed to import members');
+    } catch (error: any) {
+      // Check if error has details from backend
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to import members';
+      const failedDetails = error.response?.data?.failedDetails;
+
+      // If there are detailed validation errors, show them
+      if (failedDetails && Array.isArray(failedDetails)) {
+        setResult({
+          imported: 0,
+          failed: failedDetails.length,
+          failedDetails: failedDetails.map((detail: any) => ({
+            ...detail,
+            error: detail.errors?.join('; ') || detail.error || 'Unknown error',
+          })),
+        });
+        toast.error(`Validation failed: ${errorMessage}`);
+      } else {
+        toast.error(errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   const downloadTemplate = () => {
-    const csv = 'firstName,lastName,phone,email\nJohn,Doe,(202) 555-0173,john@example.com';
+    const csv = `firstName,lastName,phone,email
+John,Doe,2025550173,john@example.com
+Jane,Smith,202-555-0174,jane@example.com
+Robert,Johnson,(202) 555-0175,robert@example.com`;
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -106,7 +126,10 @@ export function ImportCSVModal({ isOpen, groupId, onClose, onSuccess }: ImportCS
             <p className="font-medium mb-1">CSV Format:</p>
             <p className="font-mono text-xs">firstName,lastName,phone,email</p>
             <p className="text-xs mt-2 text-gray-600">
-              Email is optional. Phone accepts any format.
+              <strong>Required:</strong> firstName, lastName, phone (US format: (202) 555-0173, 202-555-0173, or 2025550173)
+            </p>
+            <p className="text-xs mt-1 text-gray-600">
+              <strong>Optional:</strong> email
             </p>
           </div>
 
