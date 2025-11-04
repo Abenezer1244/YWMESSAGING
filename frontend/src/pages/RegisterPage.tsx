@@ -80,6 +80,18 @@ export function RegisterPage() {
     }
   };
 
+  const handleGoogleSignUp = () => {
+    toast.loading('Redirecting to Google Sign Up...');
+    // TODO: Implement Google OAuth flow
+    // window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/google`;
+  };
+
+  const handleAppleSignUp = () => {
+    toast.loading('Redirecting to Apple Sign Up...');
+    // TODO: Implement Apple OAuth flow
+    // window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/apple`;
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 py-8 relative overflow-hidden">
       {/* Subtle background accent */}
@@ -202,8 +214,44 @@ export function RegisterPage() {
             </Button>
           </form>
 
-          {/* Divider */}
+          {/* OAuth Divider */}
           <div className="mt-8 pt-8 border-t border-border">
+            <p className="text-center text-muted-foreground text-xs font-medium uppercase tracking-wider mb-6">
+              Or sign up with
+            </p>
+
+            {/* OAuth Buttons */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Google Sign Up */}
+              <button
+                type="button"
+                onClick={handleGoogleSignUp}
+                disabled={isLoading}
+                className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-border bg-card hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                </svg>
+                <span>Google</span>
+              </button>
+
+              {/* Apple Sign Up */}
+              <button
+                type="button"
+                onClick={handleAppleSignUp}
+                disabled={isLoading}
+                className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-border bg-card hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.05 13.5c-.91 0-1.82-.55-2.25-1.52-.1-.23-.37-.23-.47 0-.43.97-1.34 1.52-2.25 1.52-1.51 0-2.73-1.22-2.73-2.73 0-1.51 1.22-2.73 2.73-2.73.91 0 1.82.55 2.25 1.52.1.23.37.23.47 0 .43-.97 1.34-1.52 2.25-1.52 1.51 0 2.73 1.22 2.73 2.73 0 1.51-1.22 2.73-2.73 2.73m-5-9c0 .55-.45 1-1 1s-1-.45-1-1 .45-1 1-1 1 .45 1 1m8 0c0 .55-.45 1-1 1s-1-.45-1-1 .45-1 1-1 1 .45 1 1m-4 15c-5.52 0-10-4.48-10-10S2.48 2 8 2s10 4.48 10 10-4.48 10-10 10m0-18C4.48 2 1 5.48 1 10s3.48 8 7 8 8-3.48 8-8-3.48-8-8-8" />
+                </svg>
+                <span>Apple</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Sign In Link */}
+          <div className="mt-6 pt-6 border-t border-border">
             <p className="text-center text-muted-foreground text-sm">
               Already have an account?{' '}
               <Link
