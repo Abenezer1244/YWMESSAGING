@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { MapPin, Loader, Trash2, Edit2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import useAuthStore from '../../stores/authStore';
 import useBranchStore, { Branch } from '../../stores/branchStore';
 import { getBranches, deleteBranch } from '../../api/branches';
 import BranchFormModal from '../../components/branches/BranchFormModal';
-import BackButton from '../../components/BackButton';
-import Button from '../../components/ui/Button';
-import Card from '../../components/ui/Card';
-import { Spinner } from '../../components/ui';
+import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
 
 export function BranchesPage() {
   const auth = useAuthStore();
@@ -78,109 +77,122 @@ export function BranchesPage() {
 
   if (isLoading && branches.length === 0) {
     return (
-      <div className="min-h-screen bg-background p-6 flex items-center justify-center">
-        <Spinner size="lg" text="Loading branches..." />
-      </div>
+      <SoftLayout>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity }}>
+            <Loader className="w-8 h-8 text-primary" />
+          </motion.div>
+        </div>
+      </SoftLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background p-6 transition-colors duration-normal">
-      <div className="max-w-7xl mx-auto">
-        {/* Back Button */}
-        <div className="mb-6">
-          <BackButton variant="ghost" />
-        </div>
-
+    <SoftLayout>
+      <div className="px-4 md:px-8 py-8 w-full">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex items-center justify-between mb-8 flex-wrap gap-4"
+        >
           <div>
-            <h1 className="text-4xl font-bold text-foreground mb-2">📍 Branches</h1>
-            <p className="text-foreground/80">Manage your church locations</p>
+            <h1 className="text-4xl font-bold text-foreground mb-2">
+              <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">Branches</span>
+            </h1>
+            <p className="text-muted-foreground">Manage your church locations</p>
           </div>
-          <Button
+          <SoftButton
             variant="primary"
             size="lg"
             onClick={handleCreate}
           >
-            + New Branch
-          </Button>
-        </div>
+            New Branch
+          </SoftButton>
+        </motion.div>
 
         {branches.length === 0 ? (
-          <Card variant="highlight" className="text-center py-16 bg-muted border-border">
+          <SoftCard className="text-center py-16">
             <div className="mb-6">
-              <span className="text-6xl">📍</span>
+              <MapPin className="w-16 h-16 text-muted-foreground/50 mx-auto" />
             </div>
             <h2 className="text-2xl font-bold text-foreground mb-3">
               No Branches Yet
             </h2>
-            <p className="text-foreground/80 mb-6 max-w-md mx-auto">
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
               Create your first branch to start managing your church locations and organizing your congregation.
             </p>
-            <Button
+            <SoftButton
               variant="primary"
-              size="md"
               onClick={handleCreate}
             >
               Create Your First Branch
-            </Button>
-          </Card>
+            </SoftButton>
+          </SoftCard>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {branches.map((branch) => (
-              <Card key={branch.id} variant="default" className="hover:shadow-lg transition-shadow bg-muted border-border">
-                <div className="mb-4">
-                  <h3 className="text-xl font-bold text-foreground mb-2">{branch.name}</h3>
-                  {branch.description && (
-                    <p className="text-sm text-foreground/80">{branch.description}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2 mb-6 pb-6 border-b border-border">
-                  {branch.address && (
-                    <p className="text-sm text-foreground/80">
-                      <span className="font-medium">📍</span> {branch.address}
-                    </p>
-                  )}
-                  {branch.phone && (
-                    <p className="text-sm text-foreground/80">
-                      <span className="font-medium">📞</span> {branch.phone}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-primary">{branch.groupCount}</p>
-                    <p className="text-xs text-muted-foreground uppercase">Groups</p>
+            {branches.map((branch, idx) => (
+              <motion.div
+                key={branch.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.05 }}
+              >
+                <SoftCard variant="default">
+                  <div className="mb-4">
+                    <h3 className="text-xl font-bold text-foreground mb-2">{branch.name}</h3>
+                    {branch.description && (
+                      <p className="text-sm text-muted-foreground">{branch.description}</p>
+                    )}
                   </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-primary">{branch.memberCount}</p>
-                    <p className="text-xs text-muted-foreground uppercase">Members</p>
-                  </div>
-                </div>
 
-                <div className="flex gap-3">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleEdit(branch)}
-                    fullWidth
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDelete(branch.id)}
-                    disabled={deleting === branch.id || branches.length === 1}
-                    fullWidth
-                  >
-                    {deleting === branch.id ? 'Deleting...' : 'Delete'}
-                  </Button>
-                </div>
-              </Card>
+                  <div className="space-y-2 mb-6 pb-6 border-b border-border/40">
+                    {branch.address && (
+                      <p className="text-sm text-muted-foreground">
+                        <MapPin className="w-4 h-4 inline mr-2" />
+                        {branch.address}
+                      </p>
+                    )}
+                    {branch.phone && (
+                      <p className="text-sm text-muted-foreground">
+                        📞 {branch.phone}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-primary">{branch.groupCount}</p>
+                      <p className="text-xs text-muted-foreground uppercase">Groups</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-primary">{branch.memberCount}</p>
+                      <p className="text-xs text-muted-foreground uppercase">Members</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <SoftButton
+                      variant="secondary"
+                      onClick={() => handleEdit(branch)}
+                      fullWidth
+                    >
+                      <Edit2 className="w-4 h-4" />
+                      Edit
+                    </SoftButton>
+                    <SoftButton
+                      variant="danger"
+                      onClick={() => handleDelete(branch.id)}
+                      disabled={deleting === branch.id || branches.length === 1}
+                      fullWidth
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      {deleting === branch.id ? 'Deleting...' : 'Delete'}
+                    </SoftButton>
+                  </div>
+                </SoftCard>
+              </motion.div>
             ))}
           </div>
         )}
@@ -193,7 +205,7 @@ export function BranchesPage() {
         churchId={auth.church?.id || ''}
         branch={editingBranch}
       />
-    </div>
+    </SoftLayout>
   );
 }
 

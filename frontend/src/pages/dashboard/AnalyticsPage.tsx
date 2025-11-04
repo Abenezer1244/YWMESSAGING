@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { TrendingUp, Loader } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
   LineChart,
@@ -12,7 +14,6 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import BackButton from '../../components/BackButton';
 import {
   getMessageStats,
   getBranchStats,
@@ -21,11 +22,9 @@ import {
   BranchStats,
   SummaryStats,
 } from '../../api/analytics';
-import Button from '../../components/ui/Button';
-import Card from '../../components/ui/Card';
+import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
 import { themeColors } from '../../utils/themeColors';
 import { designTokens } from '../../utils/designTokens';
-import { Spinner } from '../../components/ui';
 
 // Reusable tooltip style configuration
 const tooltipStyle = {
@@ -66,259 +65,261 @@ export function AnalyticsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6 transition-colors duration-normal">
-      <div className="max-w-7xl mx-auto">
-        {/* Back Button */}
-        <div className="mb-6">
-          <BackButton variant="ghost" />
-        </div>
-
+    <SoftLayout>
+      <div className="px-4 md:px-8 py-8 w-full">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex justify-between items-center mb-8 flex-wrap gap-4"
+        >
           <div>
-            <h1 className="text-4xl font-bold text-foreground mb-2">📊 Analytics</h1>
-            <p className="text-foreground/80">Track your messaging performance and engagement</p>
+            <h1 className="text-4xl font-bold text-foreground mb-2">
+              <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">Analytics</span>
+            </h1>
+            <p className="text-muted-foreground">Track your messaging performance and engagement</p>
           </div>
           <select
             value={days}
             onChange={(e) => setDays(parseInt(e.target.value))}
-            className="px-4 py-2 border border-border rounded-lg bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-colors duration-normal"
+            className="px-4 py-2 border border-border/40 rounded-lg bg-card/50 text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-colors duration-normal backdrop-blur-sm"
           >
             <option value={7}>Last 7 days</option>
             <option value={30}>Last 30 days</option>
             <option value={90}>Last 90 days</option>
           </select>
-        </div>
+        </motion.div>
 
         {/* Main Content */}
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Spinner size="lg" text="Loading analytics..." />
+            <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity }}>
+              <Loader className="w-8 h-8 text-primary" />
+            </motion.div>
           </div>
         ) : (
           <div className="space-y-8">
             {/* Summary Cards */}
             {summaryStats && (
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <Card variant="default" className="text-center bg-muted border-border">
-                  <p className="text-muted-foreground text-sm mb-2">📨 Total Messages</p>
-                  <p className="text-3xl font-bold text-accent-400">
-                    {summaryStats.totalMessages}
-                  </p>
-                </Card>
-
-                <Card variant="default" className="text-center bg-slate-900/50 border-slate-700">
-                  <p className="text-muted-foreground text-sm mb-2">✅ Delivery Rate</p>
-                  <p className="text-3xl font-bold text-green-400">
-                    {summaryStats.averageDeliveryRate}%
-                  </p>
-                </Card>
-
-                <Card variant="default" className="text-center bg-slate-900/50 border-slate-700">
-                  <p className="text-muted-foreground text-sm mb-2">👤 Total Members</p>
-                  <p className="text-3xl font-bold text-blue-400">
-                    {summaryStats.totalMembers}
-                  </p>
-                </Card>
-
-                <Card variant="default" className="text-center bg-slate-900/50 border-slate-700">
-                  <p className="text-muted-foreground text-sm mb-2">📍 Branches</p>
-                  <p className="text-3xl font-bold text-yellow-400">
-                    {summaryStats.totalBranches}
-                  </p>
-                </Card>
-
-                <Card variant="default" className="text-center bg-slate-900/50 border-slate-700">
-                  <p className="text-muted-foreground text-sm mb-2">👥 Total Groups</p>
-                  <p className="text-3xl font-bold text-red-400">
-                    {summaryStats.totalGroups}
-                  </p>
-                </Card>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                {[
+                  { label: 'Total Messages', value: summaryStats.totalMessages, color: 'text-primary' },
+                  { label: 'Delivery Rate', value: `${summaryStats.averageDeliveryRate}%`, color: 'text-green-400' },
+                  { label: 'Total Members', value: summaryStats.totalMembers, color: 'text-blue-400' },
+                  { label: 'Branches', value: summaryStats.totalBranches, color: 'text-amber-400' },
+                  { label: 'Total Groups', value: summaryStats.totalGroups, color: 'text-red-400' },
+                ].map((stat, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                  >
+                    <SoftCard variant="gradient" className="text-center">
+                      <p className="text-muted-foreground text-sm mb-2">{stat.label}</p>
+                      <p className={`text-3xl font-bold ${stat.color}`}>
+                        {stat.value}
+                      </p>
+                    </SoftCard>
+                  </motion.div>
+                ))}
               </div>
             )}
 
             {/* Message Volume Chart */}
             {messageStats && messageStats.byDay.length > 0 && (
-              <Card variant="default" className="bg-muted border-border">
-                <h2 className="text-lg font-semibold text-foreground mb-4">
-                  📈 Message Volume
-                </h2>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={messageStats.byDay}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={themeColors.border.dark} />
-                    <XAxis
-                      dataKey="date"
-                      tick={{ fontSize: parseInt(designTokens.typography.fontSize.xs) }}
-                      angle={-45}
-                      textAnchor="end"
-                      height={80}
-                    />
-                    <YAxis />
-                    <Tooltip contentStyle={tooltipStyle} />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="count"
-                      stroke={themeColors.primary.base}
-                      name="Messages Sent"
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="delivered"
-                      stroke={themeColors.success.base}
-                      name="Delivered"
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="failed"
-                      stroke={themeColors.danger.base}
-                      name="Failed"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </Card>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                <SoftCard>
+                  <h2 className="text-lg font-semibold text-foreground mb-4">Message Volume</h2>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={messageStats.byDay}>
+                      <CartesianGrid strokeDasharray="3 3" stroke={themeColors.border.dark} />
+                      <XAxis
+                        dataKey="date"
+                        tick={{ fontSize: parseInt(designTokens.typography.fontSize.xs) }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={80}
+                      />
+                      <YAxis />
+                      <Tooltip contentStyle={tooltipStyle} />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="count"
+                        stroke={themeColors.primary.base}
+                        name="Messages Sent"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="delivered"
+                        stroke={themeColors.success.base}
+                        name="Delivered"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="failed"
+                        stroke={themeColors.danger.base}
+                        name="Failed"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </SoftCard>
+              </motion.div>
             )}
 
             {/* Branch Comparison */}
             {branchStats.length > 0 && (
-              <Card variant="default" className="bg-muted border-border">
-                <h2 className="text-lg font-semibold text-foreground mb-4">
-                  📊 Branch Comparison
-                </h2>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={branchStats}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={themeColors.border.dark} />
-                    <XAxis
-                      dataKey="name"
-                      tick={{ fontSize: parseInt(designTokens.typography.fontSize.xs) }}
-                      angle={-45}
-                      textAnchor="end"
-                      height={80}
-                    />
-                    <YAxis yAxisId="left" />
-                    <YAxis yAxisId="right" orientation="right" />
-                    <Tooltip contentStyle={tooltipStyle} />
-                    <Legend />
-                    <Bar
-                      yAxisId="left"
-                      dataKey="messageCount"
-                      fill={themeColors.primary.base}
-                      name="Messages Sent"
-                    />
-                    <Bar
-                      yAxisId="right"
-                      dataKey="deliveryRate"
-                      fill={themeColors.success.base}
-                      name="Delivery Rate (%)"
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </Card>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+              >
+                <SoftCard>
+                  <h2 className="text-lg font-semibold text-foreground mb-4">Branch Comparison</h2>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={branchStats}>
+                      <CartesianGrid strokeDasharray="3 3" stroke={themeColors.border.dark} />
+                      <XAxis
+                        dataKey="name"
+                        tick={{ fontSize: parseInt(designTokens.typography.fontSize.xs) }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={80}
+                      />
+                      <YAxis yAxisId="left" />
+                      <YAxis yAxisId="right" orientation="right" />
+                      <Tooltip contentStyle={tooltipStyle} />
+                      <Legend />
+                      <Bar
+                        yAxisId="left"
+                        dataKey="messageCount"
+                        fill={themeColors.primary.base}
+                        name="Messages Sent"
+                      />
+                      <Bar
+                        yAxisId="right"
+                        dataKey="deliveryRate"
+                        fill={themeColors.success.base}
+                        name="Delivery Rate (%)"
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </SoftCard>
+              </motion.div>
             )}
 
             {/* Branch Statistics Table */}
             {branchStats.length > 0 && (
-              <Card variant="default" className="overflow-hidden bg-muted border-border">
-                <h2 className="text-lg font-semibold text-foreground mb-4">
-                  📋 Branch Details
-                </h2>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full">
-                    <thead className="bg-muted border-b border-border">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                          Branch
-                        </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                          Members
-                        </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                          Groups
-                        </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                          Messages
-                        </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                          Delivery Rate
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {branchStats.map((branch) => (
-                        <tr key={branch.id} className="hover:bg-muted/50 transition-colors duration-normal">
-                          <td className="px-6 py-4 text-sm font-medium text-foreground">
-                            {branch.name}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-foreground/80">
-                            {branch.memberCount}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-foreground/80">
-                            {branch.groupCount}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-foreground/80">
-                            {branch.messageCount}
-                          </td>
-                          <td className="px-6 py-4 text-sm">
-                            <div className="flex items-center gap-2">
-                              <div className="w-32 bg-muted rounded-full h-2">
-                                <div
-                                  className="bg-green-500 h-2 rounded-full"
-                                  style={{
-                                    width: `${branch.deliveryRate}%`,
-                                  }}
-                                />
-                              </div>
-                              <span className="font-medium text-foreground">
-                                {branch.deliveryRate}%
-                              </span>
-                            </div>
-                          </td>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <SoftCard className="overflow-hidden">
+                  <h2 className="text-lg font-semibold text-foreground mb-4">Branch Details</h2>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full">
+                      <thead className="border-b border-border/40">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
+                            Branch
+                          </th>
+                          <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
+                            Members
+                          </th>
+                          <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
+                            Groups
+                          </th>
+                          <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
+                            Messages
+                          </th>
+                          <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
+                            Delivery Rate
+                          </th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </Card>
+                      </thead>
+                      <tbody className="divide-y divide-border/40">
+                        {branchStats.map((branch, idx) => (
+                          <motion.tr
+                            key={branch.id}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: idx * 0.02 }}
+                            className="hover:bg-muted/30 transition-colors duration-normal"
+                          >
+                            <td className="px-6 py-4 text-sm font-medium text-foreground">
+                              {branch.name}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-muted-foreground">
+                              {branch.memberCount}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-muted-foreground">
+                              {branch.groupCount}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-muted-foreground">
+                              {branch.messageCount}
+                            </td>
+                            <td className="px-6 py-4 text-sm">
+                              <div className="flex items-center gap-2">
+                                <div className="w-32 bg-muted rounded-full h-2">
+                                  <div
+                                    className="bg-green-500 h-2 rounded-full"
+                                    style={{
+                                      width: `${branch.deliveryRate}%`,
+                                    }}
+                                  />
+                                </div>
+                                <span className="font-medium text-foreground">
+                                  {branch.deliveryRate}%
+                                </span>
+                              </div>
+                            </td>
+                          </motion.tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </SoftCard>
+              </motion.div>
             )}
 
             {/* Message Stats Summary */}
             {messageStats && (
-              <Card variant="default" className="bg-muted border-border">
-                <h2 className="text-lg font-semibold text-foreground mb-4">
-                  💬 Message Statistics
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div>
-                    <p className="text-muted-foreground text-sm mb-1">Total Messages</p>
-                    <p className="text-2xl font-bold text-primary">
-                      {messageStats.totalMessages}
-                    </p>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}
+              >
+                <SoftCard>
+                  <h2 className="text-lg font-semibold text-foreground mb-4">Message Statistics</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {[
+                      { label: 'Total Messages', value: messageStats.totalMessages, color: 'text-primary' },
+                      { label: 'Delivered', value: messageStats.deliveredCount, color: 'text-green-400' },
+                      { label: 'Failed', value: messageStats.failedCount, color: 'text-red-400' },
+                      { label: 'Pending', value: messageStats.pendingCount, color: 'text-amber-400' },
+                    ].map((stat, idx) => (
+                      <div key={idx}>
+                        <p className="text-muted-foreground text-sm mb-1">{stat.label}</p>
+                        <p className={`text-2xl font-bold ${stat.color}`}>
+                          {stat.value}
+                        </p>
+                      </div>
+                    ))}
                   </div>
-                  <div>
-                    <p className="text-muted-foreground text-sm mb-1">Delivered</p>
-                    <p className="text-2xl font-bold text-green-400">
-                      {messageStats.deliveredCount}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground text-sm mb-1">Failed</p>
-                    <p className="text-2xl font-bold text-red-400">
-                      {messageStats.failedCount}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground text-sm mb-1">Pending</p>
-                    <p className="text-2xl font-bold text-yellow-400">
-                      {messageStats.pendingCount}
-                    </p>
-                  </div>
-                </div>
-              </Card>
+                </SoftCard>
+              </motion.div>
             )}
           </div>
         )}
       </div>
-    </div>
+    </SoftLayout>
   );
 }
 

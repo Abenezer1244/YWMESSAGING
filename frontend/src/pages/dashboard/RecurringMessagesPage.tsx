@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { Loader, RefreshCw, Plus, Edit, Trash2, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
   getRecurringMessages,
@@ -7,10 +9,7 @@ import {
   RecurringMessage,
 } from '../../api/recurring';
 import RecurringMessageModal from '../../components/recurring/RecurringMessageModal';
-import BackButton from '../../components/BackButton';
-import Button from '../../components/ui/Button';
-import Card from '../../components/ui/Card';
-import { Spinner } from '../../components/ui';
+import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
 
 export function RecurringMessagesPage() {
   const [messages, setMessages] = useState<RecurringMessage[]>([]);
@@ -104,61 +103,71 @@ export function RecurringMessagesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6 transition-colors duration-normal">
-      <div className="max-w-7xl mx-auto">
-        {/* Back Button */}
-        <div className="mb-6">
-          <BackButton variant="ghost" />
-        </div>
-
+    <SoftLayout>
+      <div className="px-4 md:px-8 py-8 w-full">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex items-center justify-between mb-8"
+        >
           <div>
-            <h1 className="text-4xl font-bold text-foreground mb-2">🔄 Recurring Messages</h1>
-            <p className="text-foreground/80">Automate regular communications</p>
+            <h1 className="text-4xl font-bold text-foreground mb-2">
+              <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">Recurring Messages</span>
+            </h1>
+            <p className="text-muted-foreground">Automate regular communications</p>
           </div>
-          <Button
+          <SoftButton
             variant="primary"
             size="lg"
             onClick={handleCreate}
+            icon={<Plus className="w-5 h-5" />}
           >
-            + Create Recurring Message
-          </Button>
-        </div>
+            Create Recurring Message
+          </SoftButton>
+        </motion.div>
 
         {/* Main Content */}
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Spinner size="lg" text="Loading recurring messages..." />
+            <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}>
+              <Loader className="w-8 h-8 text-primary" />
+            </motion.div>
           </div>
         ) : messages.length === 0 ? (
-          <Card variant="highlight" className="text-center py-16 bg-muted border-border">
-            <div className="mb-6">
-              <span className="text-6xl">🔄</span>
-            </div>
-            <h2 className="text-2xl font-bold text-foreground mb-3">
-              No Recurring Messages Yet
-            </h2>
-            <p className="text-foreground/80 mb-6 max-w-md mx-auto">
-              Create recurring messages to automatically send messages on a regular schedule.
-            </p>
-            <Button
-              variant="primary"
-              size="md"
-              onClick={handleCreate}
-            >
-              Create First Message
-            </Button>
-          </Card>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1 }}
+          >
+            <SoftCard variant="gradient" className="text-center py-16">
+              <div className="mb-6">
+                <RefreshCw className="w-16 h-16 mx-auto text-muted-foreground" />
+              </div>
+              <h2 className="text-2xl font-bold text-foreground mb-3">
+                No Recurring Messages Yet
+              </h2>
+              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                Create recurring messages to automatically send messages on a regular schedule.
+              </p>
+              <SoftButton
+                variant="primary"
+                size="md"
+                onClick={handleCreate}
+                icon={<Plus className="w-4 h-4" />}
+              >
+                Create First Message
+              </SoftButton>
+            </SoftCard>
+          </motion.div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {messages.map((message) => (
-              <Card
+            {messages.map((message, index) => (
+              <SoftCard
                 key={message.id}
-                variant="default"
-                className={`hover:shadow-lg transition-shadow bg-muted border-border ${
-                  !message.isActive ? 'opacity-75' : ''
-                }`}
+                index={index}
+                className={!message.isActive ? 'opacity-75' : ''}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
@@ -177,42 +186,45 @@ export function RecurringMessagesPage() {
                         : 'bg-muted-foreground/20 text-muted-foreground'
                     }`}
                   >
-                    {message.isActive ? '✅ Active' : '⏸️ Paused'}
+                    {message.isActive ? 'Active' : 'Paused'}
                   </button>
                 </div>
 
-                <p className="text-foreground/80 text-sm mb-4 line-clamp-2">
+                <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
                   {message.content}
                 </p>
 
-                <Card variant="highlight" className="mb-4">
-                  <p className="text-foreground text-sm">
-                    <strong>⏱️ Next send:</strong> {formatNextSend(message.nextSendAt)}
+                <SoftCard variant="gradient" className="mb-4">
+                  <p className="text-foreground text-sm flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    <strong>Next send:</strong> {formatNextSend(message.nextSendAt)}
                   </p>
                   <p className="text-muted-foreground text-xs mt-2">
                     {new Date(message.nextSendAt).toLocaleString()}
                   </p>
-                </Card>
+                </SoftCard>
 
                 <div className="flex gap-2">
-                  <Button
+                  <SoftButton
                     variant="secondary"
                     size="sm"
                     onClick={() => handleEdit(message)}
                     fullWidth
+                    icon={<Edit className="w-3 h-3" />}
                   >
                     Edit
-                  </Button>
-                  <Button
+                  </SoftButton>
+                  <SoftButton
                     variant="danger"
                     size="sm"
                     onClick={() => handleDelete(message.id)}
                     fullWidth
+                    icon={<Trash2 className="w-3 h-3" />}
                   >
                     Delete
-                  </Button>
+                  </SoftButton>
                 </div>
-              </Card>
+              </SoftCard>
             ))}
           </div>
         )}
@@ -224,7 +236,7 @@ export function RecurringMessagesPage() {
           onClose={handleModalClose}
         />
       )}
-    </div>
+    </SoftLayout>
   );
 }
 
