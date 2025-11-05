@@ -1,5 +1,7 @@
-import prisma from '../config/prisma.config.js';
+import { PrismaClient } from '@prisma/client';
 import { generateChatResponse } from './openai.service.js';
+
+const prisma = new PrismaClient();
 
 export async function getOrCreateConversation(
   userId?: string,
