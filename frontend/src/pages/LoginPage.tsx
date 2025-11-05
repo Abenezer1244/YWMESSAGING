@@ -101,9 +101,7 @@ export function LoginPage() {
         <div className="text-center mb-12">
           {/* Logo */}
           <div className="flex items-center justify-center mb-6">
-            <div className="w-14 h-14 bg-primary rounded-xl flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
-              <span className="text-background font-bold text-2xl">C</span>
-            </div>
+            <img src="/logo.svg" alt="Koinonia" className="w-16 h-16 hover:opacity-80 transition-opacity" />
           </div>
 
           {/* Headline */}

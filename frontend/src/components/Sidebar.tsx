@@ -16,7 +16,6 @@ import {
   X,
   ChevronRight,
   LogOut,
-  Zap,
 } from 'lucide-react';
 import useAuthStore from '../stores/authStore';
 import useBranchStore from '../stores/branchStore';
@@ -156,9 +155,7 @@ export function Sidebar() {
             animate={{ opacity: 1, scale: 1 }}
             className="flex items-center gap-3"
           >
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-lg">
-              <Zap className="w-6 h-6 text-white" />
-            </div>
+            <img src="/logo.svg" alt="Koinonia" className="w-10 h-10" />
             <div>
               <h1 className="text-lg font-bold text-foreground">Koinonia</h1>
               <p className="text-xs text-muted-foreground truncate max-w-[150px]">{church?.name}</p>
