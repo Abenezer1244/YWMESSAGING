@@ -9,6 +9,7 @@ import Testimonials from '../components/landing/Testimonials';
 import FinalCTA from '../components/landing/FinalCTA';
 import Footer from '../components/landing/Footer';
 import AnimatedBlobs from '../components/AnimatedBlobs';
+import { ChatWidget } from '../components/ChatWidget';
 
 export default function LandingPage() {
   // Smooth scroll behavior for anchor links
@@ -79,6 +80,7 @@ export default function LandingPage() {
         <FinalCTA />
       </main>
       <Footer />
+      <ChatWidget variant="floating" position="bottom-right" />
     </div>
   );
 }

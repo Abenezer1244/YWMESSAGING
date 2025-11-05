@@ -20,6 +20,7 @@ import { getGroups } from '../api/groups';
 import { SoftLayout, SoftCard, SoftStat, SoftButton } from '../components/SoftUI';
 import TrialBanner from '../components/TrialBanner';
 import AnimatedBlobs from '../components/AnimatedBlobs';
+import { ChatWidget } from '../components/ChatWidget';
 
 // Get CSS variable value and convert oklch to hex approximation
 const getCSSColor = (varName: string): string => {
@@ -330,6 +331,7 @@ export function DashboardPage() {
         )}
       </div>
     </SoftLayout>
+    <ChatWidget variant="floating" position="bottom-right" />
   );
 }
 

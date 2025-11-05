@@ -255,3 +255,34 @@ model AnalyticsEvent {
   @@index([churchId])
   @@index([eventName])
 }
+
+// Chat conversations (public visitors or authenticated users)
+model ChatConversation {
+  id        String   @id @default(cuid())
+  churchId  String?  // null for public landing page visitors
+  adminId   String?  // null for public visitors
+  visitorId String?  // unique identifier for public visitors (from browser)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  messages  ChatMessage[]
+
+  @@index([churchId])
+  @@index([adminId])
+  @@index([visitorId])
+}
+
+// Individual chat messages
+model ChatMessage {
+  id              String   @id @default(cuid())
+  conversationId  String
+  role            String   // "user" or "assistant"
+  content         String
+  createdAt       DateTime @default(now())
+
+  // Relations
+  conversation    ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+}

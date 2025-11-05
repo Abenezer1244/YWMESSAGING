@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koinonia Abstract Logo Concepts</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0F172A 0%, #1e293b 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 50%, #FFB347 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            color: #94A3B8;
+            font-size: 1.1rem;
+        }
+        
+        .logo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+        
+        .logo-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        
+        .logo-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 107, 53, 0.5);
+        }
+        
+        .logo-card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #FFB347;
+        }
+        
+        .logo-card p {
+            color: #94A3B8;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .logo-display {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            min-height: 150px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .logo-compact {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .description {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .description h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #fff;
+            border-bottom: 2px solid #FF6B35;
+            padding-bottom: 10px;
+        }
+        
+        .description ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .description li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #ccc;
+            line-height: 1.6;
+        }
+        
+        .description li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #FF6B35;
+            font-weight: bold;
+        }
+        
+        .variations {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .variation-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        
+        .variation-label {
+            min-width: 120px;
+            color: #94A3B8;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Koinonia</h1>
+            <p class="subtitle">Abstract Logo Concepts with Business Name</p>
+        </header>
+        
+        <div class="logo-grid">
+            <!-- Concept 1: Flowing Integration -->
+            <div class="logo-card">
+                <h2>Concept 1: Flowing Integration</h2>
+                <p>Abstract flowing elements that seamlessly integrate with the text</p>
+                <div class="logo-display">
+                    <svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="abstractGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#F7931E;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="abstractGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#F7931E;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M 0 100 Q 40 60 80 80 Q 120 100 160 100 Q 200 100 240 100" fill="none" stroke="url(#abstractGrad1)" stroke-width="8" stroke-linecap="round"/>
+                        <path d="M 0 100 Q 40 140 80 120 Q 120 100 160 100 Q 200 100 240 100" fill="none" stroke="url(#abstractGrad1)" stroke-width="8" stroke-linecap="round"/>
+                        <circle cx="80" cy="100" r="12" fill="url(#abstractGrad1)"/>
+                        <circle cx="160" cy="100" r="8" fill="url(#abstractGrad2)" opacity="0.8"/>
+                        <text x="250" y="110" font-family="Arial, sans-serif" font-size="48" font-weight="700" fill="url(#abstractGrad1)" letter-spacing="-0.02em">Koinonia</text>
+                        <circle cx="380" cy="50" r="4" fill="url(#abstractGrad2)" opacity="0.6"/>
+                        <circle cx="390" cy="150" r="4" fill="url(#abstractGrad2)" opacity="0.6"/>
+                    </svg>
+                </div>
+                <div class="logo-compact">
+                    <svg width="200" height="100" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="abstractGrad1s" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#F7931E;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M 0 100 Q 40 60 80 80 Q 120 100 160 100 Q 200 100 240 100" fill="none" stroke="url(#abstractGrad1s)" stroke-width="8" stroke-linecap="round"/>
+                        <circle cx="80" cy="100" r="12" fill="url(#abstractGrad1s)"/>
+                        <text x="250" y="110" font-family="Arial, sans-serif" font-size="48" font-weight="700" fill="url(#abstractGrad1s)" letter-spacing="-0.02em">Koinonia</text>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Concept 2: Text with Abstract Frame -->
+            <div class="logo-card">
+                <h2>Concept 2: Abstract Frame</h2>
+                <p>Abstract geometric frame elements surrounding the text</p>
+                <div class="logo-display">
+                    <svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="frameGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#F7931E;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="frameGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#F7931E;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M 20 40 L 80 20 L 100 40 L 100 60 L 80 80 L 20 60 Z" fill="url(#frameGrad1)" opacity="0.3"/>
+                        <path d="M 300 120 L 360 100 L 380 120 L 380 140 L 360 160 L 300 140 Z" fill="url(#frameGrad1)" opacity="0.3"/>
+                        <line x1="100" y1="60" x2="300" y2="120" stroke="url(#frameGrad2)" stroke-width="3" opacity="0.4"/>
+                        <text x="50" y="120" font-family="Arial, sans-serif" font-size="52" font-weight="700" fill="url(#frameGrad1)" letter-spacing="-0.02em">Koinonia</text>
+                        <circle cx="350" cy="50" r="6" fill="url(#frameGrad2)"/>
+                        <circle cx="370" cy="170" r="5" fill="url(#frameGrad2)" opacity="0.8"/>
+                    </svg>
+                </div>
+                <div class="logo-compact">
+                    <svg width="200" height="100" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="frameGrad1s" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#F7931E;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <text x="50" y="120" font-family="Arial, sans-serif" font-size="52" font-weight="700" fill="url(#frameGrad1s)" letter-spacing="-0.02em">Koinonia</text>
+                        <circle cx="350" cy="50" r="6" fill="url(#frameGrad1s)"/>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Concept 3: Integrated Letterform -->
+            <div class="logo-card">
+                <h2>Concept 3: Integrated K</h2>
+                <p>Abstract "K" mark integrated with the rest of the text</p>
+                <div class="logo-display">
+                    <svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="integGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#F7931E;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="integGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#F7931E;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M 30 50 L 30 150 L 50 150 L 50 110 L 90 150 L 110 150 L 70 110 L 110 70 L 90 70 L 50 110 L 50 50 Z" fill="url(#integGrad1)"/>
+                        <path d="M 120 80 Q 140 60 160 80 Q 180 100 200 100" fill="none" stroke="url(#integGrad2)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+                        <path d="M 120 120 Q 140 140 160 120 Q 180 100 200 100" fill="none" stroke="url(#integGrad2)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+                        <text x="220" y="120" font-family="Arial, sans-serif" font-size="48" font-weight="700" fill="url(#integGrad1)" letter-spacing="-0.02em">oinonia</text>
+                        <circle cx="350" cy="60" r="5" fill="url(#integGrad2)"/>
+                        <circle cx="370" cy="140" r="4" fill="url(#integGrad2)" opacity="0.8"/>
+                    </svg>
+                </div>
+                <div class="logo-compact">
+                    <svg width="200" height="100" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="integGrad1s" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#F7931E;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M 30 50 L 30 150 L 50 150 L 50 110 L 90 150 L 110 150 L 70 110 L 110 70 L 90 70 L 50 110 L 50 50 Z" fill="url(#integGrad1s)"/>
+                        <text x="220" y="120" font-family="Arial, sans-serif" font-size="48" font-weight="700" fill="url(#integGrad1s)" letter-spacing="-0.02em">oinonia</text>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Concept 4: Floating Elements -->
+            <div class="logo-card">
+                <h2>Concept 4: Floating Elements</h2>
+                <p>Abstract floating shapes with connecting elements around the text</p>
+                <div class="logo-display">
+                    <svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="floatGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#F7931E;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="floatGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#F7931E;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <circle cx="60" cy="60" r="25" fill="url(#floatGrad1)" opacity="0.4"/>
+                        <circle cx="80" cy="140" r="20" fill="url(#floatGrad2)" opacity="0.5"/>
+                        <circle cx="340" cy="50" r="18" fill="url(#floatGrad1)" opacity="0.3"/>
+                        <circle cx="360" cy="150" r="22" fill="url(#floatGrad2)" opacity="0.4"/>
+                        <path d="M 60 60 Q 150 100 240 100" fill="none" stroke="url(#floatGrad1)" stroke-width="2" opacity="0.3"/>
+                        <path d="M 80 140 Q 150 100 240 100" fill="none" stroke="url(#floatGrad1)" stroke-width="2" opacity="0.3"/>
+                        <text x="120" y="120" font-family="Arial, sans-serif" font-size="50" font-weight="700" fill="url(#floatGrad1)" letter-spacing="-0.02em">Koinonia</text>
+                        <circle cx="280" cy="80" r="3" fill="url(#floatGrad2)"/>
+                        <circle cx="290" cy="120" r="3" fill="url(#floatGrad2)" opacity="0.8"/>
+                    </svg>
+                </div>
+                <div class="logo-compact">
+                    <svg width="200" height="100" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="floatGrad1s" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#F7931E;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <circle cx="60" cy="60" r="25" fill="url(#floatGrad1s)" opacity="0.4"/>
+                        <text x="120" y="120" font-family="Arial, sans-serif" font-size="50" font-weight="700" fill="url(#floatGrad1s)" letter-spacing="-0.02em">Koinonia</text>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Concept 5: Modern Abstract Mark -->
+            <div class="logo-card">
+                <h2>Concept 5: Modern Mark</h2>
+                <p>Modern abstract symbol connected to the text</p>
+                <div class="logo-display">
+                    <svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="modernGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#F7931E;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="modernGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#F7931E;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M 40 100 L 80 60 L 120 100 L 100 100 L 100 140 L 60 140 L 60 100 Z" fill="url(#modernGrad1)"/>
+                        <circle cx="90" cy="100" r="15" fill="url(#modernGrad2)" opacity="0.6"/>
+                        <path d="M 120 100 Q 140 100 160 100" fill="none" stroke="url(#modernGrad1)" stroke-width="3" stroke-linecap="round"/>
+                        <text x="180" y="120" font-family="Arial, sans-serif" font-size="52" font-weight="700" fill="url(#modernGrad1)" letter-spacing="-0.02em">Koinonia</text>
+                        <circle cx="350" cy="70" r="6" fill="url(#modernGrad2)"/>
+                        <circle cx="370" cy="130" r="5" fill="url(#modernGrad2)" opacity="0.8"/>
+                    </svg>
+                </div>
+                <div class="logo-compact">
+                    <svg width="200" height="100" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="modernGrad1s" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#F7931E;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M 40 100 L 80 60 L 120 100 L 100 100 L 100 140 L 60 140 L 60 100 Z" fill="url(#modernGrad1s)"/>
+                        <text x="180" y="120" font-family="Arial, sans-serif" font-size="52" font-weight="700" fill="url(#modernGrad1s)" letter-spacing="-0.02em">Koinonia</text>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Concept 6: Wave Pattern -->
+            <div class="logo-card">
+                <h2>Concept 6: Wave Pattern</h2>
+                <p>Wave patterns above and below the text, creating rhythm</p>
+                <div class="logo-display">
+                    <img src="frontend/public/koinonia-logo-abstract-6.svg" alt="Concept 6" style="max-width: 100%; height: auto;" />
+                </div>
+                <div class="logo-compact">
+                    <img src="frontend/public/koinonia-logo-abstract-6.svg" alt="Concept 6" style="max-width: 200px; height: auto;" />
+                </div>
+            </div>
+            
+            <!-- Concept 7: Circular Motion -->
+            <div class="logo-card">
+                <h2>Concept 7: Circular Motion</h2>
+                <p>Circular motion arcs creating dynamic energy</p>
+                <div class="logo-display">
+                    <img src="frontend/public/koinonia-logo-abstract-7.svg" alt="Concept 7" style="max-width: 100%; height: auto;" />
+                </div>
+                <div class="logo-compact">
+                    <img src="frontend/public/koinonia-logo-abstract-7.svg" alt="Concept 7" style="max-width: 200px; height: auto;" />
+                </div>
+            </div>
+            
+            <!-- Concept 8: Diagonal Energy -->
+            <div class="logo-card">
+                <h2>Concept 8: Diagonal Energy</h2>
+                <p>Diagonal lines creating dynamic, energetic movement</p>
+                <div class="logo-display">
+                    <img src="frontend/public/koinonia-logo-abstract-8.svg" alt="Concept 8" style="max-width: 100%; height: auto;" />
+                </div>
+                <div class="logo-compact">
+                    <img src="frontend/public/koinonia-logo-abstract-8.svg" alt="Concept 8" style="max-width: 200px; height: auto;" />
+                </div>
+            </div>
+            
+            <!-- Concept 9: Organic Blob -->
+            <div class="logo-card">
+                <h2>Concept 9: Organic Blob</h2>
+                <p>Organic, fluid blob shapes with natural flow</p>
+                <div class="logo-display">
+                    <img src="frontend/public/koinonia-logo-abstract-9.svg" alt="Concept 9" style="max-width: 100%; height: auto;" />
+                </div>
+                <div class="logo-compact">
+                    <img src="frontend/public/koinonia-logo-abstract-9.svg" alt="Concept 9" style="max-width: 200px; height: auto;" />
+                </div>
+            </div>
+            
+            <!-- Concept 10: Geometric Grid -->
+            <div class="logo-card">
+                <h2>Concept 10: Geometric Grid</h2>
+                <p>Modern geometric grid pattern with clean squares</p>
+                <div class="logo-display">
+                    <img src="frontend/public/koinonia-logo-abstract-10.svg" alt="Concept 10" style="max-width: 100%; height: auto;" />
+                </div>
+                <div class="logo-compact">
+                    <img src="frontend/public/koinonia-logo-abstract-10.svg" alt="Concept 10" style="max-width: 200px; height: auto;" />
+                </div>
+            </div>
+            
+            <!-- Concept 11: Spiral Connection -->
+            <div class="logo-card">
+                <h2>Concept 11: Spiral Connection</h2>
+                <p>Spiral paths creating interconnected movement</p>
+                <div class="logo-display">
+                    <img src="frontend/public/koinonia-logo-abstract-11.svg" alt="Concept 11" style="max-width: 100%; height: auto;" />
+                </div>
+                <div class="logo-compact">
+                    <img src="frontend/public/koinonia-logo-abstract-11.svg" alt="Concept 11" style="max-width: 200px; height: auto;" />
+                </div>
+            </div>
+            
+            <!-- Concept 12: Overlapping Shapes -->
+            <div class="logo-card">
+                <h2>Concept 12: Overlapping Shapes</h2>
+                <p>Overlapping circles and triangles creating depth</p>
+                <div class="logo-display">
+                    <img src="frontend/public/koinonia-logo-abstract-12.svg" alt="Concept 12" style="max-width: 100%; height: auto;" />
+                </div>
+                <div class="logo-compact">
+                    <img src="frontend/public/koinonia-logo-abstract-12.svg" alt="Concept 12" style="max-width: 200px; height: auto;" />
+                </div>
+            </div>
+            
+            <!-- Concept 13: Dot Matrix -->
+            <div class="logo-card">
+                <h2>Concept 13: Dot Matrix</h2>
+                <p>Minimalist dot pattern forming abstract shapes</p>
+                <div class="logo-display">
+                    <img src="frontend/public/koinonia-logo-abstract-13.svg" alt="Concept 13" style="max-width: 100%; height: auto;" />
+                </div>
+                <div class="logo-compact">
+                    <img src="frontend/public/koinonia-logo-abstract-13.svg" alt="Concept 13" style="max-width: 200px; height: auto;" />
+                </div>
+            </div>
+            
+            <!-- Concept 14: Brush Stroke -->
+            <div class="logo-card">
+                <h2>Concept 14: Brush Stroke</h2>
+                <p>Organic brush stroke effect with artistic feel</p>
+                <div class="logo-display">
+                    <img src="frontend/public/koinonia-logo-abstract-14.svg" alt="Concept 14" style="max-width: 100%; height: auto;" />
+                </div>
+                <div class="logo-compact">
+                    <img src="frontend/public/koinonia-logo-abstract-14.svg" alt="Concept 14" style="max-width: 200px; height: auto;" />
+                </div>
+            </div>
+            
+            <!-- Concept 15: Rising Lines -->
+            <div class="logo-card">
+                <h2>Concept 15: Rising Lines</h2>
+                <p>Vertical rising lines creating upward momentum</p>
+                <div class="logo-display">
+                    <img src="frontend/public/koinonia-logo-abstract-15.svg" alt="Concept 15" style="max-width: 100%; height: auto;" />
+                </div>
+                <div class="logo-compact">
+                    <img src="frontend/public/koinonia-logo-abstract-15.svg" alt="Concept 15" style="max-width: 200px; height: auto;" />
+                </div>
+            </div>
+        </div>
+        
+        <div class="description">
+            <h2>Abstract Logo Concepts with Business Name</h2>
+            <ul>
+                <li><strong>Concept 1 - Flowing Integration:</strong> Abstract flowing elements that seamlessly connect to the text</li>
+                <li><strong>Concept 2 - Abstract Frame:</strong> Geometric frame elements surrounding the business name</li>
+                <li><strong>Concept 3 - Integrated K:</strong> Stylized abstract "K" mark integrated with the word</li>
+                <li><strong>Concept 4 - Floating Elements:</strong> Abstract floating shapes with connecting lines</li>
+                <li><strong>Concept 5 - Modern Mark:</strong> Contemporary abstract symbol connected to text</li>
+                <li><strong>Concept 6 - Wave Pattern:</strong> Wave patterns creating rhythm around text</li>
+                <li><strong>Concept 7 - Circular Motion:</strong> Circular motion arcs with dynamic energy</li>
+                <li><strong>Concept 8 - Diagonal Energy:</strong> Diagonal lines creating movement</li>
+                <li><strong>Concept 9 - Organic Blob:</strong> Organic, fluid blob shapes</li>
+                <li><strong>Concept 10 - Geometric Grid:</strong> Modern geometric grid pattern</li>
+                <li><strong>Concept 11 - Spiral Connection:</strong> Spiral paths creating interconnected movement</li>
+                <li><strong>Concept 12 - Overlapping Shapes:</strong> Overlapping circles and triangles</li>
+                <li><strong>Concept 13 - Dot Matrix:</strong> Minimalist dot pattern forming abstract shapes</li>
+                <li><strong>Concept 14 - Brush Stroke:</strong> Organic brush stroke effect</li>
+                <li><strong>Concept 15 - Rising Lines:</strong> Vertical rising lines with upward momentum</li>
+            </ul>
+            <p style="margin-top: 20px; color: #94A3B8; font-size: 0.95rem;">
+                All 15 concepts integrate the business name "Koinonia" with abstract design elements, maintaining the orange gradient color scheme (#FF6B35 to #F7931E).
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+

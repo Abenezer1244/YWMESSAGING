@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koinonia Logo Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 50%, #FFB347 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 60px;
+            font-size: 1.1rem;
+        }
+        
+        .logo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+        
+        .logo-variant {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo-variant h2 {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        
+        .logo-variant p {
+            color: #aaa;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        
+        .logo-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .logo-dark {
+            background: #1e1e1e;
+        }
+        
+        .logo-light {
+            background: #ffffff;
+        }
+        
+        .logo-gradient {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+        }
+        
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .logo-with-text {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .logo-text {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+        
+        .logo-text-gradient {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 50%, #FFB347 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .logo-text-white {
+            color: #fff;
+        }
+        
+        .design-description {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 40px;
+        }
+        
+        .design-description h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        
+        .design-description ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .design-description li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #ccc;
+            line-height: 1.6;
+        }
+        
+        .design-description li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #FF6B35;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Koinonia</h1>
+        <p class="subtitle">Abstract Logo Design Preview</p>
+        
+        <div class="logo-grid">
+            <!-- Variant 1: Logo Only - Dark Background -->
+            <div class="logo-variant">
+                <h2>Logo Only</h2>
+                <p>Dark Background</p>
+                <div class="logo-container logo-dark">
+                    <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="100" cy="100" r="90" fill="none" stroke="url(#gradient1)" stroke-width="2" opacity="0.2"/>
+                        <g id="connected-circles">
+                            <circle cx="100" cy="100" r="35" fill="url(#gradient2)" opacity="0.9"/>
+                            <circle cx="100" cy="50" r="20" fill="url(#gradient3)" opacity="0.8"/>
+                            <circle cx="150" cy="100" r="20" fill="url(#gradient3)" opacity="0.8"/>
+                            <circle cx="100" cy="150" r="20" fill="url(#gradient3)" opacity="0.8"/>
+                            <circle cx="50" cy="100" r="20" fill="url(#gradient3)" opacity="0.8"/>
+                            <circle cx="135" cy="65" r="18" fill="url(#gradient4)" opacity="0.7"/>
+                            <circle cx="135" cy="135" r="18" fill="url(#gradient4)" opacity="0.7"/>
+                            <circle cx="65" cy="135" r="18" fill="url(#gradient4)" opacity="0.7"/>
+                            <circle cx="65" cy="65" r="18" fill="url(#gradient4)" opacity="0.7"/>
+                            <line x1="100" y1="100" x2="100" y2="50" stroke="url(#gradient5)" stroke-width="2" opacity="0.6"/>
+                            <line x1="100" y1="100" x2="150" y2="100" stroke="url(#gradient5)" stroke-width="2" opacity="0.6"/>
+                            <line x1="100" y1="100" x2="100" y2="150" stroke="url(#gradient5)" stroke-width="2" opacity="0.6"/>
+                            <line x1="100" y1="100" x2="50" y2="100" stroke="url(#gradient5)" stroke-width="2" opacity="0.6"/>
+                            <line x1="100" y1="100" x2="135" y2="65" stroke="url(#gradient5)" stroke-width="1.5" opacity="0.5"/>
+                            <line x1="100" y1="100" x2="135" y2="135" stroke="url(#gradient5)" stroke-width="1.5" opacity="0.5"/>
+                            <line x1="100" y1="100" x2="65" y2="135" stroke="url(#gradient5)" stroke-width="1.5" opacity="0.5"/>
+                            <line x1="100" y1="100" x2="65" y2="65" stroke="url(#gradient5)" stroke-width="1.5" opacity="0.5"/>
+                        </g>
+                        <defs>
+                            <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#F7931E;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#F7931E;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="gradient3" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#F7931E;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="gradient4" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FFB347;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#FFD700;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="gradient5" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:0.8" />
+                                <stop offset="100%" style="stop-color:#F7931E;stop-opacity:0.8" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Variant 2: Logo with Text - Horizontal -->
+            <div class="logo-variant">
+                <h2>Logo + Text</h2>
+                <p>Horizontal Layout</p>
+                <div class="logo-container logo-dark">
+                    <div class="logo-with-text">
+                        <svg width="80" height="80" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="100" cy="100" r="90" fill="none" stroke="url(#gradient1b)" stroke-width="2" opacity="0.2"/>
+                            <g id="connected-circles">
+                                <circle cx="100" cy="100" r="35" fill="url(#gradient2b)" opacity="0.9"/>
+                                <circle cx="100" cy="50" r="20" fill="url(#gradient3b)" opacity="0.8"/>
+                                <circle cx="150" cy="100" r="20" fill="url(#gradient3b)" opacity="0.8"/>
+                                <circle cx="100" cy="150" r="20" fill="url(#gradient3b)" opacity="0.8"/>
+                                <circle cx="50" cy="100" r="20" fill="url(#gradient3b)" opacity="0.8"/>
+                                <circle cx="135" cy="65" r="18" fill="url(#gradient4b)" opacity="0.7"/>
+                                <circle cx="135" cy="135" r="18" fill="url(#gradient4b)" opacity="0.7"/>
+                                <circle cx="65" cy="135" r="18" fill="url(#gradient4b)" opacity="0.7"/>
+                                <circle cx="65" cy="65" r="18" fill="url(#gradient4b)" opacity="0.7"/>
+                                <line x1="100" y1="100" x2="100" y2="50" stroke="url(#gradient5b)" stroke-width="2" opacity="0.6"/>
+                                <line x1="100" y1="100" x2="150" y2="100" stroke="url(#gradient5b)" stroke-width="2" opacity="0.6"/>
+                                <line x1="100" y1="100" x2="100" y2="150" stroke="url(#gradient5b)" stroke-width="2" opacity="0.6"/>
+                                <line x1="100" y1="100" x2="50" y2="100" stroke="url(#gradient5b)" stroke-width="2" opacity="0.6"/>
+                                <line x1="100" y1="100" x2="135" y2="65" stroke="url(#gradient5b)" stroke-width="1.5" opacity="0.5"/>
+                                <line x1="100" y1="100" x2="135" y2="135" stroke="url(#gradient5b)" stroke-width="1.5" opacity="0.5"/>
+                                <line x1="100" y1="100" x2="65" y2="135" stroke="url(#gradient5b)" stroke-width="1.5" opacity="0.5"/>
+                                <line x1="100" y1="100" x2="65" y2="65" stroke="url(#gradient5b)" stroke-width="1.5" opacity="0.5"/>
+                            </g>
+                            <defs>
+                                <linearGradient id="gradient1b" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#F7931E;stop-opacity:1" />
+                                </linearGradient>
+                                <linearGradient id="gradient2b" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+                                    <stop offset="50%" style="stop-color:#F7931E;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+                                </linearGradient>
+                                <linearGradient id="gradient3b" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#F7931E;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+                                </linearGradient>
+                                <linearGradient id="gradient4b" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#FFB347;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#FFD700;stop-opacity:1" />
+                                </linearGradient>
+                                <linearGradient id="gradient5b" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:0.8" />
+                                    <stop offset="100%" style="stop-color:#F7931E;stop-opacity:0.8" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <span class="logo-text logo-text-gradient">Koinonia</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Variant 3: Logo Only - Light Background -->
+            <div class="logo-variant">
+                <h2>Logo Only</h2>
+                <p>Light Background</p>
+                <div class="logo-container logo-light">
+                    <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="100" cy="100" r="90" fill="none" stroke="url(#gradient1c)" stroke-width="2" opacity="0.3"/>
+                        <g id="connected-circles">
+                            <circle cx="100" cy="100" r="35" fill="url(#gradient2c)" opacity="0.95"/>
+                            <circle cx="100" cy="50" r="20" fill="url(#gradient3c)" opacity="0.9"/>
+                            <circle cx="150" cy="100" r="20" fill="url(#gradient3c)" opacity="0.9"/>
+                            <circle cx="100" cy="150" r="20" fill="url(#gradient3c)" opacity="0.9"/>
+                            <circle cx="50" cy="100" r="20" fill="url(#gradient3c)" opacity="0.9"/>
+                            <circle cx="135" cy="65" r="18" fill="url(#gradient4c)" opacity="0.8"/>
+                            <circle cx="135" cy="135" r="18" fill="url(#gradient4c)" opacity="0.8"/>
+                            <circle cx="65" cy="135" r="18" fill="url(#gradient4c)" opacity="0.8"/>
+                            <circle cx="65" cy="65" r="18" fill="url(#gradient4c)" opacity="0.8"/>
+                            <line x1="100" y1="100" x2="100" y2="50" stroke="url(#gradient5c)" stroke-width="2" opacity="0.7"/>
+                            <line x1="100" y1="100" x2="150" y2="100" stroke="url(#gradient5c)" stroke-width="2" opacity="0.7"/>
+                            <line x1="100" y1="100" x2="100" y2="150" stroke="url(#gradient5c)" stroke-width="2" opacity="0.7"/>
+                            <line x1="100" y1="100" x2="50" y2="100" stroke="url(#gradient5c)" stroke-width="2" opacity="0.7"/>
+                            <line x1="100" y1="100" x2="135" y2="65" stroke="url(#gradient5c)" stroke-width="1.5" opacity="0.6"/>
+                            <line x1="100" y1="100" x2="135" y2="135" stroke="url(#gradient5c)" stroke-width="1.5" opacity="0.6"/>
+                            <line x1="100" y1="100" x2="65" y2="135" stroke="url(#gradient5c)" stroke-width="1.5" opacity="0.6"/>
+                            <line x1="100" y1="100" x2="65" y2="65" stroke="url(#gradient5c)" stroke-width="1.5" opacity="0.6"/>
+                        </g>
+                        <defs>
+                            <linearGradient id="gradient1c" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#F7931E;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="gradient2c" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#F7931E;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="gradient3c" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#F7931E;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="gradient4c" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FFB347;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#FFD700;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="gradient5c" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:0.9" />
+                                <stop offset="100%" style="stop-color:#F7931E;stop-opacity:0.9" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Variant 4: Icon Version (Favicon) -->
+            <div class="logo-variant">
+                <h2>Icon Version</h2>
+                <p>Favicon / App Icon</p>
+                <div class="logo-container logo-dark">
+                    <svg width="64" height="64" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="100" cy="100" r="90" fill="none" stroke="url(#gradient1d)" stroke-width="2" opacity="0.2"/>
+                        <g id="connected-circles">
+                            <circle cx="100" cy="100" r="35" fill="url(#gradient2d)" opacity="0.9"/>
+                            <circle cx="100" cy="50" r="20" fill="url(#gradient3d)" opacity="0.8"/>
+                            <circle cx="150" cy="100" r="20" fill="url(#gradient3d)" opacity="0.8"/>
+                            <circle cx="100" cy="150" r="20" fill="url(#gradient3d)" opacity="0.8"/>
+                            <circle cx="50" cy="100" r="20" fill="url(#gradient3d)" opacity="0.8"/>
+                            <line x1="100" y1="100" x2="100" y2="50" stroke="url(#gradient5d)" stroke-width="2" opacity="0.6"/>
+                            <line x1="100" y1="100" x2="150" y2="100" stroke="url(#gradient5d)" stroke-width="2" opacity="0.6"/>
+                            <line x1="100" y1="100" x2="100" y2="150" stroke="url(#gradient5d)" stroke-width="2" opacity="0.6"/>
+                            <line x1="100" y1="100" x2="50" y2="100" stroke="url(#gradient5d)" stroke-width="2" opacity="0.6"/>
+                        </g>
+                        <defs>
+                            <linearGradient id="gradient1d" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#F7931E;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="gradient2d" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#F7931E;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="gradient3d" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#F7931E;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="gradient5d" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:0.8" />
+                                <stop offset="100%" style="stop-color:#F7931E;stop-opacity:0.8" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        
+        <div class="design-description">
+            <h2>Design Concept</h2>
+            <ul>
+                <li><strong>Connected Circles:</strong> Represents fellowship, community, and connection - the core meaning of "Koinonia"</li>
+                <li><strong>Center Circle:</strong> The church/community hub</li>
+                <li><strong>Surrounding Circles:</strong> Individual members connected to the community</li>
+                <li><strong>Connection Lines:</strong> Communication channels and relationships</li>
+                <li><strong>Orange Gradient:</strong> Warm, inviting colors representing community warmth</li>
+                <li><strong>Abstract Design:</strong> Modern, professional, and memorable</li>
+                <li><strong>Scalable:</strong> Works at any size from favicon to billboard</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
+

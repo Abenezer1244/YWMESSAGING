@@ -15,6 +15,7 @@ import analyticsRoutes from './routes/analytics.routes.js';
 import billingRoutes from './routes/billing.routes.js';
 import webhookRoutes from './routes/webhook.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import chatRoutes from './routes/chat.routes.js';
 
 const app = express();
 
@@ -184,6 +185,9 @@ app.use('/api/billing', billingLimiter, billingRoutes);
 
 // Apply moderate rate limiting to admin endpoints
 app.use('/api/admin', apiLimiter, adminRoutes);
+
+// Chat routes - public and protected
+app.use('/api/chat', apiLimiter, chatRoutes);
 
 // 404 handler
 app.use((req, res) => {

@@ -1,0 +1,35 @@
+<svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Abstract Logo Concept 5: Modern Abstract Mark -->
+  <defs>
+    <linearGradient id="modernGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#F7931E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="modernGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F7931E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Modern abstract mark with text -->
+  <g id="abstract-modern">
+    <!-- Abstract modern shape -->
+    <path d="M 40 100 L 80 60 L 120 100 L 100 100 L 100 140 L 60 140 L 60 100 Z" 
+          fill="url(#modernGrad1)"/>
+    <circle cx="90" cy="100" r="15" fill="url(#modernGrad2)" opacity="0.6"/>
+    
+    <!-- Abstract connecting element -->
+    <path d="M 120 100 Q 140 100 160 100" 
+          fill="none" stroke="url(#modernGrad1)" stroke-width="3" stroke-linecap="round"/>
+    
+    <!-- Text -->
+    <text x="180" y="120" font-family="Arial, sans-serif" font-size="52" font-weight="700" 
+          fill="url(#modernGrad1)" letter-spacing="-0.02em">Koinonia</text>
+    
+    <!-- Abstract accent -->
+    <circle cx="350" cy="70" r="6" fill="url(#modernGrad2)"/>
+    <circle cx="370" cy="130" r="5" fill="url(#modernGrad2)" opacity="0.8"/>
+  </g>
+</svg>
+

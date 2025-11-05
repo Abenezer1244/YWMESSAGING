@@ -1,0 +1,38 @@
+<svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Abstract Logo Concept 7: Circular Motion -->
+  <defs>
+    <linearGradient id="circ7Grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F7931E;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="circ7Grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F7931E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Circular abstract elements -->
+  <g id="abstract-circular">
+    <!-- Circular motion arcs -->
+    <path d="M 50 100 A 30 30 0 0 1 100 70" 
+          fill="none" stroke="url(#circ7Grad1)" stroke-width="6" stroke-linecap="round"/>
+    <path d="M 100 70 A 30 30 0 0 1 150 100" 
+          fill="none" stroke="url(#circ7Grad1)" stroke-width="6" stroke-linecap="round"/>
+    <path d="M 150 100 A 30 30 0 0 1 100 130" 
+          fill="none" stroke="url(#circ7Grad2)" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+    <path d="M 100 130 A 30 30 0 0 1 50 100" 
+          fill="none" stroke="url(#circ7Grad2)" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+    
+    <!-- Central circle -->
+    <circle cx="100" cy="100" r="12" fill="url(#circ7Grad1)"/>
+    
+    <!-- Text -->
+    <text x="180" y="120" font-family="Arial, sans-serif" font-size="52" font-weight="700" 
+          fill="url(#circ7Grad1)" letter-spacing="-0.02em">Koinonia</text>
+    
+    <!-- Accent elements -->
+    <circle cx="320" cy="60" r="6" fill="url(#circ7Grad2)"/>
+    <circle cx="350" cy="140" r="5" fill="url(#circ7Grad2)" opacity="0.8"/>
+  </g>
+</svg>
+

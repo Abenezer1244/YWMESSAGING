@@ -1,0 +1,35 @@
+<svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Abstract Logo Concept 2: Text with Abstract Frame -->
+  <defs>
+    <linearGradient id="frameGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F7931E;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="frameGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F7931E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Abstract frame around text -->
+  <g id="abstract-frame">
+    <!-- Abstract geometric frame -->
+    <path d="M 20 40 L 80 20 L 100 40 L 100 60 L 80 80 L 20 60 Z" 
+          fill="url(#frameGrad1)" opacity="0.3"/>
+    <path d="M 300 120 L 360 100 L 380 120 L 380 140 L 360 160 L 300 140 Z" 
+          fill="url(#frameGrad1)" opacity="0.3"/>
+    
+    <!-- Connecting abstract lines -->
+    <line x1="100" y1="60" x2="300" y2="120" stroke="url(#frameGrad2)" stroke-width="3" opacity="0.4"/>
+    <line x1="80" y1="80" x2="360" y2="100" stroke="url(#frameGrad2)" stroke-width="2" opacity="0.3"/>
+    
+    <!-- Main text -->
+    <text x="50" y="120" font-family="Arial, sans-serif" font-size="52" font-weight="700" 
+          fill="url(#frameGrad1)" letter-spacing="-0.02em">Koinonia</text>
+    
+    <!-- Abstract accent elements -->
+    <circle cx="350" cy="50" r="6" fill="url(#frameGrad2)"/>
+    <circle cx="370" cy="170" r="5" fill="url(#frameGrad2)" opacity="0.8"/>
+  </g>
+</svg>
+
