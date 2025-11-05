@@ -31,9 +31,9 @@ export async function register(req: Request, res: Response): Promise<void> {
     const result = await registerChurch({ email, password, firstName, lastName, churchName });
 
     // ✅ SECURITY: Determine cookie domain based on environment
-    // Production: .onrender.com (shared across subdomains)
+    // Production: .koinoniasms.com (shared across subdomains)
     // Development: undefined (localhost only)
-    const cookieDomain = process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined;
+    const cookieDomain = process.env.NODE_ENV === 'production' ? '.koinoniasms.com' : undefined;
 
     // Set httpOnly cookies for tokens (secure, cannot be accessed via JavaScript)
     res.cookie('accessToken', result.accessToken, {
@@ -87,7 +87,7 @@ export async function loginHandler(req: Request, res: Response): Promise<void> {
     const result = await login({ email, password });
 
     // ✅ SECURITY: Determine cookie domain based on environment
-    const cookieDomain = process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined;
+    const cookieDomain = process.env.NODE_ENV === 'production' ? '.koinoniasms.com' : undefined;
 
     // Set httpOnly cookies for tokens
     res.cookie('accessToken', result.accessToken, {
@@ -148,7 +148,7 @@ export async function refreshToken(req: Request, res: Response): Promise<void> {
     const result = await refreshAccessToken(payload.adminId);
 
     // ✅ SECURITY: Determine cookie domain based on environment
-    const cookieDomain = process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined;
+    const cookieDomain = process.env.NODE_ENV === 'production' ? '.koinoniasms.com' : undefined;
 
     // Set new httpOnly cookies for tokens
     res.cookie('accessToken', result.accessToken, {

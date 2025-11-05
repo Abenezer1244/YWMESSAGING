@@ -54,30 +54,30 @@ export default function ContactPage() {
     {
       icon: '📧',
       title: 'Email',
-      value: 'support@connect.com',
+      value: 'support@koinoniasms.com',
       description: 'For general inquiries and support requests',
-      href: 'mailto:support@connect.com',
+      href: 'mailto:support@koinoniasms.com',
     },
     {
       icon: '💬',
       title: 'Sales',
-      value: 'sales@connect.com',
+      value: 'sales@koinoniasms.com',
       description: 'For pricing, plans, and partnership opportunities',
-      href: 'mailto:sales@connect.com',
+      href: 'mailto:sales@koinoniasms.com',
     },
     {
       icon: '🔒',
       title: 'Security',
-      value: 'security@connect.com',
+      value: 'security@koinoniasms.com',
       description: 'For security concerns and vulnerability reports',
-      href: 'mailto:security@connect.com',
+      href: 'mailto:security@koinoniasms.com',
     },
     {
       icon: '🐞',
       title: 'Support',
-      value: 'help@connect.com',
+      value: 'help@koinoniasms.com',
       description: 'For technical support and feature requests',
-      href: 'mailto:help@connect.com',
+      href: 'mailto:help@koinoniasms.com',
     },
   ];
 

@@ -63,7 +63,7 @@ export default function BlogPage() {
                                     },
                                     {
                                         question: 'Can I suggest a topic for a blog post?',
-                                        answer: 'Absolutely! We love hearing from our community. Contact us at blog@connect.com with your suggestions.',
+                                        answer: 'Absolutely! We love hearing from our community. Contact us at blog@koinoniasms.com with your suggestions.',
                                     },
                                     {
                                         question: 'Can I use your blog posts on my own website?',

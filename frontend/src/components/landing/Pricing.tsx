@@ -253,7 +253,7 @@ export default function Pricing() {
           </p>
           <p className="text-sm text-muted-foreground">
             Need a custom plan?{' '}
-            <a href="mailto:support@connect.com" className="text-primary hover:text-primary/80 font-semibold transition-colors">
+            <a href="mailto:support@koinoniasms.com" className="text-primary hover:text-primary/80 font-semibold transition-colors">
               Contact us
             </a>
           </p>

@@ -87,7 +87,11 @@
       "Bash(done)",
       "Bash(git reset:*)",
       "Bash(do sed -i 's/from-blue-500 to-cyan-500/from-primary to-accent/g' \"$file\")",
-      "Bash(do echo \"Processing $file\")"
+      "Bash(do echo \"Processing $file\")",
+      "Bash(printf \"y\\nn\\n\")",
+      "Bash(printf \"y\\ny\\n\")",
+      "Bash(yes:*)",
+      "Bash(do sed -i 's/support@connect\\.com/support@koinoniasms.com/g' \"$file\")"
     ],
     "deny": [],
     "ask": []

@@ -120,8 +120,8 @@ export default function TermsPage() {
             </p>
             <div className="bg-muted border border-border rounded-lg p-6">
               <p className="text-foreground">Koinonia Support</p>
-              <p className="text-muted-foreground">Email: support@connect.com</p>
-              <p className="text-muted-foreground">Website: www.connect.com</p>
+              <p className="text-muted-foreground">Email: support@koinoniasms.com</p>
+              <p className="text-muted-foreground">Website: koinoniasms.com</p>
             </div>
           </section>
         </div>

@@ -179,11 +179,11 @@ export default function SecurityPage() {
           <section>
             <h2 className="text-2xl font-semibold text-foreground mb-4">8. Reporting Security Issues</h2>
             <p className="leading-relaxed mb-4">
-              If you discover a security vulnerability, please report it to us immediately at security@connect.com. Please do not publicly disclose the vulnerability until we have had time to address it.
+              If you discover a security vulnerability, please report it to us immediately at security@koinoniasms.com. Please do not publicly disclose the vulnerability until we have had time to address it.
             </p>
             <div className="bg-muted border border-border rounded-lg p-6">
               <p className="text-foreground font-semibold mb-2">Security Contact</p>
-              <p className="text-muted-foreground">Email: security@connect.com</p>
+              <p className="text-muted-foreground">Email: security@koinoniasms.com</p>
               <p className="text-muted-foreground">PGP Key: Available upon request</p>
             </div>
           </section>
@@ -196,8 +196,8 @@ export default function SecurityPage() {
             </p>
             <div className="bg-muted border border-border rounded-lg p-6">
               <p className="text-foreground">Koinonia Support</p>
-              <p className="text-muted-foreground">Email: support@connect.com</p>
-              <p className="text-muted-foreground">Website: www.connect.com</p>
+              <p className="text-muted-foreground">Email: support@koinoniasms.com</p>
+              <p className="text-muted-foreground">Website: koinoniasms.com</p>
             </div>
           </section>
         </div>

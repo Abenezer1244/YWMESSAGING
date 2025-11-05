@@ -1,6 +1,6 @@
 import axios from 'axios';
 import useAuthStore from '../stores/authStore';
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' && window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : 'https://api.koinoniasms.com/api');
 const client = axios.create({
     baseURL: API_BASE_URL,
     withCredentials: true, // Enable sending cookies with requests

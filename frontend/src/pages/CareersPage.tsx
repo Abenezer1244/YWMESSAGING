@@ -194,7 +194,7 @@ export default function CareersPage() {
               Don't see the perfect role? Send us your resume and we'll keep you in mind for future opportunities.
             </p>
             <a
-              href="mailto:careers@connect.com"
+              href="mailto:careers@koinoniasms.com"
               className="inline-block bg-muted hover:bg-muted/80 text-foreground font-semibold py-3 px-8 rounded-lg transition-colors border border-border hover:border-primary/50"
             >
               Send Your Resume
@@ -240,7 +240,7 @@ export default function CareersPage() {
             Join our growing team and help us empower faith communities around the world.
           </p>
           <a
-            href="mailto:careers@connect.com"
+            href="mailto:careers@koinoniasms.com"
             className="inline-block bg-primary hover:bg-primary/90 text-background font-semibold py-3 px-8 rounded-lg transition-colors"
           >
             Explore Opportunities
