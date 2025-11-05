@@ -6,6 +6,6 @@ interface GroupFormModalProps {
     onClose: () => void;
     onSuccess: (group: Group) => void;
 }
-export declare function GroupFormModal({ isOpen, group, branchId, onClose, onSuccess }: GroupFormModalProps): any;
+export declare function GroupFormModal({ isOpen, group, branchId, onClose, onSuccess }: GroupFormModalProps): import("react/jsx-runtime").JSX.Element | null;
 export {};
 //# sourceMappingURL=GroupFormModal.d.ts.map

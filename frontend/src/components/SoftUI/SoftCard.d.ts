@@ -7,6 +7,6 @@ interface SoftCardProps {
     onClick?: () => void;
     index?: number;
 }
-export declare function SoftCard({ children, className, variant, hover, onClick, index, }: SoftCardProps): any;
+export declare function SoftCard({ children, className, variant, hover, onClick, index, }: SoftCardProps): import("react/jsx-runtime").JSX.Element;
 export {};
 //# sourceMappingURL=SoftCard.d.ts.map

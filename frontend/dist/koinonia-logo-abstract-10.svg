@@ -1,0 +1,34 @@
+<svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Abstract Logo Concept 10: Geometric Grid -->
+  <defs>
+    <linearGradient id="grid10Grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F7931E;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grid10Grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F7931E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Geometric grid pattern -->
+  <g id="abstract-grid">
+    <!-- Grid squares -->
+    <rect x="30" y="50" width="30" height="30" fill="url(#grid10Grad1)" opacity="0.6" rx="3"/>
+    <rect x="70" y="50" width="30" height="30" fill="url(#grid10Grad2)" opacity="0.5" rx="3"/>
+    <rect x="30" y="90" width="30" height="30" fill="url(#grid10Grad2)" opacity="0.5" rx="3"/>
+    <rect x="70" y="90" width="30" height="30" fill="url(#grid10Grad1)" opacity="0.4" rx="3"/>
+    
+    <!-- Connecting lines -->
+    <line x1="100" y1="100" x2="130" y2="100" stroke="url(#grid10Grad1)" stroke-width="3" stroke-linecap="round"/>
+    
+    <!-- Text -->
+    <text x="150" y="120" font-family="Arial, sans-serif" font-size="52" font-weight="700" 
+          fill="url(#grid10Grad1)" letter-spacing="-0.02em">Koinonia</text>
+    
+    <!-- Accent dots -->
+    <circle cx="320" cy="60" r="5" fill="url(#grid10Grad2)"/>
+    <circle cx="350" cy="140" r="4" fill="url(#grid10Grad2)" opacity="0.8"/>
+  </g>
+</svg>
+

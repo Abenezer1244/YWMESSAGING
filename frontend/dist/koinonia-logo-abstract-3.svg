@@ -1,0 +1,36 @@
+<svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Abstract Logo Concept 3: Integrated Letterform -->
+  <defs>
+    <linearGradient id="integGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#F7931E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="integGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F7931E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Abstract K integrated with text -->
+  <g id="abstract-integrated">
+    <!-- Stylized abstract K -->
+    <path d="M 30 50 L 30 150 L 50 150 L 50 110 L 90 150 L 110 150 L 70 110 L 110 70 L 90 70 L 50 110 L 50 50 Z" 
+          fill="url(#integGrad1)"/>
+    
+    <!-- Abstract flowing elements -->
+    <path d="M 120 80 Q 140 60 160 80 Q 180 100 200 100" 
+          fill="none" stroke="url(#integGrad2)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+    <path d="M 120 120 Q 140 140 160 120 Q 180 100 200 100" 
+          fill="none" stroke="url(#integGrad2)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+    
+    <!-- Rest of text -->
+    <text x="220" y="120" font-family="Arial, sans-serif" font-size="48" font-weight="700" 
+          fill="url(#integGrad1)" letter-spacing="-0.02em">oinonia</text>
+    
+    <!-- Abstract accent dots -->
+    <circle cx="350" cy="60" r="5" fill="url(#integGrad2)"/>
+    <circle cx="370" cy="140" r="4" fill="url(#integGrad2)" opacity="0.8"/>
+  </g>
+</svg>
+

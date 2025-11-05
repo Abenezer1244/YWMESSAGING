@@ -1,5 +1,4 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 const DarkModeToggle = ({ className = '' }) => {
     const { theme, toggleTheme } = useTheme();

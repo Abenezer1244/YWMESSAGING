@@ -94,16 +94,16 @@ Robert,Johnson,(202) 555-0175,robert@example.com`;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4 p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Import Members from CSV</h2>
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg max-w-md w-full mx-4 p-6">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Import Members from CSV</h2>
 
         <div className="space-y-4">
           {/* File Upload */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Select CSV File
             </label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition">
+            <div className="border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg p-6 text-center hover:border-blue-400 dark:hover:border-blue-500 transition dark:bg-slate-700">
               <input
                 type="file"
                 accept=".csv"
@@ -113,7 +113,7 @@ Robert,Johnson,(202) 555-0175,robert@example.com`;
                 disabled={isLoading}
               />
               <label htmlFor="csv-upload" className="cursor-pointer">
-                <p className="text-gray-600">
+                <p className="text-gray-600 dark:text-gray-400">
                   {file ? `✓ ${file.name}` : 'Click to select CSV file'}
                 </p>
               </label>
@@ -124,37 +124,37 @@ Robert,Johnson,(202) 555-0175,robert@example.com`;
           <button
             type="button"
             onClick={downloadTemplate}
-            className="w-full text-sm text-blue-600 hover:text-blue-700 font-medium"
+            className="w-full text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
           >
             📥 Download CSV Template
           </button>
 
           {/* CSV Format Info */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-gray-700">
+          <div className="bg-blue-50 dark:bg-slate-700 border border-blue-200 dark:border-slate-600 rounded-lg p-3 text-sm text-gray-700 dark:text-gray-300">
             <p className="font-medium mb-1">CSV Format:</p>
             <p className="font-mono text-xs">firstName,lastName,phone,email</p>
-            <p className="text-xs mt-2 text-gray-600">
+            <p className="text-xs mt-2 text-gray-600 dark:text-gray-400">
               <strong>Required:</strong> firstName, lastName, phone (US format: (202) 555-0173, 202-555-0173, or 2025550173)
             </p>
-            <p className="text-xs mt-1 text-gray-600">
+            <p className="text-xs mt-1 text-gray-600 dark:text-gray-400">
               <strong>Optional:</strong> email
             </p>
           </div>
 
           {/* Import Results */}
           {result && (
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm">
-              <p className="font-medium text-green-700">✓ {result.imported} imported</p>
+            <div className="bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg p-3 text-sm">
+              <p className="font-medium text-green-700 dark:text-green-400">✓ {result.imported} imported</p>
               {result.failed > 0 && (
                 <>
-                  <p className="font-medium text-red-700">✗ {result.failed} failed</p>
+                  <p className="font-medium text-red-700 dark:text-red-400">✗ {result.failed} failed</p>
                   {result.failedDetails?.slice(0, 3).map((item: any, idx: number) => (
-                    <p key={idx} className="text-xs text-red-600 mt-1">
+                    <p key={idx} className="text-xs text-red-600 dark:text-red-400 mt-1">
                       Row {idx + 1}: {item.error}
                     </p>
                   ))}
                   {result.failedDetails?.length > 3 && (
-                    <p className="text-xs text-red-600">
+                    <p className="text-xs text-red-600 dark:text-red-400">
                       +{result.failedDetails.length - 3} more errors
                     </p>
                   )}
@@ -168,7 +168,7 @@ Robert,Johnson,(202) 555-0175,robert@example.com`;
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition"
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition"
               disabled={isLoading}
             >
               Close

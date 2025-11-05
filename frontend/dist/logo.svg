@@ -1,0 +1,14 @@
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" width="40" height="40">
+  <!-- Outer diamond border -->
+  <g fill="none" stroke="#5f8787" stroke-width="2.5">
+    <polygon points="60,10 110,60 60,110 10,60"/>
+  </g>
+
+  <!-- Inner diamond border -->
+  <g fill="none" stroke="#5f8787" stroke-width="1.5">
+    <polygon points="60,20 100,60 60,100 20,60"/>
+  </g>
+
+  <!-- K text -->
+  <text x="60" y="72" font-family="Georgia, serif" font-size="48" font-weight="bold" text-anchor="middle" fill="#5f8787">K</text>
+</svg>

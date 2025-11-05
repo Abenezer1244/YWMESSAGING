@@ -1,0 +1,35 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Tech Logo Concept 5: Abstract Tech Symbol - Modern & Minimal -->
+  <defs>
+    <linearGradient id="minGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F7931E;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="minGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F7931E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Minimal tech symbol -->
+  <g id="minimal-tech">
+    <!-- Central hub -->
+    <circle cx="100" cy="100" r="22" fill="url(#minGrad1)" />
+    
+    <!-- Tech connection lines - clean, angular -->
+    <line x1="100" y1="100" x2="100" y2="50" stroke="url(#minGrad2)" stroke-width="4" stroke-linecap="round"/>
+    <line x1="100" y1="100" x2="150" y2="100" stroke="url(#minGrad2)" stroke-width="4" stroke-linecap="round"/>
+    <line x1="100" y1="100" x2="100" y2="150" stroke="url(#minGrad2)" stroke-width="4" stroke-linecap="round"/>
+    <line x1="100" y1="100" x2="50" y2="100" stroke="url(#minGrad2)" stroke-width="4" stroke-linecap="round"/>
+    
+    <!-- Connection endpoints -->
+    <circle cx="100" cy="50" r="8" fill="url(#minGrad2)"/>
+    <circle cx="150" cy="100" r="8" fill="url(#minGrad2)"/>
+    <circle cx="100" cy="150" r="8" fill="url(#minGrad2)"/>
+    <circle cx="50" cy="100" r="8" fill="url(#minGrad2)"/>
+    
+    <!-- Tech accent - small indicator -->
+    <circle cx="100" cy="100" r="6" fill="#FFB347" opacity="0.8"/>
+  </g>
+</svg>
+

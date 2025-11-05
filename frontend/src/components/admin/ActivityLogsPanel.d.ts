@@ -1,3 +1,3 @@
-export declare function ActivityLogsPanel(): any;
+export declare function ActivityLogsPanel(): import("react/jsx-runtime").JSX.Element;
 export default ActivityLogsPanel;
 //# sourceMappingURL=ActivityLogsPanel.d.ts.map

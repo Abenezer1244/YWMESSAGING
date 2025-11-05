@@ -5,6 +5,6 @@ interface ChartCardProps {
     children: ReactNode;
     index?: number;
 }
-export declare function ChartCard({ title, subtitle, children, index }: ChartCardProps): any;
+export declare function ChartCard({ title, subtitle, children, index }: ChartCardProps): import("react/jsx-runtime").JSX.Element;
 export {};
 //# sourceMappingURL=ChartCard.d.ts.map
