@@ -10,6 +10,7 @@ export function AnimatedBlobs({ variant = 'default', className = '' }: AnimatedB
 
   // Orange gradient colors for dark and light modes
   const blobs = [
+    // Top left
     {
       id: 'blob-1',
       color: isDark
@@ -18,9 +19,12 @@ export function AnimatedBlobs({ variant = 'default', className = '' }: AnimatedB
       size: 'w-72 h-72',
       duration: 15,
       delay: 0,
-      initialX: -100,
-      initialY: 50,
+      initialX: -200,
+      initialY: -100,
+      endX: 150,
+      endY: 200,
     },
+    // Top right
     {
       id: 'blob-2',
       color: isDark
@@ -29,9 +33,12 @@ export function AnimatedBlobs({ variant = 'default', className = '' }: AnimatedB
       size: 'w-80 h-80',
       duration: 18,
       delay: 2,
-      initialX: 100,
+      initialX: 400,
       initialY: -50,
+      endX: 200,
+      endY: 250,
     },
+    // Middle left
     {
       id: 'blob-3',
       color: isDark
@@ -40,15 +47,73 @@ export function AnimatedBlobs({ variant = 'default', className = '' }: AnimatedB
       size: 'w-64 h-64',
       duration: 20,
       delay: 4,
-      initialX: 50,
-      initialY: 100,
+      initialX: -150,
+      initialY: 400,
+      endX: 200,
+      endY: -100,
+    },
+    // Middle right
+    {
+      id: 'blob-4',
+      color: isDark
+        ? 'linear-gradient(135deg, rgba(251, 146, 60, 0.28), rgba(249, 115, 22, 0.18))'
+        : 'linear-gradient(135deg, rgba(251, 146, 60, 0.22), rgba(249, 115, 22, 0.12))',
+      size: 'w-96 h-96',
+      duration: 22,
+      delay: 1,
+      initialX: 500,
+      initialY: 350,
+      endX: -150,
+      endY: -200,
+    },
+    // Bottom left
+    {
+      id: 'blob-5',
+      color: isDark
+        ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.26), rgba(234, 88, 12, 0.17))'
+        : 'linear-gradient(135deg, rgba(249, 115, 22, 0.19), rgba(234, 88, 12, 0.11))',
+      size: 'w-80 h-80',
+      duration: 19,
+      delay: 3,
+      initialX: -100,
+      initialY: 800,
+      endX: 250,
+      endY: -150,
+    },
+    // Bottom right
+    {
+      id: 'blob-6',
+      color: isDark
+        ? 'linear-gradient(135deg, rgba(234, 88, 12, 0.24), rgba(251, 146, 60, 0.19))'
+        : 'linear-gradient(135deg, rgba(234, 88, 12, 0.18), rgba(251, 146, 60, 0.13))',
+      size: 'w-72 h-72',
+      duration: 21,
+      delay: 5,
+      initialX: 450,
+      initialY: 750,
+      endX: -200,
+      endY: -100,
+    },
+    // Center
+    {
+      id: 'blob-7',
+      color: isDark
+        ? 'linear-gradient(135deg, rgba(244, 63, 94, 0.22), rgba(251, 146, 60, 0.16))'
+        : 'linear-gradient(135deg, rgba(244, 63, 94, 0.16), rgba(251, 146, 60, 0.11))',
+      size: 'w-96 h-96',
+      duration: 25,
+      delay: 6,
+      initialX: 150,
+      initialY: 450,
+      endX: -200,
+      endY: 200,
     },
   ];
 
   if (variant === 'minimal') {
     return (
       <div className={`fixed inset-0 overflow-hidden pointer-events-none ${className}`}>
-        {blobs.slice(0, 1).map((blob) => (
+        {blobs.slice(0, 3).map((blob) => (
           <motion.div
             key={blob.id}
             className={`absolute rounded-full blur-3xl ${blob.size}`}
@@ -57,8 +122,8 @@ export function AnimatedBlobs({ variant = 'default', className = '' }: AnimatedB
               filter: 'blur(40px)',
             }}
             animate={{
-              x: [blob.initialX, blob.initialX + 100, blob.initialX],
-              y: [blob.initialY, blob.initialY - 100, blob.initialY],
+              x: [blob.initialX, blob.endX, blob.initialX],
+              y: [blob.initialY, blob.endY, blob.initialY],
             }}
             transition={{
               duration: blob.duration,
@@ -84,8 +149,8 @@ export function AnimatedBlobs({ variant = 'default', className = '' }: AnimatedB
             filter: 'blur(40px)',
           }}
           animate={{
-            x: [blob.initialX, blob.initialX + 150, blob.initialX],
-            y: [blob.initialY, blob.initialY - 150, blob.initialY],
+            x: [blob.initialX, blob.endX, blob.initialX],
+            y: [blob.initialY, blob.endY, blob.initialY],
           }}
           transition={{
             duration: blob.duration,
