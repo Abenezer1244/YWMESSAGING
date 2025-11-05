@@ -111,7 +111,8 @@ export function ChatWidget({ variant = 'floating', position = 'bottom-right' }: 
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0, opacity: 0 }}
               onClick={openChat}
-              className="w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center"
+              className="w-14 h-14 rounded-full text-white shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center"
+              style={{ backgroundColor: '#527575' }}
             >
               <MessageCircle size={24} />
             </motion.button>
@@ -125,14 +126,15 @@ export function ChatWidget({ variant = 'floating', position = 'bottom-right' }: 
               className="w-96 h-[500px] bg-white dark:bg-slate-900 rounded-lg shadow-2xl border border-gray-200 dark:border-slate-700 flex flex-col overflow-hidden"
             >
               {/* Header */}
-              <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 flex items-center justify-between">
+              <div className="text-white p-4 flex items-center justify-between" style={{ backgroundColor: '#527575' }}>
                 <div>
                   <h3 className="font-semibold">Koinonia Assistant</h3>
-                  <p className="text-sm text-orange-100">Ask me about Koinonia SMS</p>
+                  <p className="text-sm" style={{ color: '#c5d6d6' }}>Ask me about Koinonia SMS</p>
                 </div>
                 <button
                   onClick={closeChat}
-                  className="p-1 hover:bg-orange-700 rounded transition-colors"
+                  className="p-1 rounded transition-colors"
+                  style={{ background: 'rgba(0, 0, 0, 0.2)' }}
                 >
                   <X size={20} />
                 </button>
@@ -161,9 +163,10 @@ export function ChatWidget({ variant = 'floating', position = 'bottom-right' }: 
                     <div
                       className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
                         msg.role === 'user'
-                          ? 'bg-orange-500 text-white rounded-br-none'
+                          ? 'text-white rounded-br-none'
                           : 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white border border-gray-200 dark:border-slate-600 rounded-bl-none'
                       }`}
+                      style={msg.role === 'user' ? { backgroundColor: '#527575' } : undefined}
                     >
                       {msg.content}
                     </div>
@@ -201,12 +204,14 @@ export function ChatWidget({ variant = 'floating', position = 'bottom-right' }: 
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                     placeholder="Ask me something..."
                     disabled={isLoading}
-                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-slate-800 dark:text-white text-sm"
+                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 dark:bg-slate-800 dark:text-white text-sm"
+                    style={{ '--tw-ring-color': '#527575' } as React.CSSProperties}
                   />
                   <button
                     onClick={handleSendMessage}
                     disabled={isLoading || !input.trim()}
-                    className="bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white p-2 rounded-lg transition-colors"
+                    className="text-white p-2 rounded-lg transition-colors disabled:bg-gray-400"
+                    style={{ backgroundColor: !isLoading && input.trim() ? '#527575' : undefined }}
                   >
                     <Send size={18} />
                   </button>
@@ -223,9 +228,9 @@ export function ChatWidget({ variant = 'floating', position = 'bottom-right' }: 
   return (
     <div className="w-full h-full bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4">
+      <div className="text-white p-4" style={{ backgroundColor: '#527575' }}>
         <h3 className="font-semibold">Koinonia Assistant</h3>
-        <p className="text-sm text-orange-100">Ask me about Koinonia features and support</p>
+        <p className="text-sm" style={{ color: '#c5d6d6' }}>Ask me about Koinonia features and support</p>
       </div>
 
       {/* Messages */}
@@ -251,9 +256,10 @@ export function ChatWidget({ variant = 'floating', position = 'bottom-right' }: 
             <div
               className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
                 msg.role === 'user'
-                  ? 'bg-orange-500 text-white rounded-br-none'
+                  ? 'text-white rounded-br-none'
                   : 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white border border-gray-200 dark:border-slate-600 rounded-bl-none'
               }`}
+              style={msg.role === 'user' ? { backgroundColor: '#527575' } : undefined}
             >
               {msg.content}
             </div>
@@ -291,12 +297,14 @@ export function ChatWidget({ variant = 'floating', position = 'bottom-right' }: 
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
             placeholder="Ask me something..."
             disabled={isLoading}
-            className="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-slate-800 dark:text-white text-sm"
+            className="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 dark:bg-slate-800 dark:text-white text-sm"
+            style={{ '--tw-ring-color': '#527575' } as React.CSSProperties}
           />
           <button
             onClick={handleSendMessage}
             disabled={isLoading || !input.trim()}
-            className="bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white p-2 rounded-lg transition-colors"
+            className="text-white p-2 rounded-lg transition-colors disabled:bg-gray-400"
+            style={{ backgroundColor: !isLoading && input.trim() ? '#527575' : undefined }}
           >
             <Send size={18} />
           </button>
