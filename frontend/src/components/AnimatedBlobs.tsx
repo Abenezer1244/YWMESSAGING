@@ -108,12 +108,28 @@ export function AnimatedBlobs({ variant = 'default', className = '' }: AnimatedB
       endX: -200,
       endY: 200,
     },
+    // Bottom right (enhanced for better coverage)
+    {
+      id: 'blob-8',
+      color: isDark
+        ? 'linear-gradient(135deg, rgba(251, 146, 60, 0.32), rgba(249, 115, 22, 0.22))'
+        : 'linear-gradient(135deg, rgba(251, 146, 60, 0.28), rgba(249, 115, 22, 0.18))',
+      size: 'w-96 h-96',
+      duration: 23,
+      delay: 2,
+      initialX: 600,
+      initialY: 600,
+      endX: 200,
+      endY: 400,
+    },
   ];
 
   if (variant === 'minimal') {
+    // Use specific blobs for better coverage: top-left, top-right, middle-right, bottom-right
+    const minimalBlobs = [blobs[0], blobs[1], blobs[3], blobs[7]];
     return (
       <div className={`fixed inset-0 overflow-hidden pointer-events-none ${className}`}>
-        {blobs.slice(0, 3).map((blob) => (
+        {minimalBlobs.map((blob) => (
           <motion.div
             key={blob.id}
             className={`absolute rounded-full blur-3xl ${blob.size}`}
