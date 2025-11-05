@@ -93,7 +93,7 @@ export default function Navigation() {
             {!isAuthenticated && (
               <button
                 onClick={handleSignIn}
-                className="hidden sm:block text-muted-foreground hover:text-primary font-medium transition-colors duration-normal text-sm"
+                className="hidden sm:block text-foreground hover:text-primary font-medium transition-colors duration-normal text-sm"
               >
                 Sign In
               </button>
@@ -153,7 +153,7 @@ export default function Navigation() {
               {!isAuthenticated && (
                 <button
                   onClick={handleSignIn}
-                  className="w-full px-4 py-2 text-muted-foreground hover:text-primary font-medium transition-colors duration-normal text-left text-sm"
+                  className="w-full px-4 py-2 text-foreground hover:text-primary font-medium transition-colors duration-normal text-left text-sm"
                 >
                   Sign In
                 </button>
