@@ -1,2 +1,2 @@
-export declare function Sidebar(): import("react/jsx-runtime").JSX.Element;
+export declare function Sidebar(): any;
 //# sourceMappingURL=Sidebar.d.ts.map

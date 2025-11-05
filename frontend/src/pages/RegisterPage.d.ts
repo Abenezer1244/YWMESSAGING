@@ -1,3 +1,3 @@
-export declare function RegisterPage(): import("react/jsx-runtime").JSX.Element;
+export declare function RegisterPage(): any;
 export default RegisterPage;
 //# sourceMappingURL=RegisterPage.d.ts.map

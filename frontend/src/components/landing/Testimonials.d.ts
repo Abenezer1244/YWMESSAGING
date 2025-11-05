@@ -1,2 +1,2 @@
-export default function Testimonials(): import("react/jsx-runtime").JSX.Element;
+export default function Testimonials(): any;
 //# sourceMappingURL=Testimonials.d.ts.map

@@ -1,2 +1,2 @@
-export default function SecurityPage(): import("react/jsx-runtime").JSX.Element;
+export default function SecurityPage(): any;
 //# sourceMappingURL=SecurityPage.d.ts.map

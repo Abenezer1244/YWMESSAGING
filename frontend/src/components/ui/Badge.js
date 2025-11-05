@@ -1,4 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import React from 'react';
 const Badge = ({ variant = 'solid', color = 'primary', size = 'md', icon, className = '', children, ...props }) => {
     const baseStyles = 'inline-flex items-center gap-1.5 font-medium rounded-full whitespace-nowrap';
     const sizeStyles = {

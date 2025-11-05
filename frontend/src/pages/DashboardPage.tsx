@@ -112,10 +112,11 @@ export function DashboardPage() {
   ];
 
   return (
-    <SoftLayout>
-      <AnimatedBlobs variant="minimal" />
-      {/* Content Wrapper */}
-      <div className="px-4 md:px-8 py-8 w-full">
+    <>
+      <SoftLayout>
+        <AnimatedBlobs variant="minimal" />
+        {/* Content Wrapper */}
+        <div className="px-4 md:px-8 py-8 w-full">
         {/* Trial Banner */}
         <div className="mb-8">
           <TrialBanner />
@@ -330,8 +331,9 @@ export function DashboardPage() {
           </>
         )}
       </div>
-    </SoftLayout>
-    <ChatWidget variant="floating" position="bottom-right" />
+      </SoftLayout>
+      <ChatWidget variant="floating" position="bottom-right" />
+    </>
   );
 }
 

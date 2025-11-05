@@ -1,19 +1,15 @@
 import * as React from "react";
-declare const Breadcrumb: React.ForwardRefExoticComponent<Omit<React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>, "ref"> & {
-    separator?: React.ReactNode;
-} & React.RefAttributes<HTMLElement>>;
-declare const BreadcrumbList: React.ForwardRefExoticComponent<Omit<React.DetailedHTMLProps<React.OlHTMLAttributes<HTMLOListElement>, HTMLOListElement>, "ref"> & React.RefAttributes<HTMLOListElement>>;
-declare const BreadcrumbItem: React.ForwardRefExoticComponent<Omit<React.DetailedHTMLProps<React.LiHTMLAttributes<HTMLLIElement>, HTMLLIElement>, "ref"> & React.RefAttributes<HTMLLIElement>>;
-declare const BreadcrumbLink: React.ForwardRefExoticComponent<Omit<React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>, "ref"> & {
-    asChild?: boolean;
-} & React.RefAttributes<HTMLAnchorElement>>;
-declare const BreadcrumbPage: React.ForwardRefExoticComponent<Omit<React.DetailedHTMLProps<React.HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>, "ref"> & React.RefAttributes<HTMLSpanElement>>;
+declare const Breadcrumb: any;
+declare const BreadcrumbList: any;
+declare const BreadcrumbItem: any;
+declare const BreadcrumbLink: any;
+declare const BreadcrumbPage: any;
 declare const BreadcrumbSeparator: {
-    ({ children, className, ...props }: React.ComponentProps<"li">): import("react/jsx-runtime").JSX.Element;
+    ({ children, className, ...props }: React.ComponentProps<"li">): any;
     displayName: string;
 };
 declare const BreadcrumbEllipsis: {
-    ({ className, ...props }: React.ComponentProps<"span">): import("react/jsx-runtime").JSX.Element;
+    ({ className, ...props }: React.ComponentProps<"span">): any;
     displayName: string;
 };
 export { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis, };

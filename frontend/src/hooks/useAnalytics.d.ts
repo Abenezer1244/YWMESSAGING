@@ -5,7 +5,7 @@ export declare function initializePostHog(): void;
  */
 export declare function useAnalytics(): {
     track: (eventName: string, properties?: Record<string, any>) => void;
-    posthog: import("posthog-js").PostHog;
+    posthog: any;
 };
 export default useAnalytics;
 //# sourceMappingURL=useAnalytics.d.ts.map

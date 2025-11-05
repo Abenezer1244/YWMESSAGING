@@ -1,2 +1,2 @@
-export default function Features(): import("react/jsx-runtime").JSX.Element;
+export default function Features(): any;
 //# sourceMappingURL=Features.d.ts.map

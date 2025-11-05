@@ -14,15 +14,6 @@ export interface SentMessage {
     sentAt?: string;
     deliveryRate?: number;
 }
-interface MessageState {
-    messages: SentMessage[];
-    selectedRecipients: MessageRecipient | null;
-    isLoading: boolean;
-    setMessages: (messages: SentMessage[]) => void;
-    setSelectedRecipients: (recipients: MessageRecipient | null) => void;
-    setLoading: (loading: boolean) => void;
-    addMessage: (message: SentMessage) => void;
-}
-declare const useMessageStore: import("zustand").UseBoundStore<import("zustand").StoreApi<MessageState>>;
+declare const useMessageStore: any;
 export default useMessageStore;
 //# sourceMappingURL=messageStore.d.ts.map

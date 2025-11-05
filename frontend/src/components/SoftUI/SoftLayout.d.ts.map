@@ -1,1 +1,1 @@
-{"version":3,"file":"SoftLayout.d.ts","sourceRoot":"","sources":["SoftLayout.tsx"],"names":[],"mappings":"AAAA,OAAO,EAAE,SAAS,EAAE,MAAM,OAAO,CAAC;AAGlC,UAAU,eAAe;IACvB,QAAQ,EAAE,SAAS,CAAC;CACrB;AAED,wBAAgB,UAAU,CAAC,EAAE,QAAQ,EAAE,EAAE,eAAe,2CAUvD"}
+{"version":3,"file":"SoftLayout.d.ts","sourceRoot":"","sources":["SoftLayout.tsx"],"names":[],"mappings":"AAAA,OAAO,EAAE,SAAS,EAAE,MAAM,OAAO,CAAC;AAGlC,UAAU,eAAe;IACvB,QAAQ,EAAE,SAAS,CAAC;CACrB;AAED,wBAAgB,UAAU,CAAC,EAAE,QAAQ,EAAE,EAAE,eAAe,OAUvD"}

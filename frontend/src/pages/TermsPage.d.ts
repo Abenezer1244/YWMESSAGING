@@ -1,2 +1,2 @@
-export default function TermsPage(): import("react/jsx-runtime").JSX.Element;
+export default function TermsPage(): any;
 //# sourceMappingURL=TermsPage.d.ts.map

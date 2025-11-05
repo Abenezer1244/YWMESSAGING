@@ -1,2 +1,2 @@
-export default function ContactPage(): import("react/jsx-runtime").JSX.Element;
+export default function ContactPage(): any;
 //# sourceMappingURL=ContactPage.d.ts.map

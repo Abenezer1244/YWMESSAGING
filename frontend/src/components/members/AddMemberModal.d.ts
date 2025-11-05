@@ -5,6 +5,6 @@ interface AddMemberModalProps {
     onClose: () => void;
     onSuccess: (member: Member) => void;
 }
-export declare function AddMemberModal({ isOpen, groupId, onClose, onSuccess }: AddMemberModalProps): import("react/jsx-runtime").JSX.Element | null;
+export declare function AddMemberModal({ isOpen, groupId, onClose, onSuccess }: AddMemberModalProps): any;
 export {};
 //# sourceMappingURL=AddMemberModal.d.ts.map

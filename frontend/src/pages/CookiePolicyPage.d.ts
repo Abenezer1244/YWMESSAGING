@@ -1,2 +1,2 @@
-export default function CookiePolicyPage(): import("react/jsx-runtime").JSX.Element;
+export default function CookiePolicyPage(): any;
 //# sourceMappingURL=CookiePolicyPage.d.ts.map

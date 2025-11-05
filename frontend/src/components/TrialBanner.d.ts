@@ -1,3 +1,3 @@
-export declare function TrialBanner(): import("react/jsx-runtime").JSX.Element | null;
+export declare function TrialBanner(): any;
 export default TrialBanner;
 //# sourceMappingURL=TrialBanner.d.ts.map

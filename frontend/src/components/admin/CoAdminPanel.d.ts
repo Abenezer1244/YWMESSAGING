@@ -1,3 +1,3 @@
-export declare function CoAdminPanel(): import("react/jsx-runtime").JSX.Element;
+export declare function CoAdminPanel(): any;
 export default CoAdminPanel;
 //# sourceMappingURL=CoAdminPanel.d.ts.map

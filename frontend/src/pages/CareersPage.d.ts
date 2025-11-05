@@ -1,2 +1,2 @@
-export default function CareersPage(): import("react/jsx-runtime").JSX.Element;
+export default function CareersPage(): any;
 //# sourceMappingURL=CareersPage.d.ts.map

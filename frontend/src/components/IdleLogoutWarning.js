@@ -1,4 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import React from 'react';
 import Button from './ui/Button';
 export function IdleLogoutWarning({ isOpen, secondsUntilLogout, onDismiss, onLogout, }) {
     if (!isOpen)

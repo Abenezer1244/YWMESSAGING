@@ -9,6 +9,6 @@ interface StatCardProps {
     iconColor?: string;
     index?: number;
 }
-export declare function StatCard({ icon: Icon, label, value, change, changeType, bgColor, iconColor, index, }: StatCardProps): import("react/jsx-runtime").JSX.Element;
+export declare function StatCard({ icon: Icon, label, value, change, changeType, bgColor, iconColor, index, }: StatCardProps): any;
 export {};
 //# sourceMappingURL=StatCard.d.ts.map

@@ -1,2 +1,2 @@
-export default function Footer(): import("react/jsx-runtime").JSX.Element;
+export default function Footer(): any;
 //# sourceMappingURL=Footer.d.ts.map

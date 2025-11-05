@@ -1,3 +1,3 @@
-export declare function MessageHistoryPage(): import("react/jsx-runtime").JSX.Element;
+export declare function MessageHistoryPage(): any;
 export default MessageHistoryPage;
 //# sourceMappingURL=MessageHistoryPage.d.ts.map

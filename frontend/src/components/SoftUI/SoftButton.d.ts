@@ -10,6 +10,6 @@ interface SoftButtonProps {
     className?: string;
     type?: 'button' | 'submit' | 'reset';
 }
-export declare function SoftButton({ children, variant, size, onClick, disabled, fullWidth, icon, className, type, }: SoftButtonProps): import("react/jsx-runtime").JSX.Element;
+export declare function SoftButton({ children, variant, size, onClick, disabled, fullWidth, icon, className, type, }: SoftButtonProps): any;
 export {};
 //# sourceMappingURL=SoftButton.d.ts.map

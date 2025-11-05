@@ -3,6 +3,6 @@ interface RecurringMessageModalProps {
     message?: RecurringMessage | null;
     onClose: () => void;
 }
-export default function RecurringMessageModal({ message, onClose }: RecurringMessageModalProps): import("react/jsx-runtime").JSX.Element;
+export default function RecurringMessageModal({ message, onClose }: RecurringMessageModalProps): any;
 export {};
 //# sourceMappingURL=RecurringMessageModal.d.ts.map

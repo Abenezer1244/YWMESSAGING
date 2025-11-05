@@ -4,9 +4,9 @@
  * If no activity for IDLE_TIME + WARNING_TIME, logs user out
  */
 export declare function useIdleLogout(): {
-    showWarning: boolean;
-    secondsUntilLogout: number;
-    handleLogout: () => void;
-    dismissWarning: () => void;
+    showWarning: any;
+    secondsUntilLogout: any;
+    handleLogout: any;
+    dismissWarning: any;
 };
 //# sourceMappingURL=useIdleLogout.d.ts.map

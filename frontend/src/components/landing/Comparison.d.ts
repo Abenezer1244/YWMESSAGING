@@ -1,2 +1,2 @@
-export default function Comparison(): import("react/jsx-runtime").JSX.Element;
+export default function Comparison(): any;
 //# sourceMappingURL=Comparison.d.ts.map

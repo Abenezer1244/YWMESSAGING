@@ -1,2 +1,2 @@
-export default function AboutPage(): import("react/jsx-runtime").JSX.Element;
+export default function AboutPage(): any;
 //# sourceMappingURL=AboutPage.d.ts.map

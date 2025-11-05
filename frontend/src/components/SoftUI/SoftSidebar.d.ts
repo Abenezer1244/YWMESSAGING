@@ -1,2 +1,2 @@
-export declare function SoftSidebar(): import("react/jsx-runtime").JSX.Element;
+export declare function SoftSidebar(): any;
 //# sourceMappingURL=SoftSidebar.d.ts.map

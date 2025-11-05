@@ -1,3 +1,3 @@
-export declare function AdminSettingsPage(): import("react/jsx-runtime").JSX.Element;
+export declare function AdminSettingsPage(): any;
 export default AdminSettingsPage;
 //# sourceMappingURL=AdminSettingsPage.d.ts.map

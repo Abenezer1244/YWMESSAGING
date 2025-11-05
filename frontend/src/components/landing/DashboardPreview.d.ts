@@ -1,2 +1,2 @@
-export default function DashboardPreview(): import("react/jsx-runtime").JSX.Element;
+export default function DashboardPreview(): any;
 //# sourceMappingURL=DashboardPreview.d.ts.map

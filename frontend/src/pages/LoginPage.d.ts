@@ -1,3 +1,3 @@
-export declare function LoginPage(): import("react/jsx-runtime").JSX.Element;
+export declare function LoginPage(): any;
 export default LoginPage;
 //# sourceMappingURL=LoginPage.d.ts.map

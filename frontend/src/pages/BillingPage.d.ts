@@ -1,3 +1,3 @@
-export declare function BillingPage(): import("react/jsx-runtime").JSX.Element;
+export declare function BillingPage(): any;
 export default BillingPage;
 //# sourceMappingURL=BillingPage.d.ts.map

@@ -1,2 +1,2 @@
-export default function LandingPage(): import("react/jsx-runtime").JSX.Element;
+export default function LandingPage(): any;
 //# sourceMappingURL=LandingPage.d.ts.map

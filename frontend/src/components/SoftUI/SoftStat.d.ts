@@ -8,6 +8,6 @@ interface SoftStatProps {
     gradient?: string;
     index?: number;
 }
-export declare function SoftStat({ icon: Icon, label, value, change, changeType, gradient, index, }: SoftStatProps): import("react/jsx-runtime").JSX.Element;
+export declare function SoftStat({ icon: Icon, label, value, change, changeType, gradient, index, }: SoftStatProps): any;
 export {};
 //# sourceMappingURL=SoftStat.d.ts.map

@@ -11,19 +11,6 @@ export interface Church {
     email: string;
     trialEndsAt: string;
 }
-interface AuthState {
-    user: Admin | null;
-    church: Church | null;
-    isLoading: boolean;
-    isAuthenticated: boolean;
-    accessToken: string | null;
-    refreshToken: string | null;
-    tokenExpiresAt: number | null;
-    setAuth: (user: Admin, church: Church, accessToken: string, refreshToken: string, expiresIn?: number) => void;
-    clearAuth: () => void;
-    logout: () => void;
-    isTokenExpired: () => boolean;
-}
-declare const useAuthStore: import("zustand").UseBoundStore<import("zustand").StoreApi<AuthState>>;
+declare const useAuthStore: any;
 export default useAuthStore;
 //# sourceMappingURL=authStore.d.ts.map

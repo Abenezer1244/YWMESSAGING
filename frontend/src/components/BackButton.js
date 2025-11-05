@@ -1,4 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from './ui/Button';
 const BackButton = ({ to, className = '', variant = 'ghost', size = 'md', }) => {

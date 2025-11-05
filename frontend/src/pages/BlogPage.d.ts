@@ -1,2 +1,2 @@
-export default function BlogPage(): import("react/jsx-runtime").JSX.Element;
+export default function BlogPage(): any;
 //# sourceMappingURL=BlogPage.d.ts.map

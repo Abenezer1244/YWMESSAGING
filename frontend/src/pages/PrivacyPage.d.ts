@@ -1,2 +1,2 @@
-export default function PrivacyPage(): import("react/jsx-runtime").JSX.Element;
+export default function PrivacyPage(): any;
 //# sourceMappingURL=PrivacyPage.d.ts.map

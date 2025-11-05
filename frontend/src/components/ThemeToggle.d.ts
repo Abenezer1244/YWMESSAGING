@@ -1,2 +1,2 @@
-export default function ThemeToggle(): import("react/jsx-runtime").JSX.Element;
+export default function ThemeToggle(): any;
 //# sourceMappingURL=ThemeToggle.d.ts.map

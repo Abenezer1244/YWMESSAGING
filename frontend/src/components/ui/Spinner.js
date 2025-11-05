@@ -1,4 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import React from 'react';
 const Spinner = ({ size = 'md', color = 'primary', text, }) => {
     const sizeStyles = {
         sm: 'w-4 h-4',
