@@ -104,7 +104,7 @@ export default function Navigation() {
               variant="primary"
               size="sm"
               onClick={handleStartTrial}
-              className="hidden xs:block bg-primary hover:bg-primary/90 text-background"
+              className="hidden sm:block bg-primary hover:bg-primary/90 text-background"
             >
               {isAuthenticated ? 'Dashboard' : 'Start Free'}
             </Button>
