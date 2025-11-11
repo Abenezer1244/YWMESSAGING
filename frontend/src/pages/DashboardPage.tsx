@@ -20,6 +20,7 @@ import { getGroups } from '../api/groups';
 import { SoftLayout, SoftCard, SoftStat, SoftButton } from '../components/SoftUI';
 import TrialBanner from '../components/TrialBanner';
 import { ChatWidget } from '../components/ChatWidget';
+import WelcomeModal from '../components/WelcomeModal';
 
 // Get CSS variable value and convert oklch to hex approximation
 const getCSSColor = (varName: string): string => {
@@ -51,6 +52,15 @@ export function DashboardPage() {
   const [totalGroups, setTotalGroups] = useState(0);
   const [messageStats, setMessageStats] = useState<any>(null);
   const [summaryStats, setSummaryStats] = useState<any>(null);
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  // Check if user should see welcome modal on mount
+  useEffect(() => {
+    const hasSeenWelcome = localStorage.getItem('welcomeCompleted');
+    if (!hasSeenWelcome) {
+      setShowWelcome(true);
+    }
+  }, []);
 
   useEffect(() => {
     loadDashboardData();
@@ -331,6 +341,7 @@ export function DashboardPage() {
       </div>
       </SoftLayout>
       <ChatWidget variant="floating" position="bottom-right" />
+      <WelcomeModal isOpen={showWelcome} onClose={() => setShowWelcome(false)} />
     </>
   );
 }
