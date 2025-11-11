@@ -15,7 +15,7 @@ interface WelcomeModalProps {
 const WelcomeIllustration = () => (
   <svg
     viewBox="0 0 240 200"
-    className="w-full h-48"
+    className="w-full h-32"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
@@ -185,7 +185,7 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: Wel
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 30 }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="bg-background border border-border/50 rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden"
+            className="bg-background border border-border/50 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto"
           >
             {/* Close Button */}
             <div className="absolute top-6 right-6 z-10">
@@ -207,16 +207,16 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: Wel
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="bg-gradient-to-br from-primary/5 to-primary/[0.02] p-8 md:p-12 flex flex-col justify-center"
+                className="bg-gradient-to-br from-primary/5 to-primary/[0.02] p-6 md:p-8 flex flex-col justify-center"
               >
                 {/* Illustration */}
-                <motion.div variants={itemVariants} className="mb-8">
+                <motion.div variants={itemVariants} className="mb-4">
                   <WelcomeIllustration />
                 </motion.div>
 
                 {/* Welcome Text */}
                 <motion.div variants={itemVariants}>
-                  <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3 leading-tight">
+                  <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2 leading-tight">
                     Welcome to
                     <br />
                     <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
@@ -238,14 +238,14 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: Wel
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="p-8 md:p-12 flex flex-col justify-between"
+                className="p-6 md:p-8 flex flex-col justify-between"
               >
                 {/* Header */}
                 <motion.div variants={itemVariants}>
-                  <h2 className="text-xl font-semibold text-foreground mb-2">
+                  <h2 className="text-lg font-semibold text-foreground mb-1">
                     How would you describe your role?
                   </h2>
-                  <p className="text-sm text-muted-foreground mb-8">
+                  <p className="text-sm text-muted-foreground mb-6">
                     We'll personalize your experience based on your position.
                   </p>
                 </motion.div>
@@ -255,14 +255,14 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: Wel
                   variants={containerVariants}
                   initial="hidden"
                   animate="visible"
-                  className="space-y-3 mb-8"
+                  className="space-y-2 mb-6"
                 >
                   {roles.map((role) => (
                     <motion.label
                       key={role.id}
                       variants={itemVariants}
                       whileHover={{ scale: 1.02 }}
-                      className={`relative flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 group ${
+                      className={`relative flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 group ${
                         selectedRole === role.id
                           ? 'border-primary bg-primary/8 shadow-md'
                           : 'border-border/30 hover:border-primary/40 hover:bg-muted/40 bg-muted/20'
@@ -318,7 +318,7 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: Wel
                 {/* Action Buttons */}
                 <motion.div
                   variants={itemVariants}
-                  className="space-y-3"
+                  className="space-y-2"
                 >
                   <Button
                     variant="primary"
