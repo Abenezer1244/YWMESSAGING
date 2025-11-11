@@ -13,7 +13,6 @@ import { AddMemberModal } from '../../components/members/AddMemberModal';
 import { ImportCSVModal } from '../../components/members/ImportCSVModal';
 import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
 import Input from '../../components/ui/Input';
-import AnimatedBlobs from '../../components/AnimatedBlobs';
 import { Spinner } from '../../components/ui';
 
 export function MembersPage() {
@@ -139,7 +138,6 @@ export function MembersPage() {
 
   return (
     <SoftLayout>
-      <AnimatedBlobs variant="minimal" />
       <div className="px-4 md:px-8 py-8 w-full">
         {/* Header */}
         <motion.div

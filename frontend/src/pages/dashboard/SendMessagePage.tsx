@@ -8,7 +8,6 @@ import { sendMessage } from '../../api/messages';
 import { getTemplates, MessageTemplate } from '../../api/templates';
 import TemplateFormModal from '../../components/templates/TemplateFormModal';
 import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
-import AnimatedBlobs from '../../components/AnimatedBlobs';
 
 export function SendMessagePage() {
   const { groups } = useGroupStore();
@@ -86,7 +85,6 @@ export function SendMessagePage() {
 
   return (
     <SoftLayout>
-      <AnimatedBlobs variant="minimal" />
       <div className="px-4 md:px-8 py-8 w-full max-w-4xl mx-auto">
         {/* Header */}
         <motion.div
