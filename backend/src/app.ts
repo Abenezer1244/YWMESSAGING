@@ -142,18 +142,24 @@ app.use(helmet({
   referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 }));
 
-// CORS configuration - allow development and production URLs
-const corsOrigin = process.env.NODE_ENV === 'production'
-  ? process.env.FRONTEND_URL || 'https://koinoniasms.com'
-  : [
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'http://localhost:5174',
-      'http://localhost:5175',
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:5173',
-      process.env.FRONTEND_URL || 'https://koinoniasms.com'
-    ];
+// CORS configuration - allow development, staging, and production URLs
+const corsOrigin = [
+  // Development
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:5175',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:5173',
+  // Production
+  'https://koinoniasms.com',
+  'https://www.koinoniasms.com',
+  // Render deployments
+  'https://connect-yw-frontend.onrender.com',
+  'https://connect-yw-backend.onrender.com',
+  // Environment-based (fallback)
+  process.env.FRONTEND_URL || 'https://koinoniasms.com'
+];
 
 app.use(
   cors({
