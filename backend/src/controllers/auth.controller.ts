@@ -206,3 +206,33 @@ export async function getMe(req: Request, res: Response): Promise<void> {
     res.status(500).json({ error: 'Failed to fetch admin' });
   }
 }
+
+/**
+ * POST /api/auth/logout
+ */
+export async function logout(req: Request, res: Response): Promise<void> {
+  try {
+    // ✅ SECURITY: Determine cookie domain based on environment
+    const cookieDomain = process.env.NODE_ENV === 'production' ? '.koinoniasms.com' : undefined;
+
+    // Clear httpOnly cookies by setting maxAge to 0
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none',
+      domain: cookieDomain,
+    });
+
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none',
+      domain: cookieDomain,
+    });
+
+    res.status(200).json({ success: true });
+  } catch (error: any) {
+    console.error('Logout error:', error);
+    res.status(500).json({ error: 'Logout failed' });
+  }
+}
