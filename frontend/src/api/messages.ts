@@ -1,24 +1,10 @@
 import client from './client';
 import { SentMessage } from '../stores/messageStore';
 
-export interface KoinoniaTwilioData {
-  accountSid: string;
-  authToken: string;
-  phoneNumber: string;
-}
-
 export interface SendMessageData {
   content: string;
   targetType: 'individual' | 'groups' | 'branches' | 'all';
   targetIds?: string[];
-}
-
-/**
- * Koinonia Twilio credentials
- */
-export async function connectTwilio(data: KoinoniaTwilioData): Promise<any> {
-  const response = await client.post('/messages/twilio/connect', data);
-  return response.data.data;
 }
 
 /**

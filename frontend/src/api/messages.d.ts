@@ -1,18 +1,9 @@
 import { SentMessage } from '../stores/messageStore';
-export interface KoinoniaTwilioData {
-    accountSid: string;
-    authToken: string;
-    phoneNumber: string;
-}
 export interface SendMessageData {
     content: string;
     targetType: 'individual' | 'groups' | 'branches' | 'all';
     targetIds?: string[];
 }
-/**
- * Koinonia Twilio credentials
- */
-export declare function connectTwilio(data: KoinoniaTwilioData): Promise<any>;
 /**
  * Send message to recipients
  */

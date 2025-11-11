@@ -4,13 +4,6 @@ import * as messageController from '../controllers/message.controller.js';
 
 const router = Router();
 
-// Twilio connection
-router.post(
-  '/twilio/connect',
-  authenticateToken,
-  messageController.connectTwilio
-);
-
 // Send message
 router.post('/send', authenticateToken, messageController.sendMessage);
 
@@ -19,9 +12,6 @@ router.get('/history', authenticateToken, messageController.getMessageHistory);
 
 // Get single message details
 router.get('/:messageId', authenticateToken, messageController.getMessageDetails);
-
-// Twilio webhook (no authentication)
-router.post('/webhooks/twilio/status', messageController.handleTwilioWebhook);
 
 // Telnyx webhook (no authentication)
 router.post('/webhooks/telnyx/status', messageController.handleTelnyxWebhook);
