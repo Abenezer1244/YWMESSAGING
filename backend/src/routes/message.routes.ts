@@ -23,4 +23,7 @@ router.get('/:messageId', authenticateToken, messageController.getMessageDetails
 // Twilio webhook (no authentication)
 router.post('/webhooks/twilio/status', messageController.handleTwilioWebhook);
 
+// Telnyx webhook (no authentication)
+router.post('/webhooks/telnyx/status', messageController.handleTelnyxWebhook);
+
 export default router;

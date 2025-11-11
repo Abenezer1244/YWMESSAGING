@@ -275,3 +275,74 @@ export async function handleTwilioWebhook(req: Request, res: Response) {
     res.status(500).json({ error: 'Failed to process webhook' });
   }
 }
+
+/**
+ * POST /api/webhooks/telnyx/status
+ * Webhook for Telnyx delivery status updates (DLR - Delivery Receipt)
+ * Telnyx sends event-based webhooks without signature validation on HTTPS
+ */
+export async function handleTelnyxWebhook(req: Request, res: Response) {
+  try {
+    const { type, data } = req.body;
+
+    // Only process message delivery receipts
+    if (type !== 'message.dlr') {
+      return res.status(200).json({ received: true });
+    }
+
+    const payload = data?.payload?.[0];
+    if (!payload || !payload.id) {
+      return res.status(400).json({ error: 'Payload with message ID required' });
+    }
+
+    const messageId = payload.id;
+    const telnyxStatus = payload.status;
+
+    // Find recipient by Telnyx message ID
+    // For now, we'll use twilioMessageSid field since we're storing all message IDs there
+    const recipient = await prisma.messageRecipient.findFirst({
+      where: { twilioMessageSid: messageId },
+      include: {
+        message: {
+          include: { church: true },
+        },
+      },
+    });
+
+    if (!recipient) {
+      // Message ID not found, just acknowledge webhook
+      console.log(`Telnyx webhook: Message ID ${messageId} not found in database`);
+      return res.status(200).json({ received: true });
+    }
+
+    // Map Telnyx status to our status
+    let status: 'delivered' | 'failed' | null = null;
+
+    if (telnyxStatus === 'delivered') {
+      status = 'delivered';
+    } else if (
+      telnyxStatus === 'failed' ||
+      telnyxStatus === 'undelivered' ||
+      telnyxStatus === 'bounced'
+    ) {
+      status = 'failed';
+    } else {
+      // pending, queued, etc. - don't update yet
+      return res.status(200).json({ received: true });
+    }
+
+    if (status) {
+      // Update recipient status
+      await messageService.updateRecipientStatus(recipient.id, status, {
+        failureReason: payload.error_message || undefined,
+      });
+
+      console.log(`Telnyx webhook: Updated message ${messageId} to ${status}`);
+    }
+
+    res.json({ received: true });
+  } catch (error) {
+    console.error('Error processing Telnyx webhook:', error);
+    res.status(500).json({ error: 'Failed to process webhook' });
+  }
+}
