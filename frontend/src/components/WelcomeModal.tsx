@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check } from 'lucide-react';
+import toast from 'react-hot-toast';
 import Button from './ui/Button';
+import client from '../api/client';
 
 interface WelcomeModalProps {
   isOpen: boolean;
@@ -84,6 +86,7 @@ const WelcomeIllustration = () => (
 
 export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
   const [selectedRole, setSelectedRole] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const roles = [
     {
@@ -118,12 +121,26 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
     },
   ];
 
-  const handleNext = () => {
-    if (selectedRole) {
-      localStorage.setItem('welcomeCompleted', 'true');
-      localStorage.setItem('userRole', selectedRole);
-      console.log('Welcome modal closed - stored role:', selectedRole);
-      onClose();
+  const handleNext = async () => {
+    if (!selectedRole) return;
+
+    setIsLoading(true);
+    try {
+      // Call backend to complete welcome
+      const response = await client.post('/auth/complete-welcome', {
+        userRole: selectedRole,
+      });
+
+      if (response.data.success) {
+        console.log('Welcome completed - stored role:', selectedRole);
+        toast.success('Welcome complete! Let\'s get started.');
+        onClose();
+      }
+    } catch (error: any) {
+      console.error('Failed to complete welcome:', error);
+      toast.error('Failed to save your preferences. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -302,15 +319,17 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                     size="lg"
                     fullWidth
                     onClick={handleNext}
-                    disabled={!selectedRole}
+                    disabled={!selectedRole || isLoading}
+                    isLoading={isLoading}
                     className="bg-primary hover:bg-primary/90 text-background disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-lg hover:shadow-xl transition-all"
                   >
-                    {selectedRole ? 'Continue' : 'Select a role to continue'}
+                    {isLoading ? 'Saving...' : selectedRole ? 'Continue' : 'Select a role to continue'}
                   </Button>
 
                   <button
                     onClick={onClose}
-                    className="w-full py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted/50"
+                    disabled={isLoading}
+                    className="w-full py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted/50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Skip for now
                   </button>
