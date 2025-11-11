@@ -57,6 +57,7 @@ export function DashboardPage() {
   // Check if user should see welcome modal on mount
   useEffect(() => {
     const hasSeenWelcome = localStorage.getItem('welcomeCompleted');
+    console.log('Welcome modal check:', { hasSeenWelcome, shouldShow: !hasSeenWelcome });
     if (!hasSeenWelcome) {
       setShowWelcome(true);
     }

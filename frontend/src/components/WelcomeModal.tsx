@@ -122,6 +122,7 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
     if (selectedRole) {
       localStorage.setItem('welcomeCompleted', 'true');
       localStorage.setItem('userRole', selectedRole);
+      console.log('Welcome modal closed - stored role:', selectedRole);
       onClose();
     }
   };
