@@ -7,6 +7,8 @@ export interface Admin {
   firstName: string;
   lastName: string;
   role: string;
+  welcomeCompleted?: boolean;
+  userRole?: string;
 }
 
 export interface Church {
