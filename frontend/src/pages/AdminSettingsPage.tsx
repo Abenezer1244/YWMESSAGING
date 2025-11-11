@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Settings, Loader } from 'lucide-react';
+import { Settings, Loader, Phone } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getProfile, updateProfile } from '../api/admin';
+import { getCurrentNumber } from '../api/numbers';
 import CoAdminPanel from '../components/admin/CoAdminPanel';
 import ActivityLogsPanel from '../components/admin/ActivityLogsPanel';
+import PhoneNumberPurchaseModal from '../components/PhoneNumberPurchaseModal';
 import { SoftLayout, SoftCard, SoftButton } from '../components/SoftUI';
 import Input from '../components/ui/Input';
 
@@ -24,10 +26,13 @@ interface ChurchProfile {
 }
 
 export function AdminSettingsPage() {
-  const [activeTab, setActiveTab] = useState<'profile' | 'coadmins' | 'logs'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'coadmins' | 'logs' | 'numbers'>('profile');
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [profile, setProfile] = useState<ChurchProfile | null>(null);
+  const [currentPhoneNumber, setCurrentPhoneNumber] = useState<string | null>(null);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [isLoadingNumber, setIsLoadingNumber] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -54,8 +59,25 @@ export function AdminSettingsPage() {
     }
   };
 
-  // Initial load effect would go here in real implementation
-  // useEffect(() => { loadProfile(); }, []);
+  // Load current phone number
+  const loadPhoneNumber = async () => {
+    try {
+      setIsLoadingNumber(true);
+      const data = await getCurrentNumber();
+      setCurrentPhoneNumber(data.phoneNumber);
+    } catch (error) {
+      // No phone number assigned yet
+      setCurrentPhoneNumber(null);
+    } finally {
+      setIsLoadingNumber(false);
+    }
+  };
+
+  // Load data on mount
+  useEffect(() => {
+    loadProfile();
+    loadPhoneNumber();
+  }, []);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,7 +143,7 @@ export function AdminSettingsPage() {
           <SoftCard>
             <div className="border-b border-border/40">
               <div className="flex flex-wrap">
-                {(['profile', 'coadmins', 'logs'] as const).map((tab, idx) => (
+                {(['profile', 'coadmins', 'numbers', 'logs'] as const).map((tab, idx) => (
                   <motion.button
                     key={tab}
                     initial={{ opacity: 0, x: -20 }}
@@ -136,6 +158,7 @@ export function AdminSettingsPage() {
                   >
                     {tab === 'profile' && 'Church Profile'}
                     {tab === 'coadmins' && 'Co-Admins'}
+                    {tab === 'numbers' && 'Phone Numbers'}
                     {tab === 'logs' && 'Activity Logs'}
                   </motion.button>
                 ))}
@@ -249,6 +272,79 @@ export function AdminSettingsPage() {
                 </motion.div>
               )}
 
+              {/* Phone Numbers Tab */}
+              {activeTab === 'numbers' && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <h2 className="text-2xl font-bold text-foreground mb-6">Phone Numbers</h2>
+
+                  {isLoadingNumber ? (
+                    <div className="flex justify-center py-12">
+                      <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity }}>
+                        <Loader className="w-8 h-8 text-primary" />
+                      </motion.div>
+                    </div>
+                  ) : (
+                    <div className="max-w-2xl">
+                      {/* Current Number Card */}
+                      <SoftCard variant="gradient" className="mb-6">
+                        <div className="flex items-center gap-3 mb-4">
+                          <Phone className="w-5 h-5 text-primary" />
+                          <h3 className="font-semibold text-foreground">Current Phone Number</h3>
+                        </div>
+
+                        {currentPhoneNumber ? (
+                          <div className="space-y-3">
+                            <div className="text-2xl font-bold text-primary">{currentPhoneNumber}</div>
+                            <p className="text-sm text-muted-foreground">
+                              Your active Telnyx phone number for sending SMS messages.
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            <p className="text-muted-foreground">
+                              No phone number assigned yet. Purchase one to start sending SMS messages.
+                            </p>
+                            <SoftButton
+                              variant="primary"
+                              onClick={() => setShowPurchaseModal(true)}
+                            >
+                              Buy Phone Number
+                            </SoftButton>
+                          </div>
+                        )}
+                      </SoftCard>
+
+                      {/* Info Card */}
+                      <SoftCard variant="default">
+                        <h3 className="font-semibold text-foreground mb-3">About Phone Numbers</h3>
+                        <ul className="space-y-2 text-sm text-muted-foreground">
+                          <li className="flex gap-2">
+                            <span className="text-primary font-bold">•</span>
+                            <span>Each church gets one dedicated phone number for sending SMS messages</span>
+                          </li>
+                          <li className="flex gap-2">
+                            <span className="text-primary font-bold">•</span>
+                            <span>Numbers are powered by Telnyx for reliable SMS delivery</span>
+                          </li>
+                          <li className="flex gap-2">
+                            <span className="text-primary font-bold">•</span>
+                            <span>You can purchase and manage your numbers from this dashboard</span>
+                          </li>
+                          <li className="flex gap-2">
+                            <span className="text-primary font-bold">•</span>
+                            <span>Delivery tracking is automatic - monitor message status in real-time</span>
+                          </li>
+                        </ul>
+                      </SoftCard>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
               {/* Activity Logs Tab */}
               {activeTab === 'logs' && (
                 <motion.div
@@ -264,6 +360,15 @@ export function AdminSettingsPage() {
         </motion.div>
       </div>
     </SoftLayout>
+    <PhoneNumberPurchaseModal
+      isOpen={showPurchaseModal}
+      onClose={() => setShowPurchaseModal(false)}
+      onPurchaseComplete={(phoneNumber) => {
+        setCurrentPhoneNumber(phoneNumber);
+        setShowPurchaseModal(false);
+        toast.success('Phone number purchased successfully!');
+      }}
+    />
   );
 }
 
