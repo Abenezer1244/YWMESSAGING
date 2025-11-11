@@ -201,13 +201,13 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: Wel
             </div>
 
             {/* Content Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
-              {/* Left Side - Illustration & Message */}
+            <div className="grid grid-cols-1 gap-0">
+              {/* Welcome Section - Illustration & Message */}
               <motion.div
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="bg-gradient-to-br from-primary/5 to-primary/[0.02] p-6 md:p-8 flex flex-col justify-center"
+                className="bg-gradient-to-br from-primary/5 to-primary/[0.02] p-6 md:p-8 flex flex-col items-center text-center"
               >
                 {/* Illustration */}
                 <motion.div variants={itemVariants} className="mb-4">
@@ -233,12 +233,12 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: Wel
                 </motion.p>
               </motion.div>
 
-              {/* Right Side - Role Selection */}
+              {/* Role Selection Section */}
               <motion.div
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="p-6 md:p-8 flex flex-col justify-between"
+                className="p-6 md:p-8 flex flex-col"
               >
                 {/* Header */}
                 <motion.div variants={itemVariants}>
