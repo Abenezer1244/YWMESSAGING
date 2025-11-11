@@ -214,6 +214,8 @@ model Admin {
   invitationToken String?
   invitationExpiresAt DateTime?
   lastLoginAt   DateTime?
+  welcomeCompleted Boolean @default(false) // Track if user completed onboarding
+  userRole      String?  // User's role in the church: pastor, admin, communications, volunteer, other
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
