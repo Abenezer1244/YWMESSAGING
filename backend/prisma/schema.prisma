@@ -16,10 +16,10 @@ model Church {
   name                  String
   email                 String   @unique
   stripeCustomerId      String?  @unique
-  twilioAccountSid      String?
-  twilioAuthToken       String?
-  twilioPhoneNumber     String?
-  twilioVerified        Boolean  @default(false)
+  telnyxPhoneNumber     String?
+  telnyxNumberSid       String?  @unique
+  telnyxVerified        Boolean  @default(false)
+  telnyxPurchasedAt     DateTime?
   trialEndsAt           DateTime
   subscriptionStatus    String   @default("trial") // trial, active, cancelled, expired
   createdAt             DateTime @default(now())

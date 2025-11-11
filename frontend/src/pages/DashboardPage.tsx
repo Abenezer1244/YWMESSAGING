@@ -17,10 +17,12 @@ import useBranchStore from '../stores/branchStore';
 import { getMessageStats, getSummaryStats } from '../api/analytics';
 import { getMembers } from '../api/members';
 import { getGroups } from '../api/groups';
+import { getCurrentNumber } from '../api/numbers';
 import { SoftLayout, SoftCard, SoftStat, SoftButton } from '../components/SoftUI';
 import TrialBanner from '../components/TrialBanner';
 import { ChatWidget } from '../components/ChatWidget';
 import WelcomeModal from '../components/WelcomeModal';
+import PhoneNumberPurchaseModal from '../components/PhoneNumberPurchaseModal';
 
 // Get CSS variable value and convert oklch to hex approximation
 const getCSSColor = (varName: string): string => {
@@ -53,6 +55,8 @@ export function DashboardPage() {
   const [messageStats, setMessageStats] = useState<any>(null);
   const [summaryStats, setSummaryStats] = useState<any>(null);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [showPhoneNumberModal, setShowPhoneNumberModal] = useState(false);
+  const [hasPhoneNumber, setHasPhoneNumber] = useState(false);
 
   // Check if user should see welcome modal based on auth data
   useEffect(() => {
@@ -74,7 +78,35 @@ export function DashboardPage() {
         useAuthStore.getState().refreshToken || ''
       );
     }
+
+    // Show phone number purchase modal after welcome is complete
+    // if church doesn't already have a phone number
+    if (!hasPhoneNumber) {
+      setShowPhoneNumberModal(true);
+    }
   };
+
+  const handlePhoneNumberPurchased = (phoneNumber: string) => {
+    setHasPhoneNumber(true);
+    toast.success('Phone number configured successfully!');
+  };
+
+  // Check if church has a phone number
+  useEffect(() => {
+    const checkPhoneNumber = async () => {
+      try {
+        await getCurrentNumber();
+        setHasPhoneNumber(true);
+      } catch (error) {
+        // No phone number configured yet
+        setHasPhoneNumber(false);
+      }
+    };
+
+    if (user) {
+      checkPhoneNumber();
+    }
+  }, [user]);
 
   useEffect(() => {
     loadDashboardData();
@@ -359,6 +391,11 @@ export function DashboardPage() {
         isOpen={showWelcome}
         onClose={() => setShowWelcome(false)}
         onWelcomeComplete={handleWelcomeComplete}
+      />
+      <PhoneNumberPurchaseModal
+        isOpen={showPhoneNumberModal}
+        onClose={() => setShowPhoneNumberModal(false)}
+        onPurchaseComplete={handlePhoneNumberPurchased}
       />
     </>
   );

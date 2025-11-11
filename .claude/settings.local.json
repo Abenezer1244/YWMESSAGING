@@ -93,7 +93,10 @@
       "Bash(yes:*)",
       "Bash(do sed -i 's/support@connect\\.com/support@koinoniasms.com/g' \"$file\")",
       "Bash(npm ci:*)",
-      "Bash(/tmp/landing.html)"
+      "Bash(/tmp/landing.html)",
+      "Bash(npx playwright install)",
+      "Bash(mcp__playwright__browser_navigate \"http://localhost:5173/register\")",
+      "Bash(npx playwright install:*)"
     ],
     "deny": [],
     "ask": []

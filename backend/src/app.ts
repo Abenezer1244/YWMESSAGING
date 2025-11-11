@@ -13,6 +13,7 @@ import templateRoutes from './routes/template.routes.js';
 import recurringRoutes from './routes/recurring.routes.js';
 import analyticsRoutes from './routes/analytics.routes.js';
 import billingRoutes from './routes/billing.routes.js';
+import numbersRoutes from './routes/numbers.routes.js';
 import webhookRoutes from './routes/webhook.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import chatRoutes from './routes/chat.routes.js';
@@ -198,6 +199,7 @@ app.use('/api/messages', apiLimiter, messageRoutes);
 app.use('/api/templates', apiLimiter, templateRoutes);
 app.use('/api/recurring', apiLimiter, recurringRoutes);
 app.use('/api/analytics', apiLimiter, analyticsRoutes);
+app.use('/api/numbers', apiLimiter, numbersRoutes);
 
 // Apply strict rate limiting to billing endpoints (payment security)
 app.use('/api/billing', billingLimiter, billingRoutes);
