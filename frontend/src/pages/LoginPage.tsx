@@ -9,6 +9,7 @@ import BackButton from '../components/BackButton';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Card from '../components/ui/Card';
+import AnimatedBlobs from '../components/AnimatedBlobs';
 
 interface LoginFormData {
   email: string;
@@ -88,6 +89,7 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
+      <AnimatedBlobs variant="minimal" />
       {/* Subtle background accent */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-primary opacity-10 rounded-full blur-3xl pointer-events-none"></div>
 
