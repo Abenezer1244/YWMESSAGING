@@ -142,7 +142,7 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.4, ease: 'easeOut' },
+      transition: { duration: 0.4, type: 'tween' } as any,
     },
   };
 
