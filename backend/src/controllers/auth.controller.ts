@@ -197,9 +197,16 @@ export async function getMe(req: Request, res: Response): Promise<void> {
       return;
     }
 
+    // Include welcome fields in response
+    const response = {
+      ...admin,
+      welcomeCompleted: admin.welcomeCompleted,
+      userRole: admin.userRole,
+    };
+
     res.status(200).json({
       success: true,
-      data: admin,
+      data: response,
     });
   } catch (error: any) {
     console.error('Get admin error:', error);
@@ -234,5 +241,55 @@ export async function logout(req: Request, res: Response): Promise<void> {
   } catch (error: any) {
     console.error('Logout error:', error);
     res.status(500).json({ error: 'Logout failed' });
+  }
+}
+
+/**
+ * POST /api/auth/complete-welcome
+ * Mark user's welcome modal as completed and store their role
+ */
+export async function completeWelcome(req: Request, res: Response): Promise<void> {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
+    }
+
+    const { userRole } = req.body;
+
+    // Validate role
+    const validRoles = ['pastor', 'admin', 'communications', 'volunteer', 'other'];
+    if (!userRole || !validRoles.includes(userRole)) {
+      res.status(400).json({ error: 'Invalid user role' });
+      return;
+    }
+
+    // Update admin record
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+
+    const updatedAdmin = await prisma.admin.update({
+      where: { id: req.user.adminId },
+      data: {
+        welcomeCompleted: true,
+        userRole: userRole,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        id: updatedAdmin.id,
+        email: updatedAdmin.email,
+        firstName: updatedAdmin.firstName,
+        lastName: updatedAdmin.lastName,
+        role: updatedAdmin.role,
+        welcomeCompleted: updatedAdmin.welcomeCompleted,
+        userRole: updatedAdmin.userRole,
+      },
+    });
+  } catch (error: any) {
+    console.error('Complete welcome error:', error);
+    res.status(500).json({ error: 'Failed to complete welcome' });
   }
 }
