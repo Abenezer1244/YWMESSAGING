@@ -26,6 +26,8 @@ export interface AuthResponse {
       firstName: string;
       lastName: string;
       role: string;
+      welcomeCompleted: boolean;
+      userRole?: string;
     };
     church: {
       id: string;
@@ -77,6 +79,8 @@ export async function getMe(): Promise<{
     firstName: string;
     lastName: string;
     role: string;
+    welcomeCompleted: boolean;
+    userRole?: string;
     church: {
       id: string;
       name: string;
