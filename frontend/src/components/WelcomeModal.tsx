@@ -185,7 +185,7 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: Wel
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 30 }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="bg-background border border-border/50 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto"
+            className="bg-background border border-border/50 rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden"
           >
             {/* Close Button */}
             <div className="absolute top-6 right-6 z-10">
@@ -227,9 +227,9 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: Wel
 
                 <motion.p
                   variants={itemVariants}
-                  className="text-muted-foreground leading-relaxed"
+                  className="text-sm text-muted-foreground leading-relaxed"
                 >
-                  Connect with your congregation like never before. Send messages, manage groups, and build community all in one place.
+                  Connect with your congregation. Send messages, manage groups, and build community.
                 </motion.p>
               </motion.div>
 
@@ -245,7 +245,7 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: Wel
                   <h2 className="text-lg font-semibold text-foreground mb-1">
                     How would you describe your role?
                   </h2>
-                  <p className="text-sm text-muted-foreground mb-6">
+                  <p className="text-xs text-muted-foreground mb-4">
                     We'll personalize your experience based on your position.
                   </p>
                 </motion.div>
@@ -291,13 +291,13 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: Wel
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-lg">{role.icon}</span>
-                          <span className="font-medium text-foreground text-sm">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <span className="text-base">{role.icon}</span>
+                          <span className="font-medium text-foreground text-xs">
                             {role.label}
                           </span>
                         </div>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-[10px] text-muted-foreground leading-tight">
                           {role.description}
                         </p>
                       </div>
