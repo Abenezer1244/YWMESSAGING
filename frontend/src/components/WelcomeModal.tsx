@@ -8,6 +8,7 @@ import client from '../api/client';
 interface WelcomeModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onWelcomeComplete?: (userRole: string, welcomeCompleted: boolean) => void;
 }
 
 // Professional SVG Illustration
@@ -84,7 +85,7 @@ const WelcomeIllustration = () => (
   </svg>
 );
 
-export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
+export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: WelcomeModalProps) {
   const [selectedRole, setSelectedRole] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -134,6 +135,12 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
       if (response.data.success) {
         console.log('Welcome completed - stored role:', selectedRole);
         toast.success('Welcome complete! Let\'s get started.');
+
+        // Notify parent component to update auth state
+        if (onWelcomeComplete) {
+          onWelcomeComplete(selectedRole, true);
+        }
+
         onClose();
       }
     } catch (error: any) {

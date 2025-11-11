@@ -54,14 +54,28 @@ export function DashboardPage() {
   const [summaryStats, setSummaryStats] = useState<any>(null);
   const [showWelcome, setShowWelcome] = useState(false);
 
-  // Check if user should see welcome modal on mount
+  // Check if user should see welcome modal based on auth data
   useEffect(() => {
-    const hasSeenWelcome = localStorage.getItem('welcomeCompleted');
-    console.log('Welcome modal check:', { hasSeenWelcome, shouldShow: !hasSeenWelcome });
-    if (!hasSeenWelcome) {
+    // Check if user has completed welcome (from API data)
+    const hasCompletedWelcome = user?.welcomeCompleted;
+    console.log('Welcome modal check:', { welcomeCompleted: hasCompletedWelcome, shouldShow: !hasCompletedWelcome });
+    if (!hasCompletedWelcome && user) {
       setShowWelcome(true);
     }
-  }, []);
+  }, [user]);
+
+  const handleWelcomeComplete = (userRole: string, welcomeCompleted: boolean) => {
+    // Update the user in auth store to reflect completion
+    if (user && church) {
+      const { setAuth } = useAuthStore.getState();
+      setAuth(
+        { ...user, welcomeCompleted, userRole },
+        church,
+        useAuthStore.getState().accessToken || '',
+        useAuthStore.getState().refreshToken || ''
+      );
+    }
+  };
 
   useEffect(() => {
     loadDashboardData();
@@ -342,7 +356,11 @@ export function DashboardPage() {
       </div>
       </SoftLayout>
       <ChatWidget variant="floating" position="bottom-right" />
-      <WelcomeModal isOpen={showWelcome} onClose={() => setShowWelcome(false)} />
+      <WelcomeModal
+        isOpen={showWelcome}
+        onClose={() => setShowWelcome(false)}
+        onWelcomeComplete={handleWelcomeComplete}
+      />
     </>
   );
 }
