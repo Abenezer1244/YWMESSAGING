@@ -58,7 +58,6 @@ export function DashboardPage() {
   useEffect(() => {
     // Check if user has completed welcome (from API data)
     const hasCompletedWelcome = user?.welcomeCompleted;
-    console.log('Welcome modal check:', { welcomeCompleted: hasCompletedWelcome, shouldShow: !hasCompletedWelcome });
     if (!hasCompletedWelcome && user) {
       setShowWelcome(true);
     }

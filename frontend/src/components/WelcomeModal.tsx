@@ -133,7 +133,6 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: Wel
       });
 
       if (response.data.success) {
-        console.log('Welcome completed - stored role:', selectedRole);
         toast.success('Welcome complete! Let\'s get started.');
 
         // Notify parent component to update auth state
