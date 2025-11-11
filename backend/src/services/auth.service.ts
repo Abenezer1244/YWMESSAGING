@@ -107,6 +107,8 @@ export async function registerChurch(input: RegisterInput): Promise<RegisterResp
       firstName: admin.firstName,
       lastName: admin.lastName,
       role: admin.role,
+      welcomeCompleted: admin.welcomeCompleted,
+      userRole: admin.userRole,
     },
     church: {
       id: church.id,
@@ -157,6 +159,8 @@ export async function login(input: LoginInput): Promise<LoginResponse> {
       firstName: admin.firstName,
       lastName: admin.lastName,
       role: admin.role,
+      welcomeCompleted: admin.welcomeCompleted,
+      userRole: admin.userRole,
     },
     church: {
       id: admin.church.id,
@@ -210,6 +214,8 @@ export async function getAdmin(adminId: string) {
     firstName: admin.firstName,
     lastName: admin.lastName,
     role: admin.role,
+    welcomeCompleted: admin.welcomeCompleted,
+    userRole: admin.userRole,
     church: {
       id: admin.church.id,
       name: admin.church.name,
