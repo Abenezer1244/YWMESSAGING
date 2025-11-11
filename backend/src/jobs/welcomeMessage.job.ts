@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import * as twilioService from '../services/twilio.service.js';
+import * as telnyxService from '../services/telnyx.service.js';
 
 const prisma = new PrismaClient();
 
@@ -41,8 +41,8 @@ export async function sendWelcomeMessage(
     const welcomeText =
       group.welcomeMessageText || `Welcome to ${group.name}!`;
 
-    // Send SMS via Twilio
-    await twilioService.sendSMS(member.phone, welcomeText, group.churchId);
+    // Send SMS via Telnyx
+    await telnyxService.sendSMS(member.phone, welcomeText, group.churchId);
 
     // Mark as sent
     await prisma.groupMember.update({
