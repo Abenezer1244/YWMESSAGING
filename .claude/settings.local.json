@@ -92,7 +92,8 @@
       "Bash(printf \"y\\ny\\n\")",
       "Bash(yes:*)",
       "Bash(do sed -i 's/support@connect\\.com/support@koinoniasms.com/g' \"$file\")",
-      "Bash(npm ci:*)"
+      "Bash(npm ci:*)",
+      "Bash(/tmp/landing.html)"
     ],
     "deny": [],
     "ask": []

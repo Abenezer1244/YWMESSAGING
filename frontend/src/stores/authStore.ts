@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { logout as logoutApi } from '../api/auth';
 
 export interface Admin {
   id: string;
@@ -34,7 +35,7 @@ interface AuthState {
     expiresIn?: number
   ) => void;
   clearAuth: () => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   isTokenExpired: () => boolean;
 }
 
@@ -94,8 +95,16 @@ const useAuthStore = create<AuthState>()((set, get) => ({
     }
   },
 
-  logout: () => {
-    // Tokens are cleared from state, sessionStorage, and cookies (via backend logout endpoint)
+  logout: async () => {
+    // Call backend logout endpoint to clear HTTPOnly cookies
+    try {
+      await logoutApi();
+    } catch (error) {
+      console.warn('Failed to call logout endpoint', error);
+      // Continue with local logout even if API call fails
+    }
+
+    // Clear local state
     set({
       user: null,
       church: null,

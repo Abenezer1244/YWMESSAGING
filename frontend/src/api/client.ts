@@ -94,7 +94,10 @@ client.interceptors.response.use(
         } catch (refreshError) {
           // If refresh fails, logout
           isRefreshing = false;
-          useAuthStore.getState().logout();
+          // Fire logout in background without waiting
+          useAuthStore.getState().logout().catch(() => {
+            // Logout API call failed, but still clear local state (logout already did this)
+          });
           // Don't do window.location.href - let React Router handle it
           return Promise.reject(refreshError);
         }

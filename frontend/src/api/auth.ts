@@ -88,3 +88,13 @@ export async function getMe(): Promise<{
   const response = await client.get('/auth/me');
   return response.data;
 }
+
+/**
+ * Logout - clears HTTPOnly cookies on backend
+ */
+export async function logout(): Promise<{
+  success: boolean;
+}> {
+  const response = await client.post('/auth/logout', {});
+  return response.data;
+}

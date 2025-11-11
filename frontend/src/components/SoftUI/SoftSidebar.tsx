@@ -37,9 +37,9 @@ export function SoftSidebar() {
   const [isOpen, setIsOpen] = useState(true);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
   };
 
   const navigationItems: NavItem[] = [

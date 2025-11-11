@@ -6,7 +6,7 @@
 export declare function useIdleLogout(): {
     showWarning: boolean;
     secondsUntilLogout: number;
-    handleLogout: () => void;
+    handleLogout: () => Promise<void>;
     dismissWarning: () => void;
 };
 //# sourceMappingURL=useIdleLogout.d.ts.map

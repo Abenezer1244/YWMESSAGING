@@ -28,9 +28,9 @@ export function useIdleLogout() {
   }, []);
 
   // Handle logout
-  const handleLogout = useCallback(() => {
+  const handleLogout = useCallback(async () => {
     setShowWarning(false);
-    logout();
+    await logout();
   }, [logout]);
 
   // Dismiss warning and reset timer
