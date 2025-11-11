@@ -99,15 +99,17 @@ export default function Navigation() {
               </button>
             )}
 
-            {/* CTA Button */}
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={handleStartTrial}
-              className="hidden sm:block bg-primary hover:bg-primary/90 text-background"
-            >
-              {isAuthenticated ? 'Dashboard' : 'Start Free'}
-            </Button>
+            {/* CTA Button - Only show when authenticated */}
+            {isAuthenticated && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleStartTrial}
+                className="hidden sm:block bg-primary hover:bg-primary/90 text-background"
+              >
+                Dashboard
+              </Button>
+            )}
 
             {/* Mobile Menu Button */}
             <button
