@@ -10,7 +10,7 @@ import {
 } from '../services/telnyx.service.js';
 import {
   createPhoneNumberSetupPaymentIntent,
-  confirmPaymentIntent,
+  verifyPaymentIntent,
 } from '../services/stripe.service.js';
 
 const prisma = new PrismaClient();
@@ -71,6 +71,7 @@ export async function searchNumbers(req: Request, res: Response) {
  * POST /api/numbers/setup-payment-intent
  * Create a payment intent for phone number setup fee
  * Body: { phoneNumber }
+ * SECURITY: Validates phone number format and user authorization
  */
 export async function setupPaymentIntent(req: Request, res: Response) {
   try {
@@ -83,6 +84,12 @@ export async function setupPaymentIntent(req: Request, res: Response) {
 
     if (!phoneNumber || typeof phoneNumber !== 'string') {
       return res.status(400).json({ error: 'Phone number is required' });
+    }
+
+    // SECURITY: Validate phone number format (E.164 format: +1234567890)
+    const phoneNumberRegex = /^\+?1?[2-9]\d{9}$/;
+    if (!phoneNumberRegex.test(phoneNumber.replace(/[^\d]/g, ''))) {
+      return res.status(400).json({ error: 'Invalid phone number format' });
     }
 
     // Get church with Stripe customer ID
@@ -119,6 +126,7 @@ export async function setupPaymentIntent(req: Request, res: Response) {
  * POST /api/numbers/purchase
  * Purchase a phone number for the church (after payment is confirmed)
  * Body: { phoneNumber, paymentIntentId, connectionId? }
+ * SECURITY: Verifies payment before allowing purchase
  */
 export async function purchaseNumber(req: Request, res: Response) {
   try {
@@ -137,17 +145,42 @@ export async function purchaseNumber(req: Request, res: Response) {
       return res.status(400).json({ error: 'Payment intent ID is required' });
     }
 
-    // Check if church already has a number
+    // Get church with Stripe customer ID
     const church = await prisma.church.findUnique({
       where: { id: churchId },
-      select: { telnyxPhoneNumber: true },
+      select: { telnyxPhoneNumber: true, stripeCustomerId: true },
     });
 
-    if (church?.telnyxPhoneNumber) {
+    if (!church) {
+      return res.status(404).json({ error: 'Church not found' });
+    }
+
+    if (church.telnyxPhoneNumber) {
       return res.status(400).json({ error: 'Church already has a phone number' });
     }
 
-    // Purchase the phone number with Telnyx
+    if (!church.stripeCustomerId) {
+      return res.status(400).json({ error: 'Stripe customer not configured' });
+    }
+
+    // SECURITY: Verify payment intent before purchasing
+    // This prevents fraud where someone could use a payment intent from another user
+    const SETUP_FEE_CENTS = 499; // $4.99
+    const isPaymentValid = await verifyPaymentIntent(
+      paymentIntentId,
+      church.stripeCustomerId,
+      SETUP_FEE_CENTS,
+      phoneNumber
+    );
+
+    if (!isPaymentValid) {
+      console.warn(`⚠️ Payment verification failed for church ${churchId}`);
+      return res.status(402).json({
+        error: 'Payment verification failed. Please ensure payment was successful.',
+      });
+    }
+
+    // Purchase the phone number with Telnyx (only after payment verified)
     const result = await purchasePhoneNumber(phoneNumber, churchId, connectionId);
 
     res.json({ success: true, data: result });

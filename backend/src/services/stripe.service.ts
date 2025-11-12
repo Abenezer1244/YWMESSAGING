@@ -122,17 +122,25 @@ export async function createPhoneNumberSetupPaymentIntent(
   try {
     const amountInCents = 499; // $4.99 in cents
 
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: amountInCents,
-      currency: 'usd',
-      customer: customerId,
-      description: `Phone number setup fee for ${phoneNumber}`,
-      metadata: {
-        phoneNumber,
-        type: 'phone_number_setup',
-        telnyxFee: 100, // $1.00 goes to Telnyx
+    // Use idempotency key to prevent duplicate charges
+    const idempotencyKey = `phone_setup_${customerId}_${phoneNumber}`;
+
+    const paymentIntent = await stripe.paymentIntents.create(
+      {
+        amount: amountInCents,
+        currency: 'usd',
+        customer: customerId,
+        description: `Phone number setup fee for ${phoneNumber}`,
+        metadata: {
+          phoneNumber,
+          type: 'phone_number_setup',
+          telnyxFee: 100, // $1.00 goes to Telnyx
+        },
       },
-    });
+      {
+        idempotencyKey,
+      }
+    );
 
     console.log(`✅ Payment intent created: ${paymentIntent.id}`);
     return {
@@ -142,6 +150,56 @@ export async function createPhoneNumberSetupPaymentIntent(
   } catch (error) {
     console.error('❌ Failed to create payment intent:', error);
     throw error;
+  }
+}
+
+/**
+ * Verify a payment intent belongs to a customer and was successful
+ */
+export async function verifyPaymentIntent(
+  paymentIntentId: string,
+  customerId: string,
+  expectedAmount: number,
+  phoneNumber: string
+): Promise<boolean> {
+  try {
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+    // Verify payment intent belongs to the correct customer
+    if (paymentIntent.customer !== customerId) {
+      console.error(`⚠️ Payment intent customer mismatch: expected ${customerId}, got ${paymentIntent.customer}`);
+      return false;
+    }
+
+    // Verify payment was successful
+    if (paymentIntent.status !== 'succeeded') {
+      console.error(`⚠️ Payment intent not successful: ${paymentIntent.status}`);
+      return false;
+    }
+
+    // Verify correct amount
+    if (paymentIntent.amount !== expectedAmount) {
+      console.error(`⚠️ Payment amount mismatch: expected ${expectedAmount}, got ${paymentIntent.amount}`);
+      return false;
+    }
+
+    // Verify phone number matches
+    if (paymentIntent.metadata?.phoneNumber !== phoneNumber) {
+      console.error(`⚠️ Phone number mismatch in payment intent metadata`);
+      return false;
+    }
+
+    // Verify payment intent type
+    if (paymentIntent.metadata?.type !== 'phone_number_setup') {
+      console.error(`⚠️ Invalid payment intent type: ${paymentIntent.metadata?.type}`);
+      return false;
+    }
+
+    console.log(`✅ Payment intent verified: ${paymentIntentId}`);
+    return true;
+  } catch (error) {
+    console.error('❌ Failed to verify payment intent:', error);
+    return false;
   }
 }
 
