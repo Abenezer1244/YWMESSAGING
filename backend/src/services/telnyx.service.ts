@@ -169,23 +169,29 @@ export async function purchasePhoneNumber(
 ): Promise<{ numberSid: string; phoneNumber: string; success: boolean }> {
   try {
     const client = getTelnyxClient();
-    const response = await client.post('/phone_numbers', {
-      phone_number: phoneNumber,
-      connection_id: connectionId,
+    // Use /number_orders endpoint to purchase phone numbers
+    const response = await client.post('/number_orders', {
+      phone_numbers: [{ phone_number: phoneNumber }],
       customer_reference: `church_${churchId}`,
     });
 
     const data = response.data?.data;
     if (!data?.id) {
-      throw new Error('No phone number ID returned from Telnyx');
+      throw new Error('No order ID returned from Telnyx');
+    }
+
+    // The phone_numbers array contains the purchased numbers
+    const purchasedNumber = data.phone_numbers?.[0];
+    if (!purchasedNumber?.phone_number) {
+      throw new Error('No phone number returned from Telnyx order');
     }
 
     // Save to database
     await prisma.church.update({
       where: { id: churchId },
       data: {
-        telnyxPhoneNumber: phoneNumber,
-        telnyxNumberSid: data.id,
+        telnyxPhoneNumber: purchasedNumber.phone_number,
+        telnyxNumberSid: data.id, // Order ID
         telnyxVerified: true,
         telnyxPurchasedAt: new Date(),
       },
@@ -193,7 +199,7 @@ export async function purchasePhoneNumber(
 
     return {
       numberSid: data.id,
-      phoneNumber: data.phone_number,
+      phoneNumber: purchasedNumber.phone_number,
       success: true,
     };
   } catch (error: any) {
