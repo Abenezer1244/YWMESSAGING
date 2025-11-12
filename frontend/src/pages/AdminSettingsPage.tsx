@@ -64,7 +64,7 @@ export function AdminSettingsPage() {
     try {
       setIsLoadingNumber(true);
       const data = await getCurrentNumber();
-      setCurrentPhoneNumber(data.phoneNumber);
+      setCurrentPhoneNumber(data.telnyxPhoneNumber);
     } catch (error) {
       // No phone number assigned yet
       setCurrentPhoneNumber(null);
@@ -118,7 +118,8 @@ export function AdminSettingsPage() {
   };
 
   return (
-    <SoftLayout>
+    <>
+      <SoftLayout>
       <div className="px-4 md:px-8 py-8 w-full">
         {/* Header */}
         <motion.div
@@ -369,6 +370,7 @@ export function AdminSettingsPage() {
         toast.success('Phone number purchased successfully!');
       }}
     />
+    </>
   );
 }
 
