@@ -137,10 +137,10 @@ export async function searchAvailableNumbers(options: {
     return numbers.map((num: any) => ({
       id: num.id,
       phoneNumber: num.phone_number,
-      formattedNumber: num.formatted_number,
+      formattedNumber: num.phone_number || num.formatted_number, // Use phone_number as primary
       costPerMinute: num.cost_information?.origination_minute_cost || 0,
       costPerSms: num.cost_information?.sms_cost || 0,
-      region: `${num.administrative_area}, ${num.country_code}`,
+      region: `${num.administrative_area || 'US'}, ${num.country_code || 'US'}`, // Provide defaults
       capabilities: num.capabilities || [],
     }));
   } catch (error: any) {
