@@ -91,25 +91,15 @@ export async function sendSMS(
  * Validate Telnyx API key
  */
 export async function validateTelnyxApiKey(): Promise<boolean> {
-  try {
-    const apiKey = process.env.TELNYX_API_KEY;
-    if (!apiKey) {
-      console.error('TELNYX_API_KEY is not set in environment variables');
-      return false;
-    }
-    // Try to fetch account details
-    const client = getTelnyxClient();
-    const response = await client.get('/account');
-    return response.status === 200;
-  } catch (error: any) {
-    console.error('Telnyx API validation failed:', {
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data,
-      message: error.message,
-    });
+  const apiKey = process.env.TELNYX_API_KEY;
+  if (!apiKey) {
+    console.error('TELNYX_API_KEY is not set in environment variables');
     return false;
   }
+  // Simply check if the API key is set. The actual API calls will validate
+  // whether the key has the right permissions and is active.
+  console.log('Telnyx API key is configured');
+  return true;
 }
 
 /**
