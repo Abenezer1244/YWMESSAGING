@@ -128,11 +128,16 @@ export async function getCurrentPlan(churchId: string): Promise<PlanName | 'tria
  * Get plan limits for a church (uses config/plans.ts)
  */
 export function getPlanLimits(plan: PlanName | string): PlanLimits | null {
-  // Only starter, growth, pro are valid plan names with limits
-  // Trial plans have unlimited access
-  if (plan === 'trial' || plan === 'starter' || plan === 'growth' || plan === 'pro') {
-    return PLANS[plan as PlanName] || null;
+  // Trial users get starter plan limits
+  if (plan === 'trial') {
+    return PLANS.starter;
   }
+
+  // Return plan limits for starter, growth, pro
+  if (plan === 'starter' || plan === 'growth' || plan === 'pro') {
+    return PLANS[plan];
+  }
+
   return null;
 }
 
