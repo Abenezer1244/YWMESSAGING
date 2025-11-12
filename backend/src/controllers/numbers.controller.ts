@@ -200,12 +200,27 @@ export async function confirmPayment(req: Request, res: Response) {
       error: `Payment failed with status: ${confirmedIntent.status}`,
     });
   } catch (error: any) {
-    console.error('Payment confirmation failed:', error);
+    console.error('Payment confirmation failed:', {
+      message: error?.message,
+      type: error?.type,
+      code: error?.code,
+      status: error?.status,
+      raw_type: error?.raw?.type,
+      full_error: error,
+    });
 
     // Handle specific Stripe errors
-    if (error.type === 'StripeCardError') {
+    if (error.type === 'StripeCardError' || error.raw?.type === 'card_error') {
       return res.status(402).json({
-        error: error.message || 'Card declined',
+        error: error.message || error.raw?.message || 'Card declined',
+      });
+    }
+
+    // Handle invalid request errors
+    if (error.type === 'StripeInvalidRequestError' || error.raw?.type === 'invalid_request_error') {
+      console.error('Invalid request to Stripe:', error.raw?.message);
+      return res.status(400).json({
+        error: error.raw?.message || 'Invalid payment details',
       });
     }
 
