@@ -134,15 +134,22 @@ export async function searchAvailableNumbers(options: {
 
     const numbers = response.data?.data || [];
 
-    return numbers.map((num: any) => ({
-      id: num.id,
-      phoneNumber: num.phone_number,
-      formattedNumber: num.phone_number || num.formatted_number, // Use phone_number as primary
-      costPerMinute: num.cost_information?.origination_minute_cost || 0,
-      costPerSms: num.cost_information?.sms_cost || 0,
-      region: `${num.administrative_area || 'US'}, ${num.country_code || 'US'}`, // Provide defaults
-      capabilities: num.capabilities || [],
-    }));
+    return numbers.map((num: any) => {
+      // Debug: Log the cost_information structure to see what Telnyx returns
+      if (num.cost_information) {
+        console.log('Telnyx cost_information structure:', JSON.stringify(num.cost_information, null, 2));
+      }
+
+      return {
+        id: num.id,
+        phoneNumber: num.phone_number,
+        formattedNumber: num.phone_number || num.formatted_number, // Use phone_number as primary
+        costPerMinute: num.cost_information?.origination_minute_cost || 0,
+        costPerSms: num.cost_information?.sms_cost || 0,
+        region: `${num.administrative_area || 'US'}, ${num.country_code || 'US'}`, // Provide defaults
+        capabilities: num.capabilities || [],
+      };
+    });
   } catch (error: any) {
     console.error('Telnyx search error details:', {
       status: error.response?.status,
