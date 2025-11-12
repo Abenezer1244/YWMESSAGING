@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { PLANS, PlanName, PlanLimits } from '../config/plans.js';
 
 const prisma = new PrismaClient();
 
@@ -102,4 +103,109 @@ export function getSMSPricing() {
     currency: 'USD',
     setupFee: 4.99,
   };
+}
+
+// ========== Plan Management Functions (used by middleware and services) ==========
+
+/**
+ * Get current plan for a church
+ */
+export async function getCurrentPlan(churchId: string): Promise<PlanName | 'trial'> {
+  try {
+    const church = await prisma.church.findUnique({
+      where: { id: churchId },
+      select: { subscriptionStatus: true },
+    });
+    const status = church?.subscriptionStatus as (PlanName | 'trial') | undefined;
+    return status || 'trial';
+  } catch (error) {
+    console.error('Failed to get current plan:', error);
+    return 'trial';
+  }
+}
+
+/**
+ * Get plan limits for a church (uses config/plans.ts)
+ */
+export function getPlanLimits(plan: PlanName | string): PlanLimits | null {
+  // Only starter, growth, pro are valid plan names with limits
+  // Trial plans have unlimited access
+  if (plan === 'trial' || plan === 'starter' || plan === 'growth' || plan === 'pro') {
+    return PLANS[plan as PlanName] || null;
+  }
+  return null;
+}
+
+/**
+ * Get usage for a church
+ */
+export async function getUsage(churchId: string): Promise<Record<string, number>> {
+  try {
+    // Get branches count
+    const branchCount = await prisma.branch.count({
+      where: { churchId },
+    });
+
+    // Get members count
+    const memberCount = await prisma.member.count({
+      where: {
+        groups: {
+          some: {
+            group: { churchId },
+          },
+        },
+      },
+    });
+
+    // Get co-admins count
+    const coAdminCount = await prisma.admin.count({
+      where: { churchId, role: 'CO_ADMIN' },
+    });
+
+    // Get messages sent this month
+    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    const messageCount = await prisma.message.count({
+      where: {
+        churchId,
+        createdAt: { gte: startOfMonth },
+      },
+    });
+
+    return {
+      branches: branchCount,
+      members: memberCount,
+      messagesThisMonth: messageCount,
+      coAdmins: coAdminCount,
+    };
+  } catch (error) {
+    console.error('Failed to get usage:', error);
+    return {
+      branches: 0,
+      members: 0,
+      messagesThisMonth: 0,
+      coAdmins: 0,
+    };
+  }
+}
+
+/**
+ * Check if church is on trial
+ */
+export async function isOnTrial(churchId: string): Promise<boolean> {
+  try {
+    const church = await prisma.church.findUnique({
+      where: { id: churchId },
+      select: { subscriptionStatus: true, trialEndsAt: true },
+    });
+
+    if (!church) return false;
+
+    return (
+      church.subscriptionStatus === 'trial' &&
+      church.trialEndsAt > new Date()
+    );
+  } catch (error) {
+    console.error('Failed to check trial status:', error);
+    return false;
+  }
 }

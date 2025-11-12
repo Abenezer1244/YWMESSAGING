@@ -124,7 +124,7 @@ export async function addMember(groupId: string, data: CreateMemberData) {
   const plan = await getCurrentPlan(group.churchId);
   const limits = getPlanLimits(plan);
 
-  if (usage.members >= limits.members) {
+  if (limits && limits.members && usage.members >= limits.members) {
     throw new Error(
       `Member limit of ${limits.members} reached for ${plan} plan. Please upgrade your plan to add more members.`
     );
@@ -227,11 +227,11 @@ export async function importMembers(
   const usage = await getUsage(group.churchId);
   const plan = await getCurrentPlan(group.churchId);
   const limits = getPlanLimits(plan);
-  const remainingCapacity = limits.members - usage.members;
+  const remainingCapacity = limits ? limits.members - usage.members : 999999;
 
   if (remainingCapacity <= 0) {
     throw new Error(
-      `Member limit of ${limits.members} reached for ${plan} plan. Please upgrade your plan to add more members.`
+      `Member limit of ${limits?.members || "unlimited"} reached for ${plan} plan. Please upgrade your plan to add more members.`
     );
   }
 
