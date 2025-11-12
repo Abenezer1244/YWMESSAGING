@@ -46,7 +46,7 @@ export interface SubscribeResponse {
  */
 export async function getUsage(): Promise<UsageData> {
   const response = await client.get('/billing/usage');
-  return response.data;
+  return response.data.data; // Unwrap the nested data structure
 }
 
 /**
@@ -54,7 +54,7 @@ export async function getUsage(): Promise<UsageData> {
  */
 export async function getPlan(): Promise<PlanInfo> {
   const response = await client.get('/billing/plan');
-  return response.data;
+  return response.data.data; // Unwrap the nested data structure
 }
 
 /**
@@ -62,7 +62,7 @@ export async function getPlan(): Promise<PlanInfo> {
  */
 export async function getTrial(): Promise<TrialStatus> {
   const response = await client.get('/billing/trial');
-  return response.data;
+  return response.data.data; // Unwrap the nested data structure
 }
 
 /**
@@ -76,7 +76,7 @@ export async function subscribe(
     planName,
     paymentMethodId,
   });
-  return response.data;
+  return response.data.data; // Unwrap the nested data structure
 }
 
 /**
@@ -88,7 +88,7 @@ export async function upgradePlan(
   const response = await client.put('/billing/upgrade', {
     newPlan,
   });
-  return response.data;
+  return response.data.data; // Unwrap the nested data structure
 }
 
 /**
@@ -96,7 +96,7 @@ export async function upgradePlan(
  */
 export async function cancelSubscription(): Promise<{ success: boolean; message: string }> {
   const response = await client.delete('/billing/cancel');
-  return response.data;
+  return response.data.data; // Unwrap the nested data structure
 }
 
 /**
@@ -108,5 +108,5 @@ export async function createPaymentIntent(
   const response = await client.post('/billing/payment-intent', {
     planName,
   });
-  return response.data;
+  return response.data.data; // Unwrap the nested data structure
 }

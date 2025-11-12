@@ -54,13 +54,44 @@ export async function getPlanHandler(req: Request, res: Response) {
       });
     }
 
+    const plan = await billingService.getCurrentPlan(churchId);
+    const limits = billingService.getPlanLimits(plan);
+    const usage = await billingService.getUsage(churchId);
+
+    // Calculate remaining capacity
+    const getRemainingCapacity = (limit: number, used: number): number => {
+      if (limit > 100000) return 999999; // unlimited
+      return Math.max(0, limit - used);
+    };
+
     res.json({
       success: true,
       data: {
-        plan: 'starter',
+        plan,
         limits: {
-          messagesPerMonth: 'unlimited',
-          messageLength: 1600,
+          name: limits.name,
+          price: limits.price,
+          currency: limits.currency,
+          branches: limits.branches,
+          members: limits.members,
+          messagesPerMonth: limits.messagesPerMonth,
+          coAdmins: limits.coAdmins,
+          features: limits.features,
+        },
+        usage: {
+          branches: usage.branches,
+          members: usage.members,
+          messagesThisMonth: usage.messagesThisMonth,
+          coAdmins: usage.coAdmins,
+        },
+        remaining: {
+          branches: getRemainingCapacity(limits.branches, usage.branches),
+          members: getRemainingCapacity(limits.members, usage.members),
+          messagesPerMonth: getRemainingCapacity(
+            limits.messagesPerMonth,
+            usage.messagesThisMonth
+          ),
+          coAdmins: getRemainingCapacity(limits.coAdmins, usage.coAdmins),
         },
       },
     });
