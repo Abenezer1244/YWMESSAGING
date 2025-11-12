@@ -197,6 +197,13 @@ export async function purchasePhoneNumber(
       success: true,
     };
   } catch (error: any) {
+    console.error('Telnyx purchase error details:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message,
+      fullError: error,
+    });
     const errorMessage = error.response?.data?.errors?.[0]?.detail || error.message || 'Failed to purchase number';
     throw new Error(`Telnyx purchase error: ${errorMessage}`);
   }

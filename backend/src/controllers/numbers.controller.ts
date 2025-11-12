@@ -94,9 +94,13 @@ export async function purchaseNumber(req: Request, res: Response) {
     const result = await purchasePhoneNumber(phoneNumber, churchId, connectionId);
 
     res.json({ success: true, data: result });
-  } catch (error) {
-    console.error('Failed to purchase number:', error);
-    res.status(500).json({ error: (error as any).message || 'Failed to purchase number' });
+  } catch (error: any) {
+    console.error('Failed to purchase number:', {
+      message: error.message,
+      stack: error.stack,
+      fullError: error,
+    });
+    res.status(500).json({ error: error.message || 'Failed to purchase number' });
   }
 }
 
