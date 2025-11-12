@@ -64,21 +64,15 @@ export async function setupPaymentIntent(phoneNumber: string): Promise<PaymentIn
 }
 
 /**
- * Confirm payment intent with card details
+ * Confirm payment intent with Stripe payment method
  */
 export async function confirmPayment(
   paymentIntentId: string,
-  cardNumber: string,
-  cardExpiry: string,
-  cardCvc: string,
-  cardName: string
+  paymentMethodId: string
 ): Promise<{ success: boolean; data: { paymentIntentId: string; status: string } }> {
   const response = await client.post('/numbers/confirm-payment', {
     paymentIntentId,
-    cardNumber,
-    cardExpiry,
-    cardCvc,
-    cardName,
+    paymentMethodId,
   });
   return response.data;
 }

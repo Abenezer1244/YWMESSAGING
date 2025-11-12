@@ -98,7 +98,8 @@
       "Bash(mcp__playwright__browser_navigate \"http://localhost:5173/register\")",
       "Bash(npx playwright install:*)",
       "Bash(mkdir:*)",
-      "WebFetch(domain:developers.telnyx.com)"
+      "WebFetch(domain:developers.telnyx.com)",
+      "Bash(npm ls:*)"
     ],
     "deny": [],
     "ask": []

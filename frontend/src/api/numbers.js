@@ -25,15 +25,12 @@ export async function setupPaymentIntent(phoneNumber) {
     return response.data;
 }
 /**
- * Confirm payment intent with card details
+ * Confirm payment intent with Stripe payment method
  */
-export async function confirmPayment(paymentIntentId, cardNumber, cardExpiry, cardCvc, cardName) {
+export async function confirmPayment(paymentIntentId, paymentMethodId) {
     const response = await client.post('/numbers/confirm-payment', {
         paymentIntentId,
-        cardNumber,
-        cardExpiry,
-        cardCvc,
-        cardName,
+        paymentMethodId,
     });
     return response.data;
 }

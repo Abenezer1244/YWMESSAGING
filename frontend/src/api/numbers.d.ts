@@ -42,9 +42,9 @@ export declare function searchAvailableNumbers(options: {
  */
 export declare function setupPaymentIntent(phoneNumber: string): Promise<PaymentIntentResponse>;
 /**
- * Confirm payment intent with card details
+ * Confirm payment intent with Stripe payment method
  */
-export declare function confirmPayment(paymentIntentId: string, cardNumber: string, cardExpiry: string, cardCvc: string, cardName: string): Promise<{
+export declare function confirmPayment(paymentIntentId: string, paymentMethodId: string): Promise<{
     success: boolean;
     data: {
         paymentIntentId: string;

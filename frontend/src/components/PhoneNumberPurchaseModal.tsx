@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, X, Loader, Check, ChevronDown } from 'lucide-react';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 import toast from 'react-hot-toast';
 import Button from './ui/Button';
+import StripePaymentForm from './StripePaymentForm';
 import { searchAvailableNumbers, setupPaymentIntent, confirmPayment, purchaseNumber, PhoneNumber } from '../api/numbers';
 
 interface PhoneNumberPurchaseModalProps {
@@ -24,6 +27,9 @@ const US_STATES = [
   { code: 'NC', name: 'North Carolina' },
 ];
 
+// Initialize Stripe
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
+
 export default function PhoneNumberPurchaseModal({
   isOpen,
   onClose,
@@ -36,12 +42,6 @@ export default function PhoneNumberPurchaseModal({
   const [selectedNumber, setSelectedNumber] = useState<PhoneNumber | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
-
-  // Card form states
-  const [cardNumber, setCardNumber] = useState('');
-  const [cardExpiry, setCardExpiry] = useState('');
-  const [cardCvc, setCardCvc] = useState('');
-  const [cardName, setCardName] = useState('');
 
   const handleSearch = async () => {
     if (!areaCode && !state) {
@@ -99,34 +99,22 @@ export default function PhoneNumberPurchaseModal({
     }
   };
 
-  const handlePayment = async () => {
+  const handlePaymentSuccess = async (paymentMethodId: string) => {
     if (!selectedNumber || !paymentIntentId) return;
 
     setIsLoading(true);
     try {
-      // Validate card details
-      if (!cardNumber || !cardExpiry || !cardCvc || !cardName) {
-        toast.error('Please fill in all card details');
-        setIsLoading(false);
-        return;
-      }
-
-      toast.loading('Processing payment...');
-
-      // Step 1: Confirm payment with card details
+      // Confirm payment with Stripe
       const paymentConfirm = await confirmPayment(
         paymentIntentId,
-        cardNumber,
-        cardExpiry,
-        cardCvc,
-        cardName
+        paymentMethodId
       );
 
       if (!paymentConfirm.success || paymentConfirm.data?.status !== 'succeeded') {
         throw new Error('Payment confirmation failed');
       }
 
-      // Step 2: Complete the purchase with verified payment
+      // Complete the purchase with verified payment
       const result = await purchaseNumber(
         selectedNumber.phoneNumber,
         paymentIntentId
@@ -158,10 +146,6 @@ export default function PhoneNumberPurchaseModal({
     setSearchResults([]);
     setSelectedNumber(null);
     setPaymentIntentId(null);
-    setCardNumber('');
-    setCardExpiry('');
-    setCardCvc('');
-    setCardName('');
   };
 
   const containerVariants = {
@@ -215,6 +199,7 @@ export default function PhoneNumberPurchaseModal({
                     {step === 'search' && 'Search available numbers'}
                     {step === 'select' && 'Choose a number'}
                     {step === 'confirm' && 'Confirm purchase'}
+                    {step === 'payment' && 'Complete payment'}
                   </p>
                 </div>
               </div>
@@ -408,107 +393,27 @@ export default function PhoneNumberPurchaseModal({
                 )}
 
                 {/* Step 4: Payment */}
-                {step === 'payment' && selectedNumber && (
+                {step === 'payment' && selectedNumber && paymentIntentId && (
                   <motion.div variants={itemVariants} className="space-y-4">
-                    <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-                      <h3 className="font-semibold text-foreground mb-2">Payment for {selectedNumber.formattedNumber}</h3>
-                      <div className="text-2xl font-bold text-primary">$4.99</div>
-                      <div className="text-sm text-muted-foreground">One-time setup fee</div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-1">
-                          Cardholder Name
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="John Doe"
-                          value={cardName}
-                          onChange={(e) => setCardName(e.target.value)}
-                          disabled={isLoading}
-                          className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-1">
-                          Card Number
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="4242 4242 4242 4242"
-                          value={cardNumber}
-                          onChange={(e) => setCardNumber(e.target.value.replace(/\s/g, ''))}
-                          disabled={isLoading}
-                          maxLength={19}
-                          className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 font-mono"
-                        />
-                        <div className="text-xs text-muted-foreground mt-1">
-                          Test card: 4242 4242 4242 4242
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-sm font-medium text-foreground mb-1">
-                            Expiry (MM/YY)
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="12/25"
-                            value={cardExpiry}
-                            onChange={(e) => setCardExpiry(e.target.value)}
-                            disabled={isLoading}
-                            maxLength={5}
-                            className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 font-mono"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-foreground mb-1">
-                            CVC
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="123"
-                            value={cardCvc}
-                            onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, ''))}
-                            disabled={isLoading}
-                            maxLength={4}
-                            className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 font-mono"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="text-xs text-muted-foreground bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
-                      🔒 Payment is processed securely. Your card details are only used to process this transaction.
-                    </div>
-
-                    <div className="space-y-2">
-                      <Button
-                        variant="primary"
-                        fullWidth
-                        size="lg"
-                        onClick={handlePayment}
-                        disabled={isLoading || !cardNumber || !cardExpiry || !cardCvc || !cardName}
+                    <Elements stripe={stripePromise}>
+                      <StripePaymentForm
+                        amount={499} // $4.99 in cents
+                        phoneNumber={selectedNumber.phoneNumber}
+                        paymentIntentId={paymentIntentId}
+                        onSuccess={handlePaymentSuccess}
                         isLoading={isLoading}
-                        className="bg-primary hover:bg-primary/90 text-background font-medium"
-                      >
-                        {isLoading ? 'Processing Payment...' : 'Complete Purchase'}
-                      </Button>
+                      />
+                    </Elements>
 
-                      <Button
-                        variant="secondary"
-                        fullWidth
-                        size="sm"
-                        onClick={() => setStep('confirm')}
-                        disabled={isLoading}
-                      >
-                        Back
-                      </Button>
-                    </div>
+                    <Button
+                      variant="secondary"
+                      fullWidth
+                      size="sm"
+                      onClick={() => setStep('confirm')}
+                      disabled={isLoading}
+                    >
+                      Back
+                    </Button>
                   </motion.div>
                 )}
               </motion.div>

@@ -22,8 +22,8 @@ export declare function searchNumbers(req: Request, res: Response): Promise<Resp
 export declare function setupPaymentIntent(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**
  * POST /api/numbers/confirm-payment
- * Confirm payment intent with card details
- * SECURITY: Creates payment method and confirms payment securely
+ * Confirm payment intent with Stripe payment method token
+ * SECURITY: Payment method is created on frontend, never exposes card details to backend
  */
 export declare function confirmPayment(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**

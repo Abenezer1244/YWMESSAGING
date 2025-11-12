@@ -129,8 +129,8 @@ export async function setupPaymentIntent(req: Request, res: Response) {
 
 /**
  * POST /api/numbers/confirm-payment
- * Confirm payment intent with card details
- * SECURITY: Creates payment method and confirms payment securely
+ * Confirm payment intent with Stripe payment method token
+ * SECURITY: Payment method is created on frontend, never exposes card details to backend
  */
 export async function confirmPayment(req: Request, res: Response) {
   try {
@@ -139,9 +139,9 @@ export async function confirmPayment(req: Request, res: Response) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const { paymentIntentId, cardNumber, cardExpiry, cardCvc } = req.body;
+    const { paymentIntentId, paymentMethodId } = req.body;
 
-    if (!paymentIntentId || !cardNumber || !cardExpiry || !cardCvc) {
+    if (!paymentIntentId || !paymentMethodId) {
       return res.status(400).json({ error: 'Missing payment details' });
     }
 
@@ -155,32 +155,16 @@ export async function confirmPayment(req: Request, res: Response) {
       return res.status(400).json({ error: 'Stripe customer not configured' });
     }
 
-    // Parse expiry
-    const [expiryMonth, expiryYear] = cardExpiry.split('/');
-    if (!expiryMonth || !expiryYear || isNaN(parseInt(expiryMonth)) || isNaN(parseInt(expiryYear))) {
-      return res.status(400).json({ error: 'Invalid expiry date format' });
-    }
-
-    // SECURITY: Create payment method from card details via Stripe API
-    // Card details never stored locally
-    const paymentMethod = await stripe.paymentMethods.create({
-      type: 'card',
-      card: {
-        number: cardNumber,
-        exp_month: parseInt(expiryMonth),
-        exp_year: parseInt(expiryYear) + 2000, // Convert YY to YYYY
-        cvc: cardCvc,
-      },
-    });
-
-    // Confirm the payment intent with the payment method
+    // SECURITY: Confirm payment intent with payment method token from Stripe Elements
+    // Card details are handled entirely by Stripe, never exposed to our backend
     const confirmedIntent = await stripe.paymentIntents.confirm(paymentIntentId, {
-      payment_method: paymentMethod.id,
+      payment_method: paymentMethodId,
       return_url: 'https://connect-yw-frontend.onrender.com/admin/settings',
     });
 
     // Check if payment succeeded or requires action
     if (confirmedIntent.status === 'succeeded') {
+      console.log(`✅ Payment confirmed for church ${churchId}: ${paymentIntentId}`);
       return res.json({
         success: true,
         data: {
@@ -204,9 +188,7 @@ export async function confirmPayment(req: Request, res: Response) {
       message: error?.message,
       type: error?.type,
       code: error?.code,
-      status: error?.status,
       raw_type: error?.raw?.type,
-      full_error: error,
     });
 
     // Handle specific Stripe errors
@@ -218,7 +200,6 @@ export async function confirmPayment(req: Request, res: Response) {
 
     // Handle invalid request errors
     if (error.type === 'StripeInvalidRequestError' || error.raw?.type === 'invalid_request_error') {
-      console.error('Invalid request to Stripe:', error.raw?.message);
       return res.status(400).json({
         error: error.raw?.message || 'Invalid payment details',
       });
