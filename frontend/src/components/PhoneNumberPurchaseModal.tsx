@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, X, Loader, Check, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Button from './ui/Button';
-import { searchAvailableNumbers, purchaseNumber, PhoneNumber } from '../api/numbers';
+import { searchAvailableNumbers, setupPaymentIntent, purchaseNumber, PhoneNumber } from '../api/numbers';
 
 interface PhoneNumberPurchaseModalProps {
   isOpen: boolean;
@@ -75,7 +75,23 @@ export default function PhoneNumberPurchaseModal({
 
     setIsLoading(true);
     try {
-      const result = await purchaseNumber(selectedNumber.phoneNumber);
+      // Step 1: Create payment intent for $4.99 setup fee
+      toast.loading('Creating payment intent...');
+      const paymentResponse = await setupPaymentIntent(selectedNumber.phoneNumber);
+
+      if (!paymentResponse.success || !paymentResponse.data?.paymentIntentId) {
+        throw new Error('Failed to create payment intent');
+      }
+
+      const paymentIntentId = paymentResponse.data.paymentIntentId;
+
+      // Step 2: Complete the purchase with verified payment
+      // TODO: In future, integrate Stripe Elements here for card collection
+      // For now, this assumes payment has been verified on the backend
+      const result = await purchaseNumber(
+        selectedNumber.phoneNumber,
+        paymentIntentId
+      );
 
       if (result.success) {
         toast.success(`Successfully purchased ${selectedNumber.formattedNumber}!`);
