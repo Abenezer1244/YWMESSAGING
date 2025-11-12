@@ -156,9 +156,8 @@ export async function handleTelnyxWebhook(req: Request, res: Response) {
     const telnyxStatus = payload.status;
 
     // Find recipient by Telnyx message ID
-    // For now, we'll use twilioMessageSid field since we're storing all message IDs there
     const recipient = await prisma.messageRecipient.findFirst({
-      where: { twilioMessageSid: messageId },
+      where: { providerMessageId: messageId },
       include: {
         message: {
           include: { church: true },

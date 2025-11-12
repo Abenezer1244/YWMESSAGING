@@ -1,11 +1,5 @@
 import client from './client';
-/**
- * Koinonia Twilio credentials
- */
-export async function connectTwilio(data) {
-    const response = await client.post('/messages/twilio/connect', data);
-    return response.data.data;
-}
+
 /**
  * Send message to recipients
  */

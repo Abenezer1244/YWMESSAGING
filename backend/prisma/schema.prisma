@@ -144,7 +144,7 @@ model MessageRecipient {
   messageId         String
   memberId          String
   status            String   @default("pending") // pending, sent, delivered, failed
-  twilioMessageSid  String?
+  providerMessageId String?  // Telnyx message ID (generic name for flexibility)
   deliveredAt       DateTime?
   failedAt          DateTime?
   failureReason     String?

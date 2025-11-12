@@ -7,7 +7,7 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "prisma generate && prisma db push --skip-generate && tsc",
+    "build": "prisma generate && prisma migrate deploy && tsc",
     "start": "node dist/index.js",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -36,10 +36,10 @@
     "multer": "^2.0.2",
     "openai": "^6.8.0",
     "papaparse": "5.4.1",
+    "pg": "^8.16.3",
     "prisma": "5.3.1",
     "redis": "4.6.7",
     "stripe": "12.16.0",
-    "twilio": "^5.10.4",
     "vite": "7.1.12"
   },
   "devDependencies": {
