@@ -144,7 +144,13 @@ export async function searchAvailableNumbers(options: {
       capabilities: num.capabilities || [],
     }));
   } catch (error: any) {
-    const errorMessage = error.response?.data?.errors?.[0]?.detail || error.message || 'Failed to search numbers';
+    console.error('Telnyx search error details:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message,
+    });
+    const errorMessage = error.response?.data?.errors?.[0]?.detail || error.response?.data?.message || error.message || 'Failed to search numbers';
     throw new Error(`Telnyx search error: ${errorMessage}`);
   }
 }
