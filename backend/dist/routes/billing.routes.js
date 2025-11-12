@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticateToken } from '../middleware/auth.middleware.js';
-import { getUsageHandler, getPlanHandler, getTrialHandler, subscribeHandler, upgradeHandler, cancelHandler, createPaymentIntentHandler, } from '../controllers/billing.controller.js';
+import { getUsageHandler, getPlanHandler, getTrialHandler, subscribeHandler, upgradeHandler, cancelHandler, createPaymentIntentHandler, getSMSPricing, getSMSUsage, calculateBatchCost, } from '../controllers/billing.controller.js';
 const router = Router();
 // All billing routes require authentication
 router.use(authenticateToken);
@@ -18,5 +18,12 @@ router.put('/upgrade', upgradeHandler);
 router.delete('/cancel', cancelHandler);
 // Create payment intent
 router.post('/payment-intent', createPaymentIntentHandler);
+// ========== SMS Billing Endpoints ==========
+// Get SMS pricing
+router.get('/sms-pricing', getSMSPricing);
+// Get SMS usage and costs
+router.get('/sms-usage', getSMSUsage);
+// Calculate cost for batch messages
+router.post('/calculate-batch-cost', calculateBatchCost);
 export default router;
 //# sourceMappingURL=billing.routes.js.map

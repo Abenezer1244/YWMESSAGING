@@ -12,9 +12,9 @@ export function SoftSidebar() {
     const { currentBranchId } = useBranchStore();
     const [isOpen, setIsOpen] = useState(true);
     const [expandedItem, setExpandedItem] = useState(null);
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
+    const handleLogout = async () => {
+        await logout();
+        navigate('/');
     };
     const navigationItems = [
         {

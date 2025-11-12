@@ -1,6 +1,6 @@
 import express from 'express';
 import { authenticateToken } from '../middleware/auth.middleware.js';
-import { searchNumbers, purchaseNumber, getCurrentNumber, releaseCurrentNumber, } from '../controllers/numbers.controller.js';
+import { searchNumbers, setupPaymentIntent, confirmPayment, purchaseNumber, getCurrentNumber, releaseCurrentNumber, } from '../controllers/numbers.controller.js';
 const router = express.Router();
 // All routes require authentication
 router.use(authenticateToken);
@@ -15,9 +15,21 @@ router.get('/search', searchNumbers);
  */
 router.get('/current', getCurrentNumber);
 /**
+ * Create payment intent for phone number setup fee
+ * POST /api/numbers/setup-payment-intent
+ * Body: { phoneNumber: "+14155552671" }
+ */
+router.post('/setup-payment-intent', setupPaymentIntent);
+/**
+ * Confirm payment intent with card details
+ * POST /api/numbers/confirm-payment
+ * Body: { paymentIntentId, cardNumber, cardExpiry, cardCvc, cardName }
+ */
+router.post('/confirm-payment', confirmPayment);
+/**
  * Purchase a phone number
  * POST /api/numbers/purchase
- * Body: { phoneNumber: "+14155552671", connectionId?: "..." }
+ * Body: { phoneNumber: "+14155552671", paymentIntentId: "pi_...", connectionId?: "..." }
  */
 router.post('/purchase', purchaseNumber);
 /**

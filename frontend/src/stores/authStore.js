@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { logout as logoutApi } from '../api/auth';
 const useAuthStore = create()((set, get) => ({
     // State
     user: null,
@@ -50,8 +51,16 @@ const useAuthStore = create()((set, get) => ({
             console.warn('Failed to clear auth state from sessionStorage');
         }
     },
-    logout: () => {
-        // Tokens are cleared from state, sessionStorage, and cookies (via backend logout endpoint)
+    logout: async () => {
+        // Call backend logout endpoint to clear HTTPOnly cookies
+        try {
+            await logoutApi();
+        }
+        catch (error) {
+            console.warn('Failed to call logout endpoint', error);
+            // Continue with local logout even if API call fails
+        }
+        // Clear local state
         set({
             user: null,
             church: null,

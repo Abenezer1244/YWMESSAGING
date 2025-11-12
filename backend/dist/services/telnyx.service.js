@@ -89,18 +89,27 @@ export async function searchAvailableNumbers(options) {
             params,
         });
         const numbers = response.data?.data || [];
+        // Option 3 pricing: $0.02 per SMS, $0.01 per minute for voice
+        const SMS_COST_PER_MESSAGE = 0.02;
+        const VOICE_COST_PER_MINUTE = 0.01;
         return numbers.map((num) => ({
             id: num.id,
             phoneNumber: num.phone_number,
-            formattedNumber: num.formatted_number,
-            costPerMinute: num.cost_information?.origination_minute_cost || 0,
-            costPerSms: num.cost_information?.sms_cost || 0,
-            region: `${num.administrative_area}, ${num.country_code}`,
+            formattedNumber: num.phone_number || num.formatted_number, // Use phone_number as primary
+            costPerMinute: VOICE_COST_PER_MINUTE,
+            costPerSms: SMS_COST_PER_MESSAGE,
+            region: `${num.administrative_area || 'US'}, ${num.country_code || 'US'}`, // Provide defaults
             capabilities: num.capabilities || [],
         }));
     }
     catch (error) {
-        const errorMessage = error.response?.data?.errors?.[0]?.detail || error.message || 'Failed to search numbers';
+        console.error('Telnyx search error details:', {
+            status: error.response?.status,
+            statusText: error.response?.statusText,
+            data: error.response?.data,
+            message: error.message,
+        });
+        const errorMessage = error.response?.data?.errors?.[0]?.detail || error.response?.data?.message || error.message || 'Failed to search numbers';
         throw new Error(`Telnyx search error: ${errorMessage}`);
     }
 }
@@ -110,32 +119,44 @@ export async function searchAvailableNumbers(options) {
 export async function purchasePhoneNumber(phoneNumber, churchId, connectionId) {
     try {
         const client = getTelnyxClient();
-        const response = await client.post('/phone_numbers', {
-            phone_number: phoneNumber,
-            connection_id: connectionId,
+        // Use /number_orders endpoint to purchase phone numbers
+        const response = await client.post('/number_orders', {
+            phone_numbers: [{ phone_number: phoneNumber }],
             customer_reference: `church_${churchId}`,
         });
         const data = response.data?.data;
         if (!data?.id) {
-            throw new Error('No phone number ID returned from Telnyx');
+            throw new Error('No order ID returned from Telnyx');
+        }
+        // The phone_numbers array contains the purchased numbers
+        const purchasedNumber = data.phone_numbers?.[0];
+        if (!purchasedNumber?.phone_number) {
+            throw new Error('No phone number returned from Telnyx order');
         }
         // Save to database
         await prisma.church.update({
             where: { id: churchId },
             data: {
-                telnyxPhoneNumber: phoneNumber,
-                telnyxNumberSid: data.id,
+                telnyxPhoneNumber: purchasedNumber.phone_number,
+                telnyxNumberSid: data.id, // Order ID
                 telnyxVerified: true,
                 telnyxPurchasedAt: new Date(),
             },
         });
         return {
             numberSid: data.id,
-            phoneNumber: data.phone_number,
+            phoneNumber: purchasedNumber.phone_number,
             success: true,
         };
     }
     catch (error) {
+        console.error('Telnyx purchase error details:', {
+            status: error.response?.status,
+            statusText: error.response?.statusText,
+            data: error.response?.data,
+            message: error.message,
+            fullError: error,
+        });
         const errorMessage = error.response?.data?.errors?.[0]?.detail || error.message || 'Failed to purchase number';
         throw new Error(`Telnyx purchase error: ${errorMessage}`);
     }

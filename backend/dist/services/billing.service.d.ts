@@ -1,41 +1,46 @@
-import { PlanName } from '../config/plans.js';
-export interface UsageData {
-    branches: number;
-    members: number;
-    messagesThisMonth: number;
-    coAdmins: number;
-}
+import { PlanName, PlanLimits } from '../config/plans.js';
 /**
- * Get current usage for a church
+ * Record SMS usage for billing purposes
+ * Called after an SMS is successfully sent
  */
-export declare function getUsage(churchId: string): Promise<UsageData>;
+export declare function recordSMSUsage(churchId: string, status?: 'sent' | 'failed', messageRecipientId?: string): Promise<{
+    cost: number;
+    success: boolean;
+}>;
+/**
+ * Get SMS usage summary for a church within a date range
+ */
+export declare function getSMSUsageSummary(churchId: string, startDate?: Date, endDate?: Date): Promise<{
+    totalMessages: number;
+    totalCost: number;
+    currency: string;
+}>;
+/**
+ * Calculate total cost for a batch of messages
+ */
+export declare function calculateBatchCost(messageCount: number): number;
+/**
+ * Get current SMS pricing
+ */
+export declare function getSMSPricing(): {
+    costPerSMS: number;
+    currency: string;
+    setupFee: number;
+};
 /**
  * Get current plan for a church
  */
-export declare function getCurrentPlan(churchId: string): Promise<PlanName>;
+export declare function getCurrentPlan(churchId: string): Promise<PlanName | 'trial'>;
 /**
- * Get plan limits for a plan
+ * Get plan limits for a church (uses config/plans.ts)
  */
-export declare function getPlanLimits(planName: PlanName): import("../config/plans.js").PlanLimits;
+export declare function getPlanLimits(plan: PlanName | string): PlanLimits | null;
 /**
- * Check if usage is within plan limits
+ * Get usage for a church
  */
-export declare function isWithinLimits(churchId: string): Promise<boolean>;
+export declare function getUsage(churchId: string): Promise<Record<string, number>>;
 /**
- * Get remaining capacity for each limit
- */
-export declare function getRemainingLimits(churchId: string): Promise<{
-    branches: number;
-    members: number;
-    messagesPerMonth: number;
-    coAdmins: number;
-}>;
-/**
- * Check if a church is on trial
+ * Check if church is on trial
  */
 export declare function isOnTrial(churchId: string): Promise<boolean>;
-/**
- * Get days remaining in trial
- */
-export declare function getTrialDaysRemaining(churchId: string): Promise<number>;
 //# sourceMappingURL=billing.service.d.ts.map

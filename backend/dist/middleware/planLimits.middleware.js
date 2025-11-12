@@ -12,7 +12,7 @@ export async function checkBranchLimit(req, res, next) {
         const usage = await getUsage(churchId);
         const plan = await getCurrentPlan(churchId);
         const onTrial = await isOnTrial(churchId);
-        if (!onTrial && !checkLimit(plan, 'branches', usage.branches)) {
+        if (!onTrial && plan !== 'trial' && !checkLimit(plan, 'branches', usage.branches)) {
             return res.status(402).json({
                 error: 'Branch limit reached for your plan',
                 limit: (await require('../config/plans.js')).PLANS[plan].branches,
@@ -38,7 +38,7 @@ export async function checkMemberLimit(req, res, next) {
         const usage = await getUsage(churchId);
         const plan = await getCurrentPlan(churchId);
         const onTrial = await isOnTrial(churchId);
-        if (!onTrial && !checkLimit(plan, 'members', usage.members)) {
+        if (!onTrial && plan !== 'trial' && !checkLimit(plan, 'members', usage.members)) {
             return res.status(402).json({
                 error: 'Member limit reached for your plan',
                 limit: (await require('../config/plans.js')).PLANS[plan].members,
@@ -65,7 +65,7 @@ export async function checkMessageLimit(req, res, next) {
         const plan = await getCurrentPlan(churchId);
         const onTrial = await isOnTrial(churchId);
         if (!onTrial &&
-            !checkLimit(plan, 'messagesPerMonth', usage.messagesThisMonth)) {
+            plan !== 'trial' && !checkLimit(plan, 'messagesPerMonth', usage.messagesThisMonth)) {
             return res.status(402).json({
                 error: 'Monthly message limit reached for your plan',
                 limit: (await require('../config/plans.js')).PLANS[plan]
@@ -92,7 +92,7 @@ export async function checkCoAdminLimit(req, res, next) {
         const usage = await getUsage(churchId);
         const plan = await getCurrentPlan(churchId);
         const onTrial = await isOnTrial(churchId);
-        if (!onTrial && !checkLimit(plan, 'coAdmins', usage.coAdmins)) {
+        if (!onTrial && plan !== 'trial' && !checkLimit(plan, 'coAdmins', usage.coAdmins)) {
             return res.status(402).json({
                 error: 'Co-admin limit reached for your plan',
                 limit: (await require('../config/plans.js')).PLANS[plan].coAdmins,

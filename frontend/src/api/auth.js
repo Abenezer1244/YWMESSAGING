@@ -27,4 +27,11 @@ export async function getMe() {
     const response = await client.get('/auth/me');
     return response.data;
 }
+/**
+ * Logout - clears HTTPOnly cookies on backend
+ */
+export async function logout() {
+    const response = await client.post('/auth/logout', {});
+    return response.data;
+}
 //# sourceMappingURL=auth.js.map

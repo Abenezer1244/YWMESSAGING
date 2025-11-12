@@ -1,12 +1,4 @@
 import { Request, Response } from 'express';
-import { AccessTokenPayload } from '../utils/jwt.utils.js';
-declare global {
-    namespace Express {
-        interface Request {
-            user?: AccessTokenPayload;
-        }
-    }
-}
 /**
  * GET /api/billing/usage
  * Get current usage for the church
@@ -14,35 +6,47 @@ declare global {
 export declare function getUsageHandler(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**
  * GET /api/billing/plan
- * Get current plan, limits, and remaining capacity
+ * Get current plan and limits
  */
 export declare function getPlanHandler(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**
  * GET /api/billing/trial
- * Get trial status and days remaining
+ * Get trial status
  */
 export declare function getTrialHandler(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**
  * POST /api/billing/subscribe
- * Subscribe to a plan with payment method
- * Body: { planName: 'starter' | 'growth' | 'pro', paymentMethodId?: string }
+ * Subscribe to a plan
  */
-export declare function subscribeHandler(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+export declare function subscribeHandler(req: Request, res: Response): Promise<void>;
 /**
  * PUT /api/billing/upgrade
- * Upgrade or downgrade to a different plan
- * Body: { newPlan: 'starter' | 'growth' | 'pro' }
+ * Upgrade/downgrade plan
  */
-export declare function upgradeHandler(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+export declare function upgradeHandler(req: Request, res: Response): Promise<void>;
 /**
  * DELETE /api/billing/cancel
  * Cancel subscription
  */
-export declare function cancelHandler(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+export declare function cancelHandler(req: Request, res: Response): Promise<void>;
 /**
  * POST /api/billing/payment-intent
- * Create a Stripe payment intent for subscription payment
- * Body: { planName: 'starter' | 'growth' | 'pro' }
+ * Create payment intent
  */
-export declare function createPaymentIntentHandler(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+export declare function createPaymentIntentHandler(req: Request, res: Response): Promise<void>;
+/**
+ * GET /api/billing/sms-pricing
+ * Get current SMS pricing for the church
+ */
+export declare function getSMSPricing(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+/**
+ * GET /api/billing/sms-usage
+ * Get SMS usage and costs for the church (30-day default)
+ */
+export declare function getSMSUsage(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+/**
+ * POST /api/billing/calculate-batch
+ * Calculate cost for a batch of messages
+ */
+export declare function calculateBatchCost(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 //# sourceMappingURL=billing.controller.d.ts.map

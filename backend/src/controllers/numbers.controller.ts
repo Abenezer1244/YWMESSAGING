@@ -11,9 +11,14 @@ import {
 import {
   createPhoneNumberSetupPaymentIntent,
   verifyPaymentIntent,
+  getCustomer,
 } from '../services/stripe.service.js';
+import Stripe from 'stripe';
 
 const prisma = new PrismaClient();
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+  apiVersion: '2022-11-15',
+});
 
 // Extend Express Request type to include user
 declare global {
@@ -119,6 +124,94 @@ export async function setupPaymentIntent(req: Request, res: Response) {
   } catch (error: any) {
     console.error('Failed to create payment intent:', error);
     res.status(500).json({ error: error.message || 'Failed to create payment intent' });
+  }
+}
+
+/**
+ * POST /api/numbers/confirm-payment
+ * Confirm payment intent with card details
+ * SECURITY: Creates payment method and confirms payment securely
+ */
+export async function confirmPayment(req: Request, res: Response) {
+  try {
+    const churchId = req.user?.churchId;
+    if (!churchId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { paymentIntentId, cardNumber, cardExpiry, cardCvc } = req.body;
+
+    if (!paymentIntentId || !cardNumber || !cardExpiry || !cardCvc) {
+      return res.status(400).json({ error: 'Missing payment details' });
+    }
+
+    // Get church with Stripe customer ID
+    const church = await prisma.church.findUnique({
+      where: { id: churchId },
+      select: { stripeCustomerId: true },
+    });
+
+    if (!church?.stripeCustomerId) {
+      return res.status(400).json({ error: 'Stripe customer not configured' });
+    }
+
+    // Parse expiry
+    const [expiryMonth, expiryYear] = cardExpiry.split('/');
+    if (!expiryMonth || !expiryYear || isNaN(parseInt(expiryMonth)) || isNaN(parseInt(expiryYear))) {
+      return res.status(400).json({ error: 'Invalid expiry date format' });
+    }
+
+    // SECURITY: Create payment method from card details via Stripe API
+    // Card details never stored locally
+    const paymentMethod = await stripe.paymentMethods.create({
+      type: 'card',
+      card: {
+        number: cardNumber,
+        exp_month: parseInt(expiryMonth),
+        exp_year: parseInt(expiryYear) + 2000, // Convert YY to YYYY
+        cvc: cardCvc,
+      },
+    });
+
+    // Confirm the payment intent with the payment method
+    const confirmedIntent = await stripe.paymentIntents.confirm(paymentIntentId, {
+      payment_method: paymentMethod.id,
+      return_url: 'https://connect-yw-frontend.onrender.com/admin/settings',
+    });
+
+    // Check if payment succeeded or requires action
+    if (confirmedIntent.status === 'succeeded') {
+      return res.json({
+        success: true,
+        data: {
+          paymentIntentId: confirmedIntent.id,
+          status: 'succeeded',
+        },
+      });
+    } else if (confirmedIntent.status === 'requires_action') {
+      // This would require 3D Secure or other additional authentication
+      return res.status(400).json({
+        error: 'Payment requires additional authentication',
+        clientSecret: confirmedIntent.client_secret,
+      });
+    }
+
+    return res.status(402).json({
+      error: `Payment failed with status: ${confirmedIntent.status}`,
+    });
+  } catch (error: any) {
+    console.error('Payment confirmation failed:', error);
+
+    // Handle specific Stripe errors
+    if (error.type === 'StripeCardError') {
+      return res.status(402).json({
+        error: error.message || 'Card declined',
+      });
+    }
+
+    res.status(500).json({
+      error: error.message || 'Payment confirmation failed',
+    });
   }
 }
 

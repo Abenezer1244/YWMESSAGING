@@ -1,129 +1,176 @@
 import { PrismaClient } from '@prisma/client';
-import { PLANS, checkLimit, getRemainingCapacity } from '../config/plans.js';
+import { PLANS } from '../config/plans.js';
 const prisma = new PrismaClient();
 /**
- * Get current usage for a church
+ * SMS billing service - tracks SMS costs and usage
+ * Pricing: $0.02 per SMS (Option 3)
  */
-export async function getUsage(churchId) {
+const SMS_COST_PER_MESSAGE = 0.02;
+/**
+ * Record SMS usage for billing purposes
+ * Called after an SMS is successfully sent
+ */
+export async function recordSMSUsage(churchId, status = 'sent', messageRecipientId) {
     try {
-        // Count branches
-        const branchCount = await prisma.branch.count({
-            where: { churchId, isActive: true },
-        });
-        // Count unique members across all groups
-        const memberCount = await prisma.member.count({
-            where: {
-                groups: {
-                    some: {
-                        group: {
-                            churchId,
-                        },
-                    },
-                },
-            },
-        });
-        // Count co-admins
-        const coAdminCount = await prisma.admin.count({
-            where: { churchId, role: 'CO_ADMIN' },
-        });
-        // Count messages sent this month
-        const startOfMonth = new Date();
-        startOfMonth.setDate(1);
-        startOfMonth.setHours(0, 0, 0, 0);
-        const messagesThisMonth = await prisma.message.count({
-            where: {
-                churchId,
-                status: { in: ['sent', 'pending'] },
-                sentAt: {
-                    gte: startOfMonth,
-                },
-            },
-        });
+        // Don't record failed SMS as billable
+        if (status === 'failed') {
+            return {
+                cost: 0,
+                success: true,
+            };
+        }
+        // For now, we'll track usage in-memory or via a simple table
+        // This allows us to calculate costs without a full migration
+        console.log(`[Billing] Recording SMS usage for church ${churchId}: $${SMS_COST_PER_MESSAGE}`);
         return {
-            branches: branchCount,
-            members: memberCount,
-            messagesThisMonth,
-            coAdmins: coAdminCount,
+            cost: SMS_COST_PER_MESSAGE,
+            success: true,
         };
     }
     catch (error) {
-        console.error('❌ Failed to get usage:', error);
-        throw error;
+        console.error('Failed to record SMS usage:', error);
+        throw new Error(`Billing error: ${error.message}`);
     }
 }
+/**
+ * Get SMS usage summary for a church within a date range
+ */
+export async function getSMSUsageSummary(churchId, startDate, endDate) {
+    try {
+        // This is a placeholder implementation
+        // Once the SMSUsage table exists, we'll query it
+        const defaultStart = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 days ago
+        const defaultEnd = endDate || new Date();
+        // TODO: Query SMSUsage table once migration is applied
+        // const usage = await prisma.sMSUsage.aggregate({
+        //   where: {
+        //     churchId,
+        //     sentAt: {
+        //       gte: defaultStart,
+        //       lte: defaultEnd,
+        //     },
+        //     status: 'sent',
+        //   },
+        //   _sum: {
+        //     cost: true,
+        //   },
+        //   _count: true,
+        // });
+        return {
+            totalMessages: 0,
+            totalCost: 0,
+            currency: 'USD',
+        };
+    }
+    catch (error) {
+        console.error('Failed to get SMS usage summary:', error);
+        throw new Error(`Billing error: ${error.message}`);
+    }
+}
+/**
+ * Calculate total cost for a batch of messages
+ */
+export function calculateBatchCost(messageCount) {
+    return messageCount * SMS_COST_PER_MESSAGE;
+}
+/**
+ * Get current SMS pricing
+ */
+export function getSMSPricing() {
+    return {
+        costPerSMS: SMS_COST_PER_MESSAGE,
+        currency: 'USD',
+        setupFee: 4.99,
+    };
+}
+// ========== Plan Management Functions (used by middleware and services) ==========
 /**
  * Get current plan for a church
  */
 export async function getCurrentPlan(churchId) {
     try {
-        const subscription = await prisma.subscription.findUnique({
+        const church = await prisma.church.findUnique({
+            where: { id: churchId },
+            select: { subscriptionStatus: true },
+        });
+        const status = church?.subscriptionStatus;
+        return status || 'trial';
+    }
+    catch (error) {
+        console.error('Failed to get current plan:', error);
+        return 'trial';
+    }
+}
+/**
+ * Get plan limits for a church (uses config/plans.ts)
+ */
+export function getPlanLimits(plan) {
+    // Trial users get starter plan limits
+    if (plan === 'trial') {
+        return PLANS.starter;
+    }
+    // Return plan limits for starter, growth, pro
+    if (plan === 'starter' || plan === 'growth' || plan === 'pro') {
+        return PLANS[plan];
+    }
+    return null;
+}
+/**
+ * Get usage for a church
+ */
+export async function getUsage(churchId) {
+    try {
+        // Get branches count
+        const branchCount = await prisma.branch.count({
             where: { churchId },
         });
-        if (!subscription) {
-            return 'starter'; // Default to starter if no subscription
-        }
-        return subscription.plan;
-    }
-    catch (error) {
-        console.error('❌ Failed to get current plan:', error);
-        throw error;
-    }
-}
-/**
- * Get plan limits for a plan
- */
-export function getPlanLimits(planName) {
-    return PLANS[planName];
-}
-/**
- * Check if usage is within plan limits
- */
-export async function isWithinLimits(churchId) {
-    try {
-        const usage = await getUsage(churchId);
-        const plan = await getCurrentPlan(churchId);
-        // Check each limit
-        if (!checkLimit(plan, 'branches', usage.branches))
-            return false;
-        if (!checkLimit(plan, 'members', usage.members))
-            return false;
-        if (!checkLimit(plan, 'messagesPerMonth', usage.messagesThisMonth))
-            return false;
-        if (!checkLimit(plan, 'coAdmins', usage.coAdmins))
-            return false;
-        return true;
-    }
-    catch (error) {
-        console.error('❌ Failed to check limits:', error);
-        throw error;
-    }
-}
-/**
- * Get remaining capacity for each limit
- */
-export async function getRemainingLimits(churchId) {
-    try {
-        const usage = await getUsage(churchId);
-        const plan = await getCurrentPlan(churchId);
+        // Get members count
+        const memberCount = await prisma.member.count({
+            where: {
+                groups: {
+                    some: {
+                        group: { churchId },
+                    },
+                },
+            },
+        });
+        // Get co-admins count
+        const coAdminCount = await prisma.admin.count({
+            where: { churchId, role: 'CO_ADMIN' },
+        });
+        // Get messages sent this month
+        const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+        const messageCount = await prisma.message.count({
+            where: {
+                churchId,
+                createdAt: { gte: startOfMonth },
+            },
+        });
         return {
-            branches: getRemainingCapacity(plan, 'branches', usage.branches),
-            members: getRemainingCapacity(plan, 'members', usage.members),
-            messagesPerMonth: getRemainingCapacity(plan, 'messagesPerMonth', usage.messagesThisMonth),
-            coAdmins: getRemainingCapacity(plan, 'coAdmins', usage.coAdmins),
+            branches: branchCount,
+            members: memberCount,
+            messagesThisMonth: messageCount,
+            coAdmins: coAdminCount,
         };
     }
     catch (error) {
-        console.error('❌ Failed to get remaining limits:', error);
-        throw error;
+        console.error('Failed to get usage:', error);
+        return {
+            branches: 0,
+            members: 0,
+            messagesThisMonth: 0,
+            coAdmins: 0,
+        };
     }
 }
 /**
- * Check if a church is on trial
+ * Check if church is on trial
  */
 export async function isOnTrial(churchId) {
     try {
         const church = await prisma.church.findUnique({
             where: { id: churchId },
+            select: { subscriptionStatus: true, trialEndsAt: true },
         });
         if (!church)
             return false;
@@ -131,27 +178,8 @@ export async function isOnTrial(churchId) {
             church.trialEndsAt > new Date());
     }
     catch (error) {
-        console.error('❌ Failed to check trial status:', error);
-        throw error;
-    }
-}
-/**
- * Get days remaining in trial
- */
-export async function getTrialDaysRemaining(churchId) {
-    try {
-        const church = await prisma.church.findUnique({
-            where: { id: churchId },
-        });
-        if (!church)
-            return 0;
-        const now = new Date();
-        const daysRemaining = Math.ceil((church.trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-        return Math.max(0, daysRemaining);
-    }
-    catch (error) {
-        console.error('❌ Failed to get trial days remaining:', error);
-        throw error;
+        console.error('Failed to check trial status:', error);
+        return false;
     }
 }
 //# sourceMappingURL=billing.service.js.map

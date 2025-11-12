@@ -1,5 +1,4 @@
 import client from './client';
-
 /**
  * Send message to recipients
  */

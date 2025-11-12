@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import * as telnyxService from '../services/telnyx.service.js';
+import * as billingService from '../services/billing.service.js';
 const prisma = new PrismaClient();
 /**
  * Send welcome message when a member is added to a group
@@ -31,6 +32,9 @@ export async function sendWelcomeMessage(groupMemberId, groupId, memberId) {
         const welcomeText = group.welcomeMessageText || `Welcome to ${group.name}!`;
         // Send SMS via Telnyx
         await telnyxService.sendSMS(member.phone, welcomeText, group.churchId);
+        // Record SMS usage for billing (Option 3: $0.02 per SMS)
+        const billingResult = await billingService.recordSMSUsage(group.churchId, 'sent');
+        console.log(`[Billing] Welcome SMS recorded: $${billingResult.cost} for church ${group.churchId}`);
         // Mark as sent
         await prisma.groupMember.update({
             where: { id: groupMemberId },

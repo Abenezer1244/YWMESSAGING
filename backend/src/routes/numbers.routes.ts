@@ -3,6 +3,7 @@ import { authenticateToken } from '../middleware/auth.middleware.js';
 import {
   searchNumbers,
   setupPaymentIntent,
+  confirmPayment,
   purchaseNumber,
   getCurrentNumber,
   releaseCurrentNumber,
@@ -31,6 +32,13 @@ router.get('/current', getCurrentNumber);
  * Body: { phoneNumber: "+14155552671" }
  */
 router.post('/setup-payment-intent', setupPaymentIntent);
+
+/**
+ * Confirm payment intent with card details
+ * POST /api/numbers/confirm-payment
+ * Body: { paymentIntentId, cardNumber, cardExpiry, cardCvc, cardName }
+ */
+router.post('/confirm-payment', confirmPayment);
 
 /**
  * Purchase a phone number

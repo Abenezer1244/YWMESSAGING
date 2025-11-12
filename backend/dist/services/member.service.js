@@ -88,7 +88,7 @@ export async function addMember(groupId, data) {
     const usage = await getUsage(group.churchId);
     const plan = await getCurrentPlan(group.churchId);
     const limits = getPlanLimits(plan);
-    if (usage.members >= limits.members) {
+    if (limits && limits.members && usage.members >= limits.members) {
         throw new Error(`Member limit of ${limits.members} reached for ${plan} plan. Please upgrade your plan to add more members.`);
     }
     // Format phone to E.164
@@ -170,9 +170,9 @@ export async function importMembers(groupId, membersData) {
     const usage = await getUsage(group.churchId);
     const plan = await getCurrentPlan(group.churchId);
     const limits = getPlanLimits(plan);
-    const remainingCapacity = limits.members - usage.members;
+    const remainingCapacity = limits ? limits.members - usage.members : 999999;
     if (remainingCapacity <= 0) {
-        throw new Error(`Member limit of ${limits.members} reached for ${plan} plan. Please upgrade your plan to add more members.`);
+        throw new Error(`Member limit of ${limits?.members || "unlimited"} reached for ${plan} plan. Please upgrade your plan to add more members.`);
     }
     if (membersData.length > remainingCapacity) {
         throw new Error(`Import would exceed member limit. You have ${remainingCapacity} member slot(s) remaining, but are trying to import ${membersData.length} members.`);

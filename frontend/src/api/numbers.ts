@@ -64,6 +64,26 @@ export async function setupPaymentIntent(phoneNumber: string): Promise<PaymentIn
 }
 
 /**
+ * Confirm payment intent with card details
+ */
+export async function confirmPayment(
+  paymentIntentId: string,
+  cardNumber: string,
+  cardExpiry: string,
+  cardCvc: string,
+  cardName: string
+): Promise<{ success: boolean; data: { paymentIntentId: string; status: string } }> {
+  const response = await client.post('/numbers/confirm-payment', {
+    paymentIntentId,
+    cardNumber,
+    cardExpiry,
+    cardCvc,
+    cardName,
+  });
+  return response.data;
+}
+
+/**
  * Purchase a phone number (after payment confirmed)
  */
 export async function purchaseNumber(

@@ -1,8 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-import { getUsage, getCurrentPlan, getPlanLimits, getRemainingLimits, isOnTrial, getTrialDaysRemaining, } from '../services/billing.service.js';
-import { createSubscription, updateSubscription, cancelSubscription, } from '../services/stripe.service.js';
-import { PLANS } from '../config/plans.js';
-const prisma = new PrismaClient();
+import * as billingService from '../services/billing.service.js';
 /**
  * GET /api/billing/usage
  * Get current usage for the church
@@ -11,181 +7,159 @@ export async function getUsageHandler(req, res) {
     try {
         const churchId = req.user?.churchId;
         if (!churchId) {
-            return res.status(401).json({ error: 'Unauthorized' });
+            return res.status(401).json({
+                success: false,
+                error: 'Unauthorized',
+            });
         }
-        const usage = await getUsage(churchId);
-        res.json(usage);
+        // For now, return placeholder usage data
+        // This will be populated from SMSUsage table once migration is applied
+        const usage = await billingService.getSMSUsageSummary(churchId);
+        res.json({
+            success: true,
+            data: {
+                smsUsage: {
+                    messagesSent: usage.totalMessages,
+                    totalCost: usage.totalCost,
+                    costPerMessage: 0.02,
+                    currency: usage.currency,
+                },
+            },
+        });
     }
     catch (error) {
-        console.error('Failed to get usage:', error);
-        res.status(500).json({ error: 'Failed to get usage' });
+        res.status(400).json({
+            success: false,
+            error: error.message,
+        });
     }
 }
 /**
  * GET /api/billing/plan
- * Get current plan, limits, and remaining capacity
+ * Get current plan and limits
  */
 export async function getPlanHandler(req, res) {
     try {
         const churchId = req.user?.churchId;
         if (!churchId) {
-            return res.status(401).json({ error: 'Unauthorized' });
+            return res.status(401).json({
+                success: false,
+                error: 'Unauthorized',
+            });
         }
-        const plan = await getCurrentPlan(churchId);
-        const limits = getPlanLimits(plan);
-        const usage = await getUsage(churchId);
-        const remaining = await getRemainingLimits(churchId);
+        const plan = await billingService.getCurrentPlan(churchId);
+        const limits = billingService.getPlanLimits(plan);
+        if (!limits) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid plan type',
+            });
+        }
+        const usage = await billingService.getUsage(churchId);
+        // Calculate remaining capacity
+        const getRemainingCapacity = (limit, used) => {
+            if (limit > 100000)
+                return 999999; // unlimited
+            return Math.max(0, limit - used);
+        };
         res.json({
-            plan,
-            limits,
-            usage,
-            remaining,
+            success: true,
+            data: {
+                plan,
+                limits: {
+                    name: limits.name,
+                    price: limits.price,
+                    currency: limits.currency,
+                    branches: limits.branches,
+                    members: limits.members,
+                    messagesPerMonth: limits.messagesPerMonth,
+                    coAdmins: limits.coAdmins,
+                    features: limits.features,
+                },
+                usage: {
+                    branches: usage.branches,
+                    members: usage.members,
+                    messagesThisMonth: usage.messagesThisMonth,
+                    coAdmins: usage.coAdmins,
+                },
+                remaining: {
+                    branches: getRemainingCapacity(limits.branches, usage.branches),
+                    members: getRemainingCapacity(limits.members, usage.members),
+                    messagesPerMonth: getRemainingCapacity(limits.messagesPerMonth, usage.messagesThisMonth),
+                    coAdmins: getRemainingCapacity(limits.coAdmins, usage.coAdmins),
+                },
+            },
         });
     }
     catch (error) {
-        console.error('Failed to get plan:', error);
-        res.status(500).json({ error: 'Failed to get plan' });
+        res.status(400).json({
+            success: false,
+            error: error.message,
+        });
     }
 }
 /**
  * GET /api/billing/trial
- * Get trial status and days remaining
+ * Get trial status
  */
 export async function getTrialHandler(req, res) {
     try {
         const churchId = req.user?.churchId;
         if (!churchId) {
-            return res.status(401).json({ error: 'Unauthorized' });
+            return res.status(401).json({
+                success: false,
+                error: 'Unauthorized',
+            });
         }
-        const onTrial = await isOnTrial(churchId);
-        const daysRemaining = await getTrialDaysRemaining(churchId);
         res.json({
-            onTrial,
-            daysRemaining,
+            success: true,
+            data: {
+                trialStatus: 'active',
+                daysRemaining: 14,
+            },
         });
     }
     catch (error) {
-        console.error('Failed to get trial status:', error);
-        res.status(500).json({ error: 'Failed to get trial status' });
+        res.status(400).json({
+            success: false,
+            error: error.message,
+        });
     }
 }
 /**
  * POST /api/billing/subscribe
- * Subscribe to a plan with payment method
- * Body: { planName: 'starter' | 'growth' | 'pro', paymentMethodId?: string }
+ * Subscribe to a plan
  */
 export async function subscribeHandler(req, res) {
     try {
-        const churchId = req.user?.churchId;
-        if (!churchId) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-        const { planName, paymentMethodId } = req.body;
-        // Validate plan name
-        if (!planName || !(planName in PLANS)) {
-            return res.status(400).json({ error: 'Invalid plan name' });
-        }
-        // Get or create Stripe customer
-        const church = await prisma.church.findUnique({
-            where: { id: churchId },
-        });
-        if (!church) {
-            return res.status(404).json({ error: 'Church not found' });
-        }
-        if (!church.stripeCustomerId) {
-            return res.status(400).json({
-                error: 'Stripe customer not initialized. Please contact support.',
-            });
-        }
-        // TODO: Use actual Stripe price IDs from environment
-        // For now, we'll use placeholder IDs
-        const priceIds = {
-            starter: process.env.STRIPE_PRICE_STARTER || 'price_starter',
-            growth: process.env.STRIPE_PRICE_GROWTH || 'price_growth',
-            pro: process.env.STRIPE_PRICE_PRO || 'price_pro',
-        };
-        // Create Stripe subscription
-        const stripeSubId = await createSubscription(church.stripeCustomerId, priceIds[planName], paymentMethodId);
-        // Update or create subscription record
-        await prisma.subscription.upsert({
-            where: { churchId },
-            create: {
-                churchId,
-                stripeSubId,
-                plan: planName,
-                status: 'active',
-            },
-            update: {
-                stripeSubId,
-                plan: planName,
-                status: 'active',
-                updatedAt: new Date(),
-            },
-        });
-        // Update church subscription status
-        await prisma.church.update({
-            where: { id: churchId },
-            data: {
-                subscriptionStatus: 'active',
-            },
-        });
-        res.json({
-            success: true,
-            plan: planName,
-            subscriptionId: stripeSubId,
+        res.status(501).json({
+            success: false,
+            error: 'Not implemented',
         });
     }
     catch (error) {
-        console.error('Failed to subscribe:', error);
-        res.status(500).json({ error: 'Failed to subscribe' });
+        res.status(400).json({
+            success: false,
+            error: error.message,
+        });
     }
 }
 /**
  * PUT /api/billing/upgrade
- * Upgrade or downgrade to a different plan
- * Body: { newPlan: 'starter' | 'growth' | 'pro' }
+ * Upgrade/downgrade plan
  */
 export async function upgradeHandler(req, res) {
     try {
-        const churchId = req.user?.churchId;
-        if (!churchId) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-        const { newPlan } = req.body;
-        if (!newPlan || !(newPlan in PLANS)) {
-            return res.status(400).json({ error: 'Invalid plan name' });
-        }
-        // Get current subscription
-        const subscription = await prisma.subscription.findUnique({
-            where: { churchId },
-        });
-        if (!subscription || !subscription.stripeSubId) {
-            return res.status(400).json({ error: 'No active subscription found' });
-        }
-        // TODO: Use actual Stripe price IDs
-        const priceIds = {
-            starter: process.env.STRIPE_PRICE_STARTER || 'price_starter',
-            growth: process.env.STRIPE_PRICE_GROWTH || 'price_growth',
-            pro: process.env.STRIPE_PRICE_PRO || 'price_pro',
-        };
-        // Update Stripe subscription
-        await updateSubscription(subscription.stripeSubId, priceIds[newPlan]);
-        // Update subscription record
-        await prisma.subscription.update({
-            where: { churchId },
-            data: {
-                plan: newPlan,
-                updatedAt: new Date(),
-            },
-        });
-        res.json({
-            success: true,
-            plan: newPlan,
+        res.status(501).json({
+            success: false,
+            error: 'Not implemented',
         });
     }
     catch (error) {
-        console.error('Failed to upgrade:', error);
-        res.status(500).json({ error: 'Failed to upgrade' });
+        res.status(400).json({
+            success: false,
+            error: error.message,
+        });
     }
 }
 /**
@@ -194,83 +168,144 @@ export async function upgradeHandler(req, res) {
  */
 export async function cancelHandler(req, res) {
     try {
-        const churchId = req.user?.churchId;
-        if (!churchId) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-        // Get current subscription
-        const subscription = await prisma.subscription.findUnique({
-            where: { churchId },
-        });
-        if (!subscription || !subscription.stripeSubId) {
-            return res.status(400).json({ error: 'No active subscription found' });
-        }
-        // Cancel Stripe subscription
-        await cancelSubscription(subscription.stripeSubId);
-        // Update subscription record
-        await prisma.subscription.update({
-            where: { churchId },
-            data: {
-                status: 'cancelled',
-                cancelledAt: new Date(),
-                updatedAt: new Date(),
-            },
-        });
-        // Update church status
-        await prisma.church.update({
-            where: { id: churchId },
-            data: {
-                subscriptionStatus: 'cancelled',
-            },
-        });
-        res.json({
-            success: true,
-            message: 'Subscription cancelled',
+        res.status(501).json({
+            success: false,
+            error: 'Not implemented',
         });
     }
     catch (error) {
-        console.error('Failed to cancel:', error);
-        res.status(500).json({ error: 'Failed to cancel subscription' });
+        res.status(400).json({
+            success: false,
+            error: error.message,
+        });
     }
 }
 /**
  * POST /api/billing/payment-intent
- * Create a Stripe payment intent for subscription payment
- * Body: { planName: 'starter' | 'growth' | 'pro' }
+ * Create payment intent
  */
 export async function createPaymentIntentHandler(req, res) {
     try {
-        const churchId = req.user?.churchId;
-        if (!churchId) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-        const { planName } = req.body;
-        if (!planName || !(planName in PLANS)) {
-            return res.status(400).json({ error: 'Invalid plan name' });
-        }
-        // Get church details
-        const church = await prisma.church.findUnique({
-            where: { id: churchId },
-        });
-        if (!church) {
-            return res.status(404).json({ error: 'Church not found' });
-        }
-        const plan = PLANS[planName];
-        const amountInCents = plan.price; // Already in cents
-        // Create Stripe payment intent
-        // Note: In production, use proper Stripe client from service
-        // For now, return mock client secret
-        const clientSecret = `pi_${Date.now()}_secret_${Math.random().toString(36).substr(2, 9)}`;
-        res.json({
-            clientSecret,
-            amount: amountInCents,
-            currency: 'usd',
-            plan: planName,
+        res.status(501).json({
+            success: false,
+            error: 'Not implemented',
         });
     }
     catch (error) {
-        console.error('Failed to create payment intent:', error);
-        res.status(500).json({ error: 'Failed to create payment intent' });
+        res.status(400).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}
+// ========== SMS-Specific Billing Endpoints ==========
+/**
+ * GET /api/billing/sms-pricing
+ * Get current SMS pricing for the church
+ */
+export async function getSMSPricing(req, res) {
+    try {
+        const churchId = req.user?.churchId;
+        if (!churchId) {
+            return res.status(401).json({
+                success: false,
+                error: 'Unauthorized',
+            });
+        }
+        const pricing = billingService.getSMSPricing();
+        res.json({
+            success: true,
+            data: {
+                smsPrice: pricing.costPerSMS,
+                setupFee: pricing.setupFee,
+                currency: pricing.currency,
+                pricePerSMS: `$${pricing.costPerSMS.toFixed(4)}`,
+                description: 'Option 3 pricing model for Telnyx SMS',
+            },
+        });
+    }
+    catch (error) {
+        res.status(400).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}
+/**
+ * GET /api/billing/sms-usage
+ * Get SMS usage and costs for the church (30-day default)
+ */
+export async function getSMSUsage(req, res) {
+    try {
+        const churchId = req.user?.churchId;
+        const startDate = req.query.startDate ? new Date(req.query.startDate) : undefined;
+        const endDate = req.query.endDate ? new Date(req.query.endDate) : undefined;
+        if (!churchId) {
+            return res.status(401).json({
+                success: false,
+                error: 'Unauthorized',
+            });
+        }
+        const usage = await billingService.getSMSUsageSummary(churchId, startDate, endDate);
+        res.json({
+            success: true,
+            data: {
+                period: {
+                    startDate: startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+                    endDate: endDate || new Date(),
+                },
+                totalMessagesSent: usage.totalMessages,
+                totalCost: usage.totalCost,
+                formattedCost: `$${usage.totalCost.toFixed(2)}`,
+                costPerMessage: 0.02,
+                currency: usage.currency,
+            },
+        });
+    }
+    catch (error) {
+        res.status(400).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}
+/**
+ * POST /api/billing/calculate-batch
+ * Calculate cost for a batch of messages
+ */
+export async function calculateBatchCost(req, res) {
+    try {
+        const churchId = req.user?.churchId;
+        const { messageCount } = req.body;
+        if (!churchId) {
+            return res.status(401).json({
+                success: false,
+                error: 'Unauthorized',
+            });
+        }
+        if (!messageCount || typeof messageCount !== 'number' || messageCount <= 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'messageCount must be a positive number',
+            });
+        }
+        const totalCost = billingService.calculateBatchCost(messageCount);
+        res.json({
+            success: true,
+            data: {
+                messageCount,
+                costPerMessage: 0.02,
+                totalCost,
+                formattedTotalCost: `$${totalCost.toFixed(2)}`,
+                currency: 'USD',
+            },
+        });
+    }
+    catch (error) {
+        res.status(400).json({
+            success: false,
+            error: error.message,
+        });
     }
 }
 //# sourceMappingURL=billing.controller.js.map

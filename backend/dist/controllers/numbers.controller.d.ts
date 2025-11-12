@@ -14,9 +14,23 @@ declare global {
  */
 export declare function searchNumbers(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**
+ * POST /api/numbers/setup-payment-intent
+ * Create a payment intent for phone number setup fee
+ * Body: { phoneNumber }
+ * SECURITY: Validates phone number format and user authorization
+ */
+export declare function setupPaymentIntent(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+/**
+ * POST /api/numbers/confirm-payment
+ * Confirm payment intent with card details
+ * SECURITY: Creates payment method and confirms payment securely
+ */
+export declare function confirmPayment(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+/**
  * POST /api/numbers/purchase
- * Purchase a phone number for the church
- * Body: { phoneNumber, connectionId? }
+ * Purchase a phone number for the church (after payment is confirmed)
+ * Body: { phoneNumber, paymentIntentId, connectionId? }
+ * SECURITY: Verifies payment before allowing purchase
  */
 export declare function purchaseNumber(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**

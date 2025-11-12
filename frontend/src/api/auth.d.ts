@@ -22,6 +22,8 @@ export interface AuthResponse {
             firstName: string;
             lastName: string;
             role: string;
+            welcomeCompleted: boolean;
+            userRole?: string;
         };
         church: {
             id: string;
@@ -60,6 +62,8 @@ export declare function getMe(): Promise<{
         firstName: string;
         lastName: string;
         role: string;
+        welcomeCompleted: boolean;
+        userRole?: string;
         church: {
             id: string;
             name: string;
@@ -67,5 +71,11 @@ export declare function getMe(): Promise<{
             trialEndsAt: string;
         };
     };
+}>;
+/**
+ * Logout - clears HTTPOnly cookies on backend
+ */
+export declare function logout(): Promise<{
+    success: boolean;
 }>;
 //# sourceMappingURL=auth.d.ts.map
