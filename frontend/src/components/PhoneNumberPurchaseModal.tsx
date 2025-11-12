@@ -149,8 +149,16 @@ export default function PhoneNumberPurchaseModal({
     } catch (error: any) {
       console.error('Purchase failed:', error);
 
+      // Extract error message from axios error or generic error
+      let errorMsg = 'Payment processing failed';
+
+      if (error.response?.status === 402) {
+        errorMsg = error.response?.data?.error || 'Request failed with status code 402';
+      } else if (error.message) {
+        errorMsg = error.message;
+      }
+
       // Determine if it's a decline or generic failure
-      const errorMsg = error.message || 'Failed to process payment';
       const isDecline = errorMsg.toLowerCase().includes('declined') ||
                        errorMsg.toLowerCase().includes('insufficient');
 
