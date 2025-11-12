@@ -56,6 +56,14 @@ export async function getPlanHandler(req: Request, res: Response) {
 
     const plan = await billingService.getCurrentPlan(churchId);
     const limits = billingService.getPlanLimits(plan);
+
+    if (!limits) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid plan type',
+      });
+    }
+
     const usage = await billingService.getUsage(churchId);
 
     // Calculate remaining capacity
