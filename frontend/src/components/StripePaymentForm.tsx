@@ -107,8 +107,25 @@ export default function StripePaymentForm({
           <div className="p-3 border border-border rounded-lg bg-muted">
             <CardElement options={cardElementOptions} />
           </div>
-          <div className="text-xs text-muted-foreground mt-1">
-            Test card: 4242 4242 4242 4242
+
+          {/* Test Card Examples */}
+          <div className="mt-3 space-y-2 text-xs">
+            <p className="text-muted-foreground font-semibold">Test Cards:</p>
+            <div className="space-y-1">
+              <div className="flex items-center justify-between p-2 bg-green-500/10 border border-green-500/20 rounded">
+                <span className="font-mono text-muted-foreground">4242 4242 4242 4242</span>
+                <span className="text-green-600 font-medium">✓ Successful</span>
+              </div>
+              <div className="flex items-center justify-between p-2 bg-red-500/10 border border-red-500/20 rounded">
+                <span className="font-mono text-muted-foreground">4000 0000 0000 0002</span>
+                <span className="text-red-600 font-medium">✗ Declined</span>
+              </div>
+              <div className="flex items-center justify-between p-2 bg-amber-500/10 border border-amber-500/20 rounded">
+                <span className="font-mono text-muted-foreground">4000 0000 0000 0069</span>
+                <span className="text-amber-600 font-medium">✗ Invalid CVC</span>
+              </div>
+            </div>
+            <p className="text-muted-foreground italic pt-1">Use any future date and any 3-digit CVC</p>
           </div>
         </div>
       </div>
