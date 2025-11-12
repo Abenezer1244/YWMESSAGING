@@ -300,7 +300,7 @@ export default function PhoneNumberPurchaseModal({
                       </div>
                       <div className="border-t border-border/30 pt-2 mt-2 flex justify-between font-semibold">
                         <span className="text-foreground">One-time setup:</span>
-                        <span className="text-primary">$1.00</span>
+                        <span className="text-primary">$4.99</span>
                       </div>
                     </div>
 
