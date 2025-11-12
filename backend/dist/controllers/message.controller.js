@@ -1,77 +1,6 @@
 import * as messageService from '../services/message.service.js';
-import * as twilioService from '../services/twilio.service.js';
 import { PrismaClient } from '@prisma/client';
-import crypto from 'crypto';
 const prisma = new PrismaClient();
-/**
- * SECURITY: Validate Twilio webhook request signature
- * Twilio includes X-Twilio-Signature header with HMAC-SHA1 of request URL + body
- */
-function validateTwilioSignature(req, twilioAuthToken) {
-    const signature = req.headers['x-twilio-signature'];
-    if (!signature) {
-        return false;
-    }
-    const url = `https://${req.get('host')}${req.originalUrl}`;
-    const hmac = crypto.createHmac('sha1', twilioAuthToken);
-    hmac.update(url + new URLSearchParams(req.body).toString());
-    const computedSignature = hmac.digest('base64');
-    return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(computedSignature));
-}
-/**
- * POST /api/churches/:churchId/twilio/connect
- * Koinonia Twilio credentials
- */
-export async function connectTwilio(req, res) {
-    try {
-        const churchId = req.user?.churchId;
-        const { accountSid, authToken, phoneNumber } = req.body;
-        if (!churchId) {
-            return res.status(401).json({
-                success: false,
-                error: 'Unauthorized',
-            });
-        }
-        // Validate input
-        if (!accountSid || !authToken || !phoneNumber) {
-            return res.status(400).json({
-                success: false,
-                error: 'accountSid, authToken, and phoneNumber are required',
-            });
-        }
-        // Validate credentials
-        const isValid = await twilioService.validateTwilioCredentials(accountSid, authToken, phoneNumber);
-        if (!isValid) {
-            return res.status(400).json({
-                success: false,
-                error: 'Invalid Twilio credentials',
-            });
-        }
-        // Save credentials
-        const church = await prisma.church.update({
-            where: { id: churchId },
-            data: {
-                twilioAccountSid: accountSid,
-                twilioAuthToken: authToken,
-                twilioPhoneNumber: phoneNumber,
-                twilioVerified: true,
-            },
-        });
-        res.json({
-            success: true,
-            data: {
-                twilioVerified: church.twilioVerified,
-                twilioPhoneNumber: church.twilioPhoneNumber,
-            },
-        });
-    }
-    catch (error) {
-        res.status(400).json({
-            success: false,
-            error: error.message,
-        });
-    }
-}
 /**
  * POST /api/messages/send
  * Send message to recipients
@@ -187,19 +116,26 @@ export async function getMessageDetails(req, res) {
     }
 }
 /**
- * POST /api/webhooks/twilio/status
- * Webhook for Twilio delivery status updates
- * SECURITY: Validates Twilio signature using auth token from database
+ * POST /api/webhooks/telnyx/status
+ * Webhook for Telnyx delivery status updates (DLR - Delivery Receipt)
+ * Telnyx sends event-based webhooks without signature validation on HTTPS
  */
-export async function handleTwilioWebhook(req, res) {
+export async function handleTelnyxWebhook(req, res) {
     try {
-        const { MessageSid, MessageStatus } = req.body;
-        if (!MessageSid) {
-            return res.status(400).json({ error: 'MessageSid required' });
+        const { type, data } = req.body;
+        // Only process message delivery receipts
+        if (type !== 'message.dlr') {
+            return res.status(200).json({ received: true });
         }
-        // Find recipient by Twilio message SID to get church
+        const payload = data?.payload?.[0];
+        if (!payload || !payload.id) {
+            return res.status(400).json({ error: 'Payload with message ID required' });
+        }
+        const messageId = payload.id;
+        const telnyxStatus = payload.status;
+        // Find recipient by Telnyx message ID
         const recipient = await prisma.messageRecipient.findFirst({
-            where: { twilioMessageSid: MessageSid },
+            where: { providerMessageId: messageId },
             include: {
                 message: {
                     include: { church: true },
@@ -207,37 +143,35 @@ export async function handleTwilioWebhook(req, res) {
             },
         });
         if (!recipient) {
-            // Message SID not found, just acknowledge webhook
+            // Message ID not found, just acknowledge webhook
+            console.log(`Telnyx webhook: Message ID ${messageId} not found in database`);
             return res.status(200).json({ received: true });
         }
-        // SECURITY: Validate Twilio signature using church's auth token
-        const church = recipient.message.church;
-        if (!church.twilioAuthToken || !validateTwilioSignature(req, church.twilioAuthToken)) {
-            console.warn('⚠️ Twilio webhook signature validation failed');
-            return res.status(401).json({ error: 'Invalid signature' });
-        }
-        // Map Twilio status to our status
-        let status;
-        if (MessageStatus === 'delivered') {
+        // Map Telnyx status to our status
+        let status = null;
+        if (telnyxStatus === 'delivered') {
             status = 'delivered';
         }
-        else if (MessageStatus === 'failed' ||
-            MessageStatus === 'undelivered' ||
-            MessageStatus === 'bounced') {
+        else if (telnyxStatus === 'failed' ||
+            telnyxStatus === 'undelivered' ||
+            telnyxStatus === 'bounced') {
             status = 'failed';
         }
         else {
-            // pending, sent, etc. - don't update yet
+            // pending, queued, etc. - don't update yet
             return res.status(200).json({ received: true });
         }
-        // Update recipient status
-        await messageService.updateRecipientStatus(recipient.id, status, {
-            failureReason: req.body.ErrorMessage,
-        });
+        if (status) {
+            // Update recipient status
+            await messageService.updateRecipientStatus(recipient.id, status, {
+                failureReason: payload.error_message || undefined,
+            });
+            console.log(`Telnyx webhook: Updated message ${messageId} to ${status}`);
+        }
         res.json({ received: true });
     }
     catch (error) {
-        console.error('Error processing Twilio webhook');
+        console.error('Error processing Telnyx webhook:', error);
         res.status(500).json({ error: 'Failed to process webhook' });
     }
 }

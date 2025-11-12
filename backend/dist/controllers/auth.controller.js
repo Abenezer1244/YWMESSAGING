@@ -24,9 +24,9 @@ export async function register(req, res) {
         }
         const result = await registerChurch({ email, password, firstName, lastName, churchName });
         // ✅ SECURITY: Determine cookie domain based on environment
-        // Production: .onrender.com (shared across subdomains)
+        // Production: .koinoniasms.com (shared across subdomains)
         // Development: undefined (localhost only)
-        const cookieDomain = process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined;
+        const cookieDomain = process.env.NODE_ENV === 'production' ? '.koinoniasms.com' : undefined;
         // Set httpOnly cookies for tokens (secure, cannot be accessed via JavaScript)
         res.cookie('accessToken', result.accessToken, {
             httpOnly: true,
@@ -74,7 +74,7 @@ export async function loginHandler(req, res) {
         }
         const result = await login({ email, password });
         // ✅ SECURITY: Determine cookie domain based on environment
-        const cookieDomain = process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined;
+        const cookieDomain = process.env.NODE_ENV === 'production' ? '.koinoniasms.com' : undefined;
         // Set httpOnly cookies for tokens
         res.cookie('accessToken', result.accessToken, {
             httpOnly: true,
@@ -127,7 +127,7 @@ export async function refreshToken(req, res) {
         }
         const result = await refreshAccessToken(payload.adminId);
         // ✅ SECURITY: Determine cookie domain based on environment
-        const cookieDomain = process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined;
+        const cookieDomain = process.env.NODE_ENV === 'production' ? '.koinoniasms.com' : undefined;
         // Set new httpOnly cookies for tokens
         res.cookie('accessToken', result.accessToken, {
             httpOnly: true,
@@ -171,14 +171,92 @@ export async function getMe(req, res) {
             res.status(404).json({ error: 'Admin not found' });
             return;
         }
+        // Include welcome fields in response
+        const response = {
+            ...admin,
+            welcomeCompleted: admin.welcomeCompleted,
+            userRole: admin.userRole,
+        };
         res.status(200).json({
             success: true,
-            data: admin,
+            data: response,
         });
     }
     catch (error) {
         console.error('Get admin error:', error);
         res.status(500).json({ error: 'Failed to fetch admin' });
+    }
+}
+/**
+ * POST /api/auth/logout
+ */
+export async function logout(req, res) {
+    try {
+        // ✅ SECURITY: Determine cookie domain based on environment
+        const cookieDomain = process.env.NODE_ENV === 'production' ? '.koinoniasms.com' : undefined;
+        // Clear httpOnly cookies by setting maxAge to 0
+        res.clearCookie('accessToken', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'none',
+            domain: cookieDomain,
+        });
+        res.clearCookie('refreshToken', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'none',
+            domain: cookieDomain,
+        });
+        res.status(200).json({ success: true });
+    }
+    catch (error) {
+        console.error('Logout error:', error);
+        res.status(500).json({ error: 'Logout failed' });
+    }
+}
+/**
+ * POST /api/auth/complete-welcome
+ * Mark user's welcome modal as completed and store their role
+ */
+export async function completeWelcome(req, res) {
+    try {
+        if (!req.user) {
+            res.status(401).json({ error: 'Not authenticated' });
+            return;
+        }
+        const { userRole } = req.body;
+        // Validate role
+        const validRoles = ['pastor', 'admin', 'communications', 'volunteer', 'other'];
+        if (!userRole || !validRoles.includes(userRole)) {
+            res.status(400).json({ error: 'Invalid user role' });
+            return;
+        }
+        // Update admin record
+        const { PrismaClient } = await import('@prisma/client');
+        const prisma = new PrismaClient();
+        const updatedAdmin = await prisma.admin.update({
+            where: { id: req.user.adminId },
+            data: {
+                welcomeCompleted: true,
+                userRole: userRole,
+            },
+        });
+        res.status(200).json({
+            success: true,
+            data: {
+                id: updatedAdmin.id,
+                email: updatedAdmin.email,
+                firstName: updatedAdmin.firstName,
+                lastName: updatedAdmin.lastName,
+                role: updatedAdmin.role,
+                welcomeCompleted: updatedAdmin.welcomeCompleted,
+                userRole: updatedAdmin.userRole,
+            },
+        });
+    }
+    catch (error) {
+        console.error('Complete welcome error:', error);
+        res.status(500).json({ error: 'Failed to complete welcome' });
     }
 }
 //# sourceMappingURL=auth.controller.js.map

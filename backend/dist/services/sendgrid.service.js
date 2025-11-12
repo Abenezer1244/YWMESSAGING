@@ -17,7 +17,7 @@ export async function sendEmail(options) {
     try {
         const msg = {
             to: options.to,
-            from: process.env.SENDGRID_FROM_EMAIL || 'noreply@connect-yw.com',
+            from: process.env.SENDGRID_FROM_EMAIL || 'noreply@koinoniasms.com',
             subject: options.subject,
             ...(options.templateId && {
                 templateId: options.templateId,

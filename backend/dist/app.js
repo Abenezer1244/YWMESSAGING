@@ -13,8 +13,10 @@ import templateRoutes from './routes/template.routes.js';
 import recurringRoutes from './routes/recurring.routes.js';
 import analyticsRoutes from './routes/analytics.routes.js';
 import billingRoutes from './routes/billing.routes.js';
+import numbersRoutes from './routes/numbers.routes.js';
 import webhookRoutes from './routes/webhook.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import chatRoutes from './routes/chat.routes.js';
 const app = express();
 // Trust proxy - required for rate limiting and IP detection on Render
 app.set('trust proxy', 1);
@@ -133,8 +135,26 @@ app.use(helmet({
     noSniff: true, // Prevent MIME-sniffing
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 }));
+// CORS configuration - allow development, staging, and production URLs
+const corsOrigin = [
+    // Development
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:5175',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:5173',
+    // Production
+    'https://koinoniasms.com',
+    'https://www.koinoniasms.com',
+    // Render deployments
+    'https://connect-yw-frontend.onrender.com',
+    'https://connect-yw-backend.onrender.com',
+    // Environment-based (fallback)
+    process.env.FRONTEND_URL || 'https://koinoniasms.com'
+];
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: corsOrigin,
     credentials: true,
 }));
 // Raw body parser for Stripe webhook (SECURITY: required for signature validation)
@@ -162,10 +182,13 @@ app.use('/api/messages', apiLimiter, messageRoutes);
 app.use('/api/templates', apiLimiter, templateRoutes);
 app.use('/api/recurring', apiLimiter, recurringRoutes);
 app.use('/api/analytics', apiLimiter, analyticsRoutes);
+app.use('/api/numbers', apiLimiter, numbersRoutes);
 // Apply strict rate limiting to billing endpoints (payment security)
 app.use('/api/billing', billingLimiter, billingRoutes);
 // Apply moderate rate limiting to admin endpoints
 app.use('/api/admin', apiLimiter, adminRoutes);
+// Chat routes - public and protected
+app.use('/api/chat', apiLimiter, chatRoutes);
 // 404 handler
 app.use((req, res) => {
     res.status(404).json({

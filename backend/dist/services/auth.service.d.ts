@@ -49,6 +49,8 @@ export declare function getAdmin(adminId: string): Promise<{
     firstName: string;
     lastName: string;
     role: string;
+    welcomeCompleted: boolean;
+    userRole: string | null;
     church: {
         id: string;
         name: string;

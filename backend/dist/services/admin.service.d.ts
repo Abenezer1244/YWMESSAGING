@@ -11,10 +11,10 @@ export declare function updateChurchProfile(churchId: string, input: UpdateChurc
     name: string;
     email: string;
     stripeCustomerId: string | null;
-    twilioAccountSid: string | null;
-    twilioAuthToken: string | null;
-    twilioPhoneNumber: string | null;
-    twilioVerified: boolean;
+    telnyxPhoneNumber: string | null;
+    telnyxNumberSid: string | null;
+    telnyxVerified: boolean;
+    telnyxPurchasedAt: Date | null;
     trialEndsAt: Date;
     subscriptionStatus: string;
     createdAt: Date;

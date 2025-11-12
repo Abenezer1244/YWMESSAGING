@@ -35,8 +35,9 @@ export async function searchNumbers(req: Request, res: Response) {
     // Check if Telnyx is configured
     const apiKeyValid = await validateTelnyxApiKey();
     if (!apiKeyValid) {
-      console.error('Telnyx API validation failed - API key not valid or not configured');
-      return res.status(500).json({ error: 'Telnyx API not configured or invalid' });
+      const errorMsg = 'Telnyx API not configured or invalid - API key validation failed';
+      console.error(errorMsg);
+      return res.status(500).json({ error: errorMsg });
     }
 
     const { areaCode, state, contains, quantity } = req.query;
@@ -51,9 +52,14 @@ export async function searchNumbers(req: Request, res: Response) {
 
     console.log(`Found ${numbers.length} available phone numbers`);
     res.json({ success: true, data: numbers });
-  } catch (error) {
-    console.error('Failed to search numbers:', error);
-    res.status(500).json({ error: (error as any).message || 'Failed to search numbers' });
+  } catch (error: any) {
+    const errorMessage = error?.message || 'Failed to search numbers';
+    console.error('Search numbers error:', {
+      message: errorMessage,
+      stack: error?.stack,
+      status: error?.status,
+    });
+    res.status(500).json({ error: errorMessage });
   }
 }
 

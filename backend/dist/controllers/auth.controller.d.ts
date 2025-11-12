@@ -15,4 +15,13 @@ export declare function refreshToken(req: Request, res: Response): Promise<void>
  * GET /api/auth/me
  */
 export declare function getMe(req: Request, res: Response): Promise<void>;
+/**
+ * POST /api/auth/logout
+ */
+export declare function logout(req: Request, res: Response): Promise<void>;
+/**
+ * POST /api/auth/complete-welcome
+ * Mark user's welcome modal as completed and store their role
+ */
+export declare function completeWelcome(req: Request, res: Response): Promise<void>;
 //# sourceMappingURL=auth.controller.d.ts.map

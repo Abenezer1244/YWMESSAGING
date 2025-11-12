@@ -1,10 +1,5 @@
 import { Request, Response } from 'express';
 /**
- * POST /api/churches/:churchId/twilio/connect
- * Koinonia Twilio credentials
- */
-export declare function connectTwilio(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
-/**
  * POST /api/messages/send
  * Send message to recipients
  */
@@ -21,9 +16,9 @@ export declare function getMessageHistory(req: Request, res: Response): Promise<
  */
 export declare function getMessageDetails(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**
- * POST /api/webhooks/twilio/status
- * Webhook for Twilio delivery status updates
- * SECURITY: Validates Twilio signature using auth token from database
+ * POST /api/webhooks/telnyx/status
+ * Webhook for Telnyx delivery status updates (DLR - Delivery Receipt)
+ * Telnyx sends event-based webhooks without signature validation on HTTPS
  */
-export declare function handleTwilioWebhook(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+export declare function handleTelnyxWebhook(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 //# sourceMappingURL=message.controller.d.ts.map

@@ -1,0 +1,191 @@
+import axios from 'axios';
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
+const TELNYX_BASE_URL = 'https://api.telnyx.com/v2';
+// Function to get API key - reads from environment on every call
+function getTelnyxClient() {
+    const apiKey = process.env.TELNYX_API_KEY;
+    if (!apiKey) {
+        console.warn('TELNYX_API_KEY environment variable is not set');
+    }
+    return axios.create({
+        baseURL: TELNYX_BASE_URL,
+        headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+        },
+    });
+}
+/**
+ * Send SMS via Telnyx
+ */
+export async function sendSMS(to, message, churchId) {
+    // Get church Telnyx credentials
+    const church = await prisma.church.findUnique({
+        where: { id: churchId },
+        select: {
+            telnyxPhoneNumber: true,
+        },
+    });
+    if (!church?.telnyxPhoneNumber) {
+        throw new Error('Telnyx phone number not configured for this church');
+    }
+    try {
+        const client = getTelnyxClient();
+        const response = await client.post('/messages', {
+            from: church.telnyxPhoneNumber,
+            to: to,
+            text: message,
+            type: 'SMS',
+            webhook_url: `${process.env.BACKEND_URL || 'https://api.koinoniasms.com'}/api/webhooks/telnyx/status`,
+            webhook_failover_url: `${process.env.BACKEND_URL || 'https://api.koinoniasms.com'}/api/webhooks/telnyx/status`,
+        });
+        const messageId = response.data?.data?.id;
+        if (!messageId) {
+            throw new Error('No message ID returned from Telnyx');
+        }
+        return {
+            messageSid: messageId,
+            success: true,
+        };
+    }
+    catch (error) {
+        const errorMessage = error.response?.data?.errors?.[0]?.detail || error.message || 'Failed to send SMS';
+        throw new Error(`Telnyx error: ${errorMessage}`);
+    }
+}
+/**
+ * Validate Telnyx API key
+ */
+export async function validateTelnyxApiKey() {
+    try {
+        const apiKey = process.env.TELNYX_API_KEY;
+        if (!apiKey) {
+            console.error('TELNYX_API_KEY is not set in environment variables');
+            return false;
+        }
+        // Try to fetch account details
+        const client = getTelnyxClient();
+        const response = await client.get('/account');
+        return response.status === 200;
+    }
+    catch (error) {
+        console.error('Telnyx API validation failed:', {
+            status: error.response?.status,
+            statusText: error.response?.statusText,
+            data: error.response?.data,
+            message: error.message,
+        });
+        return false;
+    }
+}
+/**
+ * Search for available phone numbers
+ * Options: areaCode, state, rateCenter, quantity, features
+ */
+export async function searchAvailableNumbers(options) {
+    try {
+        const params = {
+            filter: {
+                national_destination_code: options.areaCode,
+                administrative_area: options.state,
+                contains: options.contains,
+            },
+            limit: options.quantity || 10,
+        };
+        // Remove undefined filters
+        Object.keys(params.filter).forEach(key => params.filter[key] === undefined && delete params.filter[key]);
+        const client = getTelnyxClient();
+        const response = await client.get('/available_phone_numbers', {
+            params,
+        });
+        const numbers = response.data?.data || [];
+        return numbers.map((num) => ({
+            id: num.id,
+            phoneNumber: num.phone_number,
+            formattedNumber: num.formatted_number,
+            costPerMinute: num.cost_information?.origination_minute_cost || 0,
+            costPerSms: num.cost_information?.sms_cost || 0,
+            region: `${num.administrative_area}, ${num.country_code}`,
+            capabilities: num.capabilities || [],
+        }));
+    }
+    catch (error) {
+        const errorMessage = error.response?.data?.errors?.[0]?.detail || error.message || 'Failed to search numbers';
+        throw new Error(`Telnyx search error: ${errorMessage}`);
+    }
+}
+/**
+ * Purchase a phone number
+ */
+export async function purchasePhoneNumber(phoneNumber, churchId, connectionId) {
+    try {
+        const client = getTelnyxClient();
+        const response = await client.post('/phone_numbers', {
+            phone_number: phoneNumber,
+            connection_id: connectionId,
+            customer_reference: `church_${churchId}`,
+        });
+        const data = response.data?.data;
+        if (!data?.id) {
+            throw new Error('No phone number ID returned from Telnyx');
+        }
+        // Save to database
+        await prisma.church.update({
+            where: { id: churchId },
+            data: {
+                telnyxPhoneNumber: phoneNumber,
+                telnyxNumberSid: data.id,
+                telnyxVerified: true,
+                telnyxPurchasedAt: new Date(),
+            },
+        });
+        return {
+            numberSid: data.id,
+            phoneNumber: data.phone_number,
+            success: true,
+        };
+    }
+    catch (error) {
+        const errorMessage = error.response?.data?.errors?.[0]?.detail || error.message || 'Failed to purchase number';
+        throw new Error(`Telnyx purchase error: ${errorMessage}`);
+    }
+}
+/**
+ * Get details about a phone number owned by the account
+ */
+export async function getPhoneNumberDetails(numberSid) {
+    try {
+        const client = getTelnyxClient();
+        const response = await client.get(`/phone_numbers/${numberSid}`);
+        return response.data?.data;
+    }
+    catch (error) {
+        const errorMessage = error.response?.data?.errors?.[0]?.detail || error.message || 'Failed to get number details';
+        throw new Error(`Telnyx error: ${errorMessage}`);
+    }
+}
+/**
+ * Release/delete a phone number
+ */
+export async function releasePhoneNumber(numberSid, churchId) {
+    try {
+        const client = getTelnyxClient();
+        await client.delete(`/phone_numbers/${numberSid}`);
+        // Clear from database
+        await prisma.church.update({
+            where: { id: churchId },
+            data: {
+                telnyxPhoneNumber: null,
+                telnyxNumberSid: null,
+                telnyxVerified: false,
+            },
+        });
+        return true;
+    }
+    catch (error) {
+        const errorMessage = error.response?.data?.errors?.[0]?.detail || error.message || 'Failed to release number';
+        throw new Error(`Telnyx error: ${errorMessage}`);
+    }
+}
+//# sourceMappingURL=telnyx.service.js.map
