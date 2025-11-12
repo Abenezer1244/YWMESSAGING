@@ -42,6 +42,8 @@ export default function PhoneNumberPurchaseModal({
   const [selectedNumber, setSelectedNumber] = useState<PhoneNumber | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'declined' | 'failed'>('idle');
+  const [paymentMessage, setPaymentMessage] = useState('');
 
   const handleSearch = async () => {
     if (!areaCode && !state) {
@@ -103,6 +105,9 @@ export default function PhoneNumberPurchaseModal({
     if (!selectedNumber || !paymentIntentId) return;
 
     setIsLoading(true);
+    setPaymentStatus('processing');
+    setPaymentMessage('');
+
     try {
       // Confirm payment with Stripe
       const paymentConfirm = await confirmPayment(
@@ -111,30 +116,46 @@ export default function PhoneNumberPurchaseModal({
       );
 
       if (!paymentConfirm.success || paymentConfirm.data?.status !== 'succeeded') {
-        throw new Error('Payment confirmation failed');
+        // Payment was declined or failed
+        setPaymentStatus('failed');
+        setPaymentMessage('Payment confirmation failed. Please try again.');
+        setIsLoading(false);
+        return;
       }
 
-      // Complete the purchase with verified payment
+      // Payment succeeded - now purchase the number
       const result = await purchaseNumber(
         selectedNumber.phoneNumber,
         paymentIntentId
       );
 
       if (result.success) {
-        toast.success(`Successfully purchased ${selectedNumber.formattedNumber}!`);
+        setPaymentStatus('success');
+        setPaymentMessage('');
 
-        if (onPurchaseComplete) {
-          onPurchaseComplete(selectedNumber.phoneNumber);
-        }
+        // Wait a moment to show success before closing
+        setTimeout(() => {
+          toast.success(`Successfully purchased ${selectedNumber.formattedNumber}!`);
 
-        // Reset form
-        resetForm();
-        onClose();
+          if (onPurchaseComplete) {
+            onPurchaseComplete(selectedNumber.phoneNumber);
+          }
+
+          // Reset form
+          resetForm();
+          onClose();
+        }, 1500);
       }
     } catch (error: any) {
       console.error('Purchase failed:', error);
-      toast.error(error.message || 'Failed to purchase number');
-    } finally {
+
+      // Determine if it's a decline or generic failure
+      const errorMsg = error.message || 'Failed to process payment';
+      const isDecline = errorMsg.toLowerCase().includes('declined') ||
+                       errorMsg.toLowerCase().includes('insufficient');
+
+      setPaymentStatus(isDecline ? 'declined' : 'failed');
+      setPaymentMessage(errorMsg);
       setIsLoading(false);
     }
   };
@@ -146,6 +167,8 @@ export default function PhoneNumberPurchaseModal({
     setSearchResults([]);
     setSelectedNumber(null);
     setPaymentIntentId(null);
+    setPaymentStatus('idle');
+    setPaymentMessage('');
   };
 
   const containerVariants = {
@@ -402,6 +425,8 @@ export default function PhoneNumberPurchaseModal({
                         paymentIntentId={paymentIntentId}
                         onSuccess={handlePaymentSuccess}
                         isLoading={isLoading}
+                        paymentStatus={paymentStatus}
+                        paymentMessage={paymentMessage}
                       />
                     </Elements>
 
@@ -409,7 +434,11 @@ export default function PhoneNumberPurchaseModal({
                       variant="secondary"
                       fullWidth
                       size="sm"
-                      onClick={() => setStep('confirm')}
+                      onClick={() => {
+                        setStep('confirm');
+                        setPaymentStatus('idle');
+                        setPaymentMessage('');
+                      }}
                       disabled={isLoading}
                     >
                       Back

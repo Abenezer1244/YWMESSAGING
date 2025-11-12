@@ -11,6 +11,8 @@ interface StripePaymentFormProps {
   onSuccess: (paymentMethodId: string) => void;
   onError?: (error: string) => void;
   isLoading?: boolean;
+  paymentStatus?: 'idle' | 'processing' | 'success' | 'declined' | 'failed';
+  paymentMessage?: string;
 }
 
 const cardElementOptions: StripeCardElementOptions = {
@@ -36,6 +38,8 @@ export default function StripePaymentForm({
   onSuccess,
   onError,
   isLoading = false,
+  paymentStatus = 'idle',
+  paymentMessage = '',
 }: StripePaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
@@ -109,6 +113,25 @@ export default function StripePaymentForm({
           </div>
         </div>
       </div>
+
+      {/* Payment Status Message */}
+      {paymentStatus !== 'idle' && (
+        <div
+          className={`p-4 rounded-lg border text-center ${
+            paymentStatus === 'success'
+              ? 'bg-green-500/10 border-green-500/20 text-green-700'
+              : paymentStatus === 'declined' || paymentStatus === 'failed'
+              ? 'bg-red-500/10 border-red-500/20 text-red-700'
+              : 'bg-blue-500/10 border-blue-500/20 text-blue-700'
+          }`}
+        >
+          {paymentStatus === 'success' && '✓ Payment Successful'}
+          {paymentStatus === 'declined' && '✗ Card Declined'}
+          {paymentStatus === 'failed' && '✗ Payment Failed'}
+          {paymentStatus === 'processing' && '⏳ Processing...'}
+          {paymentMessage && <div className="text-sm mt-1">{paymentMessage}</div>}
+        </div>
+      )}
 
       <div className="text-xs text-muted-foreground bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
         🔒 Payment is processed securely by Stripe. Your card details are encrypted and never stored on our servers.

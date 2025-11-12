@@ -30,6 +30,8 @@ export default function PhoneNumberPurchaseModal({ isOpen, onClose, onPurchaseCo
     const [selectedNumber, setSelectedNumber] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [paymentIntentId, setPaymentIntentId] = useState(null);
+    const [paymentStatus, setPaymentStatus] = useState('idle');
+    const [paymentMessage, setPaymentMessage] = useState('');
     const handleSearch = async () => {
         if (!areaCode && !state) {
             toast.error('Please enter an area code or select a state');
@@ -88,29 +90,43 @@ export default function PhoneNumberPurchaseModal({ isOpen, onClose, onPurchaseCo
         if (!selectedNumber || !paymentIntentId)
             return;
         setIsLoading(true);
+        setPaymentStatus('processing');
+        setPaymentMessage('');
         try {
             // Confirm payment with Stripe
             const paymentConfirm = await confirmPayment(paymentIntentId, paymentMethodId);
             if (!paymentConfirm.success || paymentConfirm.data?.status !== 'succeeded') {
-                throw new Error('Payment confirmation failed');
+                // Payment was declined or failed
+                setPaymentStatus('failed');
+                setPaymentMessage('Payment confirmation failed. Please try again.');
+                setIsLoading(false);
+                return;
             }
-            // Complete the purchase with verified payment
+            // Payment succeeded - now purchase the number
             const result = await purchaseNumber(selectedNumber.phoneNumber, paymentIntentId);
             if (result.success) {
-                toast.success(`Successfully purchased ${selectedNumber.formattedNumber}!`);
-                if (onPurchaseComplete) {
-                    onPurchaseComplete(selectedNumber.phoneNumber);
-                }
-                // Reset form
-                resetForm();
-                onClose();
+                setPaymentStatus('success');
+                setPaymentMessage('');
+                // Wait a moment to show success before closing
+                setTimeout(() => {
+                    toast.success(`Successfully purchased ${selectedNumber.formattedNumber}!`);
+                    if (onPurchaseComplete) {
+                        onPurchaseComplete(selectedNumber.phoneNumber);
+                    }
+                    // Reset form
+                    resetForm();
+                    onClose();
+                }, 1500);
             }
         }
         catch (error) {
             console.error('Purchase failed:', error);
-            toast.error(error.message || 'Failed to purchase number');
-        }
-        finally {
+            // Determine if it's a decline or generic failure
+            const errorMsg = error.message || 'Failed to process payment';
+            const isDecline = errorMsg.toLowerCase().includes('declined') ||
+                errorMsg.toLowerCase().includes('insufficient');
+            setPaymentStatus(isDecline ? 'declined' : 'failed');
+            setPaymentMessage(errorMsg);
             setIsLoading(false);
         }
     };
@@ -121,6 +137,8 @@ export default function PhoneNumberPurchaseModal({ isOpen, onClose, onPurchaseCo
         setSearchResults([]);
         setSelectedNumber(null);
         setPaymentIntentId(null);
+        setPaymentStatus('idle');
+        setPaymentMessage('');
     };
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -152,6 +170,10 @@ export default function PhoneNumberPurchaseModal({ isOpen, onClose, onPurchaseCo
                                             }, className: "mt-4", children: "Back to Search" })] })), step === 'confirm' && selectedNumber && (_jsxs(motion.div, { variants: itemVariants, className: "space-y-4", children: [_jsx("div", { className: "bg-primary/10 border border-primary/20 rounded-lg p-4", children: _jsxs("div", { className: "text-center", children: [_jsx(Phone, { className: "w-8 h-8 text-primary mx-auto mb-3" }), _jsx("div", { className: "text-2xl font-bold text-foreground mb-1", children: selectedNumber.formattedNumber }), _jsx("div", { className: "text-sm text-muted-foreground", children: selectedNumber.region })] }) }), _jsxs("div", { className: "space-y-2 bg-muted/30 rounded-lg p-4", children: [_jsxs("div", { className: "flex justify-between text-sm", children: [_jsx("span", { className: "text-muted-foreground", children: "Per SMS:" }), _jsxs("span", { className: "font-medium text-foreground", children: ["$", selectedNumber.costPerSms.toFixed(4)] })] }), _jsxs("div", { className: "flex justify-between text-sm", children: [_jsx("span", { className: "text-muted-foreground", children: "Per minute:" }), _jsxs("span", { className: "font-medium text-foreground", children: ["$", selectedNumber.costPerMinute.toFixed(4)] })] }), _jsxs("div", { className: "border-t border-border/30 pt-2 mt-2 flex justify-between font-semibold", children: [_jsx("span", { className: "text-foreground", children: "One-time setup:" }), _jsx("span", { className: "text-primary", children: "$4.99" })] })] }), _jsx("div", { className: "text-xs text-muted-foreground bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3", children: "By purchasing, you agree to Telnyx's terms and will be charged the one-time setup fee. Usage charges apply separately." }), _jsxs("div", { className: "space-y-2", children: [_jsx(Button, { variant: "primary", fullWidth: true, size: "lg", onClick: handleConfirmSelection, disabled: isLoading, isLoading: isLoading, className: "bg-primary hover:bg-primary/90 text-background font-medium", children: isLoading ? 'Processing...' : 'Continue to Payment' }), _jsx(Button, { variant: "secondary", fullWidth: true, size: "sm", onClick: () => {
                                                         setStep('select');
                                                         setSelectedNumber(null);
-                                                    }, disabled: isLoading, children: "Choose Different Number" })] })] })), step === 'payment' && selectedNumber && paymentIntentId && (_jsxs(motion.div, { variants: itemVariants, className: "space-y-4", children: [_jsx(Elements, { stripe: stripePromise, children: _jsx(StripePaymentForm, { amount: 499, phoneNumber: selectedNumber.phoneNumber, paymentIntentId: paymentIntentId, onSuccess: handlePaymentSuccess, isLoading: isLoading }) }), _jsx(Button, { variant: "secondary", fullWidth: true, size: "sm", onClick: () => setStep('confirm'), disabled: isLoading, children: "Back" })] }))] }) })] }) })) }));
+                                                    }, disabled: isLoading, children: "Choose Different Number" })] })] })), step === 'payment' && selectedNumber && paymentIntentId && (_jsxs(motion.div, { variants: itemVariants, className: "space-y-4", children: [_jsx(Elements, { stripe: stripePromise, children: _jsx(StripePaymentForm, { amount: 499, phoneNumber: selectedNumber.phoneNumber, paymentIntentId: paymentIntentId, onSuccess: handlePaymentSuccess, isLoading: isLoading, paymentStatus: paymentStatus, paymentMessage: paymentMessage }) }), _jsx(Button, { variant: "secondary", fullWidth: true, size: "sm", onClick: () => {
+                                                setStep('confirm');
+                                                setPaymentStatus('idle');
+                                                setPaymentMessage('');
+                                            }, disabled: isLoading, children: "Back" })] }))] }) })] }) })) }));
 }
 //# sourceMappingURL=PhoneNumberPurchaseModal.js.map
