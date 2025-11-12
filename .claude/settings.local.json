@@ -96,7 +96,8 @@
       "Bash(/tmp/landing.html)",
       "Bash(npx playwright install)",
       "Bash(mcp__playwright__browser_navigate \"http://localhost:5173/register\")",
-      "Bash(npx playwright install:*)"
+      "Bash(npx playwright install:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []

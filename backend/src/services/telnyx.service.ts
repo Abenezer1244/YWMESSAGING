@@ -2,18 +2,22 @@ import axios from 'axios';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-
-const TELNYX_API_KEY = process.env.TELNYX_API_KEY;
 const TELNYX_BASE_URL = 'https://api.telnyx.com/v2';
 
-// Create Telnyx API client with authentication
-const telnyxClient = axios.create({
-  baseURL: TELNYX_BASE_URL,
-  headers: {
-    Authorization: `Bearer ${TELNYX_API_KEY}`,
-    'Content-Type': 'application/json',
-  },
-});
+// Function to get API key - reads from environment on every call
+function getTelnyxClient() {
+  const apiKey = process.env.TELNYX_API_KEY;
+  if (!apiKey) {
+    console.warn('TELNYX_API_KEY environment variable is not set');
+  }
+  return axios.create({
+    baseURL: TELNYX_BASE_URL,
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+  });
+}
 
 /**
  * Interface for Telnyx phone number search response
@@ -58,7 +62,8 @@ export async function sendSMS(
   }
 
   try {
-    const response = await telnyxClient.post('/messages', {
+    const client = getTelnyxClient();
+    const response = await client.post('/messages', {
       from: church.telnyxPhoneNumber,
       to: to,
       text: message,
@@ -87,13 +92,22 @@ export async function sendSMS(
  */
 export async function validateTelnyxApiKey(): Promise<boolean> {
   try {
-    if (!TELNYX_API_KEY) {
+    const apiKey = process.env.TELNYX_API_KEY;
+    if (!apiKey) {
+      console.error('TELNYX_API_KEY is not set in environment variables');
       return false;
     }
     // Try to fetch account details
-    const response = await telnyxClient.get('/account');
+    const client = getTelnyxClient();
+    const response = await client.get('/account');
     return response.status === 200;
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Telnyx API validation failed:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message,
+    });
     return false;
   }
 }
@@ -123,7 +137,8 @@ export async function searchAvailableNumbers(options: {
       key => params.filter[key] === undefined && delete params.filter[key]
     );
 
-    const response = await telnyxClient.get('/available_phone_numbers', {
+    const client = getTelnyxClient();
+    const response = await client.get('/available_phone_numbers', {
       params,
     });
 
@@ -153,7 +168,8 @@ export async function purchasePhoneNumber(
   connectionId?: string
 ): Promise<{ numberSid: string; phoneNumber: string; success: boolean }> {
   try {
-    const response = await telnyxClient.post('/phone_numbers', {
+    const client = getTelnyxClient();
+    const response = await client.post('/phone_numbers', {
       phone_number: phoneNumber,
       connection_id: connectionId,
       customer_reference: `church_${churchId}`,
@@ -191,7 +207,8 @@ export async function purchasePhoneNumber(
  */
 export async function getPhoneNumberDetails(numberSid: string): Promise<any> {
   try {
-    const response = await telnyxClient.get(`/phone_numbers/${numberSid}`);
+    const client = getTelnyxClient();
+    const response = await client.get(`/phone_numbers/${numberSid}`);
     return response.data?.data;
   } catch (error: any) {
     const errorMessage = error.response?.data?.errors?.[0]?.detail || error.message || 'Failed to get number details';
@@ -204,7 +221,8 @@ export async function getPhoneNumberDetails(numberSid: string): Promise<any> {
  */
 export async function releasePhoneNumber(numberSid: string, churchId: string): Promise<boolean> {
   try {
-    await telnyxClient.delete(`/phone_numbers/${numberSid}`);
+    const client = getTelnyxClient();
+    await client.delete(`/phone_numbers/${numberSid}`);
 
     // Clear from database
     await prisma.church.update({
