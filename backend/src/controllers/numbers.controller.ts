@@ -180,8 +180,36 @@ export async function confirmPayment(req: Request, res: Response) {
       });
     }
 
+    // Payment failed - extract detailed error message from Stripe
+    const paymentError = (confirmedIntent as any).last_payment_error;
+    let userFriendlyError = 'Payment failed. Please try again.';
+
+    if (paymentError) {
+      // Map Stripe error codes to user-friendly messages
+      const errorMessages: Record<string, string> = {
+        'card_declined': 'Your card was declined. Please try another card.',
+        'insufficient_funds': 'Your card has insufficient funds.',
+        'lost_card': 'Your card has been reported as lost.',
+        'stolen_card': 'Your card has been reported as stolen.',
+        'expired_card': 'Your card has expired.',
+        'incorrect_cvc': 'The CVC code is incorrect.',
+        'processing_error': 'An error occurred while processing your payment. Please try again.',
+        'rate_limit': 'Too many attempts. Please wait before trying again.',
+        'authentication_error': 'Authentication failed. Please try again.',
+        'invalid_amount': 'Invalid payment amount.',
+      };
+
+      userFriendlyError = errorMessages[paymentError.code] || paymentError.message || userFriendlyError;
+
+      console.error(`❌ Payment failed for church ${churchId}:`, {
+        code: paymentError.code,
+        message: paymentError.message,
+        type: paymentError.type,
+      });
+    }
+
     return res.status(402).json({
-      error: `Payment failed with status: ${confirmedIntent.status}`,
+      error: userFriendlyError,
     });
   } catch (error: any) {
     console.error('Payment confirmation failed:', {
@@ -189,24 +217,42 @@ export async function confirmPayment(req: Request, res: Response) {
       type: error?.type,
       code: error?.code,
       raw_type: error?.raw?.type,
+      charge_error: error?.raw?.charge?.outcome?.reason,
     });
 
-    // Handle specific Stripe errors
+    // Map Stripe error codes to user-friendly messages
+    const errorMessages: Record<string, string> = {
+      'card_declined': 'Your card was declined. Please try another card.',
+      'insufficient_funds': 'Your card has insufficient funds.',
+      'lost_card': 'Your card has been reported as lost.',
+      'stolen_card': 'Your card has been reported as stolen.',
+      'expired_card': 'Your card has expired.',
+      'incorrect_cvc': 'The CVC code is incorrect.',
+      'processing_error': 'An error occurred while processing your payment. Please try again.',
+      'rate_limit': 'Too many attempts. Please wait before trying again.',
+      'authentication_error': 'Authentication failed. Please try again.',
+    };
+
+    // Handle Stripe card errors
     if (error.type === 'StripeCardError' || error.raw?.type === 'card_error') {
+      const errorCode = error.code || error.raw?.code;
+      const userMessage = errorMessages[errorCode] || error.message || error.raw?.message || 'Card declined';
       return res.status(402).json({
-        error: error.message || error.raw?.message || 'Card declined',
+        error: userMessage,
       });
     }
 
-    // Handle invalid request errors
+    // Handle Stripe invalid request errors
     if (error.type === 'StripeInvalidRequestError' || error.raw?.type === 'invalid_request_error') {
       return res.status(400).json({
-        error: error.raw?.message || 'Invalid payment details',
+        error: error.raw?.message || 'Invalid payment details. Please check your information.',
       });
     }
 
+    // Handle generic errors with fallback message
+    const userMessage = error.message || 'Payment processing failed. Please try again.';
     res.status(500).json({
-      error: error.message || 'Payment confirmation failed',
+      error: userMessage,
     });
   }
 }
