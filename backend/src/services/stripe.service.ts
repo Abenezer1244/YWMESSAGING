@@ -110,3 +110,65 @@ export async function getCustomer(customerId: string): Promise<Stripe.Customer |
     return null;
   }
 }
+
+/**
+ * Create a payment intent for one-time charges (e.g., phone number setup fee)
+ * $4.99 charged to customer, $1 goes to Telnyx
+ */
+export async function createPhoneNumberSetupPaymentIntent(
+  customerId: string,
+  phoneNumber: string
+): Promise<{ clientSecret: string; paymentIntentId: string }> {
+  try {
+    const amountInCents = 499; // $4.99 in cents
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amountInCents,
+      currency: 'usd',
+      customer: customerId,
+      description: `Phone number setup fee for ${phoneNumber}`,
+      metadata: {
+        phoneNumber,
+        type: 'phone_number_setup',
+        telnyxFee: 100, // $1.00 goes to Telnyx
+      },
+    });
+
+    console.log(`✅ Payment intent created: ${paymentIntent.id}`);
+    return {
+      clientSecret: paymentIntent.client_secret || '',
+      paymentIntentId: paymentIntent.id,
+    };
+  } catch (error) {
+    console.error('❌ Failed to create payment intent:', error);
+    throw error;
+  }
+}
+
+/**
+ * Confirm a payment intent (for one-time charges)
+ */
+export async function confirmPaymentIntent(
+  paymentIntentId: string,
+  paymentMethodId: string
+): Promise<boolean> {
+  try {
+    const paymentIntent = await stripe.paymentIntents.confirm(paymentIntentId, {
+      payment_method: paymentMethodId,
+    });
+
+    if (paymentIntent.status === 'succeeded') {
+      console.log(`✅ Payment succeeded: ${paymentIntentId}`);
+      return true;
+    } else if (paymentIntent.status === 'requires_action') {
+      console.log(`⚠️ Payment requires additional action: ${paymentIntentId}`);
+      return false;
+    }
+
+    console.log(`❌ Payment failed with status: ${paymentIntent.status}`);
+    return false;
+  } catch (error) {
+    console.error('❌ Failed to confirm payment intent:', error);
+    throw error;
+  }
+}

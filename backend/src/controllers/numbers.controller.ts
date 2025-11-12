@@ -8,6 +8,10 @@ import {
   getPhoneNumberDetails,
   validateTelnyxApiKey,
 } from '../services/telnyx.service.js';
+import {
+  createPhoneNumberSetupPaymentIntent,
+  confirmPaymentIntent,
+} from '../services/stripe.service.js';
 
 const prisma = new PrismaClient();
 
@@ -64,9 +68,57 @@ export async function searchNumbers(req: Request, res: Response) {
 }
 
 /**
+ * POST /api/numbers/setup-payment-intent
+ * Create a payment intent for phone number setup fee
+ * Body: { phoneNumber }
+ */
+export async function setupPaymentIntent(req: Request, res: Response) {
+  try {
+    const churchId = req.user?.churchId;
+    if (!churchId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { phoneNumber } = req.body;
+
+    if (!phoneNumber || typeof phoneNumber !== 'string') {
+      return res.status(400).json({ error: 'Phone number is required' });
+    }
+
+    // Get church with Stripe customer ID
+    const church = await prisma.church.findUnique({
+      where: { id: churchId },
+      select: { stripeCustomerId: true, telnyxPhoneNumber: true },
+    });
+
+    if (!church) {
+      return res.status(404).json({ error: 'Church not found' });
+    }
+
+    if (church.telnyxPhoneNumber) {
+      return res.status(400).json({ error: 'Church already has a phone number' });
+    }
+
+    if (!church.stripeCustomerId) {
+      return res.status(400).json({ error: 'Stripe customer not configured' });
+    }
+
+    const paymentIntent = await createPhoneNumberSetupPaymentIntent(
+      church.stripeCustomerId,
+      phoneNumber
+    );
+
+    res.json({ success: true, data: paymentIntent });
+  } catch (error: any) {
+    console.error('Failed to create payment intent:', error);
+    res.status(500).json({ error: error.message || 'Failed to create payment intent' });
+  }
+}
+
+/**
  * POST /api/numbers/purchase
- * Purchase a phone number for the church
- * Body: { phoneNumber, connectionId? }
+ * Purchase a phone number for the church (after payment is confirmed)
+ * Body: { phoneNumber, paymentIntentId, connectionId? }
  */
 export async function purchaseNumber(req: Request, res: Response) {
   try {
@@ -75,10 +127,14 @@ export async function purchaseNumber(req: Request, res: Response) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const { phoneNumber, connectionId } = req.body;
+    const { phoneNumber, paymentIntentId, connectionId } = req.body;
 
     if (!phoneNumber || typeof phoneNumber !== 'string') {
       return res.status(400).json({ error: 'Phone number is required' });
+    }
+
+    if (!paymentIntentId || typeof paymentIntentId !== 'string') {
+      return res.status(400).json({ error: 'Payment intent ID is required' });
     }
 
     // Check if church already has a number
@@ -91,6 +147,7 @@ export async function purchaseNumber(req: Request, res: Response) {
       return res.status(400).json({ error: 'Church already has a phone number' });
     }
 
+    // Purchase the phone number with Telnyx
     const result = await purchasePhoneNumber(phoneNumber, churchId, connectionId);
 
     res.json({ success: true, data: result });

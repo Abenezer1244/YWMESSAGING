@@ -2,6 +2,7 @@ import express from 'express';
 import { authenticateToken } from '../middleware/auth.middleware.js';
 import {
   searchNumbers,
+  setupPaymentIntent,
   purchaseNumber,
   getCurrentNumber,
   releaseCurrentNumber,
@@ -25,9 +26,16 @@ router.get('/search', searchNumbers);
 router.get('/current', getCurrentNumber);
 
 /**
+ * Create payment intent for phone number setup fee
+ * POST /api/numbers/setup-payment-intent
+ * Body: { phoneNumber: "+14155552671" }
+ */
+router.post('/setup-payment-intent', setupPaymentIntent);
+
+/**
  * Purchase a phone number
  * POST /api/numbers/purchase
- * Body: { phoneNumber: "+14155552671", connectionId?: "..." }
+ * Body: { phoneNumber: "+14155552671", paymentIntentId: "pi_...", connectionId?: "..." }
  */
 router.post('/purchase', purchaseNumber);
 

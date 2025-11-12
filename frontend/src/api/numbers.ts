@@ -26,6 +26,14 @@ export interface PurchaseResponse {
   };
 }
 
+export interface PaymentIntentResponse {
+  success: boolean;
+  data: {
+    clientSecret: string;
+    paymentIntentId: string;
+  };
+}
+
 /**
  * Search for available phone numbers
  */
@@ -46,11 +54,26 @@ export async function searchAvailableNumbers(options: {
 }
 
 /**
- * Purchase a phone number
+ * Create payment intent for phone number setup fee
  */
-export async function purchaseNumber(phoneNumber: string, connectionId?: string): Promise<PurchaseResponse> {
+export async function setupPaymentIntent(phoneNumber: string): Promise<PaymentIntentResponse> {
+  const response = await client.post('/numbers/setup-payment-intent', {
+    phoneNumber,
+  });
+  return response.data;
+}
+
+/**
+ * Purchase a phone number (after payment confirmed)
+ */
+export async function purchaseNumber(
+  phoneNumber: string,
+  paymentIntentId: string,
+  connectionId?: string
+): Promise<PurchaseResponse> {
   const response = await client.post('/numbers/purchase', {
     phoneNumber,
+    paymentIntentId,
     connectionId,
   });
   return response.data;
