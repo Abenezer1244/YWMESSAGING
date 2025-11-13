@@ -102,8 +102,11 @@ export function SubscribePage() {
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-4xl font-bold text-foreground mb-2">Choose Your Plan</h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mb-1">
             Start with a 14-day free trial. No credit card required.
+          </p>
+          <p className="text-sm text-green-500/80 font-medium">
+            💡 Save 15% with annual billing
           </p>
         </div>
 
@@ -240,7 +243,7 @@ export function SubscribePage() {
         </div>
 
         {/* FAQ / Support */}
-        <Card variant="default" className="mt-16 border border-border bg-muted">
+        <Card variant="default" className="mt-16 border border-border bg-muted p-8">
           <h3 className="text-2xl font-bold text-foreground mb-6">
             ❓ Frequently Asked Questions
           </h3>

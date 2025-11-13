@@ -1,2 +1,0 @@
-import{c as a}from"./index-DRsrceaD.js";async function i(){return(await a.get("/billing/plan")).data.data}async function r(){return(await a.get("/billing/trial")).data.data}async function c(n,t){return(await a.post("/billing/subscribe",{planName:n,paymentMethodId:t})).data.data}async function o(){return(await a.delete("/billing/cancel")).data.data}async function l(n){return(await a.post("/billing/payment-intent",{planName:n})).data.data}export{i as a,l as b,o as c,r as g,c as s};
-//# sourceMappingURL=billing-QGzozQP7.js.map
