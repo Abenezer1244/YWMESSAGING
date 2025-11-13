@@ -73,12 +73,22 @@ const PLANS = [
 export function SubscribePage() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annual'>('monthly');
+
+  const ANNUAL_DISCOUNT = 0.15; // 15% discount for annual billing
+
+  const getPrice = (monthlyPrice: number) => {
+    if (billingPeriod === 'annual') {
+      return Math.round(monthlyPrice * 12 * (1 - ANNUAL_DISCOUNT));
+    }
+    return monthlyPrice;
+  };
 
   const handleSubscribe = async (planId: string) => {
     try {
       setIsLoading(true);
       // Navigate to checkout page with plan parameter
-      navigate(`/checkout?plan=${planId}`);
+      navigate(`/checkout?plan=${planId}&billing=${billingPeriod}`);
     } catch (error) {
       toast.error((error as Error).message || 'Failed to start checkout');
     } finally {
@@ -95,6 +105,37 @@ export function SubscribePage() {
           <p className="text-muted-foreground">
             Start with a 14-day free trial. No credit card required.
           </p>
+        </div>
+
+        {/* Billing Period Toggle */}
+        <div className="mb-12 flex items-center justify-center gap-6">
+          <button
+            onClick={() => setBillingPeriod('monthly')}
+            className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
+              billingPeriod === 'monthly'
+                ? 'bg-primary text-background'
+                : 'bg-muted text-foreground border border-border hover:border-primary/50'
+            }`}
+          >
+            Monthly Billing
+          </button>
+          <div className="relative">
+            <button
+              onClick={() => setBillingPeriod('annual')}
+              className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
+                billingPeriod === 'annual'
+                  ? 'bg-primary text-background'
+                  : 'bg-muted text-foreground border border-border hover:border-primary/50'
+              }`}
+            >
+              Annual Billing
+            </button>
+            {billingPeriod === 'annual' && (
+              <div className="absolute -top-3 -right-3 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                Save 15%
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Pricing Cards */}
@@ -138,12 +179,19 @@ export function SubscribePage() {
                 <div className="px-6 pt-6 pb-6 border-b border-border/40">
                   <div className="flex items-baseline gap-2">
                     <span className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/70">
-                      ${plan.price}
+                      ${getPrice(plan.price)}
                     </span>
-                    <span className="text-muted-foreground font-medium">/month</span>
+                    <span className="text-muted-foreground font-medium">
+                      {billingPeriod === 'annual' ? '/year' : '/month'}
+                    </span>
                   </div>
+                  {billingPeriod === 'annual' && (
+                    <p className="text-xs text-green-500 mt-2 font-medium">
+                      Save ${(plan.price * 12 * ANNUAL_DISCOUNT).toFixed(0)}/year
+                    </p>
+                  )}
                   <p className="text-xs text-muted-foreground mt-3">
-                    Billed monthly • Cancel anytime
+                    {billingPeriod === 'annual' ? 'Billed annually' : 'Billed monthly'} • Cancel anytime
                   </p>
                 </div>
 
