@@ -1,2 +1,0 @@
-import{c as a}from"./index-DgNteNlh.js";async function s(){return(await a.get("/billing/plan")).data.data}async function i(){return(await a.get("/billing/trial")).data.data}async function r(){return(await a.delete("/billing/cancel")).data.data}async function c(n){return(await a.post("/billing/payment-intent",{planName:n})).data.data}export{s as a,c as b,r as c,i as g};
-//# sourceMappingURL=billing-WEv_tm6S.js.map

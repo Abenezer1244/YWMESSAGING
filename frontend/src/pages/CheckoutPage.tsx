@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import toast from 'react-hot-toast';
-import { createPaymentIntent } from '../api/billing';
+import { createPaymentIntent, subscribe } from '../api/billing';
 import BackButton from '../components/BackButton';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
@@ -64,8 +64,8 @@ function PaymentForm({ planName, planPrice, onSubmit }: any) {
         }
       } else if (paymentIntent?.status === 'succeeded') {
         toast.success('Payment successful!');
-        // Handle successful payment
-        onSubmit();
+        // Call onSubmit which will handle subscribing and redirecting
+        onSubmit(paymentIntent.id);
       }
     } catch (err) {
       // Generic error message without exposing details
@@ -200,7 +200,7 @@ export function CheckoutPage() {
   const planPrices: Record<string, { name: string; price: number }> = {
     starter: { name: 'Starter Plan', price: 49 },
     growth: { name: 'Growth Plan', price: 79 },
-    pro: { name: 'Pro Plan', price: 99 },
+    pro: { name: 'Pro Plan', price: 129 },
   };
 
   useEffect(() => {
@@ -211,8 +211,18 @@ export function CheckoutPage() {
     }
   }, [planName, navigate]);
 
-  const handlePaymentSuccess = () => {
-    navigate('/billing');
+  const handlePaymentSuccess = async (paymentIntentId: string) => {
+    if (!planName) return;
+
+    try {
+      // Subscribe to the plan after payment succeeds
+      const result = await subscribe(planName as any);
+      toast.success(`Successfully subscribed to ${planName} plan!`);
+      navigate('/billing');
+    } catch (error) {
+      console.error('Failed to subscribe:', error);
+      toast.error('Payment succeeded but subscription update failed. Please contact support.');
+    }
   };
 
   if (!planName) {

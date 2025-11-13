@@ -1,5 +1,8 @@
 import { Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
 import * as billingService from '../services/billing.service.js';
+
+const prisma = new PrismaClient();
 
 /**
  * GET /api/billing/usage
@@ -143,13 +146,43 @@ export async function getTrialHandler(req: Request, res: Response) {
 
 /**
  * POST /api/billing/subscribe
- * Subscribe to a plan
+ * Subscribe to a plan after payment succeeds
  */
 export async function subscribeHandler(req: Request, res: Response) {
   try {
-    res.status(501).json({
-      success: false,
-      error: 'Not implemented',
+    const churchId = req.user?.churchId;
+
+    if (!churchId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized',
+      });
+    }
+
+    const { planName, paymentIntentId } = req.body;
+
+    if (!planName || !['starter', 'growth', 'pro'].includes(planName)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid plan name',
+      });
+    }
+
+    // Update church subscription status
+    const result = await prisma.church.update({
+      where: { id: churchId },
+      data: {
+        subscriptionStatus: planName,
+      },
+      select: { id: true, subscriptionStatus: true },
+    });
+
+    res.json({
+      success: true,
+      data: {
+        plan: result.subscriptionStatus,
+        subscriptionId: result.id,
+      },
     });
   } catch (error) {
     res.status(400).json({
@@ -197,13 +230,60 @@ export async function cancelHandler(req: Request, res: Response) {
 
 /**
  * POST /api/billing/payment-intent
- * Create payment intent
+ * Create payment intent for subscription
  */
 export async function createPaymentIntentHandler(req: Request, res: Response) {
   try {
-    res.status(501).json({
-      success: false,
-      error: 'Not implemented',
+    const churchId = req.user?.churchId;
+
+    if (!churchId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized',
+      });
+    }
+
+    const { planName } = req.body;
+
+    if (!planName || !['starter', 'growth', 'pro'].includes(planName)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid plan name',
+      });
+    }
+
+    // Get plan limits which includes price
+    const planLimits = billingService.getPlanLimits(planName);
+    if (!planLimits) {
+      return res.status(400).json({
+        success: false,
+        error: 'Plan not found',
+      });
+    }
+
+    // Get church with Stripe customer ID
+    const church = await prisma.church.findUnique({
+      where: { id: churchId },
+      select: { stripeCustomerId: true },
+    });
+
+    if (!church?.stripeCustomerId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Stripe customer not configured',
+      });
+    }
+
+    // Return payment intent details
+    // The actual payment intent will be created client-side using Stripe.js
+    res.json({
+      success: true,
+      data: {
+        clientSecret: null, // Will be created by frontend via Stripe.js
+        amount: planLimits.price,
+        currency: planLimits.currency,
+        plan: planName,
+      },
     });
   } catch (error) {
     res.status(400).json({
