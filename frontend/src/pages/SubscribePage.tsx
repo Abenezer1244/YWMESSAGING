@@ -5,6 +5,7 @@ import { subscribe } from '../api/billing';
 import BackButton from '../components/BackButton';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
+import { Phone, MessageSquare, BarChart3, Zap, Shield, Users } from 'lucide-react';
 
 const PLANS = [
   {
@@ -97,66 +98,96 @@ export function SubscribePage() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {PLANS.map((plan) => (
-            <Card
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+          {PLANS.map((plan, idx) => (
+            <div
               key={plan.id}
-              variant="default"
-              className={`overflow-hidden transform transition hover:shadow-lg border ${
-                plan.highlighted
-                  ? 'ring-2 ring-primary md:scale-105 border-primary bg-muted'
-                  : 'border-border bg-muted'
+              className={`relative group transition-all duration-300 ${
+                plan.highlighted ? 'md:scale-105' : ''
               }`}
             >
-              {/* Card Header */}
-              <div className={`-m-6 mb-6 px-6 py-8 ${plan.highlighted ? 'bg-primary/10' : 'bg-muted'}`}>
+              {/* Glow effect for highlighted card */}
+              {plan.highlighted && (
+                <div className="absolute -inset-1 bg-gradient-to-r from-primary to-primary/50 rounded-2xl blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
+              )}
+
+              <Card
+                variant="default"
+                className={`relative overflow-hidden transform transition-all duration-300 hover:shadow-xl border h-full ${
+                  plan.highlighted
+                    ? 'ring-2 ring-primary border-primary bg-gradient-to-br from-muted to-muted/50'
+                    : 'border-border bg-muted/30 hover:border-primary/50'
+                }`}
+              >
+                {/* Most Popular Badge */}
                 {plan.highlighted && (
-                  <div className="text-sm font-semibold text-primary mb-2">
+                  <div className="absolute top-0 right-0 bg-gradient-to-r from-primary to-primary/80 text-white px-4 py-1 text-sm font-semibold rounded-bl-lg">
                     ⭐ Most Popular
                   </div>
                 )}
-                <h2 className={`text-2xl font-bold text-foreground`}>{plan.name}</h2>
-                <p className={`text-sm mt-2 ${plan.highlighted ? 'text-primary' : 'text-foreground/80'}`}>
-                  {plan.description}
-                </p>
-              </div>
 
-              {/* Pricing */}
-              <div className="pb-6 mb-6 border-b border-border">
-                <div className="text-4xl font-bold text-foreground">
-                  ${plan.price}
-                  <span className="text-lg font-normal text-muted-foreground">/month</span>
+                {/* Card Header */}
+                <div className={`px-6 py-8 ${plan.highlighted ? 'bg-gradient-to-br from-primary/10 to-primary/5' : 'bg-gradient-to-br from-muted/50 to-transparent'}`}>
+                  <h2 className="text-2xl font-bold text-foreground mb-2">{plan.name}</h2>
+                  <p className={`text-sm ${plan.highlighted ? 'text-primary/90' : 'text-foreground/70'}`}>
+                    {plan.description}
+                  </p>
                 </div>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Billed monthly, cancel anytime
-                </p>
-              </div>
 
-              {/* Features */}
-              <div className="mb-6 flex-grow">
-                <ul className="space-y-4">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start">
-                      <span className="text-green-400 mr-3 mt-0.5">✓</span>
-                      <span className="text-foreground/80">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                {/* Pricing */}
+                <div className="px-6 pt-6 pb-6 border-b border-border/40">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/70">
+                      ${plan.price}
+                    </span>
+                    <span className="text-muted-foreground font-medium">/month</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Billed monthly • Cancel anytime
+                  </p>
+                </div>
 
-              {/* CTA */}
-              <div className="pt-6 border-t border-border">
-                <Button
-                  onClick={() => handleSubscribe(plan.id)}
-                  disabled={isLoading}
-                  variant={plan.highlighted ? 'primary' : 'secondary'}
-                  size="md"
-                  fullWidth
-                >
-                  {isLoading ? 'Processing...' : plan.cta}
-                </Button>
-              </div>
-            </Card>
+                {/* Features */}
+                <div className="px-6 py-6 flex-grow">
+                  <ul className="space-y-3.5">
+                    {plan.features.map((feature, featureIdx) => (
+                      <li key={featureIdx} className="flex items-start gap-3 group/item">
+                        <div className="flex-shrink-0 mt-0.5">
+                          <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
+                            plan.highlighted
+                              ? 'bg-primary/20 text-primary'
+                              : 'bg-primary/10 text-primary/70'
+                          }`}>
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        </div>
+                        <span className="text-sm text-foreground/85 leading-relaxed">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* CTA Button */}
+                <div className="px-6 py-6 border-t border-border/40 mt-auto">
+                  <Button
+                    onClick={() => handleSubscribe(plan.id)}
+                    disabled={isLoading}
+                    variant={plan.highlighted ? 'primary' : 'secondary'}
+                    size="md"
+                    fullWidth
+                    className={`transition-all duration-300 ${
+                      plan.highlighted
+                        ? 'hover:shadow-lg hover:shadow-primary/30'
+                        : 'hover:border-primary/50'
+                    }`}
+                  >
+                    {isLoading ? 'Processing...' : plan.cta}
+                  </Button>
+                </div>
+              </Card>
+            </div>
           ))}
         </div>
 
