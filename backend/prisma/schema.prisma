@@ -33,9 +33,11 @@ model Church {
   messageTemplates      MessageTemplate[]
   subscriptions         Subscription[]
   recurringMessages     RecurringMessage[]
+  conversations         Conversation[]
 
   @@index([subscriptionStatus])
   @@index([trialEndsAt])
+  @@index([telnyxPhoneNumber])
 }
 
 // Physical locations within a church
@@ -94,8 +96,11 @@ model Member {
   // Relations
   groups          GroupMember[]
   messageRecipients MessageRecipient[]
+  conversations   Conversation[]
+  conversationMessages ConversationMessage[]
 
   @@index([email])
+  @@index([phoneHash])
 }
 
 // Join table for Group-Member many-to-many
@@ -244,6 +249,87 @@ model Subscription {
 
   @@index([plan])
   @@index([status])
+}
+
+// SMS/MMS Conversations between church and members
+model Conversation {
+  id              String   @id @default(cuid())
+  churchId        String
+  memberId        String
+  lastMessageAt   DateTime?
+  status          String   @default("open")  // open, closed, archived
+  unreadCount     Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  church          Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  member          Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  messages        ConversationMessage[]
+
+  @@unique([churchId, memberId])
+  @@index([churchId])
+  @@index([memberId])
+  @@index([lastMessageAt])
+  @@index([status])
+}
+
+// Individual SMS/MMS messages in conversations
+model ConversationMessage {
+  id              String   @id @default(cuid())
+  conversationId  String
+  memberId        String
+  content         String   // Text content (can be empty if media-only)
+  direction       String   // "inbound" (from member) | "outbound" (from leader)
+
+  // Telnyx tracking
+  providerMessageId String?  // Telnyx MMS ID for delivery tracking
+  deliveryStatus  String?    // "pending" | "delivered" | "failed"
+
+  // S3 Media fields (full quality, NO compression)
+  mediaUrl        String?    // S3 presigned URL (expires in 7 days)
+  mediaType       String?    // "image" | "video" | "audio" | "document"
+  mediaName       String?    // Original filename
+  mediaSizeBytes  Int?       // File size in bytes
+  mediaS3Key      String?    // S3 object key for retrieval/deletion
+  mediaMimeType   String?    // MIME type (image/jpeg, video/mp4, etc)
+  mediaWidth      Int?       // Image width in pixels
+  mediaHeight     Int?       // Image height in pixels
+  mediaDuration   Int?       // Video/audio duration in seconds
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  member          Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([createdAt])
+  @@index([direction])
+  @@index([mediaType])
+  @@index([providerMessageId])
+}
+
+// Queue for SMS/MMS messages to be sent
+model MessageQueue {
+  id                    String   @id @default(cuid())
+  churchId              String
+  phone                 String   // E.164 format
+  content               String   // Text message content
+  mediaS3Url            String?  // S3 URL if sending media
+  conversationMessageId String?  // Link to conversation message
+  status                String   @default("pending")  // pending, sent, failed
+  retryCount            Int      @default(0)
+  lastError             String?
+  sentAt                DateTime?
+  failedAt              DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([churchId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 // Analytics events (PostHog backup)

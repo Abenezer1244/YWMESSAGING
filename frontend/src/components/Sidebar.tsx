@@ -71,6 +71,11 @@ export function Sidebar() {
       path: '#',
       subItems: [
         {
+          label: 'Conversations',
+          icon: <MessageSquare className="w-4 h-4" />,
+          path: '/conversations',
+        },
+        {
           label: 'Send Message',
           icon: <MessageSquare className="w-4 h-4" />,
           path: '/send-message',

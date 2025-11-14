@@ -26,6 +26,7 @@ const MessageHistoryPage = lazy(() => import('./pages/dashboard/MessageHistoryPa
 const TemplatesPage = lazy(() => import('./pages/dashboard/TemplatesPage'));
 const RecurringMessagesPage = lazy(() => import('./pages/dashboard/RecurringMessagesPage'));
 const AnalyticsPage = lazy(() => import('./pages/dashboard/AnalyticsPage'));
+const ConversationsPage = lazy(() => import('./pages/dashboard/ConversationsPage'));
 const SubscribePage = lazy(() => import('./pages/SubscribePage'));
 const BillingPage = lazy(() => import('./pages/BillingPage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
@@ -265,6 +266,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <AnalyticsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/conversations"
+            element={
+              <ProtectedRoute>
+                <ConversationsPage />
               </ProtectedRoute>
             }
           />
