@@ -330,28 +330,19 @@ export async function purchaseNumber(req: Request, res: Response) {
       });
     }
 
-    // Purchase the phone number with Telnyx (only after payment verified)
-    const result = await purchasePhoneNumber(phoneNumber, churchId, connectionId);
-
-    // Auto-link the purchased number to the church account
+    // Create webhook first to get messaging profile ID
     let webhookId: string | null = null;
     try {
       const webhookUrl = `${process.env.BACKEND_URL || 'https://api.koinoniasms.com'}/api/webhooks/telnyx/mms`;
       const webhook = await createWebhook(webhookUrl);
       webhookId = webhook.id;
       console.log(`✅ Webhook auto-created for purchased number, church ${churchId}: ${webhookId}`);
-
-      // Link the phone number to the messaging profile so webhooks are routed
-      try {
-        await linkPhoneNumberToMessagingProfile(phoneNumber, webhookId);
-        console.log(`✅ Phone number ${phoneNumber} linked to messaging profile ${webhookId}`);
-      } catch (linkError: any) {
-        console.error(`⚠️ Failed to link phone number to messaging profile: ${linkError.message}`);
-        // Continue - webhook might still work if phone number is properly associated
-      }
     } catch (webhookError: any) {
       console.warn(`⚠️ Webhook creation failed for purchased number, but continuing: ${webhookError.message}`);
     }
+
+    // Purchase the phone number with Telnyx and link to messaging profile
+    const result = await purchasePhoneNumber(phoneNumber, churchId, connectionId, webhookId || undefined);
 
     // Update church with purchased phone number and webhook ID
     const updated = await prisma.church.update({
