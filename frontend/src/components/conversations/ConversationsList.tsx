@@ -129,8 +129,7 @@ export function ConversationsList({
                     <SoftButton
                       variant="secondary"
                       size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
+                      onClick={() => {
                         onUpdateStatus(conversation.id, 'archived');
                       }}
                       title="Archive conversation"
