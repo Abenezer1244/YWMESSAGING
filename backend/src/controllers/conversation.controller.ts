@@ -3,6 +3,8 @@ import { PrismaClient } from '@prisma/client';
 import * as conversationService from '../services/conversation.service.js';
 import * as telnyxMMSService from '../services/telnyx-mms.service.js';
 import * as s3MediaService from '../services/s3-media.service.js';
+import { hashForSearch } from '../utils/encryption.utils.js';
+import { sendSMS } from '../services/telnyx.service.js';
 
 const prisma = new PrismaClient();
 
@@ -317,16 +319,48 @@ export async function handleTelnyxInboundMMS(req: Request, res: Response) {
 
     if (!church) {
       console.log(`❌ No church found for Telnyx number: ${to}`);
-      console.log(`⚠️ Stored format might be different. Checking all formats...`);
-
-      // Try different formats
-      const churches = await prisma.church.findMany({
-        select: { id: true, name: true, telnyxPhoneNumber: true }
-      });
-
-      console.log('All churches:', churches);
       return res.status(200).json({ received: true });
     }
+
+    // SECURITY: Verify sender is a registered member of the church
+    console.log(`🔐 Verifying member: ${from} for church ${church.id}`);
+
+    const phoneHash = hashForSearch(from);
+    const isMember = await prisma.member.findFirst({
+      where: {
+        phoneHash,
+        groups: {
+          some: {
+            group: {
+              churchId: church.id
+            }
+          }
+        }
+      }
+    });
+
+    if (!isMember) {
+      console.log(`🚫 Non-member attempted to message: ${from} to ${to}`);
+
+      // Send auto-reply to non-member
+      try {
+        const replyMessage = `Hello! To communicate with ${church.name}, please ask the church leader to add you to the system.`;
+
+        await sendSMS(
+          from,                  // to (sender's number)
+          replyMessage,          // message
+          church.id              // churchId
+        );
+
+        console.log(`✅ Auto-reply sent to non-member: ${from}`);
+      } catch (error: any) {
+        console.error(`⚠️ Failed to send auto-reply to ${from}:`, error.message);
+      }
+
+      return res.status(200).json({ received: true });
+    }
+
+    console.log(`✅ Member verified: ${isMember.id} (${isMember.firstName} ${isMember.lastName})`);
 
     // Extract media URLs
     const mediaUrls = media?.map((m: any) => m.url) || [];
