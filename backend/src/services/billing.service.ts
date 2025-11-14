@@ -101,7 +101,7 @@ export function getSMSPricing() {
   return {
     costPerSMS: SMS_COST_PER_MESSAGE,
     currency: 'USD',
-    setupFee: 4.99,
+    setupFee: 0.29,
   };
 }
 
