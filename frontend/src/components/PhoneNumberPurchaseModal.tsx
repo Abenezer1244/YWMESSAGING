@@ -386,7 +386,7 @@ export default function PhoneNumberPurchaseModal({
                       </div>
                       <div className="border-t border-border/30 pt-2 mt-2 flex justify-between font-semibold">
                         <span className="text-foreground">One-time setup:</span>
-                        <span className="text-primary">$7.99</span>
+                        <span className="text-primary">$0.29</span>
                       </div>
                     </div>
 
@@ -428,7 +428,7 @@ export default function PhoneNumberPurchaseModal({
                   <motion.div variants={itemVariants} className="space-y-4">
                     <Elements stripe={stripePromise}>
                       <StripePaymentForm
-                        amount={799} // $7.99 in cents
+                        amount={29} // $0.29 in cents
                         phoneNumber={selectedNumber.phoneNumber}
                         paymentIntentId={paymentIntentId}
                         onSuccess={handlePaymentSuccess}
