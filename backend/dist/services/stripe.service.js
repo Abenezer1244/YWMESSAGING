@@ -102,7 +102,8 @@ export async function createPhoneNumberSetupPaymentIntent(customerId, phoneNumbe
     try {
         const amountInCents = 50; // $0.50 in cents (Stripe minimum)
         // Use idempotency key to prevent duplicate charges
-        const idempotencyKey = `phone_setup_${customerId}_${phoneNumber}`;
+        // Include amount in key so different amounts get different keys
+        const idempotencyKey = `phone_setup_${customerId}_${phoneNumber}_${amountInCents}`;
         const paymentIntent = await stripe.paymentIntents.create({
             amount: amountInCents,
             currency: 'usd',
