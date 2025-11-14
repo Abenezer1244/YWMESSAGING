@@ -278,6 +278,8 @@ export async function updateStatus(req: Request, res: Response) {
  */
 export async function handleTelnyxInboundMMS(req: Request, res: Response) {
   try {
+    console.log('🔔 WEBHOOK RECEIVED:', JSON.stringify(req.body, null, 2));
+
     const { type, data } = req.body;
 
     // Only process message received events
@@ -299,12 +301,30 @@ export async function handleTelnyxInboundMMS(req: Request, res: Response) {
     );
 
     // Find church by Telnyx number (to field)
+    console.log(`🔍 Looking for church with telnyxPhoneNumber: ${to}`);
+
     const church = await prisma.church.findFirst({
       where: { telnyxPhoneNumber: to },
+      select: { id: true, name: true, telnyxPhoneNumber: true }
     });
+
+    console.log(`Found churches in database:`,
+      await prisma.church.findMany({
+        where: { telnyxPhoneNumber: { not: null } },
+        select: { id: true, name: true, telnyxPhoneNumber: true }
+      })
+    );
 
     if (!church) {
       console.log(`❌ No church found for Telnyx number: ${to}`);
+      console.log(`⚠️ Stored format might be different. Checking all formats...`);
+
+      // Try different formats
+      const churches = await prisma.church.findMany({
+        select: { id: true, name: true, telnyxPhoneNumber: true }
+      });
+
+      console.log('All churches:', churches);
       return res.status(200).json({ received: true });
     }
 
