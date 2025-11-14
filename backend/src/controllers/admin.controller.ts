@@ -280,6 +280,16 @@ export async function linkPhoneNumberHandler(req: Request, res: Response) {
       const webhook = await telnyxService.createWebhook(webhookUrl);
       webhookId = webhook.id;
       console.log(`✅ Webhook auto-created for church ${churchId}: ${webhookId}`);
+
+      // Try to link the number to the messaging profile
+      try {
+        console.log(`📍 Attempting to link manually added number ${formattedPhone} to messaging profile ${webhookId}...`);
+        await telnyxService.linkPhoneNumberToMessagingProfile(formattedPhone, webhookId);
+        console.log(`✅ Manual number linking succeeded for ${formattedPhone}`);
+      } catch (linkError: any) {
+        console.warn(`⚠️ Manual number linking failed: ${linkError.message}`);
+        // Continue - might still work if number is configured correctly in Telnyx
+      }
     } catch (webhookError: any) {
       console.warn(`⚠️ Webhook creation failed, but continuing: ${webhookError.message}`);
       // Don't fail the whole request if webhook creation fails

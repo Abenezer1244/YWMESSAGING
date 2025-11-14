@@ -171,15 +171,17 @@ export async function purchasePhoneNumber(
   try {
     const client = getTelnyxClient();
     // Use /number_orders endpoint to purchase phone numbers
-    const orderData: Record<string, any> = {
-      phone_numbers: [{ phone_number: phoneNumber }],
-      customer_reference: `church_${churchId}`,
-    };
+    const phoneNumberData: Record<string, any> = { phone_number: phoneNumber };
 
     // Link to messaging profile during purchase if provided
     if (messagingProfileId) {
-      orderData.messaging_profile_id = messagingProfileId;
+      phoneNumberData.messaging_profile_id = messagingProfileId;
     }
+
+    const orderData: Record<string, any> = {
+      phone_numbers: [phoneNumberData],
+      customer_reference: `church_${churchId}`,
+    };
 
     const response = await client.post('/number_orders', orderData);
 

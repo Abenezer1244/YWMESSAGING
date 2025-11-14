@@ -344,6 +344,18 @@ export async function purchaseNumber(req: Request, res: Response) {
     // Purchase the phone number with Telnyx and link to messaging profile
     const result = await purchasePhoneNumber(phoneNumber, churchId, connectionId, webhookId || undefined);
 
+    // Verify and link the number to messaging profile (fallback attempt)
+    if (webhookId) {
+      try {
+        console.log(`📍 Attempting to link purchased number ${phoneNumber} to messaging profile ${webhookId} (fallback)...`);
+        await linkPhoneNumberToMessagingProfile(phoneNumber, webhookId);
+        console.log(`✅ Fallback linking succeeded for ${phoneNumber}`);
+      } catch (linkError: any) {
+        console.warn(`⚠️ Fallback linking attempt failed (may have succeeded during purchase): ${linkError.message}`);
+        // Continue - number might already be linked from purchase request
+      }
+    }
+
     // Update church with purchased phone number and webhook ID
     const updated = await prisma.church.update({
       where: { id: churchId },
