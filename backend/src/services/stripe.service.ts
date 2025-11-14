@@ -147,9 +147,16 @@ export async function createPhoneNumberSetupPaymentIntent(
       clientSecret: paymentIntent.client_secret || '',
       paymentIntentId: paymentIntent.id,
     };
-  } catch (error) {
-    console.error('❌ Failed to create payment intent:', error);
-    throw error;
+  } catch (error: any) {
+    console.error('❌ Failed to create payment intent:', {
+      message: error.message,
+      code: error.code,
+      statusCode: error.statusCode,
+      type: error.type,
+      param: error.param,
+      stripeError: error.raw?.message,
+    });
+    throw new Error(`Stripe error: ${error.message || 'Failed to create payment intent'}`);
   }
 }
 
