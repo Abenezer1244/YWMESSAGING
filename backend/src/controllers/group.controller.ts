@@ -81,6 +81,11 @@ export async function createGroup(req: Request, res: Response) {
     const churchId = req.user?.churchId;
     const { name, description, welcomeMessageEnabled, welcomeMessageText } = req.body;
 
+    console.log(`=== CREATE GROUP DEBUG ===`);
+    console.log(`branchId: ${branchId}`);
+    console.log(`churchId: ${churchId}`);
+    console.log(`name: ${name}`);
+
     if (!churchId) {
       return res.status(401).json({
         success: false,
@@ -90,7 +95,17 @@ export async function createGroup(req: Request, res: Response) {
 
     // SECURITY: Verify branch ownership
     const hasAccess = await verifyBranchOwnership(branchId, churchId);
+    console.log(`Branch ownership verified: ${hasAccess}`);
+
     if (!hasAccess) {
+      // Debug: Check if branch exists at all
+      const branch = await prisma.branch.findFirst({
+        where: { id: branchId },
+        select: { id: true, churchId: true, name: true },
+      });
+      console.log(`Branch found in database:`, branch);
+      console.log(`❌ Access denied - branch not found or doesn't belong to church`);
+
       return res.status(403).json({
         success: false,
         error: 'Access denied',
