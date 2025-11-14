@@ -260,26 +260,58 @@ export async function releasePhoneNumber(numberSid: string, churchId: string): P
 export async function createWebhook(webhookUrl: string): Promise<{ id: string }> {
   try {
     const client = getTelnyxClient();
-    const response = await client.post('/webhooks', {
-      url: webhookUrl,
-      events: ['message.received'],
-      api_version: '2023-09-01',
-    });
 
-    const webhookId = response.data?.data?.id;
-    if (!webhookId) {
-      throw new Error('No webhook ID returned from Telnyx');
+    // First, try to get existing messaging profiles
+    let messagingProfileId: string | null = null;
+    try {
+      const profilesResponse = await client.get('/messaging_profiles');
+      const profiles = profilesResponse.data?.data || [];
+
+      // Use the first available profile, or create a new one if none exist
+      if (profiles.length > 0) {
+        messagingProfileId = profiles[0].id;
+        console.log(`Found existing messaging profile: ${messagingProfileId}`);
+      }
+    } catch (error: any) {
+      console.warn('Could not fetch existing messaging profiles, will create a new one');
     }
 
-    console.log(`✅ Webhook created: ${webhookId}`);
-    return { id: webhookId };
+    let response;
+
+    if (messagingProfileId) {
+      // Update existing messaging profile with webhook
+      console.log(`Updating messaging profile ${messagingProfileId} with webhook URL`);
+      response = await client.patch(`/messaging_profiles/${messagingProfileId}`, {
+        webhook_url: webhookUrl,
+        webhook_failover_url: webhookUrl,
+        webhook_api_version: '2',
+      });
+    } else {
+      // Create new messaging profile with webhook
+      console.log('Creating new messaging profile with webhook URL');
+      response = await client.post('/messaging_profiles', {
+        name: `Koinonia SMS Profile - ${new Date().toISOString()}`,
+        enabled: true,
+        webhook_url: webhookUrl,
+        webhook_failover_url: webhookUrl,
+        webhook_api_version: '2',
+      });
+    }
+
+    const profileId = response.data?.data?.id;
+    if (!profileId) {
+      throw new Error('No profile ID returned from Telnyx');
+    }
+
+    console.log(`✅ Messaging profile webhook configured: ${profileId}`);
+    return { id: profileId };
   } catch (error: any) {
-    console.error('Telnyx webhook creation error:', {
+    console.error('Telnyx messaging profile error:', {
       status: error.response?.status,
       data: error.response?.data,
       message: error.message,
     });
-    const errorMessage = error.response?.data?.errors?.[0]?.detail || error.message || 'Failed to create webhook';
+    const errorMessage = error.response?.data?.errors?.[0]?.detail || error.message || 'Failed to configure messaging profile webhook';
     throw new Error(`Failed to auto-create webhook: ${errorMessage}`);
   }
 }
