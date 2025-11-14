@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react';
-import { Button, Input, Spinner } from '@nextui-org/react';
 import { Send, Paperclip, X, AlertCircle } from 'lucide-react';
+import { SoftButton } from '../SoftUI';
+import Input from '../ui/Input';
+import { Spinner } from '../ui';
 
 interface ReplyComposerProps {
   conversationId: string;
@@ -68,7 +70,7 @@ export function ReplyComposer({
     // Show preview for images
     if (file.type.startsWith('image/')) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = (e: ProgressEvent<FileReader>) => {
         setFilePreview(e.target?.result as string);
       };
       reader.readAsDataURL(file);
@@ -227,16 +229,16 @@ export function ReplyComposer({
         />
 
         {/* Attach button */}
-        <Button
-          isIconOnly
-          variant="light"
+        <SoftButton
+          variant="secondary"
+          size="md"
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading || isLoading}
-          className="text-primary flex-shrink-0"
+          className="flex-shrink-0"
           title="Attach file (image, video, audio, document)"
         >
-          <Paperclip size={20} />
-        </Button>
+          <Paperclip size={18} />
+        </SoftButton>
 
         {/* Message input */}
         <Input
@@ -246,29 +248,27 @@ export function ReplyComposer({
               : 'Type a message...'
           }
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)}
           disabled={uploading || isLoading}
-          onKeyPress={(e) => {
+          onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
               handleSend();
             }
           }}
-          size="lg"
           className="flex-1"
         />
 
         {/* Send button */}
-        <Button
-          isIconOnly
-          color="primary"
+        <SoftButton
+          variant="primary"
+          size="md"
           onClick={handleSend}
-          disabled={!message && !selectedFile}
-          isLoading={uploading || isLoading}
+          disabled={!message && !selectedFile || uploading || isLoading}
           className="flex-shrink-0"
         >
-          {uploading || isLoading ? <Spinner size="sm" /> : <Send size={20} />}
-        </Button>
+          {uploading || isLoading ? <Spinner size="sm" /> : <Send size={18} />}
+        </SoftButton>
       </div>
 
       {/* File size info */}

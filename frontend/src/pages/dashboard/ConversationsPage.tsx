@@ -152,8 +152,6 @@ export function ConversationsPage() {
     }
   };
 
-  const churchPhone = auth.church?.telnyxPhoneNumber || 'Not configured';
-
   return (
     <SoftLayout>
       <div className="px-4 md:px-8 py-8 w-full h-full flex flex-col">
@@ -173,7 +171,7 @@ export function ConversationsPage() {
               </h1>
               <p className="text-muted-foreground flex items-center gap-2">
                 <Phone className="w-4 h-4" />
-                Members text {churchPhone} to start conversations
+                Members text your church number to start conversations
               </p>
             </div>
           </div>

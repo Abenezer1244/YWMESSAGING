@@ -124,7 +124,7 @@ export function ConversationsList({
 
               {/* Actions */}
               {selectedConversationId === conversation.id && onUpdateStatus && (
-                <div className="flex-shrink-0 flex gap-1">
+                <div className="flex-shrink-0 flex gap-1" onClick={(e) => e.stopPropagation()}>
                   {conversation.status !== 'archived' && (
                     <SoftButton
                       variant="secondary"
@@ -132,7 +132,6 @@ export function ConversationsList({
                       onClick={() => {
                         onUpdateStatus(conversation.id, 'archived');
                       }}
-                      title="Archive conversation"
                       className="p-2"
                     >
                       <Archive className="w-4 h-4" />
