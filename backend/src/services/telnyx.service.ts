@@ -259,6 +259,8 @@ export async function releasePhoneNumber(numberSid: string, churchId: string): P
  */
 export async function createWebhook(webhookUrl: string): Promise<{ id: string }> {
   try {
+    console.log(`🔗 Creating webhook with URL: ${webhookUrl}`);
+
     const client = getTelnyxClient();
 
     // First, try to get existing messaging profiles
@@ -267,28 +269,38 @@ export async function createWebhook(webhookUrl: string): Promise<{ id: string }>
       const profilesResponse = await client.get('/messaging_profiles');
       const profiles = profilesResponse.data?.data || [];
 
+      console.log(`📋 Found ${profiles.length} existing messaging profiles`);
+
       // Use the first available profile, or create a new one if none exist
       if (profiles.length > 0) {
         messagingProfileId = profiles[0].id;
-        console.log(`Found existing messaging profile: ${messagingProfileId}`);
+        console.log(`✅ Using existing messaging profile: ${messagingProfileId}`);
+        console.log(`   Profile details:`, {
+          id: profiles[0].id,
+          name: profiles[0].name,
+          webhook_url: profiles[0].webhook_url,
+          enabled: profiles[0].enabled
+        });
       }
     } catch (error: any) {
-      console.warn('Could not fetch existing messaging profiles, will create a new one');
+      console.warn('⚠️ Could not fetch existing messaging profiles, will create a new one');
     }
 
     let response;
 
     if (messagingProfileId) {
       // Update existing messaging profile with webhook
-      console.log(`Updating messaging profile ${messagingProfileId} with webhook URL`);
+      console.log(`🔄 Updating messaging profile ${messagingProfileId} with webhook URL: ${webhookUrl}`);
       response = await client.patch(`/messaging_profiles/${messagingProfileId}`, {
         webhook_url: webhookUrl,
         webhook_failover_url: webhookUrl,
         webhook_api_version: '2',
       });
+
+      console.log(`✅ Update response:`, response.data?.data);
     } else {
       // Create new messaging profile with webhook
-      console.log('Creating new messaging profile with webhook URL');
+      console.log(`✨ Creating new messaging profile with webhook URL: ${webhookUrl}`);
       response = await client.post('/messaging_profiles', {
         name: `Koinonia SMS Profile - ${new Date().toISOString()}`,
         enabled: true,
@@ -296,6 +308,8 @@ export async function createWebhook(webhookUrl: string): Promise<{ id: string }>
         webhook_failover_url: webhookUrl,
         webhook_api_version: '2',
       });
+
+      console.log(`✅ Creation response:`, response.data?.data);
     }
 
     const profileId = response.data?.data?.id;
@@ -304,9 +318,10 @@ export async function createWebhook(webhookUrl: string): Promise<{ id: string }>
     }
 
     console.log(`✅ Messaging profile webhook configured: ${profileId}`);
+    console.log(`   Webhook URL: ${webhookUrl}`);
     return { id: profileId };
   } catch (error: any) {
-    console.error('Telnyx messaging profile error:', {
+    console.error('❌ Telnyx messaging profile error:', {
       status: error.response?.status,
       data: error.response?.data,
       message: error.message,
