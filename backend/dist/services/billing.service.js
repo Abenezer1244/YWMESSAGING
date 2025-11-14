@@ -80,7 +80,7 @@ export function getSMSPricing() {
     return {
         costPerSMS: SMS_COST_PER_MESSAGE,
         currency: 'USD',
-        setupFee: 0.29,
+        setupFee: 0.50,
     };
 }
 // ========== Plan Management Functions (used by middleware and services) ==========

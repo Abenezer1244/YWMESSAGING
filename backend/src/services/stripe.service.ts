@@ -113,14 +113,14 @@ export async function getCustomer(customerId: string): Promise<Stripe.Customer |
 
 /**
  * Create a payment intent for one-time charges (e.g., phone number setup fee)
- * $0.29 charged to customer
+ * $0.50 charged to customer (Stripe minimum)
  */
 export async function createPhoneNumberSetupPaymentIntent(
   customerId: string,
   phoneNumber: string
 ): Promise<{ clientSecret: string; paymentIntentId: string }> {
   try {
-    const amountInCents = 29; // $0.29 in cents
+    const amountInCents = 50; // $0.50 in cents (Stripe minimum)
 
     // Use idempotency key to prevent duplicate charges
     const idempotencyKey = `phone_setup_${customerId}_${phoneNumber}`;

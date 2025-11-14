@@ -21,7 +21,7 @@ export declare function cancelSubscription(subscriptionId: string): Promise<void
 export declare function getCustomer(customerId: string): Promise<Stripe.Customer | null>;
 /**
  * Create a payment intent for one-time charges (e.g., phone number setup fee)
- * $0.29 charged to customer
+ * $0.50 charged to customer (Stripe minimum)
  */
 export declare function createPhoneNumberSetupPaymentIntent(customerId: string, phoneNumber: string): Promise<{
     clientSecret: string;
