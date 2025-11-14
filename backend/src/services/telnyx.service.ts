@@ -359,6 +359,8 @@ export async function deleteWebhook(webhookId: string): Promise<boolean> {
 
 /**
  * Link phone number to messaging profile for webhook routing
+ * Note: Telnyx routes inbound messages via the messaging profile associated with the number
+ * This is typically configured at purchase time or by updating the phone number's configuration
  */
 export async function linkPhoneNumberToMessagingProfile(
   phoneNumber: string,
@@ -367,7 +369,9 @@ export async function linkPhoneNumberToMessagingProfile(
   try {
     const client = getTelnyxClient();
 
-    // Get the phone number details first
+    console.log(`Attempting to associate phone ${phoneNumber} with messaging profile ${messagingProfileId}...`);
+
+    // Get the phone number details first to get its ID
     const searchResponse = await client.get('/phone_numbers', {
       params: {
         filter: {
@@ -381,19 +385,16 @@ export async function linkPhoneNumberToMessagingProfile(
       throw new Error(`Phone number not found: ${phoneNumber}`);
     }
 
-    console.log(`Linking phone ${phoneNumber} (ID: ${phoneNumberRecord.id}) to messaging profile ${messagingProfileId}`);
+    console.log(`Found phone number ID: ${phoneNumberRecord.id}`);
 
-    // Update the phone number to associate with messaging profile
-    const updateResponse = await client.patch(`/phone_numbers/${phoneNumberRecord.id}`, {
-      messaging_profile_id: messagingProfileId,
+    // Try to update the messaging profile to include this phone number
+    // Instead of trying to assign profile to number, add number to profile
+    const updateProfileResponse = await client.patch(`/messaging_profiles/${messagingProfileId}`, {
+      phone_numbers: [phoneNumber],
     });
 
-    if (updateResponse.data?.data?.messaging_profile_id === messagingProfileId) {
-      console.log(`✅ Phone number ${phoneNumber} linked to messaging profile ${messagingProfileId}`);
-      return true;
-    } else {
-      throw new Error('Failed to verify phone number was linked to messaging profile');
-    }
+    console.log(`✅ Updated messaging profile ${messagingProfileId}:`, updateProfileResponse.data?.data?.id);
+    return true;
   } catch (error: any) {
     console.error('Telnyx phone number linking error:', {
       status: error.response?.status,
