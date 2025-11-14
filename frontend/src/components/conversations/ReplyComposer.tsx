@@ -229,16 +229,17 @@ export function ReplyComposer({
         />
 
         {/* Attach button */}
-        <SoftButton
-          variant="secondary"
-          size="md"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading || isLoading}
-          className="flex-shrink-0"
-          title="Attach file (image, video, audio, document)"
-        >
-          <Paperclip size={18} />
-        </SoftButton>
+        <div title="Attach file (image, video, audio, document)">
+          <SoftButton
+            variant="secondary"
+            size="md"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading || isLoading}
+            className="flex-shrink-0"
+          >
+            <Paperclip size={18} />
+          </SoftButton>
+        </div>
 
         {/* Message input */}
         <Input
