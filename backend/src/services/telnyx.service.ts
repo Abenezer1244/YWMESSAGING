@@ -331,3 +331,51 @@ export async function deleteWebhook(webhookId: string): Promise<boolean> {
     throw new Error(`Failed to delete webhook: ${errorMessage}`);
   }
 }
+
+/**
+ * Link phone number to messaging profile for webhook routing
+ */
+export async function linkPhoneNumberToMessagingProfile(
+  phoneNumber: string,
+  messagingProfileId: string
+): Promise<boolean> {
+  try {
+    const client = getTelnyxClient();
+
+    // Get the phone number details first
+    const searchResponse = await client.get('/phone_numbers', {
+      params: {
+        filter: {
+          phone_number: phoneNumber,
+        },
+      },
+    });
+
+    const phoneNumberRecord = searchResponse.data?.data?.[0];
+    if (!phoneNumberRecord?.id) {
+      throw new Error(`Phone number not found: ${phoneNumber}`);
+    }
+
+    console.log(`Linking phone ${phoneNumber} (ID: ${phoneNumberRecord.id}) to messaging profile ${messagingProfileId}`);
+
+    // Update the phone number to associate with messaging profile
+    const updateResponse = await client.patch(`/phone_numbers/${phoneNumberRecord.id}`, {
+      messaging_profile_id: messagingProfileId,
+    });
+
+    if (updateResponse.data?.data?.messaging_profile_id === messagingProfileId) {
+      console.log(`✅ Phone number ${phoneNumber} linked to messaging profile ${messagingProfileId}`);
+      return true;
+    } else {
+      throw new Error('Failed to verify phone number was linked to messaging profile');
+    }
+  } catch (error: any) {
+    console.error('Telnyx phone number linking error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
+    const errorMessage = error.response?.data?.errors?.[0]?.detail || error.message || 'Failed to link phone number';
+    throw new Error(`Failed to link phone number to messaging profile: ${errorMessage}`);
+  }
+}

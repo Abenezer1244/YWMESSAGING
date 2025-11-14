@@ -8,6 +8,7 @@ import {
   getPhoneNumberDetails,
   validateTelnyxApiKey,
   createWebhook,
+  linkPhoneNumberToMessagingProfile,
 } from '../services/telnyx.service.js';
 import {
   createPhoneNumberSetupPaymentIntent,
@@ -339,6 +340,15 @@ export async function purchaseNumber(req: Request, res: Response) {
       const webhook = await createWebhook(webhookUrl);
       webhookId = webhook.id;
       console.log(`✅ Webhook auto-created for purchased number, church ${churchId}: ${webhookId}`);
+
+      // Link the phone number to the messaging profile so webhooks are routed
+      try {
+        await linkPhoneNumberToMessagingProfile(phoneNumber, webhookId);
+        console.log(`✅ Phone number ${phoneNumber} linked to messaging profile ${webhookId}`);
+      } catch (linkError: any) {
+        console.error(`⚠️ Failed to link phone number to messaging profile: ${linkError.message}`);
+        // Continue - webhook might still work if phone number is properly associated
+      }
     } catch (webhookError: any) {
       console.warn(`⚠️ Webhook creation failed for purchased number, but continuing: ${webhookError.message}`);
     }
