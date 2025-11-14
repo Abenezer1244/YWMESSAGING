@@ -135,7 +135,13 @@ export default function PhoneNumberPurchaseModal({
 
         // Wait a moment to show success before closing
         setTimeout(() => {
-          toast.success(`Successfully purchased ${selectedNumber.formattedNumber}!`);
+          const webhookStatus = result.data.webhookId
+            ? 'automatically linked with webhook'
+            : 'linked (webhook manual setup recommended)';
+
+          toast.success(
+            `Successfully purchased ${selectedNumber.formattedNumber}! Number ${webhookStatus}.`
+          );
 
           if (onPurchaseComplete) {
             onPurchaseComplete(selectedNumber.phoneNumber);

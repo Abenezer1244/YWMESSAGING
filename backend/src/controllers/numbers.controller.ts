@@ -7,6 +7,7 @@ import {
   releasePhoneNumber,
   getPhoneNumberDetails,
   validateTelnyxApiKey,
+  createWebhook,
 } from '../services/telnyx.service.js';
 import {
   createPhoneNumberSetupPaymentIntent,
@@ -313,7 +314,7 @@ export async function purchaseNumber(req: Request, res: Response) {
 
     // SECURITY: Verify payment intent before purchasing
     // This prevents fraud where someone could use a payment intent from another user
-    const SETUP_FEE_CENTS = 799; // $7.99
+    const SETUP_FEE_CENTS = 50; // $0.50 (Stripe minimum)
     const isPaymentValid = await verifyPaymentIntent(
       paymentIntentId,
       church.stripeCustomerId,
@@ -331,7 +332,50 @@ export async function purchaseNumber(req: Request, res: Response) {
     // Purchase the phone number with Telnyx (only after payment verified)
     const result = await purchasePhoneNumber(phoneNumber, churchId, connectionId);
 
-    res.json({ success: true, data: result });
+    // Auto-link the purchased number to the church account
+    let webhookId: string | null = null;
+    try {
+      const webhookUrl = `${process.env.BACKEND_URL || 'https://api.koinoniasms.com'}/api/webhooks/telnyx/mms`;
+      const webhook = await createWebhook(webhookUrl);
+      webhookId = webhook.id;
+      console.log(`✅ Webhook auto-created for purchased number, church ${churchId}: ${webhookId}`);
+    } catch (webhookError: any) {
+      console.warn(`⚠️ Webhook creation failed for purchased number, but continuing: ${webhookError.message}`);
+    }
+
+    // Update church with purchased phone number and webhook ID
+    const updated = await prisma.church.update({
+      where: { id: churchId },
+      data: {
+        telnyxPhoneNumber: phoneNumber,
+        telnyxNumberSid: result.numberSid,
+        telnyxVerified: true,
+        telnyxWebhookId: webhookId,
+        telnyxPurchasedAt: new Date(),
+      },
+      select: {
+        id: true,
+        telnyxPhoneNumber: true,
+        telnyxWebhookId: true,
+        telnyxVerified: true,
+      },
+    });
+
+    console.log(`✅ Phone number purchase completed and auto-linked for church ${churchId}: ${phoneNumber}`);
+
+    res.json({
+      success: true,
+      data: {
+        ...result,
+        phoneNumber: updated.telnyxPhoneNumber,
+        webhookId: updated.telnyxWebhookId,
+        verified: updated.telnyxVerified,
+        autoLinked: true,
+        message: webhookId
+          ? 'Phone number purchased and automatically linked with webhook!'
+          : 'Phone number purchased and linked! Please configure webhook manually in Telnyx dashboard.',
+      },
+    });
   } catch (error: any) {
     console.error('Failed to purchase number:', {
       message: error.message,

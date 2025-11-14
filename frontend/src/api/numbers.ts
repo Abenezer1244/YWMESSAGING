@@ -23,6 +23,10 @@ export interface PurchaseResponse {
     numberSid: string;
     phoneNumber: string;
     success: boolean;
+    webhookId?: string | null;
+    verified?: boolean;
+    autoLinked?: boolean;
+    message?: string;
   };
 }
 
