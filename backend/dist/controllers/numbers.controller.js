@@ -67,24 +67,34 @@ export async function setupPaymentIntent(req, res) {
             return res.status(400).json({ error: 'Invalid phone number format' });
         }
         // Get church with Stripe customer ID
+        console.log(`[setupPaymentIntent] Starting for church: ${churchId}`);
         const church = await prisma.church.findUnique({
             where: { id: churchId },
             select: { stripeCustomerId: true, telnyxPhoneNumber: true },
         });
         if (!church) {
+            console.log(`[setupPaymentIntent] Church not found: ${churchId}`);
             return res.status(404).json({ error: 'Church not found' });
         }
+        console.log(`[setupPaymentIntent] Church found. Has Stripe ID: ${!!church.stripeCustomerId}, Has phone: ${!!church.telnyxPhoneNumber}`);
         if (church.telnyxPhoneNumber) {
             return res.status(400).json({ error: 'Church already has a phone number' });
         }
         if (!church.stripeCustomerId) {
+            console.log(`[setupPaymentIntent] ERROR: Church has no Stripe customer ID!`);
             return res.status(400).json({ error: 'Stripe customer not configured' });
         }
+        console.log(`[setupPaymentIntent] Creating payment intent for phone: ${phoneNumber}, customer: ${church.stripeCustomerId}`);
         const paymentIntent = await createPhoneNumberSetupPaymentIntent(church.stripeCustomerId, phoneNumber);
+        console.log(`[setupPaymentIntent] SUCCESS: Payment intent created: ${paymentIntent.paymentIntentId}`);
         res.json({ success: true, data: paymentIntent });
     }
     catch (error) {
-        console.error('Failed to create payment intent:', error);
+        console.error('[setupPaymentIntent] ERROR:', {
+            message: error.message,
+            code: error.code,
+            stack: error.stack,
+        });
         res.status(500).json({ error: error.message || 'Failed to create payment intent' });
     }
 }
