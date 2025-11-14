@@ -18,6 +18,7 @@ model Church {
   stripeCustomerId      String?  @unique
   telnyxPhoneNumber     String?
   telnyxNumberSid       String?  @unique
+  telnyxWebhookId       String?  // Telnyx webhook ID for MMS events
   telnyxVerified        Boolean  @default(false)
   telnyxPurchasedAt     DateTime?
   trialEndsAt           DateTime

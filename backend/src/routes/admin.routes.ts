@@ -8,6 +8,7 @@ import {
   removeCoAdminHandler,
   getActivityLogsHandler,
   logActivityHandler,
+  linkPhoneNumberHandler,
 } from '../controllers/admin.controller.js';
 
 const router = Router();
@@ -27,5 +28,8 @@ router.delete('/co-admins/:adminId', removeCoAdminHandler);
 // Activity log endpoints
 router.get('/activity-logs', getActivityLogsHandler);
 router.post('/activity-log', logActivityHandler);
+
+// Phone number endpoints
+router.post('/phone-numbers/link', linkPhoneNumberHandler);
 
 export default router;

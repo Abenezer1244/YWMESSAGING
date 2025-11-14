@@ -112,3 +112,23 @@ export async function logActivity(
   });
   return response.data;
 }
+
+/**
+ * Link a phone number and auto-create webhook
+ */
+export async function linkPhoneNumber(
+  phoneNumber: string
+): Promise<{
+  success: boolean;
+  data: {
+    phoneNumber: string;
+    webhookId: string | null;
+    verified: boolean;
+    message: string;
+  };
+}> {
+  const response = await client.post('/admin/phone-numbers/link', {
+    phoneNumber,
+  });
+  return response.data;
+}

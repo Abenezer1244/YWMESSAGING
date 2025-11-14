@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
 import { AccessTokenPayload } from '../utils/jwt.utils.js';
 import {
   updateChurchProfile,
@@ -10,6 +11,9 @@ import {
   getActivityLogs,
   getActivityLogCount,
 } from '../services/admin.service.js';
+import * as telnyxService from '../services/telnyx.service.js';
+
+const prisma = new PrismaClient();
 
 declare global {
   namespace Express {
@@ -232,5 +236,93 @@ export async function logActivityHandler(req: Request, res: Response) {
   } catch (error) {
     console.error('Failed to log activity:', error);
     res.status(500).json({ error: 'Failed to log activity' });
+  }
+}
+
+/**
+ * POST /api/admin/phone-numbers/link
+ * Link a phone number and auto-create webhook
+ */
+export async function linkPhoneNumberHandler(req: Request, res: Response) {
+  try {
+    const churchId = req.user?.churchId;
+    if (!churchId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { phoneNumber } = req.body;
+
+    if (!phoneNumber) {
+      return res.status(400).json({ error: 'Phone number required' });
+    }
+
+    // Normalize phone number to E.164 format
+    const normalizedPhone = phoneNumber.replace(/\D/g, '');
+    if (normalizedPhone.length < 10) {
+      return res.status(400).json({ error: 'Invalid phone number format' });
+    }
+
+    const formattedPhone = `+1${normalizedPhone.slice(-10)}`;
+
+    // Check if number already linked to another church
+    const existingChurch = await prisma.church.findFirst({
+      where: { telnyxPhoneNumber: formattedPhone },
+    });
+
+    if (existingChurch && existingChurch.id !== churchId) {
+      return res.status(400).json({ error: 'Phone number already linked to another church' });
+    }
+
+    // Auto-create webhook
+    let webhookId: string | null = null;
+    try {
+      const webhookUrl = `${process.env.BACKEND_URL || 'https://api.koinoniasms.com'}/api/webhooks/telnyx/mms`;
+      const webhook = await telnyxService.createWebhook(webhookUrl);
+      webhookId = webhook.id;
+      console.log(`✅ Webhook auto-created for church ${churchId}: ${webhookId}`);
+    } catch (webhookError: any) {
+      console.warn(`⚠️ Webhook creation failed, but continuing: ${webhookError.message}`);
+      // Don't fail the whole request if webhook creation fails
+      // User can manually create it if needed
+    }
+
+    // Update church with phone number and webhook ID
+    const updated = await prisma.church.update({
+      where: { id: churchId },
+      data: {
+        telnyxPhoneNumber: formattedPhone,
+        telnyxVerified: true,
+        telnyxWebhookId: webhookId,
+        telnyxPurchasedAt: new Date(),
+      },
+      select: {
+        id: true,
+        telnyxPhoneNumber: true,
+        telnyxWebhookId: true,
+        telnyxVerified: true,
+      },
+    });
+
+    // Log activity
+    await logActivity(churchId, req.user?.adminId || '', 'Link Phone Number', {
+      phoneNumber: formattedPhone,
+      webhookId: webhookId || 'manual',
+    });
+
+    res.json({
+      success: true,
+      data: {
+        phoneNumber: updated.telnyxPhoneNumber,
+        webhookId: updated.telnyxWebhookId,
+        verified: updated.telnyxVerified,
+        message: webhookId
+          ? 'Phone number linked and webhook auto-created successfully!'
+          : 'Phone number linked! Please configure webhook manually in Telnyx dashboard.',
+      },
+    });
+  } catch (error) {
+    console.error('Failed to link phone number:', error);
+    const errorMessage = (error as Error).message;
+    res.status(500).json({ error: errorMessage || 'Failed to link phone number' });
   }
 }
