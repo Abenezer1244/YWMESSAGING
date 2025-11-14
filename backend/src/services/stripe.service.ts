@@ -113,14 +113,14 @@ export async function getCustomer(customerId: string): Promise<Stripe.Customer |
 
 /**
  * Create a payment intent for one-time charges (e.g., phone number setup fee)
- * $4.99 charged to customer, $1 goes to Telnyx
+ * $0.29 charged to customer
  */
 export async function createPhoneNumberSetupPaymentIntent(
   customerId: string,
   phoneNumber: string
 ): Promise<{ clientSecret: string; paymentIntentId: string }> {
   try {
-    const amountInCents = 499; // $4.99 in cents
+    const amountInCents = 29; // $0.29 in cents
 
     // Use idempotency key to prevent duplicate charges
     const idempotencyKey = `phone_setup_${customerId}_${phoneNumber}`;

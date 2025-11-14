@@ -21,7 +21,7 @@ export declare function cancelSubscription(subscriptionId: string): Promise<void
 export declare function getCustomer(customerId: string): Promise<Stripe.Customer | null>;
 /**
  * Create a payment intent for one-time charges (e.g., phone number setup fee)
- * $4.99 charged to customer, $1 goes to Telnyx
+ * $0.29 charged to customer
  */
 export declare function createPhoneNumberSetupPaymentIntent(customerId: string, phoneNumber: string): Promise<{
     clientSecret: string;
