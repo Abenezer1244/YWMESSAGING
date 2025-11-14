@@ -198,4 +198,48 @@ export async function releasePhoneNumber(numberSid, churchId) {
         throw new Error(`Telnyx error: ${errorMessage}`);
     }
 }
+/**
+ * Create webhook for incoming messages (auto-setup)
+ */
+export async function createWebhook(webhookUrl) {
+    try {
+        const client = getTelnyxClient();
+        const response = await client.post('/webhooks', {
+            url: webhookUrl,
+            events: ['message.received'],
+            api_version: '2023-09-01',
+        });
+        const webhookId = response.data?.data?.id;
+        if (!webhookId) {
+            throw new Error('No webhook ID returned from Telnyx');
+        }
+        console.log(`✅ Webhook created: ${webhookId}`);
+        return { id: webhookId };
+    }
+    catch (error) {
+        console.error('Telnyx webhook creation error:', {
+            status: error.response?.status,
+            data: error.response?.data,
+            message: error.message,
+        });
+        const errorMessage = error.response?.data?.errors?.[0]?.detail || error.message || 'Failed to create webhook';
+        throw new Error(`Failed to auto-create webhook: ${errorMessage}`);
+    }
+}
+/**
+ * Delete webhook by ID
+ */
+export async function deleteWebhook(webhookId) {
+    try {
+        const client = getTelnyxClient();
+        await client.delete(`/webhooks/${webhookId}`);
+        console.log(`✅ Webhook deleted: ${webhookId}`);
+        return true;
+    }
+    catch (error) {
+        console.error('Telnyx webhook deletion error:', error.message);
+        const errorMessage = error.response?.data?.errors?.[0]?.detail || error.message || 'Failed to delete webhook';
+        throw new Error(`Failed to delete webhook: ${errorMessage}`);
+    }
+}
 //# sourceMappingURL=telnyx.service.js.map

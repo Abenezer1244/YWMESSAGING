@@ -43,4 +43,9 @@ export declare function getActivityLogsHandler(req: Request, res: Response): Pro
  * Log an activity (internal use)
  */
 export declare function logActivityHandler(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+/**
+ * POST /api/admin/phone-numbers/link
+ * Link a phone number and auto-create webhook
+ */
+export declare function linkPhoneNumberHandler(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 //# sourceMappingURL=admin.controller.d.ts.map

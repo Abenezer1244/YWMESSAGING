@@ -82,4 +82,16 @@ export declare function getActivityLogs(page?: number, limit?: number): Promise<
 export declare function logActivity(action: string, details: Record<string, any>): Promise<{
     success: boolean;
 }>;
+/**
+ * Link a phone number and auto-create webhook
+ */
+export declare function linkPhoneNumber(phoneNumber: string): Promise<{
+    success: boolean;
+    data: {
+        phoneNumber: string;
+        webhookId: string | null;
+        verified: boolean;
+        message: string;
+    };
+}>;
 //# sourceMappingURL=admin.d.ts.map

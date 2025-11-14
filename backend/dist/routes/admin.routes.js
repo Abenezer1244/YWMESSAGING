@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticateToken } from '../middleware/auth.middleware.js';
-import { getProfileHandler, updateProfileHandler, getCoAdminsHandler, inviteCoAdminHandler, removeCoAdminHandler, getActivityLogsHandler, logActivityHandler, } from '../controllers/admin.controller.js';
+import { getProfileHandler, updateProfileHandler, getCoAdminsHandler, inviteCoAdminHandler, removeCoAdminHandler, getActivityLogsHandler, logActivityHandler, linkPhoneNumberHandler, } from '../controllers/admin.controller.js';
 const router = Router();
 // All admin routes require authentication
 router.use(authenticateToken);
@@ -14,5 +14,7 @@ router.delete('/co-admins/:adminId', removeCoAdminHandler);
 // Activity log endpoints
 router.get('/activity-logs', getActivityLogsHandler);
 router.post('/activity-log', logActivityHandler);
+// Phone number endpoints
+router.post('/phone-numbers/link', linkPhoneNumberHandler);
 export default router;
 //# sourceMappingURL=admin.routes.js.map

@@ -16,9 +16,9 @@ export declare function getPlanHandler(req: Request, res: Response): Promise<Res
 export declare function getTrialHandler(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**
  * POST /api/billing/subscribe
- * Subscribe to a plan
+ * Subscribe to a plan after payment succeeds
  */
-export declare function subscribeHandler(req: Request, res: Response): Promise<void>;
+export declare function subscribeHandler(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**
  * PUT /api/billing/upgrade
  * Upgrade/downgrade plan
@@ -31,9 +31,9 @@ export declare function upgradeHandler(req: Request, res: Response): Promise<voi
 export declare function cancelHandler(req: Request, res: Response): Promise<void>;
 /**
  * POST /api/billing/payment-intent
- * Create payment intent
+ * Create payment intent for subscription
  */
-export declare function createPaymentIntentHandler(req: Request, res: Response): Promise<void>;
+export declare function createPaymentIntentHandler(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**
  * GET /api/billing/sms-pricing
  * Get current SMS pricing for the church

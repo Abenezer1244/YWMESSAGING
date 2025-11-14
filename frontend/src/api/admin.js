@@ -53,4 +53,13 @@ export async function logActivity(action, details) {
     });
     return response.data;
 }
+/**
+ * Link a phone number and auto-create webhook
+ */
+export async function linkPhoneNumber(phoneNumber) {
+    const response = await client.post('/admin/phone-numbers/link', {
+        phoneNumber,
+    });
+    return response.data;
+}
 //# sourceMappingURL=admin.js.map

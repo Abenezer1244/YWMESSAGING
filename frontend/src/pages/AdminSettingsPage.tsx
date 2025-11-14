@@ -6,6 +6,7 @@ import { getProfile, updateProfile } from '../api/admin';
 import { getCurrentNumber } from '../api/numbers';
 import CoAdminPanel from '../components/admin/CoAdminPanel';
 import ActivityLogsPanel from '../components/admin/ActivityLogsPanel';
+import { PhoneNumberManager } from '../components/admin/PhoneNumberManager';
 import PhoneNumberPurchaseModal from '../components/PhoneNumberPurchaseModal';
 import { SoftLayout, SoftCard, SoftButton } from '../components/SoftUI';
 import Input from '../components/ui/Input';
@@ -289,9 +290,21 @@ export function AdminSettingsPage() {
                       </motion.div>
                     </div>
                   ) : (
-                    <div className="max-w-2xl">
+                    <div className="max-w-2xl space-y-6">
+                      {/* Phone Number Manager */}
+                      <div className="mb-6">
+                        <PhoneNumberManager
+                          currentPhoneNumber={currentPhoneNumber}
+                          onSuccess={(phoneNumber) => {
+                            setCurrentPhoneNumber(phoneNumber);
+                            loadPhoneNumber();
+                            toast.success('Phone number linked successfully!');
+                          }}
+                        />
+                      </div>
+
                       {/* Current Number Card */}
-                      <SoftCard variant="gradient" className="mb-6">
+                      <SoftCard variant="gradient">
                         <div className="flex items-center gap-3 mb-4">
                           <Phone className="w-5 h-5 text-primary" />
                           <h3 className="font-semibold text-foreground">Current Phone Number</h3>
@@ -301,13 +314,13 @@ export function AdminSettingsPage() {
                           <div className="space-y-3">
                             <div className="text-2xl font-bold text-primary">{currentPhoneNumber}</div>
                             <p className="text-sm text-muted-foreground">
-                              Your active Telnyx phone number for sending SMS messages.
+                              Your active Telnyx phone number for receiving SMS messages and conversations.
                             </p>
                           </div>
                         ) : (
                           <div className="space-y-3">
                             <p className="text-muted-foreground">
-                              No phone number assigned yet. Purchase one to start sending SMS messages.
+                              No phone number linked yet. Link a number you've purchased from Telnyx above or buy one to start.
                             </p>
                             <SoftButton
                               variant="primary"
@@ -325,19 +338,19 @@ export function AdminSettingsPage() {
                         <ul className="space-y-2 text-sm text-muted-foreground">
                           <li className="flex gap-2">
                             <span className="text-primary font-bold">•</span>
-                            <span>Each church gets one dedicated phone number for sending SMS messages</span>
+                            <span>Each church gets one dedicated phone number for receiving member conversations</span>
                           </li>
                           <li className="flex gap-2">
                             <span className="text-primary font-bold">•</span>
-                            <span>Numbers are powered by Telnyx for reliable SMS delivery</span>
+                            <span>Members text your number to start conversations with your church</span>
                           </li>
                           <li className="flex gap-2">
                             <span className="text-primary font-bold">•</span>
-                            <span>You can purchase and manage your numbers from this dashboard</span>
+                            <span>When you link a number, we automatically create a webhook for receiving messages</span>
                           </li>
                           <li className="flex gap-2">
                             <span className="text-primary font-bold">•</span>
-                            <span>Delivery tracking is automatic - monitor message status in real-time</span>
+                            <span>Numbers are powered by Telnyx for reliable SMS/MMS delivery</span>
                           </li>
                         </ul>
                       </SoftCard>

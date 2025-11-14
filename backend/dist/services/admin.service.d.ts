@@ -13,6 +13,7 @@ export declare function updateChurchProfile(churchId: string, input: UpdateChurc
     stripeCustomerId: string | null;
     telnyxPhoneNumber: string | null;
     telnyxNumberSid: string | null;
+    telnyxWebhookId: string | null;
     telnyxVerified: boolean;
     telnyxPurchasedAt: Date | null;
     trialEndsAt: Date;

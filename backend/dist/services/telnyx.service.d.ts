@@ -47,5 +47,15 @@ export declare function getPhoneNumberDetails(numberSid: string): Promise<any>;
  * Release/delete a phone number
  */
 export declare function releasePhoneNumber(numberSid: string, churchId: string): Promise<boolean>;
+/**
+ * Create webhook for incoming messages (auto-setup)
+ */
+export declare function createWebhook(webhookUrl: string): Promise<{
+    id: string;
+}>;
+/**
+ * Delete webhook by ID
+ */
+export declare function deleteWebhook(webhookId: string): Promise<boolean>;
 export {};
 //# sourceMappingURL=telnyx.service.d.ts.map

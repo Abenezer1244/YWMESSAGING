@@ -1,0 +1,325 @@
+import { PrismaClient } from '@prisma/client';
+import * as conversationService from '../services/conversation.service.js';
+import * as telnyxMMSService from '../services/telnyx-mms.service.js';
+import * as s3MediaService from '../services/s3-media.service.js';
+const prisma = new PrismaClient();
+/**
+ * GET /api/conversations
+ * Get all conversations for church
+ */
+export async function getConversations(req, res) {
+    try {
+        const churchId = req.user?.churchId;
+        const page = req.query.page ? parseInt(req.query.page) : 1;
+        const limit = req.query.limit ? parseInt(req.query.limit) : 20;
+        const status = req.query.status;
+        if (!churchId) {
+            return res.status(401).json({
+                success: false,
+                error: 'Unauthorized',
+            });
+        }
+        const result = await conversationService.getConversations(churchId, {
+            page,
+            limit,
+            status,
+        });
+        res.json({
+            success: true,
+            data: result.data,
+            pagination: result.pagination,
+        });
+    }
+    catch (error) {
+        console.error('Error getting conversations:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}
+/**
+ * GET /api/conversations/:conversationId
+ * Get single conversation with all messages
+ */
+export async function getConversation(req, res) {
+    try {
+        const { conversationId } = req.params;
+        const churchId = req.user?.churchId;
+        const page = req.query.page ? parseInt(req.query.page) : 1;
+        const limit = req.query.limit ? parseInt(req.query.limit) : 50;
+        if (!churchId) {
+            return res.status(401).json({
+                success: false,
+                error: 'Unauthorized',
+            });
+        }
+        const conversation = await conversationService.getConversation(conversationId, churchId, { page, limit });
+        res.json({
+            success: true,
+            data: conversation,
+        });
+    }
+    catch (error) {
+        console.error('Error getting conversation:', error);
+        const statusCode = error.message === 'Access denied' ? 403 : 500;
+        res.status(statusCode).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}
+/**
+ * POST /api/conversations/:conversationId/reply
+ * Send text-only reply
+ */
+export async function replyToConversation(req, res) {
+    try {
+        const { conversationId } = req.params;
+        const { content } = req.body;
+        const churchId = req.user?.churchId;
+        if (!churchId || !conversationId || !content) {
+            return res.status(400).json({
+                success: false,
+                error: 'Missing required fields',
+            });
+        }
+        const message = await conversationService.createReply(conversationId, churchId, content);
+        res.status(201).json({
+            success: true,
+            data: message,
+        });
+    }
+    catch (error) {
+        console.error('Error replying:', error);
+        const statusCode = error.message === 'Access denied' ? 403 : 500;
+        res.status(statusCode).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}
+/**
+ * POST /api/conversations/:conversationId/reply-with-media
+ * Send reply with media attachment (full quality, no compression)
+ */
+export async function replyWithMedia(req, res) {
+    try {
+        const { conversationId } = req.params;
+        const { content } = req.body;
+        const churchId = req.user?.churchId;
+        if (!churchId || !conversationId) {
+            return res.status(400).json({
+                success: false,
+                error: 'Missing required fields',
+            });
+        }
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                error: 'No file uploaded',
+            });
+        }
+        // Validate file
+        const validation = await s3MediaService.validateMediaFile(req.file.path, req.file.mimetype);
+        if (!validation.valid) {
+            return res.status(400).json({
+                success: false,
+                error: validation.error,
+            });
+        }
+        // Upload to S3 (full quality, no compression)
+        console.log(`📤 Uploading file: ${req.file.originalname} (${req.file.mimetype})`);
+        const uploadResult = await s3MediaService.uploadMediaFromFile(req.file.path, conversationId, req.file.originalname, req.file.mimetype);
+        // Create reply with media
+        const message = await conversationService.createReplyWithMedia(conversationId, churchId, content, {
+            s3Url: uploadResult.s3Url,
+            s3Key: uploadResult.s3Key,
+            type: uploadResult.metadata.type,
+            name: req.file.originalname,
+            sizeBytes: uploadResult.metadata.sizeBytes,
+            mimeType: uploadResult.metadata.mimeType,
+            width: uploadResult.metadata.width,
+            height: uploadResult.metadata.height,
+            duration: uploadResult.metadata.duration,
+        });
+        res.status(201).json({
+            success: true,
+            data: message,
+        });
+    }
+    catch (error) {
+        console.error('Error replying with media:', error);
+        const statusCode = error.message === 'Access denied' ? 403 : 500;
+        res.status(statusCode).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}
+/**
+ * PATCH /api/conversations/:conversationId/read
+ * Mark conversation as read
+ */
+export async function markAsRead(req, res) {
+    try {
+        const { conversationId } = req.params;
+        const churchId = req.user?.churchId;
+        if (!churchId) {
+            return res.status(401).json({
+                success: false,
+                error: 'Unauthorized',
+            });
+        }
+        await conversationService.markAsRead(conversationId, churchId);
+        res.json({
+            success: true,
+            message: 'Conversation marked as read',
+        });
+    }
+    catch (error) {
+        console.error('Error marking as read:', error);
+        const statusCode = error.message === 'Access denied' ? 403 : 500;
+        res.status(statusCode).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}
+/**
+ * PATCH /api/conversations/:conversationId/status
+ * Update conversation status
+ */
+export async function updateStatus(req, res) {
+    try {
+        const { conversationId } = req.params;
+        const { status } = req.body;
+        const churchId = req.user?.churchId;
+        if (!churchId) {
+            return res.status(401).json({
+                success: false,
+                error: 'Unauthorized',
+            });
+        }
+        if (!['open', 'closed', 'archived'].includes(status)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid status',
+            });
+        }
+        await conversationService.updateStatus(conversationId, churchId, status);
+        res.json({
+            success: true,
+            message: `Conversation status updated to ${status}`,
+        });
+    }
+    catch (error) {
+        console.error('Error updating status:', error);
+        const statusCode = error.message === 'Access denied' ? 403 : 500;
+        res.status(statusCode).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}
+/**
+ * POST /api/webhooks/telnyx/mms
+ * Receive inbound MMS from congregation member
+ * Telnyx sends webhook when member texts the church number with media
+ */
+export async function handleTelnyxInboundMMS(req, res) {
+    try {
+        const { type, data } = req.body;
+        // Only process message received events
+        if (type !== 'message.received') {
+            console.log(`⏭️ Skipping webhook type: ${type}`);
+            return res.status(200).json({ received: true });
+        }
+        const payload = data?.payload?.[0];
+        if (!payload) {
+            console.warn('⚠️ Invalid payload in webhook');
+            return res.status(400).json({ error: 'Invalid payload' });
+        }
+        const { from, to, text, media } = payload;
+        console.log(`📨 Telnyx MMS webhook: from=${from}, to=${to}, media=${media?.length || 0}`);
+        // Find church by Telnyx number (to field)
+        const church = await prisma.church.findFirst({
+            where: { telnyxPhoneNumber: to },
+        });
+        if (!church) {
+            console.log(`❌ No church found for Telnyx number: ${to}`);
+            return res.status(200).json({ received: true });
+        }
+        // Extract media URLs
+        const mediaUrls = media?.map((m) => m.url) || [];
+        console.log(`✅ Processing MMS for church: ${church.name} (${church.id})`);
+        // Process inbound MMS
+        const result = await telnyxMMSService.handleInboundMMS(church.id, from, text || '', mediaUrls);
+        console.log(`✅ MMS processed: conversation=${result.conversationId}, messages=${result.messageIds.length}`);
+        return res.json({ received: true });
+    }
+    catch (error) {
+        console.error('❌ Inbound MMS webhook error:', error);
+        // Still return 200 to acknowledge receipt to Telnyx
+        res.status(500).json({ error: error.message });
+    }
+}
+/**
+ * POST /api/webhooks/telnyx/status
+ * Receive delivery status updates from Telnyx (for SMS/MMS sent)
+ * Updates message delivery status
+ */
+export async function handleTelnyxWebhook(req, res) {
+    try {
+        const { type, data } = req.body;
+        // Only process delivery receipt events
+        if (type !== 'message.dlr') {
+            return res.status(200).json({ received: true });
+        }
+        const payload = data?.payload?.[0];
+        if (!payload || !payload.id) {
+            return res.status(400).json({ error: 'Invalid payload' });
+        }
+        const messageId = payload.id;
+        const telnyxStatus = payload.status;
+        console.log(`📨 Telnyx DLR: message=${messageId}, status=${telnyxStatus}`);
+        // Find message by Telnyx ID
+        const message = await prisma.conversationMessage.findFirst({
+            where: { providerMessageId: messageId },
+        });
+        if (!message) {
+            console.log(`⏭️ Message not found for Telnyx ID: ${messageId} (may not be from conversation)`);
+            return res.status(200).json({ received: true });
+        }
+        // Map Telnyx status to our status
+        let status = null;
+        if (telnyxStatus === 'delivered') {
+            status = 'delivered';
+        }
+        else if (telnyxStatus === 'failed' ||
+            telnyxStatus === 'undelivered' ||
+            telnyxStatus === 'bounced') {
+            status = 'failed';
+        }
+        else {
+            // pending, queued, etc. - don't update yet
+            return res.status(200).json({ received: true });
+        }
+        if (status) {
+            // Update message delivery status
+            await prisma.conversationMessage.update({
+                where: { id: message.id },
+                data: {
+                    deliveryStatus: status,
+                },
+            });
+            console.log(`✅ Updated message delivery status: ${message.id} → ${status}`);
+        }
+        res.json({ received: true });
+    }
+    catch (error) {
+        console.error('❌ Telnyx webhook error:', error);
+        res.status(500).json({ error: 'Failed to process webhook' });
+    }
+}
+//# sourceMappingURL=conversation.controller.js.map

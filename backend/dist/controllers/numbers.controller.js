@@ -239,7 +239,7 @@ export async function purchaseNumber(req, res) {
         }
         // SECURITY: Verify payment intent before purchasing
         // This prevents fraud where someone could use a payment intent from another user
-        const SETUP_FEE_CENTS = 499; // $4.99
+        const SETUP_FEE_CENTS = 799; // $7.99
         const isPaymentValid = await verifyPaymentIntent(paymentIntentId, church.stripeCustomerId, SETUP_FEE_CENTS, phoneNumber);
         if (!isPaymentValid) {
             console.warn(`⚠️ Payment verification failed for church ${churchId}`);

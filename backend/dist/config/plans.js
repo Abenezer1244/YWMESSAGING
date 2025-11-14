@@ -41,7 +41,7 @@ export const PLANS = {
     },
     pro: {
         name: 'Pro',
-        price: 9900, // $99.00
+        price: 12900, // $129.00
         currency: 'usd',
         branches: 10,
         members: 999999, // unlimited
