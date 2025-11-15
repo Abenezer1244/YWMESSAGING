@@ -108,7 +108,8 @@
       "Bash(pkill:*)",
       "Bash(docker-compose ps:*)",
       "Bash(docker-compose:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(/dev/null)"
     ],
     "deny": [],
     "ask": []
