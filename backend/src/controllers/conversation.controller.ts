@@ -365,16 +365,30 @@ export async function handleTelnyxInboundMMS(req: Request, res: Response) {
     }
 
     const phoneHash = hashForSearch(formattedPhone);
+    // Check if member is part of this church (either in a group or has a conversation)
     const isMember = await prisma.member.findFirst({
       where: {
         phoneHash,
-        groups: {
-          some: {
-            group: {
-              churchId: church.id
+        OR: [
+          // Members in groups for this church
+          {
+            groups: {
+              some: {
+                group: {
+                  churchId: church.id
+                }
+              }
+            }
+          },
+          // Members who have conversations with this church
+          {
+            conversations: {
+              some: {
+                churchId: church.id
+              }
             }
           }
-        }
+        ]
       }
     });
 
