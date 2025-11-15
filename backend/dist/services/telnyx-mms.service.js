@@ -119,24 +119,44 @@ export async function sendMMS(to, message, churchId, mediaS3Url) {
             payload.media_urls = [mediaS3Url];
             console.log(`📎 Attaching media: ${mediaS3Url}`);
         }
+        // Log outbound attempt
+        console.log(`📤 Sending ${mediaS3Url ? 'MMS' : 'SMS'}: from ${church.telnyxPhoneNumber} to ${to}`);
+        console.log(`   Message: "${message.substring(0, 80)}${message.length > 80 ? '...' : ''}"`);
         // Send via Telnyx
         const client = getTelnyxClient();
         const response = await client.post('/messages', payload);
         const messageId = response.data?.data?.id;
+        const messageStatus = response.data?.data?.status;
         if (!messageId) {
+            console.error('❌ No message ID returned from Telnyx');
+            console.error('   Telnyx Response:', JSON.stringify(response.data, null, 2));
             throw new Error('No message ID returned from Telnyx');
         }
-        console.log(`✅ ${mediaS3Url ? 'MMS' : 'SMS'} sent: ${messageId} to ${to}`);
+        console.log(`✅ ${mediaS3Url ? 'MMS' : 'SMS'} accepted by Telnyx: ${messageId}`);
+        console.log(`   Status: ${messageStatus}, Recipient: ${to}`);
         return {
             messageSid: messageId,
             success: true,
         };
     }
     catch (error) {
+        console.error(`❌ Failed to send ${mediaS3Url ? 'MMS' : 'SMS'} to ${to}`);
+        // Log detailed error information from Telnyx
+        if (error.response?.data) {
+            console.error('   Telnyx Response:', JSON.stringify(error.response.data, null, 2));
+            const errors = error.response.data?.errors;
+            if (Array.isArray(errors) && errors.length > 0) {
+                errors.forEach((err, idx) => {
+                    console.error(`   Error ${idx + 1}: [${err.code}] ${err.title} - ${err.detail}`);
+                });
+            }
+        }
+        else if (error.message) {
+            console.error('   Error:', error.message);
+        }
         const errorMessage = error.response?.data?.errors?.[0]?.detail ||
             error.message ||
             'Failed to send MMS';
-        console.error(`❌ MMS send error: ${errorMessage}`);
         throw new Error(`Telnyx error: ${errorMessage}`);
     }
 }

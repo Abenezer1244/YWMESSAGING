@@ -179,6 +179,10 @@ export async function sendSMS(
   }
 
   try {
+    // Log outbound SMS attempt
+    console.log(`📤 Sending SMS: from ${church.telnyxPhoneNumber} to ${to}`);
+    console.log(`   Message: "${message.substring(0, 80)}${message.length > 80 ? '...' : ''}"`);
+
     const client = getTelnyxClient();
     const response = await client.post('/messages', {
       from: church.telnyxPhoneNumber,
@@ -190,15 +194,37 @@ export async function sendSMS(
     });
 
     const messageId = response.data?.data?.id;
+    const messageStatus = response.data?.data?.status;
+
     if (!messageId) {
+      console.error('❌ No message ID returned from Telnyx');
+      console.error('   Telnyx Response:', JSON.stringify(response.data, null, 2));
       throw new Error('No message ID returned from Telnyx');
     }
+
+    console.log(`✅ SMS accepted by Telnyx: ${messageId}`);
+    console.log(`   Status: ${messageStatus}, Recipient: ${to}`);
 
     return {
       messageSid: messageId,
       success: true,
     };
   } catch (error: any) {
+    console.error(`❌ Failed to send SMS to ${to}`);
+
+    // Log detailed error information from Telnyx
+    if (error.response?.data) {
+      console.error('   Telnyx Response:', JSON.stringify(error.response.data, null, 2));
+      const errors = error.response.data?.errors;
+      if (Array.isArray(errors) && errors.length > 0) {
+        errors.forEach((err: any, idx: number) => {
+          console.error(`   Error ${idx + 1}: [${err.code}] ${err.title} - ${err.detail}`);
+        });
+      }
+    } else if (error.message) {
+      console.error('   Error:', error.message);
+    }
+
     const errorMessage = error.response?.data?.errors?.[0]?.detail || error.message || 'Failed to send SMS';
     throw new Error(`Telnyx error: ${errorMessage}`);
   }
