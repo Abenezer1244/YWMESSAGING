@@ -549,6 +549,13 @@ export async function linkPhoneNumberToMessagingProfile(phoneNumber, messagingPr
         }
         catch (method1Error) {
             const errorCode = generateErrorCode(method1Error.response?.status);
+            // Enhanced error logging to capture full Telnyx response
+            console.error('[TELNYX_LINKING] Method 1 Error Details:', {
+                status: method1Error.response?.status,
+                statusText: method1Error.response?.statusText,
+                fullErrorData: method1Error.response?.data,
+                message: method1Error.message,
+            });
             logLinkingOperation({
                 timestamp: new Date().toISOString(),
                 churchId,
@@ -557,7 +564,7 @@ export async function linkPhoneNumberToMessagingProfile(phoneNumber, messagingPr
                 step: `${currentStep}_failed`,
                 result: 'failure',
                 errorCode,
-                errorDetails: method1Error.message || method1Error.response?.data?.errors?.[0]?.detail,
+                errorDetails: method1Error.message || method1Error.response?.data?.errors?.[0]?.detail || JSON.stringify(method1Error.response?.data),
                 duration: Date.now() - method1StartTime,
             });
             // ====================================================================
