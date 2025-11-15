@@ -282,15 +282,16 @@ export async function handleTelnyxInboundMMS(req: Request, res: Response) {
   try {
     console.log('🔔 WEBHOOK RECEIVED:', JSON.stringify(req.body, null, 2));
 
-    const { type, data } = req.body;
+    const { data } = req.body;
+    const eventType = data?.event_type;
 
     // Only process message received events
-    if (type !== 'message.received') {
-      console.log(`⏭️ Skipping webhook type: ${type}`);
+    if (eventType !== 'message.received') {
+      console.log(`⏭️ Skipping webhook type: ${eventType}`);
       return res.status(200).json({ received: true });
     }
 
-    const payload = data?.payload?.[0];
+    const payload = data?.payload;
     if (!payload) {
       console.warn('⚠️ Invalid payload in webhook');
       return res.status(400).json({ error: 'Invalid payload' });
