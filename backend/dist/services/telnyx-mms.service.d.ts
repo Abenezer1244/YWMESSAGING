@@ -15,7 +15,7 @@ export declare function sendMMS(to: string, message: string, churchId: string, m
  * Handle inbound MMS webhook
  * Called when member sends photo/video/audio/document to church number
  */
-export declare function handleInboundMMS(churchId: string, senderPhone: string, messageText: string, mediaUrls: string[]): Promise<{
+export declare function handleInboundMMS(churchId: string, senderPhone: string, messageText: string, mediaUrls: string[], telnyxMessageId?: string): Promise<{
     conversationId: string;
     messageIds: string[];
 }>;

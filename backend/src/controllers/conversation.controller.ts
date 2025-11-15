@@ -299,6 +299,15 @@ export async function handleTelnyxInboundMMS(req: Request, res: Response) {
 
     const { id: telnyxMessageId, from, to, text, media } = payload;
 
+    // Extract phone numbers from Telnyx webhook format
+    const senderPhone = from?.phone_number;
+    const recipientPhone = to?.[0]?.phone_number;
+
+    if (!senderPhone || !recipientPhone) {
+      console.warn('⚠️ Missing phone numbers in webhook payload');
+      return res.status(400).json({ error: 'Missing phone numbers' });
+    }
+
     // IDEMPOTENCY: Check if we already processed this message
     if (telnyxMessageId) {
       const existingMessage = await prisma.conversationMessage.findFirst({
@@ -312,11 +321,11 @@ export async function handleTelnyxInboundMMS(req: Request, res: Response) {
     }
 
     console.log(
-      `📨 Telnyx MMS webhook: from=${from}, to=${to}, media=${media?.length || 0}`
+      `📨 Telnyx MMS webhook: from=${senderPhone}, to=${recipientPhone}, media=${media?.length || 0}`
     );
 
     // Find church by Telnyx number (to field)
-    console.log(`🔍 Looking for church with telnyxPhoneNumber: ${to}`);
+    console.log(`🔍 Looking for church with telnyxPhoneNumber: ${recipientPhone}`);
 
     const church = await prisma.church.findFirst({
       where: { telnyxPhoneNumber: to },

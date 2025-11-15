@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import Stripe from 'stripe';
+import { handleTelnyxInboundMMS, handleTelnyxWebhook } from '../controllers/conversation.controller.js';
 const router = Router();
 const prisma = new PrismaClient();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
@@ -182,5 +183,7 @@ async function handleSubscriptionDeleted(subscription) {
     }
 }
 router.post('/webhooks/stripe', handleStripeWebhook);
+router.post('/webhooks/telnyx/mms', handleTelnyxInboundMMS);
+router.post('/webhooks/telnyx/status', handleTelnyxWebhook);
 export default router;
 //# sourceMappingURL=webhook.routes.js.map

@@ -2,6 +2,8 @@ import { PrismaClient } from '@prisma/client';
 import * as conversationService from '../services/conversation.service.js';
 import * as telnyxMMSService from '../services/telnyx-mms.service.js';
 import * as s3MediaService from '../services/s3-media.service.js';
+import { hashForSearch } from '../utils/encryption.utils.js';
+import { sendSMS } from '../services/telnyx.service.js';
 const prisma = new PrismaClient();
 /**
  * GET /api/conversations
@@ -229,32 +231,89 @@ export async function updateStatus(req, res) {
  */
 export async function handleTelnyxInboundMMS(req, res) {
     try {
-        const { type, data } = req.body;
+        console.log('🔔 WEBHOOK RECEIVED:', JSON.stringify(req.body, null, 2));
+        const { data } = req.body;
+        const eventType = data?.event_type;
         // Only process message received events
-        if (type !== 'message.received') {
-            console.log(`⏭️ Skipping webhook type: ${type}`);
+        if (eventType !== 'message.received') {
+            console.log(`⏭️ Skipping webhook type: ${eventType}`);
             return res.status(200).json({ received: true });
         }
-        const payload = data?.payload?.[0];
+        const payload = data?.payload;
         if (!payload) {
             console.warn('⚠️ Invalid payload in webhook');
             return res.status(400).json({ error: 'Invalid payload' });
         }
-        const { from, to, text, media } = payload;
-        console.log(`📨 Telnyx MMS webhook: from=${from}, to=${to}, media=${media?.length || 0}`);
+        const { id: telnyxMessageId, from, to, text, media } = payload;
+        // Extract phone numbers from Telnyx webhook format
+        const senderPhone = from?.phone_number;
+        const recipientPhone = to?.[0]?.phone_number;
+        if (!senderPhone || !recipientPhone) {
+            console.warn('⚠️ Missing phone numbers in webhook payload');
+            return res.status(400).json({ error: 'Missing phone numbers' });
+        }
+        // IDEMPOTENCY: Check if we already processed this message
+        if (telnyxMessageId) {
+            const existingMessage = await prisma.conversationMessage.findFirst({
+                where: { providerMessageId: telnyxMessageId }
+            });
+            if (existingMessage) {
+                console.log(`⏭️ Webhook already processed for message ID: ${telnyxMessageId}`);
+                return res.json({ received: true });
+            }
+        }
+        console.log(`📨 Telnyx MMS webhook: from=${senderPhone}, to=${recipientPhone}, media=${media?.length || 0}`);
         // Find church by Telnyx number (to field)
+        console.log(`🔍 Looking for church with telnyxPhoneNumber: ${recipientPhone}`);
         const church = await prisma.church.findFirst({
             where: { telnyxPhoneNumber: to },
+            select: { id: true, name: true, telnyxPhoneNumber: true }
         });
+        console.log(`Found churches in database:`, await prisma.church.findMany({
+            where: { telnyxPhoneNumber: { not: null } },
+            select: { id: true, name: true, telnyxPhoneNumber: true }
+        }));
         if (!church) {
             console.log(`❌ No church found for Telnyx number: ${to}`);
             return res.status(200).json({ received: true });
         }
+        // SECURITY: Verify sender is a registered member of the church
+        console.log(`🔐 Verifying member: ${from} for church ${church.id}`);
+        const phoneHash = hashForSearch(from);
+        const isMember = await prisma.member.findFirst({
+            where: {
+                phoneHash,
+                groups: {
+                    some: {
+                        group: {
+                            churchId: church.id
+                        }
+                    }
+                }
+            }
+        });
+        if (!isMember) {
+            console.log(`🚫 Non-member attempted to message: ${from} to ${to}`);
+            // Send auto-reply to non-member
+            try {
+                const replyMessage = `Hello! To communicate with ${church.name}, please ask the church leader to add you to the system.`;
+                await sendSMS(from, // to (sender's number)
+                replyMessage, // message
+                church.id // churchId
+                );
+                console.log(`✅ Auto-reply sent to non-member: ${from}`);
+            }
+            catch (error) {
+                console.error(`⚠️ Failed to send auto-reply to ${from}:`, error.message);
+            }
+            return res.status(200).json({ received: true });
+        }
+        console.log(`✅ Member verified: ${isMember.id} (${isMember.firstName} ${isMember.lastName})`);
         // Extract media URLs
         const mediaUrls = media?.map((m) => m.url) || [];
         console.log(`✅ Processing MMS for church: ${church.name} (${church.id})`);
         // Process inbound MMS
-        const result = await telnyxMMSService.handleInboundMMS(church.id, from, text || '', mediaUrls);
+        const result = await telnyxMMSService.handleInboundMMS(church.id, from, text || '', mediaUrls, telnyxMessageId);
         console.log(`✅ MMS processed: conversation=${result.conversationId}, messages=${result.messageIds.length}`);
         return res.json({ received: true });
     }

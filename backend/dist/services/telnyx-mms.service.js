@@ -138,7 +138,7 @@ export async function sendMMS(to, message, churchId, mediaS3Url) {
  * Handle inbound MMS webhook
  * Called when member sends photo/video/audio/document to church number
  */
-export async function handleInboundMMS(churchId, senderPhone, messageText, mediaUrls) {
+export async function handleInboundMMS(churchId, senderPhone, messageText, mediaUrls, telnyxMessageId) {
     try {
         console.log(`📱 Inbound MMS: ${senderPhone} → Church (${mediaUrls.length} media files)`);
         // 1. Find or create member by phone
@@ -172,6 +172,7 @@ export async function handleInboundMMS(churchId, senderPhone, messageText, media
                     memberId: member.id,
                     content: messageText,
                     direction: 'inbound',
+                    providerMessageId: telnyxMessageId, // Store Telnyx ID for idempotency
                 },
             });
             messageIds.push(textMessage.id);
@@ -192,6 +193,7 @@ export async function handleInboundMMS(churchId, senderPhone, messageText, media
                         memberId: member.id,
                         content: messageText || `[${uploadResult.metadata.type}]`,
                         direction: 'inbound',
+                        providerMessageId: telnyxMessageId, // Store Telnyx ID for idempotency
                         mediaUrl: uploadResult.s3Url,
                         mediaType: uploadResult.metadata.type,
                         mediaName: fileName,

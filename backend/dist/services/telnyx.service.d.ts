@@ -34,7 +34,7 @@ export declare function searchAvailableNumbers(options: {
 /**
  * Purchase a phone number
  */
-export declare function purchasePhoneNumber(phoneNumber: string, churchId: string, connectionId?: string): Promise<{
+export declare function purchasePhoneNumber(phoneNumber: string, churchId: string, connectionId?: string, messagingProfileId?: string): Promise<{
     numberSid: string;
     phoneNumber: string;
     success: boolean;
@@ -57,5 +57,11 @@ export declare function createWebhook(webhookUrl: string): Promise<{
  * Delete webhook by ID
  */
 export declare function deleteWebhook(webhookId: string): Promise<boolean>;
+/**
+ * Link phone number to messaging profile for webhook routing
+ * Note: Telnyx routes inbound messages via the messaging profile associated with the number
+ * This tries multiple approaches to ensure the number is linked
+ */
+export declare function linkPhoneNumberToMessagingProfile(phoneNumber: string, messagingProfileId: string): Promise<boolean>;
 export {};
 //# sourceMappingURL=telnyx.service.d.ts.map

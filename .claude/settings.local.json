@@ -99,7 +99,12 @@
       "Bash(npx playwright install:*)",
       "Bash(mkdir:*)",
       "WebFetch(domain:developers.telnyx.com)",
-      "Bash(npm ls:*)"
+      "Bash(npm ls:*)",
+      "Bash(mcp__playwright__browser_navigate \"http://localhost:5173\")",
+      "Bash(nul)",
+      "Bash(tasklist:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.npmjs.com)"
     ],
     "deny": [],
     "ask": []
