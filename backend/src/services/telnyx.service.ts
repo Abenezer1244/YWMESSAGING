@@ -189,6 +189,7 @@ export async function sendSMS(
       to: to,
       text: message,
       type: 'SMS',
+      dlr_type: 'dlr',  // Request delivery receipt notifications
       webhook_url: `${process.env.BACKEND_URL || 'https://api.koinoniasms.com'}/api/webhooks/telnyx/status`,
       webhook_failover_url: `${process.env.BACKEND_URL || 'https://api.koinoniasms.com'}/api/webhooks/telnyx/status`,
     });

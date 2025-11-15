@@ -127,6 +127,7 @@ export async function sendMMS(
       to,
       text: message,
       type: mediaS3Url ? 'MMS' : 'SMS',
+      dlr_type: 'dlr',  // Request delivery receipt notifications
       webhook_url: `${
         process.env.BACKEND_URL || 'https://api.koinoniasms.com'
       }/api/webhooks/telnyx/status`,
