@@ -300,15 +300,29 @@ export async function broadcastInboundToMembers(
   mediaType?: string
 ): Promise<void> {
   try {
-    // Get all members of the church who opted in for SMS (except the sender)
+    // Get all members of the church who opted in for SMS
+    // Include members who are in groups OR have conversations with this church
     const members = await prisma.member.findMany({
       where: {
         optInSms: true,
-        groups: {
-          some: {
-            group: { churchId },
+        OR: [
+          // Members in groups for this church
+          {
+            groups: {
+              some: {
+                group: { churchId },
+              },
+            },
           },
-        },
+          // Members who have conversations with this church (texted the church number)
+          {
+            conversations: {
+              some: {
+                churchId,
+              },
+            },
+          },
+        ],
       },
       select: {
         id: true,
