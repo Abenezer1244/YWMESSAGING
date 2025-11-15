@@ -18,18 +18,35 @@ interface FormData {
 }
 
 export function AddMemberModal({ isOpen, groupId, onClose, onSuccess }: AddMemberModalProps) {
-  const { register, handleSubmit, reset } = useForm<FormData>();
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      phone: '',
+      email: '',
+    }
+  });
   const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async (data: FormData) => {
     try {
       setIsLoading(true);
 
+      // Trim and validate form data
+      const firstName = data.firstName?.trim();
+      const lastName = data.lastName?.trim();
+      const phone = data.phone?.trim();
+
+      if (!firstName || !lastName || !phone) {
+        toast.error('First name, last name, and phone are required');
+        return;
+      }
+
       const member = await addMember(groupId, {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phone: data.phone,
-        email: data.email || undefined,
+        firstName,
+        lastName,
+        phone,
+        email: data.email?.trim() || undefined,
       });
 
       toast.success('Member added successfully');
@@ -54,22 +71,24 @@ export function AddMemberModal({ isOpen, groupId, onClose, onSuccess }: AddMembe
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                First Name *
+                First Name * {errors.firstName && <span className="text-red-500">Required</span>}
               </label>
               <input
                 type="text"
-                {...register('firstName', { required: true })}
+                {...register('firstName', { required: 'First name is required' })}
+                autoComplete="off"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="John"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Last Name *
+                Last Name * {errors.lastName && <span className="text-red-500">Required</span>}
               </label>
               <input
                 type="text"
-                {...register('lastName', { required: true })}
+                {...register('lastName', { required: 'Last name is required' })}
+                autoComplete="off"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Doe"
               />
@@ -78,11 +97,12 @@ export function AddMemberModal({ isOpen, groupId, onClose, onSuccess }: AddMembe
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Phone Number *
+              Phone Number * {errors.phone && <span className="text-red-500">Required</span>}
             </label>
             <input
               type="tel"
-              {...register('phone', { required: true })}
+              {...register('phone', { required: 'Phone is required' })}
+              autoComplete="off"
               className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="(202) 555-0173"
             />
@@ -96,6 +116,7 @@ export function AddMemberModal({ isOpen, groupId, onClose, onSuccess }: AddMembe
             <input
               type="email"
               {...register('email')}
+              autoComplete="off"
               className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="john@example.com"
             />
