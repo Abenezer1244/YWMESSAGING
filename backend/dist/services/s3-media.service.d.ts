@@ -35,7 +35,7 @@ export declare function deleteMedia(s3Key: string): Promise<void>;
  * Refresh/generate presigned URL for existing media
  * Called when existing URL is about to expire
  */
-export declare function getPresignedUrl(s3Key: string, expirationSeconds?: number): string;
+export declare function getPresignedUrl(s3Key: string, expirationSeconds?: number): Promise<string>;
 /**
  * Get media info (for dashboard preview)
  */

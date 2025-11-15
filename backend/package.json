@@ -18,10 +18,11 @@
     "prisma:studio": "prisma studio"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.480.0",
+    "@aws-sdk/s3-request-presigner": "^3.480.0",
     "@prisma/client": "5.3.1",
     "@sendgrid/mail": "^8.1.6",
     "@types/multer": "^2.0.0",
-    "aws-sdk": "^2.1692.0",
     "axios": "^1.13.1",
     "bcrypt": "5.1.0",
     "bull": "4.10.0",

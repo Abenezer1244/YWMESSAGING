@@ -1,13 +1,16 @@
-import AWS from 'aws-sdk';
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, HeadObjectCommand, ListObjectsV2Command, HeadBucketCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { v4 as uuidv4 } from 'uuid';
 import fetch from 'node-fetch';
 import sharp from 'sharp';
 import fs from 'fs';
 import path from 'path';
-const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+const s3Client = new S3Client({
     region: process.env.AWS_REGION || 'us-east-1',
+    credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+    },
 });
 /**
  * Download media from Telnyx CDN and upload to S3
@@ -44,8 +47,7 @@ export async function downloadAndUploadMedia(telnyxMediaUrl, conversationId, fil
         // 6. Upload to S3 - FULL QUALITY, NO COMPRESSION
         const s3Key = `${process.env.AWS_S3_FOLDER || 'conversations'}/${conversationId}/${uuidv4()}_${fileName}`;
         console.log(`📤 Uploading to S3: ${s3Key}`);
-        await s3
-            .putObject({
+        const putCommand = new PutObjectCommand({
             Bucket: process.env.AWS_S3_BUCKET,
             Key: s3Key,
             Body: buffer,
@@ -56,15 +58,14 @@ export async function downloadAndUploadMedia(telnyxMediaUrl, conversationId, fil
                 'conversation-id': conversationId,
                 'upload-date': new Date().toISOString(),
             },
-        })
-            .promise();
+        });
+        await s3Client.send(putCommand);
         console.log(`✅ S3 upload complete: ${s3Key}`);
         // 7. Generate presigned URL (valid for 7 days)
-        const s3Url = s3.getSignedUrl('getObject', {
+        const s3Url = await getSignedUrl(s3Client, new GetObjectCommand({
             Bucket: process.env.AWS_S3_BUCKET,
             Key: s3Key,
-            Expires: 7 * 24 * 60 * 60,
-        });
+        }), { expiresIn: 7 * 24 * 60 * 60 });
         return {
             s3Key,
             s3Url,
@@ -109,8 +110,7 @@ export async function uploadMediaFromFile(filePath, conversationId, fileName, mi
         // 4. Upload to S3 - FULL QUALITY, NO COMPRESSION
         const s3Key = `${process.env.AWS_S3_FOLDER || 'conversations'}/${conversationId}/${uuidv4()}_${fileName}`;
         console.log(`📤 Dashboard upload to S3: ${s3Key}`);
-        await s3
-            .putObject({
+        const putCommand = new PutObjectCommand({
             Bucket: process.env.AWS_S3_BUCKET,
             Key: s3Key,
             Body: buffer,
@@ -121,15 +121,14 @@ export async function uploadMediaFromFile(filePath, conversationId, fileName, mi
                 'conversation-id': conversationId,
                 'upload-date': new Date().toISOString(),
             },
-        })
-            .promise();
+        });
+        await s3Client.send(putCommand);
         console.log(`✅ Dashboard upload complete: ${s3Key}`);
         // 5. Generate presigned URL
-        const s3Url = s3.getSignedUrl('getObject', {
+        const s3Url = await getSignedUrl(s3Client, new GetObjectCommand({
             Bucket: process.env.AWS_S3_BUCKET,
             Key: s3Key,
-            Expires: 7 * 24 * 60 * 60,
-        });
+        }), { expiresIn: 7 * 24 * 60 * 60 });
         return {
             s3Key,
             s3Url,
@@ -207,12 +206,11 @@ async function extractMediaMetadata(filePath, mimeType) {
  */
 export async function deleteMedia(s3Key) {
     try {
-        await s3
-            .deleteObject({
+        const deleteCommand = new DeleteObjectCommand({
             Bucket: process.env.AWS_S3_BUCKET,
             Key: s3Key,
-        })
-            .promise();
+        });
+        await s3Client.send(deleteCommand);
         console.log(`🗑️ Deleted from S3: ${s3Key}`);
     }
     catch (error) {
@@ -224,26 +222,25 @@ export async function deleteMedia(s3Key) {
  * Refresh/generate presigned URL for existing media
  * Called when existing URL is about to expire
  */
-export function getPresignedUrl(s3Key, expirationSeconds = 604800) {
-    return s3.getSignedUrl('getObject', {
+export async function getPresignedUrl(s3Key, expirationSeconds = 604800) {
+    return getSignedUrl(s3Client, new GetObjectCommand({
         Bucket: process.env.AWS_S3_BUCKET,
         Key: s3Key,
-        Expires: expirationSeconds, // 7 days default
-    });
+    }), { expiresIn: expirationSeconds } // 7 days default
+    );
 }
 /**
  * Get media info (for dashboard preview)
  */
 export async function getMediaInfo(s3Key) {
     try {
-        const result = await s3
-            .headObject({
+        const headCommand = new HeadObjectCommand({
             Bucket: process.env.AWS_S3_BUCKET,
             Key: s3Key,
-        })
-            .promise();
+        });
+        const result = await s3Client.send(headCommand);
         return {
-            url: getPresignedUrl(s3Key),
+            url: await getPresignedUrl(s3Key),
             size: result.ContentLength || 0,
             lastModified: result.LastModified || new Date(),
         };
@@ -264,13 +261,12 @@ export async function deleteOldMedia(retentionDays = 365) {
         let deletedCount = 0;
         let continuationToken;
         do {
-            const listResult = await s3
-                .listObjectsV2({
+            const listCommand = new ListObjectsV2Command({
                 Bucket: process.env.AWS_S3_BUCKET,
                 Prefix: process.env.AWS_S3_FOLDER,
                 ContinuationToken: continuationToken,
-            })
-                .promise();
+            });
+            const listResult = await s3Client.send(listCommand);
             if (!listResult.Contents || listResult.Contents.length === 0) {
                 break;
             }
@@ -341,9 +337,10 @@ export async function validateMediaFile(filePath, mimeType) {
  */
 export async function checkS3Connection() {
     try {
-        await s3
-            .headBucket({ Bucket: process.env.AWS_S3_BUCKET })
-            .promise();
+        const headBucketCommand = new HeadBucketCommand({
+            Bucket: process.env.AWS_S3_BUCKET,
+        });
+        await s3Client.send(headBucketCommand);
         console.log('✅ S3 bucket accessible');
         return true;
     }
