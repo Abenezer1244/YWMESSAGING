@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import * as messageService from '../services/message.service.js';
 import * as telnyxService from '../services/telnyx.service.js';
 import { PrismaClient } from '@prisma/client';
+import { decrypt } from '../utils/encryption.utils.js';
 import crypto from 'crypto';
 
 const prisma = new PrismaClient();
@@ -59,8 +60,11 @@ export async function sendMessage(req: Request, res: Response) {
         // Send to each recipient
         for (const recipient of recipients) {
           try {
+            // Decrypt phone number (stored encrypted in database)
+            const decryptedPhone = decrypt(recipient.member.phone);
+
             const result = await telnyxService.sendSMS(
-              recipient.member.phone,
+              decryptedPhone,
               content,
               churchId
             );

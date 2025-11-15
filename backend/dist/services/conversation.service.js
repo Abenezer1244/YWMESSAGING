@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import * as telnyxService from './telnyx.service.js';
+import { decrypt } from '../utils/encryption.utils.js';
 const prisma = new PrismaClient();
 /**
  * Get all conversations for a church (sorted by newest)
@@ -189,7 +190,9 @@ async function broadcastOutboundToMembers(churchId, content) {
         for (const member of members) {
             try {
                 const messageText = `Church: ${content}`;
-                await telnyxService.sendSMS(messageText, member.phone, churchId);
+                // Decrypt phone number (stored encrypted in database)
+                const decryptedPhone = decrypt(member.phone);
+                await telnyxService.sendSMS(messageText, decryptedPhone, churchId);
                 console.log(`   ✓ Sent to ${member.firstName}`);
             }
             catch (error) {

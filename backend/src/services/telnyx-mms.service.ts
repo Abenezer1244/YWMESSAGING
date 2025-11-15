@@ -2,7 +2,7 @@ import axios from 'axios';
 import { PrismaClient } from '@prisma/client';
 import * as s3MediaService from './s3-media.service.js';
 import { formatToE164 } from '../utils/phone.utils.js';
-import { hashForSearch } from '../utils/encryption.utils.js';
+import { hashForSearch, decrypt } from '../utils/encryption.utils.js';
 
 const prisma = new PrismaClient();
 const TELNYX_BASE_URL = 'https://api.telnyx.com/v2';
@@ -343,7 +343,9 @@ export async function broadcastInboundToMembers(
     // Send SMS synchronously to each recipient
     for (const member of recipientMembers) {
       try {
-        await sendMMS(member.phone, displayMessage, churchId);
+        // Decrypt phone number (stored encrypted in database)
+        const decryptedPhone = decrypt(member.phone);
+        await sendMMS(decryptedPhone, displayMessage, churchId);
         console.log(`   ✓ Sent to ${member.firstName}`);
       } catch (error: any) {
         console.error(`   ✗ Failed to send to ${member.firstName}: ${error.message}`);
