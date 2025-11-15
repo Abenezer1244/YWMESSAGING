@@ -1,7 +1,7 @@
-import Bull from 'bull';
-export declare const mailQueue: Bull.Queue<any>;
-export declare const smsQueue: Bull.Queue<any>;
-export declare const mmsQueue: Bull.Queue<any>;
-export declare const analyticsQueue: Bull.Queue<any>;
+declare let mailQueue: any;
+declare let smsQueue: any;
+declare let mmsQueue: any;
+declare let analyticsQueue: any;
+export { mailQueue, smsQueue, mmsQueue, analyticsQueue };
 export declare function closeQueues(): Promise<void>;
 //# sourceMappingURL=queue.d.ts.map
