@@ -597,6 +597,16 @@ export async function linkPhoneNumberToMessagingProfile(
 
         phoneNumberRecord = searchResponse.data?.data?.[0];
         if (phoneNumberRecord?.id && validateTelnyxId(phoneNumberRecord.id)) {
+          // Log detailed phone number info to understand its state
+          console.log('[TELNYX_LINKING] Phone number found with details:', {
+            id: phoneNumberRecord.id,
+            phone_number: phoneNumberRecord.phone_number,
+            status: phoneNumberRecord.status,
+            messaging_profile_id: phoneNumberRecord.messaging_profile_id,
+            requirements_met: phoneNumberRecord.requirements_met,
+            record_type: phoneNumberRecord.record_type,
+          });
+
           logLinkingOperation({
             timestamp: new Date().toISOString(),
             churchId,
@@ -761,7 +771,15 @@ export async function linkPhoneNumberToMessagingProfile(
 
           retryPhoneNumberRecord = searchResponse.data?.data?.[0] as TelnyxPhoneNumber | undefined || null;
           if (retryPhoneNumberRecord?.id && validateTelnyxId(retryPhoneNumberRecord.id)) {
-            console.log(`[TELNYX_LINKING] Method 2: Found phone number on attempt ${i + 1}`);
+            // Log detailed phone number info to understand its state
+            console.log(`[TELNYX_LINKING] Method 2: Found phone number on attempt ${i + 1} with details:`, {
+              id: retryPhoneNumberRecord.id,
+              phone_number: retryPhoneNumberRecord.phone_number,
+              status: retryPhoneNumberRecord.status,
+              messaging_profile_id: retryPhoneNumberRecord.messaging_profile_id,
+              requirements_met: retryPhoneNumberRecord.requirements_met,
+              record_type: retryPhoneNumberRecord.record_type,
+            });
             break;
           }
         }
