@@ -106,9 +106,16 @@ export async function getCurrentNumber(): Promise<CurrentNumber> {
 }
 
 /**
- * Release/delete church's phone number
+ * Release/delete church's phone number with soft-delete (30-day recovery window)
+ * @param confirm - User confirms they want to delete
+ * @param confirmPhone - User types the phone number to confirm
  */
-export async function releaseNumber(): Promise<{ success: boolean; message: string }> {
-  const response = await client.delete('/numbers/current');
+export async function releaseNumber(options?: {
+  confirm?: boolean;
+  confirmPhone?: string;
+}): Promise<{ success: boolean; message: string; data?: any }> {
+  const response = await client.delete('/numbers/current', {
+    data: options,
+  });
   return response.data;
 }

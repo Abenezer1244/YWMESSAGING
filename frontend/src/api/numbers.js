@@ -53,10 +53,14 @@ export async function getCurrentNumber() {
     return response.data.data;
 }
 /**
- * Release/delete church's phone number
+ * Release/delete church's phone number with soft-delete (30-day recovery window)
+ * @param confirm - User confirms they want to delete
+ * @param confirmPhone - User types the phone number to confirm
  */
-export async function releaseNumber() {
-    const response = await client.delete('/numbers/current');
+export async function releaseNumber(options) {
+    const response = await client.delete('/numbers/current', {
+        data: options,
+    });
     return response.data;
 }
 //# sourceMappingURL=numbers.js.map

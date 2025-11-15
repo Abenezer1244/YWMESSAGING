@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { Phone, Loader, Check, AlertCircle } from 'lucide-react';
+import { Phone, Loader, Check, AlertCircle, Trash2, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { linkPhoneNumber } from '../../api/admin';
+import { releaseNumber } from '../../api/numbers';
 import { SoftButton } from '../SoftUI';
 import Input from '../ui/Input';
 
 interface PhoneNumberManagerProps {
   currentPhoneNumber?: string | null;
-  onSuccess?: (phoneNumber: string, webhookId: string | null) => void;
+  onSuccess?: (phoneNumber: string | null, webhookId: string | null) => void;
 }
 
 export function PhoneNumberManager({
@@ -19,6 +20,12 @@ export function PhoneNumberManager({
   const [showForm, setShowForm] = useState(!currentPhoneNumber);
   const [linkedPhoneNumber, setLinkedPhoneNumber] = useState(currentPhoneNumber);
   const [webhookStatus, setWebhookStatus] = useState<'auto' | 'manual' | null>(null);
+
+  // Delete modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmPhone, setDeleteConfirmPhone] = useState('');
+  const [deleteConfirmCheckbox, setDeleteConfirmCheckbox] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleLinkPhoneNumber = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -50,6 +57,42 @@ export function PhoneNumberManager({
     }
   };
 
+  const handleDeletePhoneNumber = async () => {
+    // Validate confirmation
+    if (!deleteConfirmCheckbox) {
+      toast.error('Please confirm you understand the consequences');
+      return;
+    }
+
+    if (deleteConfirmPhone !== linkedPhoneNumber) {
+      toast.error(`Please type the phone number exactly: ${linkedPhoneNumber}`);
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      const result = await releaseNumber({
+        confirm: true,
+        confirmPhone: deleteConfirmPhone,
+      });
+
+      if (result.success) {
+        setLinkedPhoneNumber(null);
+        setShowDeleteModal(false);
+        setDeleteConfirmPhone('');
+        setDeleteConfirmCheckbox(false);
+
+        toast.success('Phone number deleted (30-day recovery window)');
+        onSuccess?.(null, null);
+      }
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to delete phone number';
+      toast.error(errorMessage);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Current Phone Number Display */}
@@ -71,14 +114,22 @@ export function PhoneNumberManager({
                 )}
               </div>
             </div>
-            <SoftButton
-              variant="secondary"
-              size="sm"
-              onClick={() => setShowForm(true)}
-              className="flex-shrink-0"
-            >
-              Change
-            </SoftButton>
+            <div className="flex gap-2 flex-shrink-0">
+              <SoftButton
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowForm(true)}
+              >
+                Change
+              </SoftButton>
+              <SoftButton
+                variant="danger"
+                size="sm"
+                onClick={() => setShowDeleteModal(true)}
+              >
+                <Trash2 className="w-4 h-4" />
+              </SoftButton>
+            </div>
           </div>
         </div>
       )}
@@ -154,6 +205,120 @@ export function PhoneNumberManager({
             <strong>What happens next?</strong> Your congregation can now text <strong>{linkedPhoneNumber}</strong> to
             start conversations with you. Messages and media will appear in your Conversations dashboard!
           </p>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-background rounded-lg border border-border max-w-md w-full p-6 space-y-4">
+            {/* Header */}
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground">Delete Phone Number</h3>
+                <p className="text-sm text-muted-foreground mt-1">This action has a 30-day recovery window</p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteConfirmPhone('');
+                  setDeleteConfirmCheckbox(false);
+                }}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Warning */}
+            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex gap-2">
+              <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+              <div className="text-xs text-red-600">
+                <p className="font-semibold mb-1">⚠️ Important</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>All SMS conversations on this number will end</li>
+                  <li>This number will be released from Telnyx</li>
+                  <li>You have 30 days to contact support for recovery</li>
+                  <li>After 30 days, this cannot be undone</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Phone Number Input */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Type the phone number to confirm:
+              </label>
+              <p className="text-sm text-muted-foreground mb-2">{linkedPhoneNumber}</p>
+              <Input
+                type="text"
+                placeholder={linkedPhoneNumber || 'Phone number'}
+                value={deleteConfirmPhone}
+                onChange={(e) => setDeleteConfirmPhone(e.target.value)}
+                disabled={isDeleting}
+                className="font-mono"
+              />
+            </div>
+
+            {/* Confirmation Checkbox */}
+            <label className="flex items-start gap-2">
+              <input
+                type="checkbox"
+                checked={deleteConfirmCheckbox}
+                onChange={(e) => setDeleteConfirmCheckbox(e.target.checked)}
+                disabled={isDeleting}
+                className="mt-1 rounded"
+              />
+              <span className="text-sm text-foreground">
+                I understand this cannot be undone and I want to delete this phone number
+              </span>
+            </label>
+
+            {/* Recovery Info */}
+            <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+              <p className="text-xs text-blue-600">
+                <strong>📞 Need to recover?</strong> Contact support within 30 days to restore this number.
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 pt-2">
+              <SoftButton
+                variant="primary"
+                className="flex-1"
+                disabled={
+                  isDeleting ||
+                  !deleteConfirmCheckbox ||
+                  deleteConfirmPhone !== linkedPhoneNumber
+                }
+                onClick={handleDeletePhoneNumber}
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader className="w-4 h-4 animate-spin mr-2 inline" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4 mr-2 inline" />
+                    Delete Number
+                  </>
+                )}
+              </SoftButton>
+              <SoftButton
+                variant="secondary"
+                className="flex-1"
+                disabled={isDeleting}
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteConfirmPhone('');
+                  setDeleteConfirmCheckbox(false);
+                }}
+              >
+                Cancel
+              </SoftButton>
+            </div>
+          </div>
         </div>
       )}
     </div>
