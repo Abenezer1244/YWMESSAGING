@@ -1,7 +1,7 @@
 # Development Progress - Phone Number Linking & Auto-Migration
 
-**Last Updated**: November 15, 2025, 19:36 UTC
-**Status**: In Progress - Debugging Phone Number Linking Response Structure
+**Last Updated**: November 15, 2025, 19:39 UTC
+**Status**: In Progress - Testing Direct Field Format vs Nested Structure
 
 ---
 
@@ -79,52 +79,77 @@ Working on enterprise-grade automatic phone number linking system with recovery 
 - **Change**: Added comprehensive logging of Telnyx response
 - **Why**: Understanding where messaging_profile_id appears in response
 
+### 11. Discovery: Nested Structure Accepted But Doesn't Update
+- **Commit**: `63a0a94`
+- **File**: `backend/src/services/telnyx.service.ts`
+- **Change**: Revert from nested `messaging_settings` to direct `messaging_profile_id` field
+- **Discovery**: Response shows:
+  - Status 200 (success) ✅
+  - `messaging_profile_id` field exists in response ✅
+  - **But value is still `null`** ❌ (not updated)
+- **Why**: Nested structure was accepted but didn't actually update the field
+- **Testing**: Direct field to see if it works or gets a 422 error again
+
 ---
 
 ## Current Issue & Solution Path
 
-### Problem
-- ✅ PATCH request to Telnyx API is **succeeding** (no HTTP errors)
-- ❌ Response doesn't have messaging_profile_id where we expect
-- Result: We extract `undefined` and think the linking failed
-
-### Root Cause Investigation
-Error message revealed the real issue:
-```
-"The field messaging_profile_id is not reachable here, please check the documentation at:
-https://developers.telnyx.com/docs/api/v2/numbers/Number-Configurations#updatePhoneNumberWithMessagingSettings."
-```
-
-**We were sending**:
-```json
-{
-  "messaging_profile_id": "..."
-}
-```
-
-**Telnyx expects**:
+### Finding #1: Nested Structure Doesn't Update Field
+When sending:
 ```json
 {
   "messaging_settings": {
-    "messaging_profile_id": "..."
+    "messaging_profile_id": "40019a80-d883-4618-953b-dad1610b39f4"
   }
 }
 ```
 
-✅ **FIXED** in commit `da25a79`
-
-### Current Debug Effort
-Added logging to see response structure:
-```javascript
-[TELNYX_LINKING] Method 1 - Full response: {
-  status: updateNumberResponse.status,
-  dataKeys: Object.keys(updateNumberResponse.data || {}),
-  dataDataKeys: Object.keys(updateNumberResponse.data?.data || {}),
-  fullData: updateNumberResponse.data,
+Response:
+```json
+{
+  "status": 200,  // ← Request accepted!
+  "data": {
+    "messaging_profile_id": null,  // ← But NOT updated!
+    ...
+  }
 }
 ```
 
-**Expected on next deployment**: Logs showing actual response structure so we can update parsing
+**Analysis**:
+- API accepts request (no validation error)
+- Returns 200 status code ✅
+- Response includes messaging_profile_id field ✅
+- **But value stays null** ❌
+
+This indicates the nested structure might be for a different operation (reading/updating other messaging settings, not linking to a profile).
+
+### Finding #2: Response Structure
+Full response from Telnyx includes:
+```javascript
+dataDataKeys: [
+  'id', 'record_type', 'phone_number', 'status',
+  'messaging_profile_id',  // ← The field we need
+  'messaging_profile_name',
+  ...
+]
+
+fullData.data.messaging_profile_id: null  // ← Location of field
+```
+
+### Current Test (Commit `63a0a94`)
+Reverting to direct field format:
+```json
+{
+  "messaging_profile_id": "40019a80-d883-4618-953b-dad1610b39f4"
+}
+```
+
+This will either:
+1. **Work** - Phone gets linked (would be surprising since earlier 422 error)
+2. **Fail with 422** - Tells us nested was actually correct but with different field name
+3. **Succeed with null** - Tells us the endpoint doesn't support this operation
+
+Any of these outcomes will guide us to the real solution.
 
 ---
 
