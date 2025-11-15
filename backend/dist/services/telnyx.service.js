@@ -540,11 +540,11 @@ export async function linkPhoneNumberToMessagingProfile(phoneNumber, messagingPr
                 result: 'retry',
                 duration: 0,
             });
-            // CORRECTED: Add phone number TO the messaging profile, not update phone with profile
-            // POST to the profile endpoint to add this phone number
-            console.log(`[TELNYX_LINKING] Method 1: Adding phone to messaging profile via POST`);
-            const addPhoneResponse = await client.post(`/messaging_profiles/${messagingProfileId}/phone_numbers`, {
-                phone_number_id: phoneNumberRecord.id,
+            // CORRECTED: Use PATCH /phone_numbers/{id}/messaging endpoint
+            // This is the correct endpoint to link a phone number to a messaging profile
+            console.log(`[TELNYX_LINKING] Method 1: Linking phone to messaging profile via PATCH /messaging`);
+            const addPhoneResponse = await client.patch(`/phone_numbers/${phoneNumberRecord.id}/messaging`, {
+                messaging_profile_id: messagingProfileId,
             });
             // Log full response to understand structure
             console.log('[TELNYX_LINKING] Method 1 - Full response:', {
@@ -553,7 +553,6 @@ export async function linkPhoneNumberToMessagingProfile(phoneNumber, messagingPr
                 dataDataKeys: Object.keys(addPhoneResponse.data?.data || {}),
                 fullData: addPhoneResponse.data,
             });
-            // For POST endpoints, the response might be different
             // Check if we got success (2xx status means it worked)
             if (addPhoneResponse.status >= 200 && addPhoneResponse.status < 300) {
                 logLinkingOperation({
@@ -661,9 +660,9 @@ export async function linkPhoneNumberToMessagingProfile(phoneNumber, messagingPr
                 if (!retryPhoneNumberRecord?.id) {
                     throw new Error(`Phone number still not indexed after ${additionalSearchAttempts} additional search attempts`);
                 }
-                // Retry using the correct endpoint: POST to messaging profile to add phone
-                const retryUpdateResponse = await client.post(`/messaging_profiles/${messagingProfileId}/phone_numbers`, {
-                    phone_number_id: retryPhoneNumberRecord.id,
+                // Retry using the correct endpoint: PATCH /phone_numbers/{id}/messaging
+                const retryUpdateResponse = await client.patch(`/phone_numbers/${retryPhoneNumberRecord.id}/messaging`, {
+                    messaging_profile_id: messagingProfileId,
                 });
                 // Log full response to understand structure
                 console.log('[TELNYX_LINKING] Method 2 - Full response:', {
@@ -672,7 +671,7 @@ export async function linkPhoneNumberToMessagingProfile(phoneNumber, messagingPr
                     dataDataKeys: Object.keys(retryUpdateResponse.data?.data || {}),
                     fullData: retryUpdateResponse.data,
                 });
-                // For POST endpoints, check 2xx status
+                // Check 2xx status for success
                 if (retryUpdateResponse.status >= 200 && retryUpdateResponse.status < 300) {
                     logLinkingOperation({
                         timestamp: new Date().toISOString(),
