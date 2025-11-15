@@ -17,4 +17,10 @@ export declare function hashForSearch(plaintext: string): string;
  * Verify if plaintext matches hash
  */
 export declare function verifyHashForSearch(plaintext: string, hash: string): boolean;
+/**
+ * Safely decrypt phone number, handling both encrypted and plain text formats
+ * Some records may have plain text phones (legacy data before encryption was added)
+ * Returns the decrypted phone if encrypted, or the original phone if already plain text
+ */
+export declare function decryptPhoneSafe(phoneData: string): string;
 //# sourceMappingURL=encryption.utils.d.ts.map

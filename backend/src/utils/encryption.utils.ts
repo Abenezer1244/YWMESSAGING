@@ -124,3 +124,25 @@ export function verifyHashForSearch(plaintext: string, hash: string): boolean {
     Buffer.from(hash)
   );
 }
+
+/**
+ * Safely decrypt phone number, handling both encrypted and plain text formats
+ * Some records may have plain text phones (legacy data before encryption was added)
+ * Returns the decrypted phone if encrypted, or the original phone if already plain text
+ */
+export function decryptPhoneSafe(phoneData: string): string {
+  try {
+    // Check if it looks encrypted: format is iv:salt:encrypted:tag (4 parts separated by colons)
+    const parts = phoneData.split(':');
+    if (parts.length === 4) {
+      // Try to decrypt assuming it's in encrypted format
+      return decrypt(phoneData);
+    }
+
+    // Not encrypted - return as-is (plain text phone like +12064664353)
+    return phoneData;
+  } catch (error) {
+    // If decryption fails for any reason, assume it's plain text
+    return phoneData;
+  }
+}
