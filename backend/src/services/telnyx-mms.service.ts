@@ -172,7 +172,8 @@ export async function handleInboundMMS(
   churchId: string,
   senderPhone: string,
   messageText: string,
-  mediaUrls: string[]
+  mediaUrls: string[],
+  telnyxMessageId?: string
 ): Promise<{
   conversationId: string;
   messageIds: string[];
@@ -217,6 +218,7 @@ export async function handleInboundMMS(
           memberId: member.id,
           content: messageText,
           direction: 'inbound',
+          providerMessageId: telnyxMessageId, // Store Telnyx ID for idempotency
         },
       });
 
@@ -246,6 +248,7 @@ export async function handleInboundMMS(
             memberId: member.id,
             content: messageText || `[${uploadResult.metadata.type}]`,
             direction: 'inbound',
+            providerMessageId: telnyxMessageId, // Store Telnyx ID for idempotency
             mediaUrl: uploadResult.s3Url,
             mediaType: uploadResult.metadata.type,
             mediaName: fileName,

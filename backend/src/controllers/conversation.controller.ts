@@ -296,7 +296,19 @@ export async function handleTelnyxInboundMMS(req: Request, res: Response) {
       return res.status(400).json({ error: 'Invalid payload' });
     }
 
-    const { from, to, text, media } = payload;
+    const { id: telnyxMessageId, from, to, text, media } = payload;
+
+    // IDEMPOTENCY: Check if we already processed this message
+    if (telnyxMessageId) {
+      const existingMessage = await prisma.conversationMessage.findFirst({
+        where: { providerMessageId: telnyxMessageId }
+      });
+
+      if (existingMessage) {
+        console.log(`⏭️ Webhook already processed for message ID: ${telnyxMessageId}`);
+        return res.json({ received: true });
+      }
+    }
 
     console.log(
       `📨 Telnyx MMS webhook: from=${from}, to=${to}, media=${media?.length || 0}`
@@ -374,7 +386,8 @@ export async function handleTelnyxInboundMMS(req: Request, res: Response) {
       church.id,
       from,
       text || '',
-      mediaUrls
+      mediaUrls,
+      telnyxMessageId
     );
 
     console.log(
