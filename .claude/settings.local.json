@@ -104,7 +104,11 @@
       "Bash(nul)",
       "Bash(tasklist:*)",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:www.npmjs.com)"
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(pkill:*)",
+      "Bash(docker-compose ps:*)",
+      "Bash(docker-compose:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,9 +1,10 @@
 import * as messageService from '../services/message.service.js';
+import * as telnyxService from '../services/telnyx.service.js';
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 /**
  * POST /api/messages/send
- * Send message to recipients
+ * Send message to recipients synchronously (no Redis queue)
  */
 export async function sendMessage(req, res) {
     try {
@@ -34,6 +35,50 @@ export async function sendMessage(req, res) {
             targetType,
             targetIds: targetIds || [],
         });
+        // Send messages synchronously to all recipients
+        (async () => {
+            try {
+                // Get all recipients for this message
+                const recipients = await prisma.messageRecipient.findMany({
+                    where: { messageId: message.id },
+                    include: { member: true },
+                });
+                console.log(`📤 Sending message to ${recipients.length} recipients`);
+                // Send to each recipient
+                for (const recipient of recipients) {
+                    try {
+                        const result = await telnyxService.sendSMS(recipient.member.phone, content, churchId);
+                        // Update recipient with Telnyx message ID
+                        await prisma.messageRecipient.update({
+                            where: { id: recipient.id },
+                            data: {
+                                providerMessageId: result.messageSid,
+                                status: 'pending', // Pending delivery confirmation from Telnyx
+                            },
+                        });
+                        console.log(`   ✓ Sent to ${recipient.member.firstName} ${recipient.member.lastName}`);
+                    }
+                    catch (error) {
+                        // Mark as failed but continue with other recipients
+                        await prisma.messageRecipient.update({
+                            where: { id: recipient.id },
+                            data: {
+                                status: 'failed',
+                                failureReason: error.message,
+                                failedAt: new Date(),
+                            },
+                        });
+                        console.error(`   ✗ Failed to send to ${recipient.member.firstName}: ${error.message}`);
+                    }
+                }
+                // Update message stats
+                await messageService.updateMessageStats(message.id);
+                console.log(`✅ Message broadcast complete: ${message.id}`);
+            }
+            catch (error) {
+                console.error('❌ Error sending message batch:', error.message);
+            }
+        })(); // Fire and forget - don't wait for sending to complete
         res.status(201).json({
             success: true,
             data: message,

@@ -291,6 +291,7 @@ export async function handleInboundMMS(
 /**
  * Broadcast inbound message to all congregation members
  * When a member texts the church number, send SMS to all other members
+ * Sends synchronously without Redis queue
  */
 export async function broadcastInboundToMembers(
   churchId: string,
@@ -339,24 +340,17 @@ export async function broadcastInboundToMembers(
 
     console.log(`📢 Broadcasting to ${recipientMembers.length} members: ${displayMessage}`);
 
-    // Queue SMS for each recipient
+    // Send SMS synchronously to each recipient
     for (const member of recipientMembers) {
       try {
-        await prisma.messageQueue.create({
-          data: {
-            churchId,
-            phone: member.phone,
-            content: displayMessage,
-            status: 'pending',
-          },
-        });
-        console.log(`   ✓ Queued for ${member.firstName}`);
+        await sendMMS(member.phone, displayMessage, churchId);
+        console.log(`   ✓ Sent to ${member.firstName}`);
       } catch (error: any) {
-        console.error(`   ✗ Failed to queue for ${member.firstName}: ${error.message}`);
+        console.error(`   ✗ Failed to send to ${member.firstName}: ${error.message}`);
       }
     }
 
-    console.log(`✅ Broadcast queued for ${recipientMembers.length} members`);
+    console.log(`✅ Broadcast sent to ${recipientMembers.length} members`);
   } catch (error: any) {
     console.error('❌ Error broadcasting inbound message:', error);
     // Don't throw - continue processing even if broadcast fails

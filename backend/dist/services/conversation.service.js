@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import * as telnyxService from './telnyx.service.js';
 const prisma = new PrismaClient();
 /**
  * Get all conversations for a church (sorted by newest)
@@ -158,6 +159,51 @@ export async function getConversation(conversationId, churchId, options = {}) {
     }
 }
 /**
+ * Broadcast outbound reply to all congregation members
+ * Sends synchronously without Redis queue
+ */
+async function broadcastOutboundToMembers(churchId, content) {
+    try {
+        // Get all members of the church who opted in for SMS
+        const members = await prisma.member.findMany({
+            where: {
+                optInSms: true,
+                groups: {
+                    some: {
+                        group: { churchId },
+                    },
+                },
+            },
+            select: {
+                id: true,
+                firstName: true,
+                phone: true,
+            },
+        });
+        if (members.length === 0) {
+            console.log('ℹ️ No members to notify');
+            return;
+        }
+        console.log(`📢 Broadcasting reply to ${members.length} members`);
+        // Send SMS synchronously to each member
+        for (const member of members) {
+            try {
+                const messageText = `Church: ${content}`;
+                await telnyxService.sendSMS(messageText, member.phone, churchId);
+                console.log(`   ✓ Sent to ${member.firstName}`);
+            }
+            catch (error) {
+                console.error(`   ✗ Failed to send to ${member.firstName}: ${error.message}`);
+            }
+        }
+        console.log(`✅ Broadcast sent to ${members.length} members`);
+    }
+    catch (error) {
+        console.error('❌ Error broadcasting outbound reply:', error);
+        // Don't throw - continue processing even if broadcast fails
+    }
+}
+/**
  * Create text-only reply message
  */
 export async function createReply(conversationId, churchId, content) {
@@ -186,16 +232,8 @@ export async function createReply(conversationId, churchId, content) {
             where: { id: conversationId },
             data: { lastMessageAt: new Date() },
         });
-        // Queue for sending via SMS
-        await prisma.messageQueue.create({
-            data: {
-                churchId,
-                phone: conversation.member.phone,
-                content,
-                conversationMessageId: message.id,
-                status: 'pending',
-            },
-        });
+        // Broadcast to all members
+        await broadcastOutboundToMembers(churchId, content);
         return {
             id: message.id,
             content: message.content,
@@ -247,17 +285,9 @@ export async function createReplyWithMedia(conversationId, churchId, content, me
             where: { id: conversationId },
             data: { lastMessageAt: new Date() },
         });
-        // Queue for sending via MMS
-        await prisma.messageQueue.create({
-            data: {
-                churchId,
-                phone: conversation.member.phone,
-                content: content || `[${mediaData.type}]`,
-                mediaS3Url: mediaData.s3Url,
-                conversationMessageId: message.id,
-                status: 'pending',
-            },
-        });
+        // Broadcast to all members
+        const displayText = content || `[${mediaData.type}]`;
+        await broadcastOutboundToMembers(churchId, displayText);
         return {
             id: message.id,
             content: message.content,

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 /**
  * POST /api/messages/send
- * Send message to recipients
+ * Send message to recipients synchronously (no Redis queue)
  */
 export declare function sendMessage(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**

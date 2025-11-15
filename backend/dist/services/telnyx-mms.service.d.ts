@@ -20,6 +20,12 @@ export declare function handleInboundMMS(churchId: string, senderPhone: string, 
     messageIds: string[];
 }>;
 /**
+ * Broadcast inbound message to all congregation members
+ * When a member texts the church number, send SMS to all other members
+ * Sends synchronously without Redis queue
+ */
+export declare function broadcastInboundToMembers(churchId: string, senderMemberId: string, messageText: string, mediaType?: string): Promise<void>;
+/**
  * Get member by phone (for outbound messaging)
  */
 export declare function getMemberByPhone(churchId: string, phone: string): Promise<any | null>;

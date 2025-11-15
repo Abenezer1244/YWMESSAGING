@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import * as telnyxService from './telnyx.service.js';
 
 const prisma = new PrismaClient();
 
@@ -190,6 +191,7 @@ export async function getConversation(
 
 /**
  * Broadcast outbound reply to all congregation members
+ * Sends synchronously without Redis queue
  */
 async function broadcastOutboundToMembers(
   churchId: string,
@@ -220,24 +222,18 @@ async function broadcastOutboundToMembers(
 
     console.log(`📢 Broadcasting reply to ${members.length} members`);
 
-    // Queue SMS for each member
+    // Send SMS synchronously to each member
     for (const member of members) {
       try {
-        await prisma.messageQueue.create({
-          data: {
-            churchId,
-            phone: member.phone,
-            content: `Church: ${content}`,
-            status: 'pending',
-          },
-        });
-        console.log(`   ✓ Queued for ${member.firstName}`);
+        const messageText = `Church: ${content}`;
+        await telnyxService.sendSMS(messageText, member.phone, churchId);
+        console.log(`   ✓ Sent to ${member.firstName}`);
       } catch (error: any) {
-        console.error(`   ✗ Failed to queue for ${member.firstName}: ${error.message}`);
+        console.error(`   ✗ Failed to send to ${member.firstName}: ${error.message}`);
       }
     }
 
-    console.log(`✅ Broadcast queued for ${members.length} members`);
+    console.log(`✅ Broadcast sent to ${members.length} members`);
   } catch (error: any) {
     console.error('❌ Error broadcasting outbound reply:', error);
     // Don't throw - continue processing even if broadcast fails
