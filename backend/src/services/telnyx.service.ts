@@ -607,16 +607,26 @@ export async function linkPhoneNumberToMessagingProfile(
             record_type: phoneNumberRecord.record_type,
           });
 
-          logLinkingOperation({
-            timestamp: new Date().toISOString(),
-            churchId,
-            phoneNumber,
-            messagingProfileId,
-            step: `${currentStep}_found`,
-            result: 'success',
-            duration: Date.now() - searchStartTime,
-          });
-          break;
+          // Only proceed if phone is active and requirements are met
+          if (phoneNumberRecord.status === 'active' && phoneNumberRecord.requirements_met !== false) {
+            logLinkingOperation({
+              timestamp: new Date().toISOString(),
+              churchId,
+              phoneNumber,
+              messagingProfileId,
+              step: `${currentStep}_found`,
+              result: 'success',
+              duration: Date.now() - searchStartTime,
+            });
+            break;
+          } else {
+            // Phone number not ready yet, wait and retry
+            console.log(`[TELNYX_LINKING] Phone number found but not ready. Status: ${phoneNumberRecord.status}, Requirements met: ${phoneNumberRecord.requirements_met}`);
+            if (searchAttempt < 5) {
+              const delayMs = Math.pow(2, searchAttempt) * 1000;
+              await new Promise(resolve => setTimeout(resolve, delayMs));
+            }
+          }
         }
 
         if (searchAttempt < 5) {
@@ -780,7 +790,15 @@ export async function linkPhoneNumberToMessagingProfile(
               requirements_met: retryPhoneNumberRecord.requirements_met,
               record_type: retryPhoneNumberRecord.record_type,
             });
-            break;
+
+            // Only break if phone is active and requirements are met
+            if (retryPhoneNumberRecord.status === 'active' && retryPhoneNumberRecord.requirements_met !== false) {
+              break;
+            } else {
+              console.log(`[TELNYX_LINKING] Method 2: Phone not ready yet. Status: ${retryPhoneNumberRecord.status}, Requirements: ${retryPhoneNumberRecord.requirements_met}`);
+              // Continue searching, will retry with longer delays
+              retryPhoneNumberRecord = null;
+            }
           }
         }
 
