@@ -263,6 +263,17 @@ export async function handleInboundMMS(
       data: { lastMessageAt: new Date() },
     });
 
+    // 6. Broadcast message to all other congregation members
+    if (messageText || mediaUrls.length > 0) {
+      const mediaType = mediaUrls.length > 0 ? 'media' : undefined;
+      await broadcastInboundToMembers(
+        churchId,
+        member.id,
+        messageText,
+        mediaType
+      );
+    }
+
     console.log(
       `✅ Inbound MMS processed: ${conversation.id} (${messageIds.length} messages)`
     );
@@ -274,6 +285,81 @@ export async function handleInboundMMS(
   } catch (error: any) {
     console.error('❌ Inbound MMS handling error:', error);
     throw error;
+  }
+}
+
+/**
+ * Broadcast inbound message to all congregation members
+ * When a member texts the church number, send SMS to all other members
+ */
+export async function broadcastInboundToMembers(
+  churchId: string,
+  senderMemberId: string,
+  messageText: string,
+  mediaType?: string
+): Promise<void> {
+  try {
+    // Get all members of the church who opted in for SMS (except the sender)
+    const members = await prisma.member.findMany({
+      where: {
+        optInSms: true,
+        groups: {
+          some: {
+            group: { churchId },
+          },
+        },
+      },
+      select: {
+        id: true,
+        firstName: true,
+        phone: true,
+      },
+    });
+
+    // Filter out the sender
+    const recipientMembers = members.filter(m => m.id !== senderMemberId);
+
+    if (recipientMembers.length === 0) {
+      console.log('ℹ️ No other members to notify');
+      return;
+    }
+
+    // Get sender name
+    const sender = await prisma.member.findUnique({
+      where: { id: senderMemberId },
+      select: { firstName: true },
+    });
+
+    const senderName = sender?.firstName || 'Member';
+
+    // Format message
+    const displayMessage = mediaType
+      ? `${senderName}: [${mediaType.toUpperCase()}]`
+      : `${senderName}: ${messageText}`;
+
+    console.log(`📢 Broadcasting to ${recipientMembers.length} members: ${displayMessage}`);
+
+    // Queue SMS for each recipient
+    for (const member of recipientMembers) {
+      try {
+        await prisma.messageQueue.create({
+          data: {
+            churchId,
+            phone: member.phone,
+            content: displayMessage,
+            status: 'pending',
+          },
+        });
+        console.log(`   ✓ Queued for ${member.firstName}`);
+      } catch (error: any) {
+        console.error(`   ✗ Failed to queue for ${member.firstName}: ${error.message}`);
+      }
+    }
+
+    console.log(`✅ Broadcast queued for ${recipientMembers.length} members`);
+  } catch (error: any) {
+    console.error('❌ Error broadcasting inbound message:', error);
+    // Don't throw - continue processing even if broadcast fails
   }
 }
 

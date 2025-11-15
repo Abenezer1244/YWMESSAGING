@@ -189,6 +189,62 @@ export async function getConversation(
 }
 
 /**
+ * Broadcast outbound reply to all congregation members
+ */
+async function broadcastOutboundToMembers(
+  churchId: string,
+  content: string
+): Promise<void> {
+  try {
+    // Get all members of the church who opted in for SMS
+    const members = await prisma.member.findMany({
+      where: {
+        optInSms: true,
+        groups: {
+          some: {
+            group: { churchId },
+          },
+        },
+      },
+      select: {
+        id: true,
+        firstName: true,
+        phone: true,
+      },
+    });
+
+    if (members.length === 0) {
+      console.log('ℹ️ No members to notify');
+      return;
+    }
+
+    console.log(`📢 Broadcasting reply to ${members.length} members`);
+
+    // Queue SMS for each member
+    for (const member of members) {
+      try {
+        await prisma.messageQueue.create({
+          data: {
+            churchId,
+            phone: member.phone,
+            content: `Church: ${content}`,
+            status: 'pending',
+          },
+        });
+        console.log(`   ✓ Queued for ${member.firstName}`);
+      } catch (error: any) {
+        console.error(`   ✗ Failed to queue for ${member.firstName}: ${error.message}`);
+      }
+    }
+
+    console.log(`✅ Broadcast queued for ${members.length} members`);
+  } catch (error: any) {
+    console.error('❌ Error broadcasting outbound reply:', error);
+    // Don't throw - continue processing even if broadcast fails
+  }
+}
+
+/**
  * Create text-only reply message
  */
 export async function createReply(
@@ -226,16 +282,8 @@ export async function createReply(
       data: { lastMessageAt: new Date() },
     });
 
-    // Queue for sending via SMS
-    await prisma.messageQueue.create({
-      data: {
-        churchId,
-        phone: conversation.member.phone,
-        content,
-        conversationMessageId: message.id,
-        status: 'pending',
-      },
-    });
+    // Broadcast to all members
+    await broadcastOutboundToMembers(churchId, content);
 
     return {
       id: message.id,
@@ -308,17 +356,9 @@ export async function createReplyWithMedia(
       data: { lastMessageAt: new Date() },
     });
 
-    // Queue for sending via MMS
-    await prisma.messageQueue.create({
-      data: {
-        churchId,
-        phone: conversation.member.phone,
-        content: content || `[${mediaData.type}]`,
-        mediaS3Url: mediaData.s3Url,
-        conversationMessageId: message.id,
-        status: 'pending',
-      },
-    });
+    // Broadcast to all members
+    const displayText = content || `[${mediaData.type}]`;
+    await broadcastOutboundToMembers(churchId, displayText);
 
     return {
       id: message.id,
