@@ -697,9 +697,19 @@ export async function linkPhoneNumberToMessagingProfile(
         },
       });
 
+      // Log full response to understand structure
+      console.log('[TELNYX_LINKING] Method 1 - Full response:', {
+        status: updateNumberResponse.status,
+        dataKeys: Object.keys(updateNumberResponse.data || {}),
+        dataDataKeys: Object.keys(updateNumberResponse.data?.data || {}),
+        fullData: updateNumberResponse.data,
+      });
+
       // Handle both flat and nested response structures
       const linkedProfileId = updateNumberResponse.data?.data?.messaging_profile_id ||
                                updateNumberResponse.data?.data?.messaging_settings?.messaging_profile_id;
+      console.log('[TELNYX_LINKING] Method 1 - Extracted profileId:', linkedProfileId);
+
       if (linkedProfileId === messagingProfileId && validateTelnyxId(linkedProfileId)) {
         logLinkingOperation({
           timestamp: new Date().toISOString(),
@@ -822,9 +832,19 @@ export async function linkPhoneNumberToMessagingProfile(
           },
         });
 
+        // Log full response to understand structure
+        console.log('[TELNYX_LINKING] Method 2 - Full response:', {
+          status: retryUpdateResponse.status,
+          dataKeys: Object.keys(retryUpdateResponse.data || {}),
+          dataDataKeys: Object.keys(retryUpdateResponse.data?.data || {}),
+          fullData: retryUpdateResponse.data,
+        });
+
         // Handle both flat and nested response structures
         const retryLinkedProfileId = retryUpdateResponse.data?.data?.messaging_profile_id ||
                                      retryUpdateResponse.data?.data?.messaging_settings?.messaging_profile_id;
+        console.log('[TELNYX_LINKING] Method 2 - Extracted profileId:', retryLinkedProfileId);
+
         if (retryLinkedProfileId === messagingProfileId && validateTelnyxId(retryLinkedProfileId)) {
           logLinkingOperation({
             timestamp: new Date().toISOString(),
