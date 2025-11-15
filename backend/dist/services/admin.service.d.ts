@@ -16,6 +16,10 @@ export declare function updateChurchProfile(churchId: string, input: UpdateChurc
     telnyxWebhookId: string | null;
     telnyxVerified: boolean;
     telnyxPurchasedAt: Date | null;
+    telnyxPhoneLinkingStatus: string;
+    telnyxPhoneLinkingLastAttempt: Date | null;
+    telnyxPhoneLinkingRetryCount: number;
+    telnyxPhoneLinkingError: string | null;
     trialEndsAt: Date;
     subscriptionStatus: string;
     createdAt: Date;

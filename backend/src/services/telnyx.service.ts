@@ -4,20 +4,9 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 const TELNYX_BASE_URL = 'https://api.telnyx.com/v2';
 
-// Function to get API key - reads from environment on every call
-function getTelnyxClient() {
-  const apiKey = process.env.TELNYX_API_KEY;
-  if (!apiKey) {
-    console.warn('TELNYX_API_KEY environment variable is not set');
-  }
-  return axios.create({
-    baseURL: TELNYX_BASE_URL,
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-  });
-}
+// ============================================================================
+// TypeScript Interfaces (Phase 4: Type Safety)
+// ============================================================================
 
 /**
  * Interface for Telnyx phone number search response
@@ -40,6 +29,134 @@ interface PurchaseNumberRequest {
   connectionId?: string;
   customerReference?: string;
 }
+
+/**
+ * Telnyx Phone Number record from API
+ */
+interface TelnyxPhoneNumber {
+  id: string;
+  phone_number: string;
+  messaging_profile_id: string | null;
+  status: string;
+  [key: string]: any;
+}
+
+/**
+ * Telnyx Messaging Profile record
+ */
+interface TelnyxMessagingProfile {
+  id: string;
+  name: string;
+  webhook_url: string;
+  enabled: boolean;
+  phone_numbers?: string[];
+  [key: string]: any;
+}
+
+/**
+ * Linking operation result with metrics
+ */
+interface LinkingResult {
+  success: boolean;
+  method: 'direct' | 'profile' | null;
+  duration: number;
+  phoneNumberId: string;
+  messagingProfileId: string;
+  phoneNumber: string;
+  error?: {
+    code: string;
+    message: string;
+    httpStatus?: number;
+  };
+}
+
+/**
+ * Structured log entry for monitoring
+ */
+interface LinkingLogEntry {
+  timestamp: string;
+  churchId?: string;
+  phoneNumber: string;
+  messagingProfileId: string;
+  step: string;
+  result: 'success' | 'failure' | 'retry';
+  errorCode?: string;
+  errorDetails?: string;
+  duration: number;
+}
+
+// ============================================================================
+// Utility Functions (Phase 1: Monitoring & Logging)
+// ============================================================================
+
+/**
+ * Structured logging for linking operations
+ * Outputs JSON format for ELK/Datadog/CloudWatch integration
+ */
+function logLinkingOperation(entry: LinkingLogEntry) {
+  const logLevel = entry.result === 'failure' ? 'error' : 'info';
+  const logEntry = {
+    ...entry,
+    timestamp: new Date().toISOString(),
+  };
+
+  if (logLevel === 'error') {
+    console.error('[TELNYX_LINKING]', JSON.stringify(logEntry));
+  } else {
+    console.log('[TELNYX_LINKING]', JSON.stringify(logEntry));
+  }
+}
+
+/**
+ * Validate phone number format (E.164)
+ */
+function validatePhoneNumber(phoneNumber: string): boolean {
+  // E.164 format: +1234567890 or variations
+  const e164Regex = /^\+?[1-9]\d{1,14}$/;
+  return e164Regex.test(phoneNumber.replace(/\D/g, ''));
+}
+
+/**
+ * Validate Telnyx ID format (UUID-like)
+ */
+function validateTelnyxId(id: string): boolean {
+  // Telnyx IDs are typically UUIDs or numeric strings
+  return /^[a-f0-9\-\d]{8,}$/i.test(id);
+}
+
+/**
+ * Generate error code for structured logging
+ */
+function generateErrorCode(status?: number, message?: string): string {
+  if (!status) return 'UNKNOWN_ERROR';
+  if (status === 422) return 'UNPROCESSABLE_ENTITY_PHONE_NUMBER';
+  if (status === 400) return 'BAD_REQUEST_INVALID_FORMAT';
+  if (status === 429) return 'RATE_LIMIT_EXCEEDED';
+  if (status === 401 || status === 403) return 'AUTHENTICATION_ERROR';
+  if (status === 404) return 'NOT_FOUND';
+  if (status >= 500) return 'TELNYX_SERVICE_ERROR';
+  return 'API_ERROR';
+}
+
+// Function to get API key - reads from environment on every call
+function getTelnyxClient() {
+  const apiKey = process.env.TELNYX_API_KEY;
+  if (!apiKey) {
+    console.warn('TELNYX_API_KEY environment variable is not set');
+  }
+  return axios.create({
+    baseURL: TELNYX_BASE_URL,
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+// ============================================================================
+// Exports for type reuse
+// ============================================================================
+export type { LinkingResult, TelnyxPhoneNumber, TelnyxMessagingProfile, LinkingLogEntry };
 
 /**
  * Send SMS via Telnyx
@@ -361,25 +478,114 @@ export async function deleteWebhook(webhookId: string): Promise<boolean> {
 
 /**
  * Link phone number to messaging profile for webhook routing
+ * Enterprise-grade implementation with validation, monitoring, and structured logging
+ *
  * Note: Telnyx routes inbound messages via the messaging profile associated with the number
  * This tries multiple approaches to ensure the number is linked
  * IMPORTANT: Phone numbers need time to be indexed in Telnyx's system after purchase
  */
 export async function linkPhoneNumberToMessagingProfile(
   phoneNumber: string,
-  messagingProfileId: string
-): Promise<boolean> {
+  messagingProfileId: string,
+  churchId?: string
+): Promise<LinkingResult> {
+  const operationStartTime = Date.now();
+  let currentStep = 'validation';
+
   try {
+    // ========================================================================
+    // Phase 4: Input Validation
+    // ========================================================================
+    currentStep = 'validation';
+
+    // Validate phone number format
+    if (!phoneNumber || typeof phoneNumber !== 'string') {
+      const errorMsg = 'Phone number is required and must be a string';
+      logLinkingOperation({
+        timestamp: new Date().toISOString(),
+        churchId,
+        phoneNumber: phoneNumber || 'INVALID',
+        messagingProfileId,
+        step: currentStep,
+        result: 'failure',
+        errorCode: 'INVALID_PHONE_NUMBER_TYPE',
+        errorDetails: errorMsg,
+        duration: Date.now() - operationStartTime,
+      });
+      throw new Error(errorMsg);
+    }
+
+    if (!validatePhoneNumber(phoneNumber)) {
+      const errorMsg = `Phone number format invalid. Expected E.164 format (+1234567890), got: ${phoneNumber}`;
+      logLinkingOperation({
+        timestamp: new Date().toISOString(),
+        churchId,
+        phoneNumber,
+        messagingProfileId,
+        step: currentStep,
+        result: 'failure',
+        errorCode: 'INVALID_PHONE_NUMBER_FORMAT',
+        errorDetails: errorMsg,
+        duration: Date.now() - operationStartTime,
+      });
+      throw new Error(errorMsg);
+    }
+
+    // Validate messaging profile ID
+    if (!messagingProfileId || typeof messagingProfileId !== 'string') {
+      const errorMsg = 'Messaging profile ID is required and must be a string';
+      logLinkingOperation({
+        timestamp: new Date().toISOString(),
+        churchId,
+        phoneNumber,
+        messagingProfileId: messagingProfileId || 'INVALID',
+        step: currentStep,
+        result: 'failure',
+        errorCode: 'INVALID_PROFILE_ID_TYPE',
+        errorDetails: errorMsg,
+        duration: Date.now() - operationStartTime,
+      });
+      throw new Error(errorMsg);
+    }
+
+    if (!validateTelnyxId(messagingProfileId)) {
+      const errorMsg = `Messaging profile ID format invalid. Expected UUID/ID format, got: ${messagingProfileId}`;
+      logLinkingOperation({
+        timestamp: new Date().toISOString(),
+        churchId,
+        phoneNumber,
+        messagingProfileId,
+        step: currentStep,
+        result: 'failure',
+        errorCode: 'INVALID_PROFILE_ID_FORMAT',
+        errorDetails: errorMsg,
+        duration: Date.now() - operationStartTime,
+      });
+      throw new Error(errorMsg);
+    }
+
     const client = getTelnyxClient();
 
-    console.log(`🔗 Linking phone ${phoneNumber} to messaging profile ${messagingProfileId}...`);
+    // ========================================================================
+    // Phase 1: Step 1 - Search for phone number record
+    // ========================================================================
+    currentStep = 'search_phone_number';
+    const searchStartTime = Date.now();
+    let phoneNumberRecord: TelnyxPhoneNumber | null = null;
+    let lastSearchError: any = null;
 
-    // Step 1: Get the phone number record with all details
-    // Retry up to 5 times with delays as the number might not be immediately available
-    let phoneNumberRecord: any = null;
     for (let searchAttempt = 1; searchAttempt <= 5; searchAttempt++) {
       try {
-        console.log(`   Search attempt ${searchAttempt}/5: Looking for phone ${phoneNumber} in Telnyx...`);
+        logLinkingOperation({
+          timestamp: new Date().toISOString(),
+          churchId,
+          phoneNumber,
+          messagingProfileId,
+          step: `${currentStep}_attempt_${searchAttempt}`,
+          result: 'retry',
+          duration: Date.now() - searchStartTime,
+        });
+
         const searchResponse = await client.get('/phone_numbers', {
           params: {
             filter: {
@@ -390,93 +596,240 @@ export async function linkPhoneNumberToMessagingProfile(
         });
 
         phoneNumberRecord = searchResponse.data?.data?.[0];
-        if (phoneNumberRecord?.id) {
-          console.log(`✅ Found phone number ID: ${phoneNumberRecord.id}`);
-          console.log(`   Current messaging_profile_id: ${phoneNumberRecord.messaging_profile_id}`);
+        if (phoneNumberRecord?.id && validateTelnyxId(phoneNumberRecord.id)) {
+          logLinkingOperation({
+            timestamp: new Date().toISOString(),
+            churchId,
+            phoneNumber,
+            messagingProfileId,
+            step: `${currentStep}_found`,
+            result: 'success',
+            duration: Date.now() - searchStartTime,
+          });
           break;
         }
 
         if (searchAttempt < 5) {
-          console.warn(`⚠️ Phone number not found yet, waiting 2 seconds before retry...`);
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          // Exponential backoff: 2s, 4s, 8s, 16s, etc.
+          const delayMs = Math.pow(2, searchAttempt) * 1000;
+          await new Promise(resolve => setTimeout(resolve, delayMs));
         }
       } catch (searchError: any) {
-        console.error(`⚠️ Search attempt ${searchAttempt} failed:`, searchError.message);
+        lastSearchError = searchError;
+        const errorCode = generateErrorCode(searchError.response?.status);
+
+        logLinkingOperation({
+          timestamp: new Date().toISOString(),
+          churchId,
+          phoneNumber,
+          messagingProfileId,
+          step: `${currentStep}_attempt_${searchAttempt}_error`,
+          result: 'failure',
+          errorCode,
+          errorDetails: searchError.message,
+          duration: Date.now() - searchStartTime,
+        });
+
         if (searchAttempt < 5) {
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          const delayMs = Math.pow(2, searchAttempt) * 1000;
+          await new Promise(resolve => setTimeout(resolve, delayMs));
         }
       }
     }
 
     if (!phoneNumberRecord?.id) {
-      throw new Error(`Phone number ${phoneNumber} not found after 5 search attempts. It may take a few minutes to appear in Telnyx's system.`);
+      const errorMsg = `Phone number ${phoneNumber} not found after 5 search attempts. It may take a few minutes to appear in Telnyx's system.`;
+      logLinkingOperation({
+        timestamp: new Date().toISOString(),
+        churchId,
+        phoneNumber,
+        messagingProfileId,
+        step: 'search_phone_number_failed',
+        result: 'failure',
+        errorCode: 'PHONE_NUMBER_NOT_FOUND',
+        errorDetails: errorMsg,
+        duration: Date.now() - operationStartTime,
+      });
+      throw new Error(errorMsg);
     }
 
-    // Step 2: Try to update the phone number itself to assign the messaging profile
-    // This is the most direct way to link a number to a messaging profile
+    // ========================================================================
+    // Phase 1: Step 2 - Method 1: Direct phone number update
+    // ========================================================================
+    currentStep = 'method_1_direct_update';
+    const method1StartTime = Date.now();
+
     try {
-      console.log(`🔄 Method 1: Updating phone number ${phoneNumberRecord.id} to assign messaging profile...`);
+      logLinkingOperation({
+        timestamp: new Date().toISOString(),
+        churchId,
+        phoneNumber,
+        messagingProfileId,
+        step: currentStep,
+        result: 'retry',
+        duration: 0,
+      });
+
       const updateNumberResponse = await client.patch(`/phone_numbers/${phoneNumberRecord.id}`, {
         messaging_profile_id: messagingProfileId,
       });
 
       const linkedProfileId = updateNumberResponse.data?.data?.messaging_profile_id;
-      if (linkedProfileId === messagingProfileId) {
-        console.log(`✅ Phone number linked via Method 1:`, {
-          phoneNumber: updateNumberResponse.data?.data?.phone_number,
-          messagingProfileId: linkedProfileId,
+      if (linkedProfileId === messagingProfileId && validateTelnyxId(linkedProfileId)) {
+        logLinkingOperation({
+          timestamp: new Date().toISOString(),
+          churchId,
+          phoneNumber,
+          messagingProfileId,
+          step: currentStep,
+          result: 'success',
+          duration: Date.now() - method1StartTime,
         });
-        return true;
+
+        return {
+          success: true,
+          method: 'direct',
+          duration: Date.now() - operationStartTime,
+          phoneNumberId: phoneNumberRecord.id,
+          messagingProfileId: linkedProfileId,
+          phoneNumber,
+        };
       } else {
         throw new Error(`Phone linked but with wrong profile. Expected: ${messagingProfileId}, Got: ${linkedProfileId}`);
       }
     } catch (method1Error: any) {
-      console.error(`⚠️ Method 1 FAILED with status ${method1Error.response?.status}:`, JSON.stringify({
-        errors: method1Error.response?.data?.errors,
-        message: method1Error.message,
-        fullData: method1Error.response?.data,
-      }, null, 2));
+      const errorCode = generateErrorCode(method1Error.response?.status);
 
-      // Step 3: Fallback - try updating the messaging profile to include the phone number
+      logLinkingOperation({
+        timestamp: new Date().toISOString(),
+        churchId,
+        phoneNumber,
+        messagingProfileId,
+        step: `${currentStep}_failed`,
+        result: 'failure',
+        errorCode,
+        errorDetails: method1Error.message || method1Error.response?.data?.errors?.[0]?.detail,
+        duration: Date.now() - method1StartTime,
+      });
+
+      // ====================================================================
+      // Phase 1: Step 3 - Method 2: Messaging profile update (FIXED)
+      // ====================================================================
+      currentStep = 'method_2_profile_update';
+      const method2StartTime = Date.now();
+
       try {
-        console.log(`🔄 Method 2: Updating messaging profile to include phone number...`);
+        logLinkingOperation({
+          timestamp: new Date().toISOString(),
+          churchId,
+          phoneNumber,
+          messagingProfileId,
+          step: currentStep,
+          result: 'retry',
+          duration: 0,
+        });
+
+        // CRITICAL FIX: Use phoneNumberRecord.id (the ID) not phoneNumber (the phone string)
         const updateProfileResponse = await client.patch(`/messaging_profiles/${messagingProfileId}`, {
           phone_numbers: [phoneNumberRecord.id],
         });
 
-        console.log(`✅ Phone number linked via Method 2:`, updateProfileResponse.data?.data?.id);
-        return true;
+        const responseProfileId = updateProfileResponse.data?.data?.id;
+        if (responseProfileId === messagingProfileId) {
+          logLinkingOperation({
+            timestamp: new Date().toISOString(),
+            churchId,
+            phoneNumber,
+            messagingProfileId,
+            step: currentStep,
+            result: 'success',
+            duration: Date.now() - method2StartTime,
+          });
+
+          return {
+            success: true,
+            method: 'profile',
+            duration: Date.now() - operationStartTime,
+            phoneNumberId: phoneNumberRecord.id,
+            messagingProfileId,
+            phoneNumber,
+          };
+        } else {
+          throw new Error(`Profile update failed: response ID mismatch`);
+        }
       } catch (method2Error: any) {
-        console.error(`⚠️ Method 2 FAILED with status ${method2Error.response?.status}:`, JSON.stringify({
-          errors: method2Error.response?.data?.errors,
-          message: method2Error.message,
-          fullData: method2Error.response?.data,
-        }, null, 2));
+        const errorCode = generateErrorCode(method2Error.response?.status);
 
-        // Both methods failed
-        console.log(`❌ Both automatic linking methods failed.`);
-        console.log(`   To link manually in Telnyx dashboard:`);
-        console.log(`   1. Go to Real-Time Communications → Messaging → Phone Numbers`);
-        console.log(`   2. Find and click on ${phoneNumber}`);
-        console.log(`   3. In the "Messaging profile" dropdown, select your profile`);
-        console.log(`   4. Click Save`);
-        console.log(`   5. Refresh this page`);
+        logLinkingOperation({
+          timestamp: new Date().toISOString(),
+          churchId,
+          phoneNumber,
+          messagingProfileId,
+          step: `${currentStep}_failed`,
+          result: 'failure',
+          errorCode,
+          errorDetails: method2Error.message || method2Error.response?.data?.errors?.[0]?.detail,
+          duration: Date.now() - method2StartTime,
+        });
 
-        throw new Error(
-          `Failed to link ${phoneNumber} to messaging profile ${messagingProfileId}. ` +
-          `Method 1 error: ${method1Error.message}. ` +
-          `Method 2 error: ${method2Error.message}. ` +
-          `Please link manually in Telnyx dashboard.`
-        );
+        // Both methods failed - prepare comprehensive error for retry logic
+        const finalError = {
+          success: false,
+          method: null as null,
+          duration: Date.now() - operationStartTime,
+          phoneNumberId: phoneNumberRecord.id,
+          messagingProfileId,
+          phoneNumber,
+          error: {
+            code: 'BOTH_LINKING_METHODS_FAILED',
+            message: `Method 1 failed: ${method1Error.message}. Method 2 failed: ${method2Error.message}`,
+            httpStatus: method2Error.response?.status,
+          },
+        };
+
+        logLinkingOperation({
+          timestamp: new Date().toISOString(),
+          churchId,
+          phoneNumber,
+          messagingProfileId,
+          step: 'both_methods_failed',
+          result: 'failure',
+          errorCode: 'BOTH_LINKING_METHODS_FAILED',
+          errorDetails: `Method 1: ${method1Error.message}. Method 2: ${method2Error.message}`,
+          duration: finalError.duration,
+        });
+
+        return finalError as LinkingResult;
       }
     }
   } catch (error: any) {
-    console.error('❌ Telnyx phone number linking error:', {
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message,
+    const errorCode = generateErrorCode(error.response?.status);
+    const errorMsg = error.message || 'Unknown error during linking';
+
+    logLinkingOperation({
+      timestamp: new Date().toISOString(),
+      churchId,
+      phoneNumber,
+      messagingProfileId,
+      step: `${currentStep}_unexpected_error`,
+      result: 'failure',
+      errorCode: errorCode === 'API_ERROR' ? 'UNEXPECTED_ERROR' : errorCode,
+      errorDetails: errorMsg,
+      duration: Date.now() - operationStartTime,
     });
-    const errorMessage = error.response?.data?.errors?.[0]?.detail || error.message || 'Failed to link phone number';
-    throw new Error(`Failed to link phone number to messaging profile: ${errorMessage}`);
+
+    return {
+      success: false,
+      method: null,
+      duration: Date.now() - operationStartTime,
+      phoneNumberId: '',
+      messagingProfileId,
+      phoneNumber,
+      error: {
+        code: errorCode,
+        message: errorMsg,
+        httpStatus: error.response?.status,
+      },
+    };
   }
 }

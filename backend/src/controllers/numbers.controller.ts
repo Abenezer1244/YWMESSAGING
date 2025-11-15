@@ -371,22 +371,17 @@ export async function purchaseNumber(req: Request, res: Response) {
 
     // Attempt to link the phone number to messaging profile
     // This is critical - without linking, SMS sending will fail
-    let linkedSuccessfully = false;
-    let linkingError: Error | null = null;
+    let linkingResult = await linkPhoneNumberToMessagingProfile(phoneNumber, webhookId, churchId);
 
-    try {
-      console.log(`📍 Linking ${phoneNumber} to messaging profile ${webhookId}...`);
-      await linkPhoneNumberToMessagingProfile(phoneNumber, webhookId);
-      console.log(`✅ Successfully linked ${phoneNumber} to messaging profile`);
-      linkedSuccessfully = true;
-    } catch (linkError: any) {
-      console.error(`❌ Linking failed: ${linkError.message}`);
-      linkingError = linkError;
-      // Don't throw yet - phone number is purchased, just not linked
-      // User will need to link manually
+    // Enterprise-grade linking: Log result for monitoring and future recovery
+    if (linkingResult.success) {
+      console.log(`✅ Successfully linked ${phoneNumber} to messaging profile via method: ${linkingResult.method}. Duration: ${linkingResult.duration}ms`);
+    } else {
+      console.error(`⚠️ Linking failed after both methods. Error: ${linkingResult.error?.code} - ${linkingResult.error?.message}`);
     }
 
-    // Update church with purchased phone number and webhook ID
+    // Update church with purchased phone number, webhook ID, and linking status
+    // Phase 2: Track linking status for automatic recovery
     const updated = await prisma.church.update({
       where: { id: churchId },
       data: {
@@ -395,16 +390,23 @@ export async function purchaseNumber(req: Request, res: Response) {
         telnyxVerified: true,
         telnyxWebhookId: webhookId,
         telnyxPurchasedAt: new Date(),
+        // Enterprise: Track linking status for background verification job
+        telnyxPhoneLinkingStatus: linkingResult.success ? 'linked' : 'failed',
+        telnyxPhoneLinkingLastAttempt: new Date(),
+        telnyxPhoneLinkingRetryCount: linkingResult.success ? 0 : 1,
+        telnyxPhoneLinkingError: linkingResult.success ? null : `${linkingResult.error?.code}: ${linkingResult.error?.message}`,
       },
       select: {
         id: true,
         telnyxPhoneNumber: true,
         telnyxWebhookId: true,
         telnyxVerified: true,
+        telnyxPhoneLinkingStatus: true,
+        telnyxPhoneLinkingRetryCount: true,
       },
     });
 
-    if (linkedSuccessfully) {
+    if (linkingResult.success) {
       console.log(`✅ Phone number purchase completed with messaging profile linked for church ${churchId}: ${phoneNumber}`);
       res.json({
         success: true,
@@ -414,13 +416,15 @@ export async function purchaseNumber(req: Request, res: Response) {
           webhookId: updated.telnyxWebhookId,
           verified: updated.telnyxVerified,
           linked: true,
-          linkingError: null,
-          message: '✅ Phone number purchased and automatically linked to messaging profile! SMS is ready to use.',
+          linkingMethod: linkingResult.method,
+          linkingDuration: linkingResult.duration,
+          message: `✅ Phone number purchased and automatically linked to messaging profile via ${linkingResult.method} method! SMS is ready to use.`,
         },
       });
     } else {
       // Phone number was purchased but linking failed
-      console.log(`⚠️ Phone number purchased but NOT linked for church ${churchId}: ${phoneNumber}`);
+      // Will be retried by background job (Phase 2)
+      console.log(`⚠️ Phone number purchased but NOT automatically linked for church ${churchId}: ${phoneNumber}`);
       res.status(201).json({
         success: false,
         requiresAction: true,
@@ -430,16 +434,19 @@ export async function purchaseNumber(req: Request, res: Response) {
           webhookId: updated.telnyxWebhookId,
           verified: updated.telnyxVerified,
           linked: false,
-          linkingError: linkingError?.message || 'Unknown error',
-          message: `⚠️ Phone number purchased but automatic linking failed. ${linkingError?.message} You must link the number to the messaging profile before SMS will work.`,
-          nextSteps: [
-            '1. Go to Telnyx Dashboard → Real-Time Communications → Messaging → Phone Numbers',
-            `2. Find phone number ${phoneNumber}`,
-            '3. Click on the number to edit',
-            `4. In the "Messaging profile" dropdown, select the profile (should be "Mike" or similar)`,
-            '5. Click Save',
-            '6. SMS sending will then be enabled',
-          ],
+          linkingError: linkingResult.error,
+          message: `⚠️ Phone number purchased but automatic linking failed. ${linkingResult.error?.code}: ${linkingResult.error?.message}. System will retry automatically. If problem persists, manual linking may be required.`,
+          retryInfo: {
+            note: 'This will be automatically retried by the system',
+            manualLinkingSteps: [
+              '1. Go to Telnyx Dashboard → Real-Time Communications → Messaging → Phone Numbers',
+              `2. Find phone number ${phoneNumber}`,
+              '3. Click on the number to edit',
+              `4. In the "Messaging profile" dropdown, select the profile (should be "Mike" or similar)`,
+              '5. Click Save',
+              '6. SMS sending will then be enabled',
+            ],
+          },
         },
       });
     }

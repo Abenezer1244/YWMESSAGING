@@ -12,19 +12,24 @@ datasource db {
 
 // Church account
 model Church {
-  id                    String   @id @default(cuid())
-  name                  String
-  email                 String   @unique
-  stripeCustomerId      String?  @unique
-  telnyxPhoneNumber     String?
-  telnyxNumberSid       String?  @unique
-  telnyxWebhookId       String?  // Telnyx webhook ID for MMS events
-  telnyxVerified        Boolean  @default(false)
-  telnyxPurchasedAt     DateTime?
-  trialEndsAt           DateTime
-  subscriptionStatus    String   @default("trial") // trial, active, cancelled, expired
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id                           String   @id @default(cuid())
+  name                         String
+  email                        String   @unique
+  stripeCustomerId             String?  @unique
+  telnyxPhoneNumber            String?
+  telnyxNumberSid              String?  @unique
+  telnyxWebhookId              String?  // Telnyx webhook ID for MMS events
+  telnyxVerified               Boolean  @default(false)
+  telnyxPurchasedAt            DateTime?
+  // Phase 2: Enterprise linking status tracking
+  telnyxPhoneLinkingStatus      String   @default("pending") // pending, linked, failed
+  telnyxPhoneLinkingLastAttempt DateTime?
+  telnyxPhoneLinkingRetryCount  Int      @default(0) // Tracks retry attempts for automatic recovery
+  telnyxPhoneLinkingError       String?  // Last error message for debugging
+  trialEndsAt                  DateTime
+  subscriptionStatus           String   @default("trial") // trial, active, cancelled, expired
+  createdAt                    DateTime @default(now())
+  updatedAt                    DateTime @updatedAt
 
   // Relations
   branches              Branch[]
@@ -39,6 +44,7 @@ model Church {
   @@index([subscriptionStatus])
   @@index([trialEndsAt])
   @@index([telnyxPhoneNumber])
+  @@index([telnyxPhoneLinkingStatus]) // Index for finding churches that need linking
 }
 
 // Physical locations within a church

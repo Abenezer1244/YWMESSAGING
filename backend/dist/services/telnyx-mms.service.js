@@ -44,14 +44,28 @@ export async function findOrCreateMemberByPhone(churchId, phone) {
     const phoneHash = hashForSearch(formattedPhone);
     try {
         // Try to find existing member with this phone in this church
+        // Include members in groups OR members with conversations
         const existingMember = await prisma.member.findFirst({
             where: {
-                groups: {
-                    some: {
-                        group: { churchId },
-                    },
-                },
                 phoneHash,
+                OR: [
+                    // Members in groups for this church
+                    {
+                        groups: {
+                            some: {
+                                group: { churchId },
+                            },
+                        },
+                    },
+                    // Members who have conversations with this church (texted before)
+                    {
+                        conversations: {
+                            some: {
+                                churchId,
+                            },
+                        },
+                    },
+                ],
             },
         });
         if (existingMember) {
@@ -334,12 +348,25 @@ export async function getMemberByPhone(churchId, phone) {
     try {
         const member = await prisma.member.findFirst({
             where: {
-                groups: {
-                    some: {
-                        group: { churchId },
-                    },
-                },
                 phoneHash,
+                OR: [
+                    // Members in groups for this church
+                    {
+                        groups: {
+                            some: {
+                                group: { churchId },
+                            },
+                        },
+                    },
+                    // Members who have conversations with this church
+                    {
+                        conversations: {
+                            some: {
+                                churchId,
+                            },
+                        },
+                    },
+                ],
             },
         });
         return member || null;
