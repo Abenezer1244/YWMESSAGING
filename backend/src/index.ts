@@ -4,6 +4,7 @@ import { startRecurringMessageScheduler } from './jobs/recurringMessages.job.js'
 
 const PORT = process.env.PORT || 3000;
 
+// Force clean rebuild with synchronous message sending
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
 
