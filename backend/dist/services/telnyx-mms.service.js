@@ -308,7 +308,35 @@ export async function broadcastInboundToMembers(churchId, senderMemberId, messag
             try {
                 // Decrypt phone number (stored encrypted in database, or plain text for legacy records)
                 const decryptedPhone = decryptPhoneSafe(member.phone);
-                await sendMMS(decryptedPhone, displayMessage, churchId);
+                const result = await sendMMS(decryptedPhone, displayMessage, churchId);
+                // Save outbound message to conversation history
+                // First, find or create conversation between church and this member
+                const conversation = await prisma.conversation.upsert({
+                    where: {
+                        churchId_memberId: {
+                            churchId,
+                            memberId: member.id,
+                        }
+                    },
+                    update: {
+                        lastMessageAt: new Date(),
+                    },
+                    create: {
+                        churchId,
+                        memberId: member.id,
+                    }
+                });
+                // Save the outbound message
+                await prisma.conversationMessage.create({
+                    data: {
+                        conversationId: conversation.id,
+                        memberId: member.id,
+                        content: displayMessage,
+                        direction: 'outbound',
+                        providerMessageId: result.messageSid,
+                        deliveryStatus: 'pending',
+                    }
+                });
                 console.log(`   ✓ Sent to ${member.firstName}`);
             }
             catch (error) {
