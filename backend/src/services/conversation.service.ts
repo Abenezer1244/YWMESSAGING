@@ -229,7 +229,7 @@ async function broadcastOutboundToMembers(
         const messageText = `Church: ${content}`;
         // Decrypt phone number (stored encrypted in database)
         const decryptedPhone = decrypt(member.phone);
-        await telnyxService.sendSMS(messageText, decryptedPhone, churchId);
+        await telnyxService.sendSMS(decryptedPhone, messageText, churchId);
         console.log(`   ✓ Sent to ${member.firstName}`);
       } catch (error: any) {
         console.error(`   ✗ Failed to send to ${member.firstName}: ${error.message}`);
