@@ -570,10 +570,14 @@ export async function linkPhoneNumberToMessagingProfile(phoneNumber, messagingPr
         catch (method1Error) {
             const errorCode = generateErrorCode(method1Error.response?.status);
             // Enhanced error logging to capture full Telnyx response
+            const errorDetail = method1Error.response?.data?.errors?.[0];
             console.error('[TELNYX_LINKING] Method 1 Error Details:', {
                 status: method1Error.response?.status,
                 statusText: method1Error.response?.statusText,
-                fullErrorData: method1Error.response?.data,
+                errorTitle: errorDetail?.title,
+                errorDetail: errorDetail?.detail,
+                errorSource: errorDetail?.source,
+                fullResponse: JSON.stringify(method1Error.response?.data),
                 message: method1Error.message,
             });
             logLinkingOperation({
@@ -677,10 +681,14 @@ export async function linkPhoneNumberToMessagingProfile(phoneNumber, messagingPr
             catch (method2Error) {
                 const errorCode = generateErrorCode(method2Error.response?.status);
                 // Enhanced error logging to capture full Telnyx response
+                const method2ErrorDetail = method2Error.response?.data?.errors?.[0];
                 console.error('[TELNYX_LINKING] Method 2 Error Details:', {
                     status: method2Error.response?.status,
                     statusText: method2Error.response?.statusText,
-                    fullErrorData: method2Error.response?.data,
+                    errorTitle: method2ErrorDetail?.title,
+                    errorDetail: method2ErrorDetail?.detail,
+                    errorSource: method2ErrorDetail?.source,
+                    fullResponse: JSON.stringify(method2Error.response?.data),
                     message: method2Error.message,
                 });
                 logLinkingOperation({
