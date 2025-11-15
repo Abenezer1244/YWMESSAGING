@@ -71,7 +71,7 @@ if (smsQueue) {
             console.log(`   To: ${phone}`);
             console.log(`   Content: ${content.substring(0, 50)}...`);
             // Send via Telnyx
-            const result = await telnyxService.sendSMS(content, phone, churchId);
+            const result = await telnyxService.sendSMS(phone, content, churchId);
             // Update message with Telnyx ID
             if (conversationMessageId) {
                 await prisma.conversationMessage.update({
