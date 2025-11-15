@@ -263,17 +263,26 @@ export async function broadcastInboundToMembers(churchId, senderMemberId, messag
                 phone: true,
             },
         });
-        // Filter out the sender
-        const recipientMembers = members.filter(m => m.id !== senderMemberId);
+        // Get sender info (phone + name)
+        const sender = await prisma.member.findUnique({
+            where: { id: senderMemberId },
+            select: { firstName: true, phone: true },
+        });
+        if (!sender) {
+            console.error(`Sender member not found: ${senderMemberId}`);
+            return;
+        }
+        // Filter out the sender by comparing phone numbers
+        // This handles cases where the same phone number exists under multiple member IDs
+        const senderPhone = decryptPhoneSafe(sender.phone);
+        const recipientMembers = members.filter(m => {
+            const memberPhone = decryptPhoneSafe(m.phone);
+            return memberPhone !== senderPhone;
+        });
         if (recipientMembers.length === 0) {
             console.log('ℹ️ No other members to notify');
             return;
         }
-        // Get sender name
-        const sender = await prisma.member.findUnique({
-            where: { id: senderMemberId },
-            select: { firstName: true },
-        });
         const senderName = sender?.firstName || 'Member';
         // Format message
         const displayMessage = mediaType

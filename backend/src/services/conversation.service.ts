@@ -235,10 +235,21 @@ async function broadcastOutboundToMembers(
       return;
     }
 
-    console.log(`📢 Broadcasting reply to ${members.length} members`);
+    // Deduplicate members by phone number (in case same phone exists under multiple IDs)
+    const seenPhones = new Set<string>();
+    const uniqueMembers = members.filter(member => {
+      const memberPhone = decryptPhoneSafe(member.phone);
+      if (seenPhones.has(memberPhone)) {
+        return false;
+      }
+      seenPhones.add(memberPhone);
+      return true;
+    });
+
+    console.log(`📢 Broadcasting reply to ${uniqueMembers.length} members`);
 
     // Send SMS synchronously to each member
-    for (const member of members) {
+    for (const member of uniqueMembers) {
       try {
         const messageText = `Church: ${content}`;
         // Decrypt phone number (stored encrypted in database, or plain text for legacy records)
@@ -250,7 +261,7 @@ async function broadcastOutboundToMembers(
       }
     }
 
-    console.log(`✅ Broadcast sent to ${members.length} members`);
+    console.log(`✅ Broadcast sent to ${uniqueMembers.length} members`);
   } catch (error: any) {
     console.error('❌ Error broadcasting outbound reply:', error);
     // Don't throw - continue processing even if broadcast fails
