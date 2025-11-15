@@ -5,6 +5,7 @@ import * as telnyxMMSService from '../services/telnyx-mms.service.js';
 import * as s3MediaService from '../services/s3-media.service.js';
 import { hashForSearch } from '../utils/encryption.utils.js';
 import { sendSMS } from '../services/telnyx.service.js';
+import { formatToE164 } from '../utils/phone.utils.js';
 
 const prisma = new PrismaClient();
 
@@ -347,7 +348,23 @@ export async function handleTelnyxInboundMMS(req: Request, res: Response) {
     // SECURITY: Verify sender is a registered member of the church
     console.log(`🔐 Verifying member: ${senderPhone} for church ${church.id}`);
 
-    const phoneHash = hashForSearch(senderPhone);
+    // Format phone number to match how it's stored in the database
+    let formattedPhone: string;
+    try {
+      formattedPhone = formatToE164(senderPhone);
+    } catch (error) {
+      // Fallback if formatToE164 fails - use simple normalization
+      const digits = senderPhone.replace(/\D/g, '');
+      if (digits.length === 11 && digits.startsWith('1')) {
+        formattedPhone = `+${digits}`;
+      } else if (digits.length === 10) {
+        formattedPhone = `+1${digits}`;
+      } else {
+        formattedPhone = `+${digits}`;
+      }
+    }
+
+    const phoneHash = hashForSearch(formattedPhone);
     const isMember = await prisma.member.findFirst({
       where: {
         phoneHash,
