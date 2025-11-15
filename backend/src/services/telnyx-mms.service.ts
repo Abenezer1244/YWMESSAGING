@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { PrismaClient } from '@prisma/client';
-import crypto from 'crypto';
 import * as s3MediaService from './s3-media.service.js';
 import { formatToE164 } from '../utils/phone.utils.js';
+import { hashForSearch } from '../utils/encryption.utils.js';
 
 const prisma = new PrismaClient();
 const TELNYX_BASE_URL = 'https://api.telnyx.com/v2';
@@ -20,15 +20,6 @@ function getTelnyxClient() {
       'Content-Type': 'application/json',
     },
   });
-}
-
-/**
- * Hash phone number for secure lookup
- * Used to match incoming SMS/MMS to members without storing plain text
- */
-function hashPhone(phone: string): string {
-  const hashKey = process.env.PHONE_HASH_KEY || 'default_key';
-  return crypto.createHmac('sha256', hashKey).update(phone).digest('hex');
 }
 
 /**
@@ -54,7 +45,7 @@ export async function findOrCreateMemberByPhone(
       formattedPhone = `+${digits}`;
     }
   }
-  const phoneHash = hashPhone(formattedPhone);
+  const phoneHash = hashForSearch(formattedPhone);
 
   try {
     // Try to find existing member with this phone in this church
@@ -308,7 +299,7 @@ export async function getMemberByPhone(
       formattedPhone = `+${digits}`;
     }
   }
-  const phoneHash = hashPhone(formattedPhone);
+  const phoneHash = hashForSearch(formattedPhone);
 
   try {
     const member = await prisma.member.findFirst({
