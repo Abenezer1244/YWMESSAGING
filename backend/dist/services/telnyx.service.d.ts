@@ -36,7 +36,7 @@ interface TelnyxMessagingProfile {
  */
 interface LinkingResult {
     success: boolean;
-    method: 'direct' | 'profile' | null;
+    method: 'direct' | 'profile' | 'aggressive_search_retry' | null;
     duration: number;
     phoneNumberId: string;
     messagingProfileId: string;

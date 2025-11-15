@@ -561,9 +561,9 @@ export async function linkPhoneNumberToMessagingProfile(phoneNumber, messagingPr
                 duration: Date.now() - method1StartTime,
             });
             // ====================================================================
-            // Phase 1: Step 3 - Method 2: Messaging profile update (FIXED)
+            // Phase 1: Step 3 - Method 2: Aggressive search + retry direct link
             // ====================================================================
-            currentStep = 'method_2_profile_update';
+            currentStep = 'method_2_aggressive_search_retry';
             const method2StartTime = Date.now();
             try {
                 logLinkingOperation({
@@ -575,12 +575,40 @@ export async function linkPhoneNumberToMessagingProfile(phoneNumber, messagingPr
                     result: 'retry',
                     duration: 0,
                 });
-                // CRITICAL FIX: Use phoneNumberRecord.id (the ID) not phoneNumber (the phone string)
-                const updateProfileResponse = await client.patch(`/messaging_profiles/${messagingProfileId}`, {
-                    phone_numbers: [phoneNumberRecord.id],
+                // Method 2: More aggressive search with longer delays for newly purchased numbers
+                // Wait additional time for Telnyx to index the phone number
+                let retryPhoneNumberRecord = null;
+                const additionalSearchAttempts = 3;
+                for (let i = 0; i < additionalSearchAttempts; i++) {
+                    // Exponential backoff: 3s, 6s, 12s
+                    const delayMs = Math.pow(2, i + 1) * 1500;
+                    if (i > 0) {
+                        console.log(`[TELNYX_LINKING] Method 2: Waiting ${delayMs}ms before search attempt ${i + 1}...`);
+                        await new Promise(resolve => setTimeout(resolve, delayMs));
+                    }
+                    const searchResponse = await client.get('/phone_numbers', {
+                        params: {
+                            filter: {
+                                phone_number: phoneNumber,
+                            },
+                            limit: 10,
+                        },
+                    });
+                    retryPhoneNumberRecord = searchResponse.data?.data?.[0] || null;
+                    if (retryPhoneNumberRecord?.id && validateTelnyxId(retryPhoneNumberRecord.id)) {
+                        console.log(`[TELNYX_LINKING] Method 2: Found phone number on attempt ${i + 1}`);
+                        break;
+                    }
+                }
+                if (!retryPhoneNumberRecord?.id) {
+                    throw new Error(`Phone number still not indexed after ${additionalSearchAttempts} additional search attempts`);
+                }
+                // Retry the direct phone number update (Method 1 logic)
+                const retryUpdateResponse = await client.patch(`/phone_numbers/${retryPhoneNumberRecord.id}`, {
+                    messaging_profile_id: messagingProfileId,
                 });
-                const responseProfileId = updateProfileResponse.data?.data?.id;
-                if (responseProfileId === messagingProfileId) {
+                const retryLinkedProfileId = retryUpdateResponse.data?.data?.messaging_profile_id;
+                if (retryLinkedProfileId === messagingProfileId && validateTelnyxId(retryLinkedProfileId)) {
                     logLinkingOperation({
                         timestamp: new Date().toISOString(),
                         churchId,
@@ -592,19 +620,26 @@ export async function linkPhoneNumberToMessagingProfile(phoneNumber, messagingPr
                     });
                     return {
                         success: true,
-                        method: 'profile',
+                        method: 'aggressive_search_retry',
                         duration: Date.now() - operationStartTime,
-                        phoneNumberId: phoneNumberRecord.id,
+                        phoneNumberId: retryPhoneNumberRecord.id,
                         messagingProfileId,
                         phoneNumber,
                     };
                 }
                 else {
-                    throw new Error(`Profile update failed: response ID mismatch`);
+                    throw new Error(`Phone linked but with wrong profile. Expected: ${messagingProfileId}, Got: ${retryLinkedProfileId}`);
                 }
             }
             catch (method2Error) {
                 const errorCode = generateErrorCode(method2Error.response?.status);
+                // Enhanced error logging to capture full Telnyx response
+                console.error('[TELNYX_LINKING] Method 2 Error Details:', {
+                    status: method2Error.response?.status,
+                    statusText: method2Error.response?.statusText,
+                    fullErrorData: method2Error.response?.data,
+                    message: method2Error.message,
+                });
                 logLinkingOperation({
                     timestamp: new Date().toISOString(),
                     churchId,
@@ -613,7 +648,7 @@ export async function linkPhoneNumberToMessagingProfile(phoneNumber, messagingPr
                     step: `${currentStep}_failed`,
                     result: 'failure',
                     errorCode,
-                    errorDetails: method2Error.message || method2Error.response?.data?.errors?.[0]?.detail,
+                    errorDetails: method2Error.message || method2Error.response?.data?.errors?.[0]?.detail || JSON.stringify(method2Error.response?.data),
                     duration: Date.now() - method2StartTime,
                 });
                 // Both methods failed - prepare comprehensive error for retry logic
