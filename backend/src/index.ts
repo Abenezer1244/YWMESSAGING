@@ -1,7 +1,9 @@
 import 'dotenv/config';
 import app from './app.js';
 import { startRecurringMessageScheduler } from './jobs/recurringMessages.job.js';
+import { verifyAndRecoverPhoneLinkings } from './services/phone-linking-recovery.service.js';
 import { spawn } from 'child_process';
+import cron from 'node-cron';
 
 const PORT = process.env.PORT || 3000;
 
@@ -61,6 +63,20 @@ async function startServer() {
       // Step 3: Start recurring message scheduler
       startRecurringMessageScheduler();
       console.log('✅ Message scheduling initialized');
+
+      // Step 4: Start phone number linking recovery job (every 5 minutes)
+      cron.schedule('*/5 * * * *', async () => {
+        try {
+          const results = await verifyAndRecoverPhoneLinkings();
+          if (results.length > 0) {
+            console.log(`[PHONE_LINKING_RECOVERY] Job completed: ${results.length} churches processed`);
+          }
+        } catch (error: any) {
+          console.error('[PHONE_LINKING_RECOVERY] Job failed:', error.message);
+        }
+      });
+      console.log('✅ Phone number linking recovery job scheduled (every 5 minutes)');
+
       console.log('✅ Application fully initialized and ready');
     });
   } catch (error: any) {
