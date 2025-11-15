@@ -690,24 +690,27 @@ export async function linkPhoneNumberToMessagingProfile(
         duration: 0,
       });
 
-      // Update phone number with messaging profile (try direct field)
-      const updateNumberResponse = await client.patch(`/phone_numbers/${phoneNumberRecord.id}`, {
-        messaging_profile_id: messagingProfileId,
-      });
+      // CORRECTED: Add phone number TO the messaging profile, not update phone with profile
+      // POST to the profile endpoint to add this phone number
+      console.log(`[TELNYX_LINKING] Method 1: Adding phone to messaging profile via POST`);
+      const addPhoneResponse = await client.post(
+        `/messaging_profiles/${messagingProfileId}/phone_numbers`,
+        {
+          phone_number_id: phoneNumberRecord.id,
+        }
+      );
 
       // Log full response to understand structure
       console.log('[TELNYX_LINKING] Method 1 - Full response:', {
-        status: updateNumberResponse.status,
-        dataKeys: Object.keys(updateNumberResponse.data || {}),
-        dataDataKeys: Object.keys(updateNumberResponse.data?.data || {}),
-        fullData: updateNumberResponse.data,
+        status: addPhoneResponse.status,
+        dataKeys: Object.keys(addPhoneResponse.data || {}),
+        dataDataKeys: Object.keys(addPhoneResponse.data?.data || {}),
+        fullData: addPhoneResponse.data,
       });
 
-      // Extract messaging_profile_id from response
-      const linkedProfileId = updateNumberResponse.data?.data?.messaging_profile_id;
-      console.log('[TELNYX_LINKING] Method 1 - Extracted profileId:', linkedProfileId);
-
-      if (linkedProfileId === messagingProfileId && validateTelnyxId(linkedProfileId)) {
+      // For POST endpoints, the response might be different
+      // Check if we got success (2xx status means it worked)
+      if (addPhoneResponse.status >= 200 && addPhoneResponse.status < 300) {
         logLinkingOperation({
           timestamp: new Date().toISOString(),
           churchId,
@@ -723,11 +726,11 @@ export async function linkPhoneNumberToMessagingProfile(
           method: 'direct',
           duration: Date.now() - operationStartTime,
           phoneNumberId: phoneNumberRecord.id,
-          messagingProfileId: linkedProfileId,
+          messagingProfileId,
           phoneNumber,
         };
       } else {
-        throw new Error(`Phone linked but with wrong profile. Expected: ${messagingProfileId}, Got: ${linkedProfileId}`);
+        throw new Error(`Failed to link phone to messaging profile`);
       }
     } catch (method1Error: any) {
       const errorCode = generateErrorCode(method1Error.response?.status);
@@ -822,10 +825,13 @@ export async function linkPhoneNumberToMessagingProfile(
           throw new Error(`Phone number still not indexed after ${additionalSearchAttempts} additional search attempts`);
         }
 
-        // Retry the direct phone number update with messaging profile
-        const retryUpdateResponse = await client.patch(`/phone_numbers/${retryPhoneNumberRecord.id}`, {
-          messaging_profile_id: messagingProfileId,
-        });
+        // Retry using the correct endpoint: POST to messaging profile to add phone
+        const retryUpdateResponse = await client.post(
+          `/messaging_profiles/${messagingProfileId}/phone_numbers`,
+          {
+            phone_number_id: retryPhoneNumberRecord.id,
+          }
+        );
 
         // Log full response to understand structure
         console.log('[TELNYX_LINKING] Method 2 - Full response:', {
@@ -835,11 +841,8 @@ export async function linkPhoneNumberToMessagingProfile(
           fullData: retryUpdateResponse.data,
         });
 
-        // Extract messaging_profile_id from response
-        const retryLinkedProfileId = retryUpdateResponse.data?.data?.messaging_profile_id;
-        console.log('[TELNYX_LINKING] Method 2 - Extracted profileId:', retryLinkedProfileId);
-
-        if (retryLinkedProfileId === messagingProfileId && validateTelnyxId(retryLinkedProfileId)) {
+        // For POST endpoints, check 2xx status
+        if (retryUpdateResponse.status >= 200 && retryUpdateResponse.status < 300) {
           logLinkingOperation({
             timestamp: new Date().toISOString(),
             churchId,
@@ -859,7 +862,7 @@ export async function linkPhoneNumberToMessagingProfile(
             phoneNumber,
           };
         } else {
-          throw new Error(`Phone linked but with wrong profile. Expected: ${messagingProfileId}, Got: ${retryLinkedProfileId}`);
+          throw new Error(`Failed to link phone to messaging profile`);
         }
       } catch (method2Error: any) {
         const errorCode = generateErrorCode(method2Error.response?.status);
