@@ -2,7 +2,7 @@ import axios from 'axios';
 import { PrismaClient } from '@prisma/client';
 import * as s3MediaService from './s3-media.service.js';
 import { formatToE164 } from '../utils/phone.utils.js';
-import { hashForSearch, decrypt } from '../utils/encryption.utils.js';
+import { hashForSearch, decrypt, encrypt } from '../utils/encryption.utils.js';
 const prisma = new PrismaClient();
 const TELNYX_BASE_URL = 'https://api.telnyx.com/v2';
 function getTelnyxClient() {
@@ -64,7 +64,7 @@ export async function findOrCreateMemberByPhone(churchId, phone) {
             data: {
                 firstName: '',
                 lastName: 'Congregation Member',
-                phone: formattedPhone,
+                phone: encrypt(formattedPhone),
                 phoneHash,
                 optInSms: true,
             },
