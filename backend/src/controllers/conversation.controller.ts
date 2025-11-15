@@ -340,14 +340,14 @@ export async function handleTelnyxInboundMMS(req: Request, res: Response) {
     );
 
     if (!church) {
-      console.log(`❌ No church found for Telnyx number: ${to}`);
+      console.log(`❌ No church found for Telnyx number: ${recipientPhone}`);
       return res.status(200).json({ received: true });
     }
 
     // SECURITY: Verify sender is a registered member of the church
-    console.log(`🔐 Verifying member: ${from} for church ${church.id}`);
+    console.log(`🔐 Verifying member: ${senderPhone} for church ${church.id}`);
 
-    const phoneHash = hashForSearch(from);
+    const phoneHash = hashForSearch(senderPhone);
     const isMember = await prisma.member.findFirst({
       where: {
         phoneHash,
@@ -362,21 +362,21 @@ export async function handleTelnyxInboundMMS(req: Request, res: Response) {
     });
 
     if (!isMember) {
-      console.log(`🚫 Non-member attempted to message: ${from} to ${to}`);
+      console.log(`🚫 Non-member attempted to message: ${senderPhone} to ${recipientPhone}`);
 
       // Send auto-reply to non-member
       try {
         const replyMessage = `Hello! To communicate with ${church.name}, please ask the church leader to add you to the system.`;
 
         await sendSMS(
-          from,                  // to (sender's number)
+          senderPhone,           // to (sender's number)
           replyMessage,          // message
           church.id              // churchId
         );
 
-        console.log(`✅ Auto-reply sent to non-member: ${from}`);
+        console.log(`✅ Auto-reply sent to non-member: ${senderPhone}`);
       } catch (error: any) {
-        console.error(`⚠️ Failed to send auto-reply to ${from}:`, error.message);
+        console.error(`⚠️ Failed to send auto-reply to ${senderPhone}:`, error.message);
       }
 
       return res.status(200).json({ received: true });
