@@ -2,6 +2,7 @@ import axios from 'axios';
 import { PrismaClient } from '@prisma/client';
 import crypto from 'crypto';
 import * as s3MediaService from './s3-media.service.js';
+import { formatToE164 } from '../utils/phone.utils.js';
 
 const prisma = new PrismaClient();
 const TELNYX_BASE_URL = 'https://api.telnyx.com/v2';
@@ -31,24 +32,6 @@ function hashPhone(phone: string): string {
 }
 
 /**
- * Normalize phone number to E.164 format
- */
-function normalizePhone(phone: string): string {
-  // Remove all non-digits
-  const digits = phone.replace(/\D/g, '');
-
-  // If starts with 1 and is 11 digits (US), keep as is
-  // Otherwise assume it's 10 digits and prepend +1
-  if (digits.length === 11 && digits.startsWith('1')) {
-    return `+${digits}`;
-  } else if (digits.length === 10) {
-    return `+1${digits}`;
-  } else {
-    return `+${digits}`;
-  }
-}
-
-/**
  * Find member by phone number
  * Returns existing member or creates new one for unknown number
  */
@@ -56,8 +39,22 @@ export async function findOrCreateMemberByPhone(
   churchId: string,
   phone: string
 ): Promise<any> {
-  const normalizedPhone = normalizePhone(phone);
-  const phoneHash = hashPhone(normalizedPhone);
+  let formattedPhone: string;
+  try {
+    // Use same formatting as member service for consistency
+    formattedPhone = formatToE164(phone);
+  } catch (error) {
+    // Fallback if formatToE164 fails - use simple normalization
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length === 11 && digits.startsWith('1')) {
+      formattedPhone = `+${digits}`;
+    } else if (digits.length === 10) {
+      formattedPhone = `+1${digits}`;
+    } else {
+      formattedPhone = `+${digits}`;
+    }
+  }
+  const phoneHash = hashPhone(formattedPhone);
 
   try {
     // Try to find existing member with this phone in this church
@@ -78,13 +75,13 @@ export async function findOrCreateMemberByPhone(
     }
 
     // Create new member for unknown caller
-    console.log(`📱 Creating new member for phone: ${normalizedPhone}`);
+    console.log(`📱 Creating new member for phone: ${formattedPhone}`);
 
     const newMember = await prisma.member.create({
       data: {
         firstName: '',
         lastName: 'Congregation Member',
-        phone: normalizedPhone,
+        phone: formattedPhone,
         phoneHash,
         optInSms: true,
       },
@@ -296,8 +293,22 @@ export async function getMemberByPhone(
   churchId: string,
   phone: string
 ): Promise<any | null> {
-  const normalizedPhone = normalizePhone(phone);
-  const phoneHash = hashPhone(normalizedPhone);
+  let formattedPhone: string;
+  try {
+    // Use same formatting as member service for consistency
+    formattedPhone = formatToE164(phone);
+  } catch (error) {
+    // Fallback if formatToE164 fails - use simple normalization
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length === 11 && digits.startsWith('1')) {
+      formattedPhone = `+${digits}`;
+    } else if (digits.length === 10) {
+      formattedPhone = `+1${digits}`;
+    } else {
+      formattedPhone = `+${digits}`;
+    }
+  }
+  const phoneHash = hashPhone(formattedPhone);
 
   try {
     const member = await prisma.member.findFirst({
