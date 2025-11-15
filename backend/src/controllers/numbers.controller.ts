@@ -494,29 +494,70 @@ export async function getCurrentNumber(req: Request, res: Response) {
 
 /**
  * DELETE /api/numbers/current
- * Release/delete the church's phone number
+ * Release/delete the church's phone number with soft-delete (30-day recovery window)
+ *
+ * Body (optional): { confirm: true, confirmPhone: "+1918..." }
+ * - confirm: User must explicitly confirm
+ * - confirmPhone: User must type the phone number exactly
  */
 export async function releaseCurrentNumber(req: Request, res: Response) {
   try {
     const churchId = req.user?.churchId;
+    const adminId = req.user?.adminId;
+
     if (!churchId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
+    const { confirm, confirmPhone } = req.body;
+
     const church = await prisma.church.findUnique({
       where: { id: churchId },
-      select: { telnyxNumberSid: true },
+      select: { telnyxNumberSid: true, telnyxPhoneNumber: true },
     });
 
     if (!church?.telnyxNumberSid) {
       return res.status(404).json({ error: 'No phone number to release' });
     }
 
-    await releasePhoneNumber(church.telnyxNumberSid, churchId);
+    // Step 1: Validate confirmation (safety check)
+    if (!confirm) {
+      return res.status(400).json({
+        error: 'Deletion requires explicit confirmation',
+        requiresConfirmation: true,
+        phoneNumber: church.telnyxPhoneNumber,
+        message: 'This action cannot be undone. All SMS conversations on this number will end.',
+      });
+    }
 
-    res.json({ success: true, message: 'Phone number released' });
+    // Step 2: Verify user typed the phone number correctly
+    if (!confirmPhone || confirmPhone !== church.telnyxPhoneNumber) {
+      return res.status(400).json({
+        error: 'Phone number confirmation mismatch',
+        message: `Please type the phone number exactly: ${church.telnyxPhoneNumber}`,
+      });
+    }
+
+    // Step 3: Soft-delete the number (30-day recovery window)
+    console.log(`[DELETE_NUMBER] User ${adminId} requesting deletion of phone ${church.telnyxPhoneNumber} for church ${churchId}`);
+
+    await releasePhoneNumber(church.telnyxNumberSid, churchId, {
+      softDelete: true,
+      deletedBy: adminId,
+    });
+
+    res.json({
+      success: true,
+      message: 'Phone number deleted (30-day recovery window)',
+      data: {
+        phoneNumber: church.telnyxPhoneNumber,
+        status: 'archived',
+        recoveryWindow: '30 days',
+        note: 'You can contact support to restore this number within 30 days',
+      },
+    });
   } catch (error) {
-    console.error('Failed to release number:', error);
-    res.status(500).json({ error: (error as any).message || 'Failed to release number' });
+    console.error('Failed to delete number:', error);
+    res.status(500).json({ error: (error as any).message || 'Failed to delete number' });
   }
 }

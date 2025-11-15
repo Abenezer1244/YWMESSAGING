@@ -20,6 +20,10 @@ export declare function updateChurchProfile(churchId: string, input: UpdateChurc
     telnyxPhoneLinkingLastAttempt: Date | null;
     telnyxPhoneLinkingRetryCount: number;
     telnyxPhoneLinkingError: string | null;
+    telnyxNumberStatus: string;
+    telnyxNumberDeletedAt: Date | null;
+    telnyxNumberDeletedBy: string | null;
+    telnyxNumberRecoveryDeadline: Date | null;
     trialEndsAt: Date;
     subscriptionStatus: string;
     createdAt: Date;

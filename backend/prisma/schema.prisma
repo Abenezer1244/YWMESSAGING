@@ -26,6 +26,11 @@ model Church {
   telnyxPhoneLinkingLastAttempt DateTime?
   telnyxPhoneLinkingRetryCount  Int      @default(0) // Tracks retry attempts for automatic recovery
   telnyxPhoneLinkingError       String?  // Last error message for debugging
+  // Phase 3: Soft-delete for phone numbers with 30-day recovery window
+  telnyxNumberStatus           String   @default("active") // active, archived, pending-deletion
+  telnyxNumberDeletedAt        DateTime? // When the number was marked for deletion
+  telnyxNumberDeletedBy        String?   // Admin ID who initiated deletion
+  telnyxNumberRecoveryDeadline DateTime? // Until this date, number can be restored
   trialEndsAt                  DateTime
   subscriptionStatus           String   @default("trial") // trial, active, cancelled, expired
   createdAt                    DateTime @default(now())
@@ -45,6 +50,8 @@ model Church {
   @@index([trialEndsAt])
   @@index([telnyxPhoneNumber])
   @@index([telnyxPhoneLinkingStatus]) // Index for finding churches that need linking
+  @@index([telnyxNumberStatus]) // Index for finding archived/deleted numbers
+  @@index([telnyxNumberRecoveryDeadline]) // Index for cleanup job to find expired recoveries
 }
 
 // Physical locations within a church

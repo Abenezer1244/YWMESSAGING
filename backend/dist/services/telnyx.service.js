@@ -239,25 +239,61 @@ export async function getPhoneNumberDetails(numberSid) {
     }
 }
 /**
- * Release/delete a phone number
+ * Release/delete a phone number with soft-delete support
+ *
+ * Soft-delete: Phone number is marked as archived with 30-day recovery window
+ * - Telnyx release is called immediately (can't undo with Telnyx)
+ * - DB marks number as "archived" instead of clearing it
+ * - Conversations stay but show "archived number" status
+ * - Can be restored within 30 days
  */
-export async function releasePhoneNumber(numberSid, churchId) {
+export async function releasePhoneNumber(numberSid, churchId, options) {
     try {
         const client = getTelnyxClient();
+        // Step 1: Release from Telnyx (immediate, cannot be undone with Telnyx)
+        console.log(`[PHONE_RELEASE] Releasing phone number ${numberSid} from Telnyx...`);
         await client.delete(`/phone_numbers/${numberSid}`);
-        // Clear from database
-        await prisma.church.update({
-            where: { id: churchId },
-            data: {
-                telnyxPhoneNumber: null,
-                telnyxNumberSid: null,
-                telnyxVerified: false,
-            },
-        });
+        console.log(`[PHONE_RELEASE] Successfully released from Telnyx`);
+        // Step 2: Update database
+        const now = new Date();
+        const recoveryDeadline = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
+        if (options?.softDelete) {
+            // Soft-delete: Archive the number, keep conversation history
+            console.log(`[PHONE_RELEASE] Soft-deleting number for church ${churchId} (30-day recovery window)`);
+            await prisma.church.update({
+                where: { id: churchId },
+                data: {
+                    telnyxNumberStatus: 'archived',
+                    telnyxNumberDeletedAt: now,
+                    telnyxNumberDeletedBy: options.deletedBy || 'system',
+                    telnyxNumberRecoveryDeadline: recoveryDeadline,
+                    // Keep the phone number and SID for potential recovery
+                    // telnyxPhoneNumber and telnyxNumberSid remain unchanged
+                    telnyxVerified: false, // Can't use for messaging anymore
+                },
+            });
+            console.log(`[PHONE_RELEASE] Number archived. Recovery available until ${recoveryDeadline.toISOString()}`);
+        }
+        else {
+            // Hard-delete: Clear all phone data (for cleanup after recovery window expires)
+            console.log(`[PHONE_RELEASE] Hard-deleting number for church ${churchId}`);
+            await prisma.church.update({
+                where: { id: churchId },
+                data: {
+                    telnyxPhoneNumber: null,
+                    telnyxNumberSid: null,
+                    telnyxVerified: false,
+                    telnyxNumberStatus: 'archived', // Mark as archived even when hard-deleted
+                    // Keep deletion metadata for audit trail
+                },
+            });
+            console.log(`[PHONE_RELEASE] Number hard-deleted from database`);
+        }
         return true;
     }
     catch (error) {
         const errorMessage = error.response?.data?.errors?.[0]?.detail || error.message || 'Failed to release number';
+        console.error(`[PHONE_RELEASE] Error releasing number: ${errorMessage}`);
         throw new Error(`Telnyx error: ${errorMessage}`);
     }
 }

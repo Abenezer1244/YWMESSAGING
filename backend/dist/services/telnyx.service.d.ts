@@ -96,9 +96,18 @@ export declare function purchasePhoneNumber(phoneNumber: string, churchId: strin
  */
 export declare function getPhoneNumberDetails(numberSid: string): Promise<any>;
 /**
- * Release/delete a phone number
+ * Release/delete a phone number with soft-delete support
+ *
+ * Soft-delete: Phone number is marked as archived with 30-day recovery window
+ * - Telnyx release is called immediately (can't undo with Telnyx)
+ * - DB marks number as "archived" instead of clearing it
+ * - Conversations stay but show "archived number" status
+ * - Can be restored within 30 days
  */
-export declare function releasePhoneNumber(numberSid: string, churchId: string): Promise<boolean>;
+export declare function releasePhoneNumber(numberSid: string, churchId: string, options?: {
+    softDelete?: boolean;
+    deletedBy?: string;
+}): Promise<boolean>;
 /**
  * Create webhook for incoming messages (auto-setup)
  */

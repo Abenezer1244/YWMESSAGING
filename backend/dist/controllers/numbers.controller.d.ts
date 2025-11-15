@@ -40,7 +40,11 @@ export declare function purchaseNumber(req: Request, res: Response): Promise<Res
 export declare function getCurrentNumber(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**
  * DELETE /api/numbers/current
- * Release/delete the church's phone number
+ * Release/delete the church's phone number with soft-delete (30-day recovery window)
+ *
+ * Body (optional): { confirm: true, confirmPhone: "+1918..." }
+ * - confirm: User must explicitly confirm
+ * - confirmPhone: User must type the phone number exactly
  */
 export declare function releaseCurrentNumber(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 //# sourceMappingURL=numbers.controller.d.ts.map
