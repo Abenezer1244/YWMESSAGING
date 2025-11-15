@@ -361,6 +361,7 @@ export async function deleteWebhook(webhookId: string): Promise<boolean> {
  * Link phone number to messaging profile for webhook routing
  * Note: Telnyx routes inbound messages via the messaging profile associated with the number
  * This tries multiple approaches to ensure the number is linked
+ * IMPORTANT: Phone numbers need time to be indexed in Telnyx's system after purchase
  */
 export async function linkPhoneNumberToMessagingProfile(
   phoneNumber: string,
@@ -372,21 +373,42 @@ export async function linkPhoneNumberToMessagingProfile(
     console.log(`🔗 Linking phone ${phoneNumber} to messaging profile ${messagingProfileId}...`);
 
     // Step 1: Get the phone number record with all details
-    const searchResponse = await client.get('/phone_numbers', {
-      params: {
-        filter: {
-          phone_number: phoneNumber,
-        },
-      },
-    });
+    // Retry up to 5 times with delays as the number might not be immediately available
+    let phoneNumberRecord: any = null;
+    for (let searchAttempt = 1; searchAttempt <= 5; searchAttempt++) {
+      try {
+        console.log(`   Search attempt ${searchAttempt}/5: Looking for phone ${phoneNumber} in Telnyx...`);
+        const searchResponse = await client.get('/phone_numbers', {
+          params: {
+            filter: {
+              phone_number: phoneNumber,
+            },
+            limit: 10,
+          },
+        });
 
-    const phoneNumberRecord = searchResponse.data?.data?.[0];
-    if (!phoneNumberRecord?.id) {
-      throw new Error(`Phone number not found: ${phoneNumber}`);
+        phoneNumberRecord = searchResponse.data?.data?.[0];
+        if (phoneNumberRecord?.id) {
+          console.log(`✅ Found phone number ID: ${phoneNumberRecord.id}`);
+          console.log(`   Current messaging_profile_id: ${phoneNumberRecord.messaging_profile_id}`);
+          break;
+        }
+
+        if (searchAttempt < 5) {
+          console.warn(`⚠️ Phone number not found yet, waiting 2 seconds before retry...`);
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      } catch (searchError: any) {
+        console.error(`⚠️ Search attempt ${searchAttempt} failed:`, searchError.message);
+        if (searchAttempt < 5) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
     }
 
-    console.log(`✅ Found phone number ID: ${phoneNumberRecord.id}`);
-    console.log(`   Current messaging_profile_id: ${phoneNumberRecord.messaging_profile_id}`);
+    if (!phoneNumberRecord?.id) {
+      throw new Error(`Phone number ${phoneNumber} not found after 5 search attempts. It may take a few minutes to appear in Telnyx's system.`);
+    }
 
     // Step 2: Try to update the phone number itself to assign the messaging profile
     // This is the most direct way to link a number to a messaging profile
@@ -396,15 +418,21 @@ export async function linkPhoneNumberToMessagingProfile(
         messaging_profile_id: messagingProfileId,
       });
 
-      console.log(`✅ Phone number linked via Method 1:`, {
-        phoneNumber: updateNumberResponse.data?.data?.phone_number,
-        messagingProfileId: updateNumberResponse.data?.data?.messaging_profile_id,
-      });
-      return true;
+      const linkedProfileId = updateNumberResponse.data?.data?.messaging_profile_id;
+      if (linkedProfileId === messagingProfileId) {
+        console.log(`✅ Phone number linked via Method 1:`, {
+          phoneNumber: updateNumberResponse.data?.data?.phone_number,
+          messagingProfileId: linkedProfileId,
+        });
+        return true;
+      } else {
+        throw new Error(`Phone linked but with wrong profile. Expected: ${messagingProfileId}, Got: ${linkedProfileId}`);
+      }
     } catch (method1Error: any) {
-      console.warn(`⚠️ Method 1 failed (${method1Error.response?.status}), trying Method 2...`);
+      console.warn(`⚠️ Method 1 failed (${method1Error.response?.status}): ${method1Error.response?.data?.errors?.[0]?.detail || method1Error.message}`);
+      console.log(`   Response data:`, JSON.stringify(method1Error.response?.data, null, 2));
 
-      // Step 3: Fallback - try updating the messaging profile
+      // Step 3: Fallback - try updating the messaging profile to include the phone number
       try {
         console.log(`🔄 Method 2: Updating messaging profile to include phone number...`);
         const updateProfileResponse = await client.patch(`/messaging_profiles/${messagingProfileId}`, {
@@ -414,20 +442,23 @@ export async function linkPhoneNumberToMessagingProfile(
         console.log(`✅ Phone number linked via Method 2:`, updateProfileResponse.data?.data?.id);
         return true;
       } catch (method2Error: any) {
-        console.warn(`⚠️ Method 2 failed (${method2Error.response?.status}), logging for manual linking...`);
+        console.warn(`⚠️ Method 2 failed (${method2Error.response?.status}): ${method2Error.response?.data?.errors?.[0]?.detail || method2Error.message}`);
+        console.log(`   Response data:`, JSON.stringify(method2Error.response?.data, null, 2));
 
-        // Both methods failed - log for manual linking
-        console.log(`❌ Both linking methods failed. Manual linking required.`);
+        // Both methods failed
+        console.log(`❌ Both automatic linking methods failed.`);
         console.log(`   To link manually in Telnyx dashboard:`);
-        console.log(`   1. Go to Messaging → Phone Numbers`);
-        console.log(`   2. Find ${phoneNumber}`);
-        console.log(`   3. Click "Edit"`);
-        console.log(`   4. Set "Messaging Profile" to your profile (ID: ${messagingProfileId})`);
-        console.log(`   5. Save`);
+        console.log(`   1. Go to Real-Time Communications → Messaging → Phone Numbers`);
+        console.log(`   2. Find and click on ${phoneNumber}`);
+        console.log(`   3. In the "Messaging profile" dropdown, select your profile`);
+        console.log(`   4. Click Save`);
+        console.log(`   5. Refresh this page`);
 
         throw new Error(
-          `Failed both linking methods. Manual linking required in Telnyx dashboard: ` +
-          `Phone ${phoneNumber} to Profile ${messagingProfileId}`
+          `Failed to link ${phoneNumber} to messaging profile ${messagingProfileId}. ` +
+          `Method 1 error: ${method1Error.message}. ` +
+          `Method 2 error: ${method2Error.message}. ` +
+          `Please link manually in Telnyx dashboard.`
         );
       }
     }

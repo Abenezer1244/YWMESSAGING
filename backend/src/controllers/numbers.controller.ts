@@ -362,35 +362,28 @@ export async function purchaseNumber(req: Request, res: Response) {
     const result = await purchasePhoneNumber(phoneNumber, churchId, connectionId, webhookId || undefined);
 
     // Verify and link the number to messaging profile (required for SMS to work)
-    if (webhookId) {
-      let linkingAttempts = 0;
-      const maxAttempts = 3;
-      let linkedSuccessfully = false;
+    if (!webhookId) {
+      throw new Error(
+        `Failed to create messaging profile for phone number. Cannot purchase number without SMS capability. ` +
+        `Please try again or contact support.`
+      );
+    }
 
-      while (linkingAttempts < maxAttempts && !linkedSuccessfully) {
-        try {
-          linkingAttempts++;
-          console.log(`📍 Attempt ${linkingAttempts}/${maxAttempts}: Linking ${phoneNumber} to messaging profile ${webhookId}...`);
-          await linkPhoneNumberToMessagingProfile(phoneNumber, webhookId);
-          console.log(`✅ Successfully linked ${phoneNumber} to messaging profile`);
-          linkedSuccessfully = true;
-        } catch (linkError: any) {
-          console.error(`❌ Linking attempt ${linkingAttempts} failed: ${linkError.message}`);
+    // Attempt to link the phone number to messaging profile
+    // This is critical - without linking, SMS sending will fail
+    let linkedSuccessfully = false;
+    let linkingError: Error | null = null;
 
-          // If this is the last attempt, throw the error
-          if (linkingAttempts >= maxAttempts) {
-            throw new Error(
-              `Failed to link phone number ${phoneNumber} to messaging profile after ${maxAttempts} attempts. ` +
-              `The number was purchased but cannot receive SMS. Please manually link in Telnyx dashboard or contact support.`
-            );
-          }
-
-          // Wait 1 second before retrying
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-      }
-    } else {
-      console.warn(`⚠️ No webhook ID provided - number may not have messaging profile configured`);
+    try {
+      console.log(`📍 Linking ${phoneNumber} to messaging profile ${webhookId}...`);
+      await linkPhoneNumberToMessagingProfile(phoneNumber, webhookId);
+      console.log(`✅ Successfully linked ${phoneNumber} to messaging profile`);
+      linkedSuccessfully = true;
+    } catch (linkError: any) {
+      console.error(`❌ Linking failed: ${linkError.message}`);
+      linkingError = linkError;
+      // Don't throw yet - phone number is purchased, just not linked
+      // User will need to link manually
     }
 
     // Update church with purchased phone number and webhook ID
@@ -411,21 +404,45 @@ export async function purchaseNumber(req: Request, res: Response) {
       },
     });
 
-    console.log(`✅ Phone number purchase completed and auto-linked for church ${churchId}: ${phoneNumber}`);
-
-    res.json({
-      success: true,
-      data: {
-        ...result,
-        phoneNumber: updated.telnyxPhoneNumber,
-        webhookId: updated.telnyxWebhookId,
-        verified: updated.telnyxVerified,
-        autoLinked: true,
-        message: webhookId
-          ? 'Phone number purchased and automatically linked with webhook!'
-          : 'Phone number purchased and linked! Please configure webhook manually in Telnyx dashboard.',
-      },
-    });
+    if (linkedSuccessfully) {
+      console.log(`✅ Phone number purchase completed with messaging profile linked for church ${churchId}: ${phoneNumber}`);
+      res.json({
+        success: true,
+        data: {
+          ...result,
+          phoneNumber: updated.telnyxPhoneNumber,
+          webhookId: updated.telnyxWebhookId,
+          verified: updated.telnyxVerified,
+          linked: true,
+          linkingError: null,
+          message: '✅ Phone number purchased and automatically linked to messaging profile! SMS is ready to use.',
+        },
+      });
+    } else {
+      // Phone number was purchased but linking failed
+      console.log(`⚠️ Phone number purchased but NOT linked for church ${churchId}: ${phoneNumber}`);
+      res.status(201).json({
+        success: false,
+        requiresAction: true,
+        data: {
+          ...result,
+          phoneNumber: updated.telnyxPhoneNumber,
+          webhookId: updated.telnyxWebhookId,
+          verified: updated.telnyxVerified,
+          linked: false,
+          linkingError: linkingError?.message || 'Unknown error',
+          message: `⚠️ Phone number purchased but automatic linking failed. ${linkingError?.message} You must link the number to the messaging profile before SMS will work.`,
+          nextSteps: [
+            '1. Go to Telnyx Dashboard → Real-Time Communications → Messaging → Phone Numbers',
+            `2. Find phone number ${phoneNumber}`,
+            '3. Click on the number to edit',
+            `4. In the "Messaging profile" dropdown, select the profile (should be "Mike" or similar)`,
+            '5. Click Save',
+            '6. SMS sending will then be enabled',
+          ],
+        },
+      });
+    }
   } catch (error: any) {
     console.error('Failed to purchase number:', {
       message: error.message,
