@@ -266,7 +266,7 @@ export async function handleTelnyxInboundMMS(req, res) {
         // Find church by Telnyx number (to field)
         console.log(`🔍 Looking for church with telnyxPhoneNumber: ${recipientPhone}`);
         const church = await prisma.church.findFirst({
-            where: { telnyxPhoneNumber: to },
+            where: { telnyxPhoneNumber: recipientPhone },
             select: { id: true, name: true, telnyxPhoneNumber: true }
         });
         console.log(`Found churches in database:`, await prisma.church.findMany({
