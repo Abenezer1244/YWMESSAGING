@@ -313,7 +313,7 @@ export async function handleTelnyxInboundMMS(req, res) {
         const mediaUrls = media?.map((m) => m.url) || [];
         console.log(`✅ Processing MMS for church: ${church.name} (${church.id})`);
         // Process inbound MMS
-        const result = await telnyxMMSService.handleInboundMMS(church.id, from, text || '', mediaUrls, telnyxMessageId);
+        const result = await telnyxMMSService.handleInboundMMS(church.id, senderPhone, text || '', mediaUrls, telnyxMessageId);
         console.log(`✅ MMS processed: conversation=${result.conversationId}, messages=${result.messageIds.length}`);
         return res.json({ received: true });
     }

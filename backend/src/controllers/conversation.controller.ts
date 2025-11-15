@@ -394,7 +394,7 @@ export async function handleTelnyxInboundMMS(req: Request, res: Response) {
     // Process inbound MMS
     const result = await telnyxMMSService.handleInboundMMS(
       church.id,
-      from,
+      senderPhone,
       text || '',
       mediaUrls,
       telnyxMessageId
