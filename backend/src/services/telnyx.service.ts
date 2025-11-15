@@ -690,11 +690,9 @@ export async function linkPhoneNumberToMessagingProfile(
         duration: 0,
       });
 
-      // Try correct Telnyx API structure: messaging_settings object
+      // Update phone number with messaging profile (try direct field)
       const updateNumberResponse = await client.patch(`/phone_numbers/${phoneNumberRecord.id}`, {
-        messaging_settings: {
-          messaging_profile_id: messagingProfileId,
-        },
+        messaging_profile_id: messagingProfileId,
       });
 
       // Log full response to understand structure
@@ -705,9 +703,8 @@ export async function linkPhoneNumberToMessagingProfile(
         fullData: updateNumberResponse.data,
       });
 
-      // Handle both flat and nested response structures
-      const linkedProfileId = updateNumberResponse.data?.data?.messaging_profile_id ||
-                               updateNumberResponse.data?.data?.messaging_settings?.messaging_profile_id;
+      // Extract messaging_profile_id from response
+      const linkedProfileId = updateNumberResponse.data?.data?.messaging_profile_id;
       console.log('[TELNYX_LINKING] Method 1 - Extracted profileId:', linkedProfileId);
 
       if (linkedProfileId === messagingProfileId && validateTelnyxId(linkedProfileId)) {
@@ -825,11 +822,9 @@ export async function linkPhoneNumberToMessagingProfile(
           throw new Error(`Phone number still not indexed after ${additionalSearchAttempts} additional search attempts`);
         }
 
-        // Retry the direct phone number update (Method 1 logic) with correct Telnyx API structure
+        // Retry the direct phone number update with messaging profile
         const retryUpdateResponse = await client.patch(`/phone_numbers/${retryPhoneNumberRecord.id}`, {
-          messaging_settings: {
-            messaging_profile_id: messagingProfileId,
-          },
+          messaging_profile_id: messagingProfileId,
         });
 
         // Log full response to understand structure
@@ -840,9 +835,8 @@ export async function linkPhoneNumberToMessagingProfile(
           fullData: retryUpdateResponse.data,
         });
 
-        // Handle both flat and nested response structures
-        const retryLinkedProfileId = retryUpdateResponse.data?.data?.messaging_profile_id ||
-                                     retryUpdateResponse.data?.data?.messaging_settings?.messaging_profile_id;
+        // Extract messaging_profile_id from response
+        const retryLinkedProfileId = retryUpdateResponse.data?.data?.messaging_profile_id;
         console.log('[TELNYX_LINKING] Method 2 - Extracted profileId:', retryLinkedProfileId);
 
         if (retryLinkedProfileId === messagingProfileId && validateTelnyxId(retryLinkedProfileId)) {
