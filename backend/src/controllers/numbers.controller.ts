@@ -330,30 +330,67 @@ export async function purchaseNumber(req: Request, res: Response) {
       });
     }
 
-    // Create webhook first to get messaging profile ID
+    // Create messaging profile with webhook - REQUIRED for SMS to work
     let webhookId: string | null = null;
-    try {
-      const webhookUrl = `${process.env.BACKEND_URL || 'https://api.koinoniasms.com'}/api/webhooks/telnyx/mms`;
-      const webhook = await createWebhook(webhookUrl);
-      webhookId = webhook.id;
-      console.log(`✅ Webhook auto-created for purchased number, church ${churchId}: ${webhookId}`);
-    } catch (webhookError: any) {
-      console.warn(`⚠️ Webhook creation failed for purchased number, but continuing: ${webhookError.message}`);
+    let webhookAttempts = 0;
+    const maxWebhookAttempts = 3;
+
+    while (webhookAttempts < maxWebhookAttempts && !webhookId) {
+      try {
+        webhookAttempts++;
+        const webhookUrl = `${process.env.BACKEND_URL || 'https://api.koinoniasms.com'}/api/webhooks/telnyx/mms`;
+        console.log(`📝 Attempt ${webhookAttempts}/${maxWebhookAttempts}: Creating messaging profile with webhook...`);
+        const webhook = await createWebhook(webhookUrl);
+        webhookId = webhook.id;
+        console.log(`✅ Messaging profile created: ${webhookId}`);
+      } catch (webhookError: any) {
+        console.error(`❌ Webhook creation attempt ${webhookAttempts} failed: ${webhookError.message}`);
+
+        if (webhookAttempts >= maxWebhookAttempts) {
+          throw new Error(
+            `Failed to create messaging profile after ${maxWebhookAttempts} attempts. ` +
+            `Cannot purchase phone number without a messaging profile for SMS. ${webhookError.message}`
+          );
+        }
+
+        // Wait 1 second before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
     }
 
     // Purchase the phone number with Telnyx and link to messaging profile
     const result = await purchasePhoneNumber(phoneNumber, churchId, connectionId, webhookId || undefined);
 
-    // Verify and link the number to messaging profile (fallback attempt)
+    // Verify and link the number to messaging profile (required for SMS to work)
     if (webhookId) {
-      try {
-        console.log(`📍 Attempting to link purchased number ${phoneNumber} to messaging profile ${webhookId} (fallback)...`);
-        await linkPhoneNumberToMessagingProfile(phoneNumber, webhookId);
-        console.log(`✅ Fallback linking succeeded for ${phoneNumber}`);
-      } catch (linkError: any) {
-        console.warn(`⚠️ Fallback linking attempt failed (may have succeeded during purchase): ${linkError.message}`);
-        // Continue - number might already be linked from purchase request
+      let linkingAttempts = 0;
+      const maxAttempts = 3;
+      let linkedSuccessfully = false;
+
+      while (linkingAttempts < maxAttempts && !linkedSuccessfully) {
+        try {
+          linkingAttempts++;
+          console.log(`📍 Attempt ${linkingAttempts}/${maxAttempts}: Linking ${phoneNumber} to messaging profile ${webhookId}...`);
+          await linkPhoneNumberToMessagingProfile(phoneNumber, webhookId);
+          console.log(`✅ Successfully linked ${phoneNumber} to messaging profile`);
+          linkedSuccessfully = true;
+        } catch (linkError: any) {
+          console.error(`❌ Linking attempt ${linkingAttempts} failed: ${linkError.message}`);
+
+          // If this is the last attempt, throw the error
+          if (linkingAttempts >= maxAttempts) {
+            throw new Error(
+              `Failed to link phone number ${phoneNumber} to messaging profile after ${maxAttempts} attempts. ` +
+              `The number was purchased but cannot receive SMS. Please manually link in Telnyx dashboard or contact support.`
+            );
+          }
+
+          // Wait 1 second before retrying
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
       }
+    } else {
+      console.warn(`⚠️ No webhook ID provided - number may not have messaging profile configured`);
     }
 
     // Update church with purchased phone number and webhook ID
