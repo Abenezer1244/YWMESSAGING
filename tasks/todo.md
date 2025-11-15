@@ -345,3 +345,26 @@ If needed later:
 - Add Redis back for performance (would just speed up existing flow)
 - Implement message batching for large broadcasts
 - Add rate limiting per recipient to avoid Telnyx throttling
+
+---
+
+## Follow-up Fix: Disable Queue Initialization
+
+**Commit:** `0e5c552 - Fix: Disable Redis queue initialization to prevent connection errors`
+
+**Issue:** Even after removing the queue import from index.ts, the queue.ts module was still creating Bull queue instances at module load time, causing Redis connection errors in logs.
+
+**Solution:** Modified queue.ts to only initialize queues if `ENABLE_QUEUES=true` environment variable is set.
+
+**Changes:**
+- Queue instances now initialize as `null` by default
+- Bull queue creation wrapped in `if (process.env.ENABLE_QUEUES === 'true')` checks
+- Event handlers only attach if queues are not null
+- Processors only register if queues are enabled
+- closeQueues() function updated to handle null queues gracefully
+
+**Result:**
+- ✅ No Redis connection errors in production logs
+- ✅ Queues can be re-enabled in future by setting environment variable
+- ✅ Clean separation of deprecated code
+- ✅ Zero impact on message sending (already synchronous)
