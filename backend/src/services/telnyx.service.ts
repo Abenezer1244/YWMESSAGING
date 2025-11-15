@@ -183,7 +183,9 @@ export async function purchasePhoneNumber(
       customer_reference: `church_${churchId}`,
     };
 
+    console.log(`📝 Sending number_orders request with data:`, JSON.stringify(orderData, null, 2));
     const response = await client.post('/number_orders', orderData);
+    console.log(`📝 Number order response:`, JSON.stringify(response.data?.data, null, 2));
 
     const data = response.data?.data;
     if (!data?.id) {
@@ -429,21 +431,27 @@ export async function linkPhoneNumberToMessagingProfile(
         throw new Error(`Phone linked but with wrong profile. Expected: ${messagingProfileId}, Got: ${linkedProfileId}`);
       }
     } catch (method1Error: any) {
-      console.warn(`⚠️ Method 1 failed (${method1Error.response?.status}): ${method1Error.response?.data?.errors?.[0]?.detail || method1Error.message}`);
-      console.log(`   Response data:`, JSON.stringify(method1Error.response?.data, null, 2));
+      console.error(`⚠️ Method 1 FAILED with status ${method1Error.response?.status}:`, JSON.stringify({
+        errors: method1Error.response?.data?.errors,
+        message: method1Error.message,
+        fullData: method1Error.response?.data,
+      }, null, 2));
 
       // Step 3: Fallback - try updating the messaging profile to include the phone number
       try {
         console.log(`🔄 Method 2: Updating messaging profile to include phone number...`);
         const updateProfileResponse = await client.patch(`/messaging_profiles/${messagingProfileId}`, {
-          phone_numbers: [phoneNumber],
+          phone_numbers: [phoneNumberRecord.id],
         });
 
         console.log(`✅ Phone number linked via Method 2:`, updateProfileResponse.data?.data?.id);
         return true;
       } catch (method2Error: any) {
-        console.warn(`⚠️ Method 2 failed (${method2Error.response?.status}): ${method2Error.response?.data?.errors?.[0]?.detail || method2Error.message}`);
-        console.log(`   Response data:`, JSON.stringify(method2Error.response?.data, null, 2));
+        console.error(`⚠️ Method 2 FAILED with status ${method2Error.response?.status}:`, JSON.stringify({
+          errors: method2Error.response?.data?.errors,
+          message: method2Error.message,
+          fullData: method2Error.response?.data,
+        }, null, 2));
 
         // Both methods failed
         console.log(`❌ Both automatic linking methods failed.`);
