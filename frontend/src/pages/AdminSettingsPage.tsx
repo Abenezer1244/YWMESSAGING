@@ -295,10 +295,14 @@ export function AdminSettingsPage() {
                       <div className="mb-6">
                         <PhoneNumberManager
                           currentPhoneNumber={currentPhoneNumber}
-                          onSuccess={(phoneNumber) => {
+                          onSuccess={(phoneNumber, webhookId) => {
                             setCurrentPhoneNumber(phoneNumber);
                             loadPhoneNumber();
-                            toast.success('Phone number linked successfully!');
+                            if (phoneNumber) {
+                              toast.success('Phone number linked successfully!');
+                            } else {
+                              toast.success('Phone number deleted (30-day recovery window)');
+                            }
                           }}
                         />
                       </div>

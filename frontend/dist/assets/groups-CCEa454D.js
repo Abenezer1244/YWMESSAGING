@@ -1,2 +1,0 @@
-import{c as e}from"./index-D4T_1qUL.js";async function n(s){return(await e.get(`/groups/branches/${s}/groups`)).data.data}async function o(s,a){return(await e.post(`/groups/branches/${s}/groups`,a)).data.data}async function p(s,a){return(await e.put(`/groups/${s}`,a)).data.data}async function u(s){return(await e.delete(`/groups/${s}`)).data.data}export{o as c,u as d,n as g,p as u};
-//# sourceMappingURL=groups-CCEa454D.js.map

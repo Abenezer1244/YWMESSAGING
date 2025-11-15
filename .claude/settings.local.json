@@ -109,7 +109,8 @@
       "Bash(docker-compose ps:*)",
       "Bash(docker-compose:*)",
       "Bash(grep:*)",
-      "Bash(/dev/null)"
+      "Bash(/dev/null)",
+      "Bash(mcp__playwright__browser_navigate:*)"
     ],
     "deny": [],
     "ask": []
