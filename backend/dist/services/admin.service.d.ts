@@ -24,6 +24,14 @@ export declare function updateChurchProfile(churchId: string, input: UpdateChurc
     telnyxNumberDeletedAt: Date | null;
     telnyxNumberDeletedBy: string | null;
     telnyxNumberRecoveryDeadline: Date | null;
+    dlcBrandId: string | null;
+    dlcStatus: string;
+    dlcRegisteredAt: Date | null;
+    dlcApprovedAt: Date | null;
+    dlcRejectionReason: string | null;
+    dlcNextCheckAt: Date | null;
+    usingSharedBrand: boolean;
+    deliveryRate: number;
     trialEndsAt: Date;
     subscriptionStatus: string;
     createdAt: Date;

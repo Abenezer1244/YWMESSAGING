@@ -75,22 +75,29 @@ function getTelnyxClient() {
  * Send SMS via Telnyx
  */
 export async function sendSMS(to, message, churchId) {
-    // Get church Telnyx credentials
+    // Get church Telnyx credentials and 10DLC brand info
     const church = await prisma.church.findUnique({
         where: { id: churchId },
         select: {
             telnyxPhoneNumber: true,
+            usingSharedBrand: true,
+            dlcBrandId: true,
+            deliveryRate: true,
         },
     });
     if (!church?.telnyxPhoneNumber) {
         throw new Error('Telnyx phone number not configured for this church');
     }
     try {
-        // Log outbound SMS attempt
+        // Log outbound SMS attempt with delivery rate
+        const brandType = church.usingSharedBrand ? 'shared' : 'personal';
+        const deliveryPercent = Math.round((church.deliveryRate || 0.65) * 100);
         console.log(`📤 Sending SMS: from ${church.telnyxPhoneNumber} to ${to}`);
+        console.log(`   Brand: ${brandType} (${deliveryPercent}% delivery rate)`);
         console.log(`   Message: "${message.substring(0, 80)}${message.length > 80 ? '...' : ''}"`);
         const client = getTelnyxClient();
-        const response = await client.post('/messages', {
+        // Build payload with optional brand ID
+        const payload = {
             from: church.telnyxPhoneNumber,
             to: to,
             text: message,
@@ -98,7 +105,13 @@ export async function sendSMS(to, message, churchId) {
             dlr_type: 'dlr', // Request delivery receipt notifications
             webhook_url: `${process.env.BACKEND_URL || 'https://api.koinoniasms.com'}/api/webhooks/telnyx/status`,
             webhook_failover_url: `${process.env.BACKEND_URL || 'https://api.koinoniasms.com'}/api/webhooks/telnyx/status`,
-        });
+        };
+        // Add brand ID if using per-church 10DLC (once approved)
+        if (!church.usingSharedBrand && church.dlcBrandId) {
+            payload.brand_id = church.dlcBrandId;
+            console.log(`   Using personal 10DLC brand: ${church.dlcBrandId}`);
+        }
+        const response = await client.post('/messages', payload);
         const messageId = response.data?.data?.id;
         const messageStatus = response.data?.data?.status;
         if (!messageId) {

@@ -97,10 +97,15 @@ export async function findOrCreateMemberByPhone(churchId, phone) {
  */
 export async function sendMMS(to, message, churchId, mediaS3Url) {
     try {
-        // Get church Telnyx number
+        // Get church Telnyx number and 10DLC brand info
         const church = await prisma.church.findUnique({
             where: { id: churchId },
-            select: { telnyxPhoneNumber: true },
+            select: {
+                telnyxPhoneNumber: true,
+                usingSharedBrand: true,
+                dlcBrandId: true,
+                deliveryRate: true,
+            },
         });
         if (!church?.telnyxPhoneNumber) {
             throw new Error('Telnyx phone number not configured for this church');
@@ -115,13 +120,20 @@ export async function sendMMS(to, message, churchId, mediaS3Url) {
             webhook_url: `${process.env.BACKEND_URL || 'https://api.koinoniasms.com'}/api/webhooks/telnyx/status`,
             webhook_failover_url: `${process.env.BACKEND_URL || 'https://api.koinoniasms.com'}/api/webhooks/telnyx/status`,
         };
+        // Add brand ID if using per-church 10DLC (once approved)
+        if (!church.usingSharedBrand && church.dlcBrandId) {
+            payload.brand_id = church.dlcBrandId;
+        }
         // Add media URL if provided
         if (mediaS3Url) {
             payload.media_urls = [mediaS3Url];
             console.log(`📎 Attaching media: ${mediaS3Url}`);
         }
-        // Log outbound attempt
+        // Log outbound attempt with delivery rate
+        const brandType = church.usingSharedBrand ? 'shared' : 'personal';
+        const deliveryPercent = Math.round((church.deliveryRate || 0.65) * 100);
         console.log(`📤 Sending ${mediaS3Url ? 'MMS' : 'SMS'}: from ${church.telnyxPhoneNumber} to ${to}`);
+        console.log(`   Brand: ${brandType} (${deliveryPercent}% delivery rate)`);
         console.log(`   Message: "${message.substring(0, 80)}${message.length > 80 ? '...' : ''}"`);
         // Send via Telnyx
         const client = getTelnyxClient();

@@ -17,6 +17,7 @@ import numbersRoutes from './routes/numbers.routes.js';
 import webhookRoutes from './routes/webhook.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import chatRoutes from './routes/chat.routes.js';
+import schedulerRoutes from './routes/scheduler.routes.js';
 
 const app = express();
 
@@ -206,6 +207,10 @@ app.use('/api/billing', billingLimiter, billingRoutes);
 
 // Apply moderate rate limiting to admin endpoints
 app.use('/api/admin', apiLimiter, adminRoutes);
+
+// Scheduler routes - AWS CloudWatch triggers (no auth needed, uses API key instead)
+// No rate limiting - CloudWatch calls are infrequent and from trusted AWS
+app.use('/api/scheduler', schedulerRoutes);
 
 // Chat routes - public and protected
 app.use('/api/chat', apiLimiter, chatRoutes);

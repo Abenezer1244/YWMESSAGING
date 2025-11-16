@@ -244,6 +244,7 @@ export async function linkPhoneNumberHandler(req, res) {
             // User can manually create it if needed
         }
         // Update church with phone number and webhook ID
+        // Initialize 10DLC fields: start with shared brand for immediate use
         const updated = await prisma.church.update({
             where: { id: churchId },
             data: {
@@ -251,14 +252,33 @@ export async function linkPhoneNumberHandler(req, res) {
                 telnyxVerified: true,
                 telnyxWebhookId: webhookId,
                 telnyxPurchasedAt: new Date(),
+                // 10DLC: Start with shared brand for 60-70% delivery
+                usingSharedBrand: true,
+                dlcStatus: 'pending',
+                dlcNextCheckAt: new Date(Date.now() + 12 * 60 * 60 * 1000), // Check in 12 hours
+                deliveryRate: 0.65, // 65% with shared brand
             },
             select: {
                 id: true,
                 telnyxPhoneNumber: true,
                 telnyxWebhookId: true,
                 telnyxVerified: true,
+                usingSharedBrand: true,
+                deliveryRate: true,
             },
         });
+        // Trigger background job to auto-register per-church 10DLC (fire and forget)
+        try {
+            // Import the background job function
+            const { registerPersonal10DLCAsync } = await import('../jobs/10dlc-registration.js');
+            registerPersonal10DLCAsync(churchId, formattedPhone).catch((err) => {
+                console.error(`⚠️ Failed to start 10DLC registration for church ${churchId}:`, err);
+                // Don't fail the request, just log it
+            });
+        }
+        catch (error) {
+            console.error('⚠️ Could not import 10DLC job, skipping async registration:', error);
+        }
         // Log activity
         await logActivity(churchId, req.user?.adminId || '', 'Link Phone Number', {
             phoneNumber: formattedPhone,
