@@ -31,6 +31,17 @@ model Church {
   telnyxNumberDeletedAt        DateTime? // When the number was marked for deletion
   telnyxNumberDeletedBy        String?   // Admin ID who initiated deletion
   telnyxNumberRecoveryDeadline DateTime? // Until this date, number can be restored
+
+  // 10DLC Registration (Delivery Optimization)
+  dlcBrandId                   String?  // Telnyx 10DLC brand ID (per-church)
+  dlcStatus                    String   @default("pending") // pending, approved, rejected, using_shared
+  dlcRegisteredAt              DateTime? // When we submitted to Telnyx
+  dlcApprovedAt                DateTime? // When Telnyx approved
+  dlcRejectionReason           String?  // If rejected, why
+  dlcNextCheckAt               DateTime? // Next time to check approval status
+  usingSharedBrand             Boolean  @default(true) // true = platform brand, false = per-church brand
+  deliveryRate                 Float    @default(0.65) // Delivery rate (starts 65% with shared, 99% when approved)
+
   trialEndsAt                  DateTime
   subscriptionStatus           String   @default("trial") // trial, active, cancelled, expired
   createdAt                    DateTime @default(now())
@@ -52,6 +63,8 @@ model Church {
   @@index([telnyxPhoneLinkingStatus]) // Index for finding churches that need linking
   @@index([telnyxNumberStatus]) // Index for finding archived/deleted numbers
   @@index([telnyxNumberRecoveryDeadline]) // Index for cleanup job to find expired recoveries
+  @@index([dlcStatus]) // Index for finding churches pending 10DLC approval
+  @@index([dlcNextCheckAt]) // Index for background job to check approval status
 }
 
 // Physical locations within a church

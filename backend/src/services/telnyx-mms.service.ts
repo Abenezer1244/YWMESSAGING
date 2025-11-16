@@ -111,10 +111,15 @@ export async function sendMMS(
   mediaS3Url?: string
 ): Promise<{ messageSid: string; success: boolean }> {
   try {
-    // Get church Telnyx number
+    // Get church Telnyx number and 10DLC brand info
     const church = await prisma.church.findUnique({
       where: { id: churchId },
-      select: { telnyxPhoneNumber: true },
+      select: {
+        telnyxPhoneNumber: true,
+        usingSharedBrand: true,
+        dlcBrandId: true,
+        deliveryRate: true,
+      },
     });
 
     if (!church?.telnyxPhoneNumber) {
@@ -136,14 +141,22 @@ export async function sendMMS(
       }/api/webhooks/telnyx/status`,
     };
 
+    // Add brand ID if using per-church 10DLC (once approved)
+    if (!church.usingSharedBrand && church.dlcBrandId) {
+      payload.brand_id = church.dlcBrandId;
+    }
+
     // Add media URL if provided
     if (mediaS3Url) {
       payload.media_urls = [mediaS3Url];
       console.log(`📎 Attaching media: ${mediaS3Url}`);
     }
 
-    // Log outbound attempt
+    // Log outbound attempt with delivery rate
+    const brandType = church.usingSharedBrand ? 'shared' : 'personal';
+    const deliveryPercent = Math.round((church.deliveryRate || 0.65) * 100);
     console.log(`📤 Sending ${mediaS3Url ? 'MMS' : 'SMS'}: from ${church.telnyxPhoneNumber} to ${to}`);
+    console.log(`   Brand: ${brandType} (${deliveryPercent}% delivery rate)`);
     console.log(`   Message: "${message.substring(0, 80)}${message.length > 80 ? '...' : ''}"`);
 
     // Send via Telnyx
