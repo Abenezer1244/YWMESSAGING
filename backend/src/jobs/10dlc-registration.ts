@@ -48,14 +48,15 @@ export async function registerPersonal10DLCAsync(
     // Register brand with Telnyx
     console.log(`📤 Submitting 10DLC brand to Telnyx: "${church.name}"`);
 
-    const brandResponse = await client.post('/10dlc_brands', {
+    const brandResponse = await client.post('/a2p_brands', {
       company_name: church.name,
-      brand_type: 'CHURCH', // Telnyx brand type
-      phone_number: phoneNumber,
-      // These fields help with approval
+      brand_type: 'SOLE_PROPRIETOR', // Telnyx expects SOLE_PROPRIETOR, PRIVATE_FOR_PROFIT, NON_PROFIT, GOVERNMENT
       vertical: 'RELIGION', // Vertical market
-      city: 'USA', // We don't have city, using default
-      state: 'US',
+      city: 'Seattle', // Default city (we don't have this data)
+      state: 'WA', // Default state
+      country: 'US',
+      email: church.email,
+      display_name: church.name,
     });
 
     const brandId = brandResponse.data?.data?.id;
@@ -138,7 +139,7 @@ export async function checkAndMigrateToPer10DLC(): Promise<void> {
     for (const church of pendingChurches) {
       try {
         // Check brand status with Telnyx
-        const response = await client.get(`/10dlc_brands/${church.dlcBrandId}`);
+        const response = await client.get(`/a2p_brands/${church.dlcBrandId}`);
         const status = response.data?.data?.status;
 
         console.log(`  Church: ${church.name} - Status: ${status}`);
