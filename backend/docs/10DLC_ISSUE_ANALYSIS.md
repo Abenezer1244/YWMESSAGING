@@ -1,7 +1,7 @@
-# 10DLC Registration Issue - Analysis & Solutions
+# 10DLC Registration Issue - Root Cause FOUND & Solution
 
 **Date:** November 17, 2025
-**Status:** 🔴 Blocking Issue - Requires Telnyx Account Configuration
+**Status:** 🔴 CRITICAL - API Key Invalid/Revoked
 
 ---
 
@@ -13,10 +13,16 @@
 Telnyx Error: Resource not found (code 10005)
 ```
 
-The `/a2p_brands` endpoint returns 404, indicating either:
-1. The endpoint doesn't exist on this Telnyx account
-2. A2P brand registration feature is not enabled
-3. The API key doesn't have permissions for this feature
+**ROOT CAUSE IDENTIFIED:**
+The API key `KEY019A7519B7F03C53D55D25C7B47C0BE8_...` is **invalid or revoked**.
+
+All API endpoints return **401 "No key found matching the ID"**:
+```
+GET /messaging_profiles → 401 Authentication Failed
+GET /phone_numbers → 401 Authentication Failed
+```
+
+This means Telnyx's servers don't recognize this API key.
 
 ---
 
@@ -53,21 +59,32 @@ The `/a2p_brands` endpoint returns 404, indicating either:
 
 ---
 
-## Solutions (In Priority Order)
+## Solutions (URGENT)
 
-### Solution 1: Contact Telnyx Support (RECOMMENDED)
-**Status:** Requires Action
+### Solution 1: IMMEDIATE - Request New API Key from Telnyx
+**Status:** CRITICAL - Do this NOW
 **Steps:**
-1. Contact Telnyx support at support@telnyx.com
-2. Request: "Enable A2P brand registration for organization [ORG_ID]"
-3. Mention: "Need access to /a2p_brands endpoint for 10DLC registration"
-4. Expected response time: 24-48 hours
+1. Contact Telnyx support IMMEDIATELY at support@telnyx.com or phone support
+2. Say: "Our API key `KEY019A7519B7F03C53D55D25C7B47C0BE8...` is returning 401 'No key found'. Can you either:
+   - Regenerate this key to make it active, OR
+   - Provide a new valid API key"
+3. Ask them to test that the new key works before providing it
+4. Expected response time: URGENT (should be same day for active customers)
 
-**Indicators you need this:**
-- ✅ We have valid messaging profiles and phone numbers
-- ✅ SMS sending works (via synchronous Telnyx API)
-- ❌ But 10DLC brand registration endpoint returns 404
-- ❌ API key authentication seems to fail on /organization endpoint
+**Why this is critical:**
+- ✅ Your account HAS A2P enabled (per Telnyx confirmation)
+- ✅ The endpoint `/a2p_brands` exists
+- ❌ But your API KEY is invalid/revoked → Telnyx rejects all requests
+- 🔴 This blocks ALL API calls (not just 10DLC)
+
+**Verification the key is bad:**
+```
+GET /messaging_profiles with current key → 401 ❌
+GET /phone_numbers with current key → 401 ❌
+GET /a2p_brands with current key → 404 (can't even reach it)
+```
+
+The 401 errors prove the key is invalid.
 
 ---
 
@@ -130,50 +147,105 @@ This looks like an older format (KEY_ID_secret). Telnyx v2 API typically uses Be
 
 ## Recommended Action Plan
 
-### Immediate (Next 24 hours)
-1. **Contact Telnyx Support**
-   - Email: support@telnyx.com
-   - Subject: "Enable A2P Brand Registration API"
+### 🚨 IMMEDIATE (TODAY - URGENT)
+1. **Contact Telnyx Support by Phone or Email**
+   - Email: support@telnyx.com (mention URGENT)
+   - Phone: [Check your Telnyx dashboard for support phone]
+   - Subject: "URGENT: API Key Invalid - Blocking Production"
    - Details:
      ```
-     Organization: [Your Org ID from /organization endpoint if working]
-     Current issue: /a2p_brands endpoint returns 404
-     Use case: Automatic per-church 10DLC brand registration for SMS platform
-     API Key: [First 10 chars of your key, NOT full key]
+     Current API Key: KEY019A7519B7F03C53D55D25C7B47C0BE8_...
+     Error: All API endpoints returning 401 "No key found matching the ID"
+     Impact: SMS sending and 10DLC registration completely blocked
+     Need: Valid API key that works with Bearer token auth
      ```
 
-2. **Verify API Key** (While waiting for support)
-   ```bash
-   # Run test script to verify current key works
-   cd backend && node test-a2p-setup.js
+2. **While waiting for Telnyx response:**
+   - Run diagnostic to confirm issue:
+     ```bash
+     cd backend && node test-endpoints.js
+     ```
+   - This proves the key is bad (401 errors)
+   - Have output ready to send to Telnyx
+
+### Once You Get New API Key (Same Day - CRITICAL PATH)
+1. **Update .env file:**
+   ```
+   # Backend .env
+   TELNYX_API_KEY=<new-key-from-telnyx>
    ```
 
-### Short-term (24-48 hours)
-- Wait for Telnyx support response
-- May need to generate new API key
-- Apply changes and test
+2. **Update Render Production:**
+   - Go to: https://dashboard.render.com/
+   - Select: `connect-yw-backend` service
+   - Settings → Environment Variables
+   - Update `TELNYX_API_KEY` with new key
+   - Backend will auto-restart
 
-### Long-term (If A2P still not available)
+3. **Test new key:**
+   ```bash
+   cd backend && node test-endpoints.js
+   # Should now show: ✅ GET /messaging_profiles - Status 200
+   ```
+
+4. **Trigger 10DLC registration:**
+   - System will auto-retry on next phone number purchase
+   - Or manually trigger if church already has number
+   - Monitor Render logs: `[DLC] ...` entries
+
+### Long-term (Backup Plan If Telnyx Delays)
 - Implement Solution 3 (shared brand fallback)
-- All churches use shared brand initially
-- Manual upgrade path once Telnyx enables A2P
-- Monitor Telnyx documentation for updates
+- All churches use shared brand (65%) initially
+- Once new key is active, auto-upgrade to personal brand (99%)
+- No code changes needed, already built-in
 
 ---
 
-## Testing the Fix
+## Testing Steps Once You Get New API Key
 
-Once Telnyx enables A2P:
-
+### Step 1: Update Key and Restart
 ```bash
-# 1. Run diagnostic test
-cd backend && node test-a2p-setup.js
+# Edit .env with new key
+vim backend/.env
+# Change: TELNYX_API_KEY=<new-key>
 
-# 2. Try creating a test brand manually via Telnyx dashboard
+# Test locally (if using local Postgres):
+cd backend && npm run build && npm start
+```
 
-# 3. Test API call with corrected endpoint
+### Step 2: Verify Key Works
+```bash
+cd backend && node test-endpoints.js
+# Expected output:
+# ✅ GET /messaging_profiles - Status 200: Found X items
+# ✅ GET /phone_numbers - Status 200: Found X items
+# ✅ GET /a2p_brands - Status 200: Found 0 items (or existing brands)
+```
+
+### Step 3: Update Production (Render)
+1. Go to: https://dashboard.render.com/
+2. Select `connect-yw-backend`
+3. Settings → Environment
+4. Update `TELNYX_API_KEY` with new key
+5. Click "Save" (backend will auto-redeploy)
+6. Wait for deployment to complete (~1 min)
+
+### Step 4: Monitor 10DLC Registration
+```bash
+# Option A: Purchase a new phone number (triggers auto-registration)
+# Option B: Check Render logs in dashboard
+# Look for: [DLC] or [TELNYX_LINKING] entries
+
+# Expected log sequence:
+# 📤 Submitting 10DLC brand to Telnyx: "church name"
+# ✅ Brand registered with Telnyx: <brandId>
+# 📅 Scheduled approval check for church
+```
+
+### Step 5: Verify with curl (Optional)
+```bash
 curl -X POST https://api.telnyx.com/v2/a2p_brands \
-  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Authorization: Bearer YOUR_NEW_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "company_name": "Test Church",
@@ -185,9 +257,7 @@ curl -X POST https://api.telnyx.com/v2/a2p_brands \
     "email": "test@example.com",
     "display_name": "Test Church"
   }'
-
-# 4. If successful, trigger 10DLC registration
-# (System will automatically retry on next phone number purchase)
+# Should return: 200 OK with brand_id in response
 ```
 
 ---
