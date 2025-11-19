@@ -5,45 +5,77 @@ import { handleTelnyx10DLCWebhook } from '../jobs/10dlc-webhooks';
 const router = Router();
 
 /**
- * Verify Telnyx webhook signature
- * CRITICAL: Verifies the webhook is actually from Telnyx
- * Prevents attackers from sending fake webhooks
+ * ✅ CRITICAL FIX: Verify Telnyx webhook signature using ED25519
+ * Telnyx uses public key cryptography (ED25519) to sign webhooks
  *
- * Telnyx uses HMAC-SHA256 with the webhook secret
- * See: https://developers.telnyx.com/docs/api/webhooks#authentication
+ * Signature is created as: Base64(timestamp|payload)
+ * Headers provided:
+ * - telnyx-signature-ed25519: Base64-encoded ED25519 signature
+ * - telnyx-timestamp: Unix timestamp when webhook was created
+ *
+ * See: https://developers.telnyx.com/docs/api/webhooks#webhook-signature-verification
  */
-function verifyTelnyxSignature(
-  payload: Buffer,
-  signature: string
+function verifyTelnyxWebhookSignature(
+  payload: string,
+  signatureHeader: string,
+  timestampHeader: string,
+  publicKeyBase64: string
 ): boolean {
-  const secret = process.env.TELNYX_WEBHOOK_SECRET;
-
-  if (!secret) {
-    console.error('❌ TELNYX_WEBHOOK_SECRET environment variable not configured');
-    console.error('   Webhook signature verification cannot be performed');
-    console.error('   This is a CRITICAL security issue - webhooks are UNVERIFIED');
-    return false;
-  }
-
-  if (!signature) {
-    console.warn('⚠️ Webhook missing signature header (x-telnyx-signature-mac)');
+  if (!signatureHeader || !timestampHeader) {
+    console.warn('⚠️ Webhook missing signature or timestamp header');
+    console.warn(`   Signature header: ${signatureHeader ? 'present' : 'MISSING'}`);
+    console.warn(`   Timestamp header: ${timestampHeader ? 'present' : 'MISSING'}`);
     return false;
   }
 
   try {
-    // Telnyx uses HMAC-SHA256 with base64 encoding
-    const expectedSignature = crypto
-      .createHmac('sha256', secret)
-      .update(payload)
-      .digest('base64');
+    // Decode the public key from base64
+    const publicKeyBuffer = Buffer.from(publicKeyBase64, 'base64');
 
-    // Use timing-safe comparison to prevent timing attacks
-    const signatureMatches = crypto.timingSafeEqual(
-      Buffer.from(signature, 'base64'),
-      Buffer.from(expectedSignature, 'base64')
+    // Create ED25519 public key from raw buffer
+    // ED25519 keys are always 32 bytes
+    const publicKey = crypto.createPublicKey({
+      key: publicKeyBuffer,
+      format: 'raw',
+      type: 'ed25519',
+    } as any); // Using 'any' to avoid TypeScript strictness for older Node.js versions
+
+    // Build the signed message: timestamp|payload
+    const signedMessage = `${timestampHeader}|${payload}`;
+
+    // Decode the signature from base64
+    const signatureBuffer = Buffer.from(signatureHeader, 'base64');
+
+    // Verify the signature using ED25519
+    const isValid = crypto.verify(
+      null, // algorithm is null for ED25519
+      Buffer.from(signedMessage, 'utf-8'),
+      publicKey,
+      signatureBuffer
     );
 
-    return signatureMatches;
+    if (!isValid) {
+      console.error('❌ ED25519 Signature verification failed');
+      return false;
+    }
+
+    // ✅ Optional: Verify timestamp is recent (within 5 minutes)
+    // This prevents replay attacks where old webhooks are resent
+    const webhookTimestamp = parseInt(timestampHeader, 10);
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    const timeDifferenceSeconds = Math.abs(currentTimestamp - webhookTimestamp);
+    const MAX_AGE_SECONDS = 5 * 60; // 5 minutes
+
+    if (timeDifferenceSeconds > MAX_AGE_SECONDS) {
+      console.warn(
+        `⚠️ Webhook timestamp is ${timeDifferenceSeconds}s old (max: ${MAX_AGE_SECONDS}s)`
+      );
+      console.warn('   This could be a replay attack - rejecting webhook');
+      return false;
+    }
+
+    console.log('✅ ED25519 signature verified successfully');
+    return true;
   } catch (error: any) {
     console.error('❌ Webhook signature verification error:', error.message);
     return false;
@@ -52,7 +84,7 @@ function verifyTelnyxSignature(
 
 /**
  * Webhook endpoint for Telnyx 10DLC status updates
- * ✅ VERIFIED: Signature validation enabled
+ * ✅ VERIFIED: ED25519 signature validation enabled
  *
  * Telnyx will POST to this endpoint when:
  * - Brand status changes
@@ -61,37 +93,52 @@ function verifyTelnyxSignature(
  */
 router.post('/10dlc/status', async (req: Request, res: Response) => {
   try {
-    // Get the raw payload and signature
+    // Get headers
+    const signature = req.headers['telnyx-signature-ed25519'] as string;
+    const timestamp = req.headers['telnyx-timestamp'] as string;
     const payload = req.body;
-    const signature = req.headers['x-telnyx-signature-mac'] as string;
 
-    // Log the webhook for debugging (BEFORE signature check)
+    // Get public key from environment
+    const publicKey = process.env.TELNYX_WEBHOOK_PUBLIC_KEY;
+
+    if (!publicKey) {
+      console.error('❌ CRITICAL: TELNYX_WEBHOOK_PUBLIC_KEY environment variable not configured');
+      console.error('   Webhook signature verification cannot be performed');
+      return res.status(500).json({
+        error: 'Server configuration error - webhook verification disabled',
+      });
+    }
+
+    // Log the webhook for debugging
     console.log(`\n📨 Received Telnyx webhook`);
     console.log(`   Event Type: ${payload.data?.event_type}`);
-    console.log(`   Timestamp: ${payload.data?.occurred_at}`);
+    console.log(`   Occurred At: ${payload.data?.occurred_at}`);
     console.log(`   Request ID: ${payload.data?.id}`);
 
-    // ✅ CRITICAL SECURITY FIX: Verify webhook signature
-    // This ensures the webhook is actually from Telnyx
-    const isValidSignature = verifyTelnyxSignature(
-      Buffer.from(JSON.stringify(payload)),
-      signature
+    // ✅ CRITICAL SECURITY: Verify webhook signature using ED25519
+    const payloadString = JSON.stringify(payload);
+    const isValidSignature = verifyTelnyxWebhookSignature(
+      payloadString,
+      signature,
+      timestamp,
+      publicKey
     );
 
     if (!isValidSignature) {
-      console.error('❌ WEBHOOK SIGNATURE VERIFICATION FAILED');
-      console.error('   Webhook may be from an attacker - rejecting');
+      console.error('❌ WEBHOOK SIGNATURE VERIFICATION FAILED - REJECTING');
+      console.error('   Webhook may be from an attacker or tampered with');
       console.error(`   Event Type: ${payload.data?.event_type}`);
       console.error(`   Request ID: ${payload.data?.id}`);
 
       // Return 401 Unauthorized
-      // Telnyx will retry with valid signature later
+      // Telnyx will retry with valid signature if this was legitimate
       return res.status(401).json({
         error: 'Invalid webhook signature - access denied',
       });
     }
 
-    console.log(`✅ Webhook signature verified - signature valid`);
+    // Signature verified - safe to process
+    console.log(`✅ Webhook signature verified (ED25519) - processing`);
 
     // Validate webhook payload structure
     if (!payload.data) {
@@ -137,22 +184,32 @@ router.post('/10dlc/status', async (req: Request, res: Response) => {
 
 /**
  * Failover webhook endpoint
- * ✅ VERIFIED: Signature validation enabled
+ * ✅ VERIFIED: ED25519 signature validation enabled
  * Telnyx will try this if the primary endpoint fails
  */
 router.post('/10dlc/status-failover', async (req: Request, res: Response) => {
   try {
+    const signature = req.headers['telnyx-signature-ed25519'] as string;
+    const timestamp = req.headers['telnyx-timestamp'] as string;
     const payload = req.body;
-    const signature = req.headers['x-telnyx-signature-mac'] as string;
 
     console.log(`\n📨 Received Telnyx webhook (FAILOVER)`);
     console.log(`   Event Type: ${payload.data?.event_type}`);
     console.log(`   (Attempting failover endpoint)`);
 
+    const publicKey = process.env.TELNYX_WEBHOOK_PUBLIC_KEY;
+    if (!publicKey) {
+      console.error('❌ TELNYX_WEBHOOK_PUBLIC_KEY not configured');
+      return res.status(500).json({ error: 'Server configuration error' });
+    }
+
     // ✅ Verify signature on failover endpoint too
-    const isValidSignature = verifyTelnyxSignature(
-      Buffer.from(JSON.stringify(payload)),
-      signature
+    const payloadString = JSON.stringify(payload);
+    const isValidSignature = verifyTelnyxWebhookSignature(
+      payloadString,
+      signature,
+      timestamp,
+      publicKey
     );
 
     if (!isValidSignature) {
