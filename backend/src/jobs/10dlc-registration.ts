@@ -277,7 +277,6 @@ export async function registerPersonal10DLCAsync(
     console.error(`❌ Error registering 10DLC for church ${churchId}:`, userFriendlyError);
 
     if (error.response?.data) {
-      console.error('Full Telnyx response:', JSON.stringify(error.response.data, null, 2));
     }
 
     // Mark as failed but don't crash the system
@@ -394,7 +393,6 @@ export async function createCampaignAsync(churchId: string): Promise<void> {
     console.error(`❌ Error creating campaign for church ${churchId}:`, userFriendlyError);
 
     if (error.response?.data) {
-      console.error('Full Telnyx response:', JSON.stringify(error.response.data, null, 2));
     }
 
     // Mark as failed but don't crash the system
