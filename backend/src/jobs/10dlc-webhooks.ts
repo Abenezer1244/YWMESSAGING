@@ -176,10 +176,10 @@ async function handleCampaignUpdate(payload: any): Promise<void> {
     console.log(`🎉 ${church.name} is now approved for 99% delivery rate!`);
   }
 
-  // Campaign rejected
-  if (campaignStatus === 'TELNYX_FAILED' || campaignStatus === 'MNO_REJECTED') {
+  // Campaign rejected at any stage
+  if (campaignStatus === 'TCR_FAILED' || campaignStatus === 'TELNYX_FAILED' || campaignStatus === 'MNO_REJECTED') {
     const reasons = payloadData?.failureReasons || 'Unknown reason';
-    console.log(`❌ Campaign rejected: ${reasons}`);
+    console.log(`❌ Campaign rejected at ${campaignStatus} stage: ${reasons}`);
 
     await prisma.church.update({
       where: { id: church.id },
@@ -187,12 +187,18 @@ async function handleCampaignUpdate(payload: any): Promise<void> {
         dlcStatus: 'rejected',
         dlcCampaignId: campaignId,
         dlcCampaignStatus: campaignStatus,
-        dlcRejectionReason: reasons,
+        dlcRejectionReason: `Campaign rejected at ${campaignStatus} stage: ${reasons}`,
       },
     });
+
+    // Log detailed rejection info for debugging
+    console.log(`   Campaign ID: ${campaignId}`);
+    console.log(`   Church: ${church.name} (${church.id})`);
+    console.log(`   Reason: ${reasons}`);
+    console.log(`   Recommendation: Review campaign details and resubmit`);
   }
 
-  // Campaign pending (waiting for next approval stage)
+  // Campaign pending - waiting for next approval stage (intermediate states)
   if (
     campaignStatus === 'TCR_PENDING' ||
     campaignStatus === 'TCR_ACCEPTED' ||
@@ -200,6 +206,9 @@ async function handleCampaignUpdate(payload: any): Promise<void> {
     campaignStatus === 'MNO_PENDING'
   ) {
     console.log(`⏳ Campaign pending in ${campaignStatus} state`);
+    console.log(`   Campaign ID: ${campaignId}`);
+    console.log(`   Church: ${church.name} (${church.id})`);
+    console.log(`   Progress: Awaiting next approval stage...`);
 
     await prisma.church.update({
       where: { id: church.id },
