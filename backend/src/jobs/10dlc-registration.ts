@@ -113,8 +113,20 @@ function mapTelnyxError(error: any): string {
     return TELNYX_ERROR_CODES[errorCode] || `Telnyx error code ${errorCode}`;
   }
 
-  // Fallback
-  return error.message || 'Unknown error occurred';
+  // ✅ IMPROVED: Generic fallback based on HTTP status code
+  // This avoids leaking error.message which could contain sensitive information
+  if (error.response?.status) {
+    const status = error.response.status;
+    if (status >= 500) {
+      return 'Telnyx API server error - please try again in a few moments';
+    }
+    if (status >= 400) {
+      return 'Invalid request to Telnyx API - please verify your information';
+    }
+  }
+
+  // Safe fallback - never exposes raw error.message
+  return 'Unable to process Telnyx request - please try again later';
 }
 
 /**
