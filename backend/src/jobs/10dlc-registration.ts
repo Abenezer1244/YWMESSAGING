@@ -347,7 +347,12 @@ export async function registerPersonal10DLCAsync(
     const userFriendlyError = mapTelnyxError(error);
     console.error(`❌ Error registering 10DLC for church ${churchId}:`, userFriendlyError);
 
+    // Log detailed Telnyx error for debugging
     if (error.response?.data) {
+      console.error(`   Telnyx API Response:`, JSON.stringify(error.response.data, null, 2));
+    }
+    if (error.response?.status) {
+      console.error(`   HTTP Status: ${error.response.status}`);
     }
 
     // Mark as failed but don't crash the system
