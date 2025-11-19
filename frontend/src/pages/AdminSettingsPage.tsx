@@ -37,6 +37,16 @@ export function AdminSettingsPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    // 10DLC Brand Information
+    ein: '',
+    brandPhoneNumber: '',
+    streetAddress: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    website: '',
+    entityType: 'NON_PROFIT',
+    vertical: 'RELIGION',
   });
 
   // Load profile on mount
@@ -48,6 +58,16 @@ export function AdminSettingsPage() {
       setFormData({
         name: data.name || '',
         email: data.email || '',
+        // 10DLC Brand Information
+        ein: data.ein || '',
+        brandPhoneNumber: data.brandPhoneNumber || '',
+        streetAddress: data.streetAddress || '',
+        city: data.city || '',
+        state: data.state || '',
+        postalCode: data.postalCode || '',
+        website: data.website || '',
+        entityType: data.entityType || 'NON_PROFIT',
+        vertical: data.vertical || 'RELIGION',
       });
     } catch (error) {
       // Show generic error message without exposing backend details
@@ -83,7 +103,7 @@ export function AdminSettingsPage() {
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validation
+    // Validation - Basic Fields
     if (!formData.name.trim()) {
       toast.error('Church name is required');
       return;
@@ -99,11 +119,67 @@ export function AdminSettingsPage() {
       return;
     }
 
+    // Validation - 10DLC Fields
+    if (!formData.ein.trim()) {
+      toast.error('EIN (Employer Identification Number) is required for 10DLC');
+      return;
+    }
+
+    if (!/^\d+$/.test(formData.ein.trim())) {
+      toast.error('EIN must contain only digits');
+      return;
+    }
+
+    if (!formData.brandPhoneNumber.trim()) {
+      toast.error('Brand contact phone number is required');
+      return;
+    }
+
+    if (!/^\+1\d{10}$/.test(formData.brandPhoneNumber.trim())) {
+      toast.error('Phone must be in format: +1XXXXXXXXXX');
+      return;
+    }
+
+    if (!formData.streetAddress.trim()) {
+      toast.error('Street address is required');
+      return;
+    }
+
+    if (!formData.city.trim()) {
+      toast.error('City is required');
+      return;
+    }
+
+    if (!formData.state.trim() || formData.state.length !== 2) {
+      toast.error('State must be 2-letter code (e.g., CA, NY)');
+      return;
+    }
+
+    if (!formData.postalCode.trim()) {
+      toast.error('Postal code is required');
+      return;
+    }
+
+    if (!/^\d{5}(-\d{4})?$/.test(formData.postalCode.trim())) {
+      toast.error('Postal code must be 5 digits or 5+4 format');
+      return;
+    }
+
     try {
       setIsSaving(true);
       await updateProfile({
         name: formData.name.trim(),
         email: formData.email.trim(),
+        // 10DLC Brand Information
+        ein: formData.ein.trim(),
+        brandPhoneNumber: formData.brandPhoneNumber.trim(),
+        streetAddress: formData.streetAddress.trim(),
+        city: formData.city.trim(),
+        state: formData.state.trim().toUpperCase(),
+        postalCode: formData.postalCode.trim(),
+        website: formData.website.trim() || undefined,
+        entityType: formData.entityType,
+        vertical: formData.vertical,
       });
       toast.success('Profile updated successfully');
       loadProfile();
@@ -220,6 +296,154 @@ export function AdminSettingsPage() {
                           }
                           placeholder="contact@church.com"
                         />
+                      </motion.div>
+
+                      {/* 10DLC Brand Information Section */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="mb-8"
+                      >
+                        <SoftCard variant="gradient">
+                          <h3 className="font-semibold text-foreground mb-4">10DLC Brand Information</h3>
+                          <p className="text-sm text-muted-foreground mb-6">
+                            Required for SMS messaging approval. Fill in your church's legal information.
+                          </p>
+
+                          {/* EIN */}
+                          <div className="mb-6">
+                            <Input
+                              label="EIN (Employer Identification Number)"
+                              type="text"
+                              value={formData.ein}
+                              onChange={(e) =>
+                                setFormData({ ...formData, ein: e.target.value })
+                              }
+                              placeholder="123456789"
+                              required
+                            />
+                          </div>
+
+                          {/* Brand Phone Number */}
+                          <div className="mb-6">
+                            <Input
+                              label="Brand Contact Phone"
+                              type="tel"
+                              value={formData.brandPhoneNumber}
+                              onChange={(e) =>
+                                setFormData({ ...formData, brandPhoneNumber: e.target.value })
+                              }
+                              placeholder="+12025551234"
+                              required
+                            />
+                          </div>
+
+                          {/* Street Address */}
+                          <div className="mb-6">
+                            <Input
+                              label="Street Address"
+                              type="text"
+                              value={formData.streetAddress}
+                              onChange={(e) =>
+                                setFormData({ ...formData, streetAddress: e.target.value })
+                              }
+                              placeholder="123 Main Street"
+                              required
+                            />
+                          </div>
+
+                          {/* City and State Row */}
+                          <div className="grid grid-cols-2 gap-4 mb-6">
+                            <Input
+                              label="City"
+                              type="text"
+                              value={formData.city}
+                              onChange={(e) =>
+                                setFormData({ ...formData, city: e.target.value })
+                              }
+                              placeholder="New York"
+                              required
+                            />
+                            <Input
+                              label="State (2-letter)"
+                              type="text"
+                              value={formData.state}
+                              onChange={(e) =>
+                                setFormData({ ...formData, state: e.target.value.toUpperCase().slice(0, 2) })
+                              }
+                              placeholder="NY"
+                              maxLength={2}
+                              required
+                            />
+                          </div>
+
+                          {/* Postal Code */}
+                          <div className="mb-6">
+                            <Input
+                              label="Postal Code"
+                              type="text"
+                              value={formData.postalCode}
+                              onChange={(e) =>
+                                setFormData({ ...formData, postalCode: e.target.value })
+                              }
+                              placeholder="10001"
+                              required
+                            />
+                          </div>
+
+                          {/* Website (Optional) */}
+                          <div className="mb-6">
+                            <Input
+                              label="Church Website (Optional)"
+                              type="url"
+                              value={formData.website}
+                              onChange={(e) =>
+                                setFormData({ ...formData, website: e.target.value })
+                              }
+                              placeholder="https://yourchurch.com"
+                            />
+                          </div>
+
+                          {/* Entity Type and Vertical */}
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-foreground mb-2">
+                                Entity Type
+                              </label>
+                              <select
+                                value={formData.entityType}
+                                onChange={(e) =>
+                                  setFormData({ ...formData, entityType: e.target.value })
+                                }
+                                className="w-full px-3 py-2 bg-muted border border-border rounded-md text-foreground"
+                              >
+                                <option value="NON_PROFIT">Non-Profit</option>
+                                <option value="SOLE_PROPRIETOR">Sole Proprietor</option>
+                                <option value="PRIVATE_CORPORATION">Private Corporation</option>
+                                <option value="PARTNERSHIP">Partnership</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-foreground mb-2">
+                                Industry Vertical
+                              </label>
+                              <select
+                                value={formData.vertical}
+                                onChange={(e) =>
+                                  setFormData({ ...formData, vertical: e.target.value })
+                                }
+                                className="w-full px-3 py-2 bg-muted border border-border rounded-md text-foreground"
+                              >
+                                <option value="RELIGION">Religion</option>
+                                <option value="EDUCATION">Education</option>
+                                <option value="HEALTHCARE">Healthcare</option>
+                                <option value="FINANCE">Finance</option>
+                                <option value="OTHER">Other</option>
+                              </select>
+                            </div>
+                          </div>
+                        </SoftCard>
                       </motion.div>
 
                       {/* Account Info */}

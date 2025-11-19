@@ -53,18 +53,45 @@ export async function updateProfileHandler(req: Request, res: Response) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const { name, email, description } = req.body;
+    const {
+      name,
+      email,
+      description,
+      // 10DLC Brand Information
+      ein,
+      brandPhoneNumber,
+      streetAddress,
+      city,
+      state,
+      postalCode,
+      website,
+      entityType,
+      vertical,
+    } = req.body;
 
     const updated = await updateChurchProfile(churchId, {
       name,
       email,
       description,
+      // 10DLC Brand Information
+      ein,
+      brandPhoneNumber,
+      streetAddress,
+      city,
+      state,
+      postalCode,
+      website,
+      entityType,
+      vertical,
     });
 
     // Log activity
     await logActivity(churchId, req.user?.adminId || '', 'Update Profile', {
       name,
       email,
+      ein,
+      city,
+      state,
     });
 
     res.json({

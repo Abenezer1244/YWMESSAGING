@@ -7,6 +7,16 @@ export interface UpdateChurchInput {
   name?: string;
   email?: string;
   description?: string;
+  // 10DLC Brand Information
+  ein?: string;
+  brandPhoneNumber?: string;
+  streetAddress?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  website?: string;
+  entityType?: string;
+  vertical?: string;
 }
 
 /**
@@ -20,8 +30,19 @@ export async function updateChurchProfile(
     const updated = await prisma.church.update({
       where: { id: churchId },
       data: {
+        // Basic profile
         ...(input.name && { name: input.name }),
         ...(input.email && { email: input.email }),
+        // 10DLC Brand Information
+        ...(input.ein && { ein: input.ein }),
+        ...(input.brandPhoneNumber && { brandPhoneNumber: input.brandPhoneNumber }),
+        ...(input.streetAddress && { streetAddress: input.streetAddress }),
+        ...(input.city && { city: input.city }),
+        ...(input.state && { state: input.state }),
+        ...(input.postalCode && { postalCode: input.postalCode }),
+        ...(input.website && { website: input.website }),
+        ...(input.entityType && { entityType: input.entityType }),
+        ...(input.vertical && { vertical: input.vertical }),
       },
     });
 
@@ -34,19 +55,30 @@ export async function updateChurchProfile(
 }
 
 /**
- * Get church profile
+ * Get church profile (including 10DLC fields)
  */
 export async function getChurchProfile(churchId: string) {
   try {
     const church = await prisma.church.findUnique({
       where: { id: churchId },
       select: {
+        // Basic profile
         id: true,
         name: true,
         email: true,
         subscriptionStatus: true,
         createdAt: true,
         updatedAt: true,
+        // 10DLC Brand Information
+        ein: true,
+        brandPhoneNumber: true,
+        streetAddress: true,
+        city: true,
+        state: true,
+        postalCode: true,
+        website: true,
+        entityType: true,
+        vertical: true,
       },
     });
 

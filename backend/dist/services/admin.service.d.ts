@@ -2,6 +2,15 @@ export interface UpdateChurchInput {
     name?: string;
     email?: string;
     description?: string;
+    ein?: string;
+    brandPhoneNumber?: string;
+    streetAddress?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    website?: string;
+    entityType?: string;
+    vertical?: string;
 }
 /**
  * Update church profile
@@ -50,7 +59,7 @@ export declare function updateChurchProfile(churchId: string, input: UpdateChurc
     updatedAt: Date;
 }>;
 /**
- * Get church profile
+ * Get church profile (including 10DLC fields)
  */
 export declare function getChurchProfile(churchId: string): Promise<{
     email: string;
@@ -58,6 +67,15 @@ export declare function getChurchProfile(churchId: string): Promise<{
     id: string;
     createdAt: Date;
     updatedAt: Date;
+    ein: string | null;
+    brandPhoneNumber: string | null;
+    streetAddress: string | null;
+    city: string | null;
+    state: string | null;
+    postalCode: string | null;
+    website: string | null;
+    entityType: string;
+    vertical: string;
     subscriptionStatus: string;
 } | null>;
 /**

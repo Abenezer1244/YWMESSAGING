@@ -7,6 +7,16 @@ export interface ChurchProfile {
   subscriptionStatus: string;
   createdAt: string;
   updatedAt: string;
+  // 10DLC Brand Information
+  ein?: string | null;
+  brandPhoneNumber?: string | null;
+  streetAddress?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postalCode?: string | null;
+  website?: string | null;
+  entityType?: string | null;
+  vertical?: string | null;
 }
 
 export interface CoAdmin {
@@ -47,12 +57,22 @@ export async function getProfile(): Promise<ChurchProfile> {
 }
 
 /**
- * Update church profile
+ * Update church profile (including 10DLC fields)
  */
 export async function updateProfile(data: {
   name?: string;
   email?: string;
   description?: string;
+  // 10DLC Brand Information
+  ein?: string;
+  brandPhoneNumber?: string;
+  streetAddress?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  website?: string;
+  entityType?: string;
+  vertical?: string;
 }): Promise<{ success: boolean; profile: ChurchProfile }> {
   const response = await client.put('/admin/profile', data);
   return response.data;

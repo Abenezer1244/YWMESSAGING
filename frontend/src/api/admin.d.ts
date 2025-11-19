@@ -5,6 +5,15 @@ export interface ChurchProfile {
     subscriptionStatus: string;
     createdAt: string;
     updatedAt: string;
+    ein?: string | null;
+    brandPhoneNumber?: string | null;
+    streetAddress?: string | null;
+    city?: string | null;
+    state?: string | null;
+    postalCode?: string | null;
+    website?: string | null;
+    entityType?: string | null;
+    vertical?: string | null;
 }
 export interface CoAdmin {
     id: string;
@@ -37,12 +46,21 @@ export interface ActivityLogsResponse {
  */
 export declare function getProfile(): Promise<ChurchProfile>;
 /**
- * Update church profile
+ * Update church profile (including 10DLC fields)
  */
 export declare function updateProfile(data: {
     name?: string;
     email?: string;
     description?: string;
+    ein?: string;
+    brandPhoneNumber?: string;
+    streetAddress?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    website?: string;
+    entityType?: string;
+    vertical?: string;
 }): Promise<{
     success: boolean;
     profile: ChurchProfile;
