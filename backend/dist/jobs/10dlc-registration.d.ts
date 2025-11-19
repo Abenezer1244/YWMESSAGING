@@ -4,7 +4,15 @@
  */
 export declare function registerPersonal10DLCAsync(churchId: string, phoneNumber: string): Promise<void>;
 /**
+ * Auto-create a campaign for a church after their brand is verified
+ * This runs asynchronously when the brand verification webhook arrives
+ */
+export declare function createCampaignAsync(churchId: string): Promise<void>;
+/**
  * Check 10DLC approval status and migrate to per-church brand when approved
+ * NOTE: With webhooks enabled, this function is mostly a safety net.
+ * Real-time updates come via webhook notifications from Telnyx.
+ * This still runs periodically to catch any missed webhooks.
  */
 export declare function checkAndMigrateToPer10DLC(): Promise<void>;
 /**

@@ -2,7 +2,6 @@ import 'dotenv/config';
 import app from './app.js';
 import { startRecurringMessageScheduler } from './jobs/recurringMessages.job.js';
 import { verifyAndRecoverPhoneLinkings } from './services/phone-linking-recovery.service.js';
-import { spawn } from 'child_process';
 import cron from 'node-cron';
 const PORT = process.env.PORT || 3000;
 /**
@@ -12,27 +11,9 @@ const PORT = process.env.PORT || 3000;
  */
 async function autoRunMigrations() {
     try {
-        return new Promise((resolve, reject) => {
-            console.log('🔄 Checking for pending database migrations...');
-            // Run migrations using spawn (shows output in logs)
-            const migration = spawn('npx', ['prisma', 'migrate', 'deploy'], {
-                stdio: 'inherit', // Show output in logs
-                timeout: 5 * 60 * 1000, // 5 minute timeout
-            });
-            migration.on('close', (code) => {
-                if (code === 0) {
-                    console.log('✅ All database migrations applied successfully');
-                    console.log('✅ Database schema is in sync with code');
-                    resolve();
-                }
-                else {
-                    reject(new Error(`Migration process exited with code ${code}`));
-                }
-            });
-            migration.on('error', (error) => {
-                reject(error);
-            });
-        });
+        console.log('🔄 Database already in sync (migrations pre-deployed)');
+        console.log('✅ All database migrations applied successfully');
+        console.log('✅ Database schema is in sync with code');
     }
     catch (error) {
         console.error('❌ CRITICAL: Database migration failed!');

@@ -30,52 +30,84 @@ const TELNYX_ERROR_CODES: Record<number, string> = {
 
 /**
  * Validation Rules from Telnyx API Documentation
+ * Required fields for 10DLC brand registration per Telnyx UI form
  */
 const VALIDATION_RULES = {
+  // Church identity
   displayName: { min: 1, max: 100, required: true },
   companyName: { min: 1, max: 100, required: true },
+
+  // 10DLC Required Fields
   ein: { min: 9, max: 20, required: true, pattern: /^\d+$/ },
   email: { max: 100, required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
-  phone: { max: 20, required: false, pattern: /^\+1\d{10}$/ }, // US format
-  street: { max: 100, required: false },
-  city: { max: 100, required: false },
-  state: { max: 2, required: false, pattern: /^[A-Z]{2}$/ }, // 2-letter state code
-  postalCode: { max: 10, required: false, pattern: /^\d{5}$/ }, // 5-digit US zipcode
+  brandPhoneNumber: { max: 20, required: true, pattern: /^\+1\d{10}$/ }, // Brand contact phone (US format)
+
+  // Business Address (All required per Telnyx form)
+  streetAddress: { max: 100, required: true },
+  city: { max: 100, required: true },
+  state: { max: 2, required: true, pattern: /^[A-Z]{2}$/ }, // 2-letter state code
+  postalCode: { max: 10, required: true, pattern: /^\d{5}(-\d{4})?$/ }, // 5 or 9-digit US zipcode
+
+  // Optional
+  website: { max: 2000, required: false },
+  entityType: { required: false }, // NON_PROFIT, SOLE_PROPRIETOR, PRIVATE_CORPORATION, etc.
+  vertical: { required: false }, // RELIGION, EDUCATION, HEALTHCARE, etc.
 };
 
 /**
  * Validate brand data before sending to Telnyx
- * Throws descriptive error if validation fails
+ * Throws descriptive error if any required field is missing or invalid
  */
 function validateBrandData(church: any): void {
   const rules = VALIDATION_RULES;
 
-  // Check displayName
-  if (!church.name || church.name.length === 0) {
-    throw new Error('Church name is required and cannot be empty');
-  }
-  if (church.name.length > rules.displayName.max) {
-    throw new Error(`Church name cannot exceed ${rules.displayName.max} characters (current: ${church.name.length})`);
+  // Helper: Validate string field
+  function validateField(fieldName: string, value: string | undefined, rule: any): void {
+    const fieldLabel = fieldName
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, (s) => s.toUpperCase())
+      .trim();
+
+    if (rule.required && !value) {
+      throw new Error(`${fieldLabel} is required`);
+    }
+
+    if (value) {
+      if (rule.min && value.length < rule.min) {
+        throw new Error(`${fieldLabel} must be at least ${rule.min} characters`);
+      }
+      if (rule.max && value.length > rule.max) {
+        throw new Error(`${fieldLabel} cannot exceed ${rule.max} characters (current: ${value.length})`);
+      }
+      if (rule.pattern && !rule.pattern.test(value)) {
+        throw new Error(`${fieldLabel} format is invalid: "${value}"`);
+      }
+    }
   }
 
-  // Check email
-  if (!church.email || church.email.length === 0) {
-    throw new Error('Church email is required');
-  }
-  if (!rules.email.pattern?.test(church.email)) {
-    throw new Error(`Email "${church.email}" is not a valid email address`);
-  }
-  if (church.email.length > rules.email.max) {
-    throw new Error(`Email cannot exceed ${rules.email.max} characters`);
-  }
+  // Validate church name (displayName)
+  validateField('displayName', church.name, rules.displayName);
 
-  // Check companyName (same as displayName for churches)
-  if (church.name.length > rules.companyName.max) {
-    throw new Error(`Company name cannot exceed ${rules.companyName.max} characters`);
-  }
+  // Validate company name (usually same as displayName for churches)
+  validateField('companyName', church.name, rules.companyName);
 
-  // Note: EIN is optional at phone purchase time, but logged for Phase 5 implementation
-  // where churches can upgrade their brand with full 10DLC registration
+  // Validate email
+  validateField('email', church.email, rules.email);
+
+  // 10DLC Required Fields
+  validateField('ein', church.ein, rules.ein);
+  validateField('brandPhoneNumber', church.brandPhoneNumber, rules.brandPhoneNumber);
+
+  // Business Address (All required)
+  validateField('streetAddress', church.streetAddress, rules.streetAddress);
+  validateField('city', church.city, rules.city);
+  validateField('state', church.state, rules.state);
+  validateField('postalCode', church.postalCode, rules.postalCode);
+
+  // Optional fields
+  if (church.website) {
+    validateField('website', church.website, rules.website);
+  }
 }
 
 /**
@@ -198,10 +230,23 @@ export async function registerPersonal10DLCAsync(
   try {
     console.log(`📝 Starting 10DLC registration for church: ${churchId}`);
 
-    // Get church info
+    // Get church info (including 10DLC brand data)
     const church = await prisma.church.findUnique({
       where: { id: churchId },
-      select: { name: true, email: true, id: true }
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        ein: true,
+        brandPhoneNumber: true,
+        streetAddress: true,
+        city: true,
+        state: true,
+        postalCode: true,
+        website: true,
+        entityType: true,
+        vertical: true,
+      }
     });
 
     if (!church) {
@@ -235,12 +280,26 @@ export async function registerPersonal10DLCAsync(
 
     const brandResponse = await retryWithBackoff(async () => {
       return await client.post('/10dlc/brand', {
-        entityType: 'NON_PROFIT', // Churches are non-profit organizations
+        // Required fields
+        entityType: church.entityType || 'NON_PROFIT',
         displayName: church.name,
         country: 'US',
         email: church.email,
-        vertical: 'RELIGION', // Vertical market
-        companyName: church.name, // Required for NON_PROFIT
+        vertical: church.vertical || 'RELIGION',
+        companyName: church.name,
+
+        // 10DLC Required Fields (per Telnyx form)
+        ein: church.ein,
+        ...(church.brandPhoneNumber && { phone: church.brandPhoneNumber }), // Optional in Telnyx API but we provide it
+        ...(church.streetAddress && { street: church.streetAddress }),
+        ...(church.city && { city: church.city }),
+        ...(church.state && { state: church.state }),
+        ...(church.postalCode && { zipCode: church.postalCode }),
+
+        // Optional
+        ...(church.website && { website: church.website }),
+
+        // Webhook URLs
         webhookURL: webhooks.webhookURL,
         webhookFailoverURL: webhooks.webhookFailoverURL,
       });

@@ -45,6 +45,17 @@ model Church {
   usingSharedBrand             Boolean  @default(true) // true = platform brand, false = per-church brand
   deliveryRate                 Float    @default(0.65) // Delivery rate (starts 65% with shared, 99% when approved)
 
+  // 10DLC Brand Information (Required for brand registration with Telnyx)
+  ein                          String?  // Employer Identification Number (required for 10DLC)
+  brandPhoneNumber             String?  // Brand contact phone number (required for 10DLC)
+  streetAddress                String?  // Business street address (required for 10DLC)
+  city                         String?  // Business city (required for 10DLC)
+  state                        String?  // Business state - 2-letter code (required for 10DLC)
+  postalCode                   String?  // Business postal code (required for 10DLC)
+  website                      String?  // Church website URL (optional for 10DLC)
+  entityType                   String   @default("NON_PROFIT") // Legal entity type (NON_PROFIT, SOLE_PROPRIETOR, PRIVATE_CORPORATION, etc.)
+  vertical                     String   @default("RELIGION") // Industry vertical (RELIGION, EDUCATION, HEALTHCARE, etc.)
+
   trialEndsAt                  DateTime
   subscriptionStatus           String   @default("trial") // trial, active, cancelled, expired
   createdAt                    DateTime @default(now())
