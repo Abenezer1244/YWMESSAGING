@@ -56,6 +56,25 @@ export async function updateProfileHandler(req, res) {
             city,
             state,
         });
+        // 🔄 Trigger 10DLC registration if church has 10DLC fields AND a phone number
+        // Check if 10DLC fields were provided and if church already has a phone number
+        const has10DLCFields = ein && brandPhoneNumber && streetAddress && city && state && postalCode;
+        if (has10DLCFields && updated.telnyxPhoneNumber) {
+            console.log(`🔔 Triggering 10DLC registration for church ${churchId} with phone ${updated.telnyxPhoneNumber}`);
+            try {
+                const { registerPersonal10DLCAsync } = await import('../jobs/10dlc-registration.js');
+                registerPersonal10DLCAsync(churchId, updated.telnyxPhoneNumber).catch((err) => {
+                    console.error(`⚠️ Failed to start 10DLC registration for church ${churchId}:`, err);
+                    // Don't fail the request, just log it
+                });
+            }
+            catch (error) {
+                console.error('⚠️ Could not import 10DLC job, skipping async registration:', error);
+            }
+        }
+        else if (has10DLCFields && !updated.telnyxPhoneNumber) {
+            console.log(`⏳ 10DLC info saved but no phone number yet. Registration will trigger when phone is linked.`);
+        }
         res.json({
             success: true,
             profile: updated,
