@@ -1,0 +1,174 @@
+{
+  "test_scenarios": [
+    {
+      "name": "Scenario 1: Brand Verification Webhook (Triggers Campaign Creation)",
+      "description": "When a church's brand is verified by Telnyx, this webhook arrives and triggers automatic campaign creation",
+      "endpoint": "POST /api/webhooks/10dlc/status",
+      "payload": {
+        "data": {
+          "event_type": "10dlc.brand.update",
+          "id": "webhook-brand-verify-001",
+          "occurred_at": "2025-11-19T12:00:00Z",
+          "payload": {
+            "type": "TCR_BRAND_WEBHOOK",
+            "eventType": "BRAND_ADD",
+            "brandId": "4b20017f-8da9-a992-a6c0-683072fb7729",
+            "tcrBrandId": "BBRAND1",
+            "status": "OK",
+            "identityStatus": "VERIFIED"
+          }
+        }
+      },
+      "expected_behavior": {
+        "response_code": 202,
+        "response_body": {
+          "success": true,
+          "message": "Webhook accepted for processing"
+        },
+        "side_effects": [
+          "Church record updated: dlcStatus = 'brand_verified'",
+          "tcrBrandId stored in database",
+          "createCampaignAsync() called in background",
+          "Campaign creation begins (2-5 seconds later)"
+        ],
+        "logs": [
+          "📨 Received Telnyx webhook: 10dlc.brand.update",
+          "✅ Brand verified and ready! Setting up campaign...",
+          "📋 Starting campaign creation for church: [churchId]",
+          "📤 Creating campaign for [churchName]",
+          "✅ Campaign created: [campaignId]"
+        ]
+      }
+    },
+    {
+      "name": "Scenario 2: Campaign Approval Progress (TCR_PENDING)",
+      "description": "Campaign submitted to The Campaign Registry, awaiting review",
+      "endpoint": "POST /api/webhooks/10dlc/status",
+      "payload": {
+        "data": {
+          "event_type": "10dlc.campaign.update",
+          "id": "webhook-campaign-tcr-001",
+          "occurred_at": "2025-11-19T12:10:00Z",
+          "payload": {
+            "campaignId": "campaign-123-tcr",
+            "brandId": "4b20017f-8da9-a992-a6c0-683072fb7729",
+            "campaignStatus": "TCR_PENDING",
+            "type": "CAMPAIGN_STATUS_UPDATE"
+          }
+        }
+      },
+      "expected_behavior": {
+        "response_code": 202,
+        "church_update": {
+          "dlcStatus": "campaign_pending",
+          "dlcCampaignId": "campaign-123-tcr",
+          "dlcCampaignStatus": "TCR_PENDING"
+        },
+        "logs": [
+          "📨 Received Telnyx webhook: 10dlc.campaign.update",
+          "📢 Campaign Update: campaignId=campaign-123-tcr, status=TCR_PENDING",
+          "⏳ Campaign pending in TCR_PENDING state"
+        ]
+      }
+    },
+    {
+      "name": "Scenario 3: Campaign Fully Approved (MNO_PROVISIONED)",
+      "description": "Campaign approved by all carriers - READY TO SEND AT 99% DELIVERY!",
+      "endpoint": "POST /api/webhooks/10dlc/status",
+      "payload": {
+        "data": {
+          "event_type": "10dlc.campaign.update",
+          "id": "webhook-campaign-approved-001",
+          "occurred_at": "2025-11-19T12:20:00Z",
+          "payload": {
+            "campaignId": "campaign-123-tcr",
+            "brandId": "4b20017f-8da9-a992-a6c0-683072fb7729",
+            "campaignStatus": "MNO_PROVISIONED",
+            "type": "CAMPAIGN_STATUS_UPDATE"
+          }
+        }
+      },
+      "expected_behavior": {
+        "response_code": 202,
+        "church_update": {
+          "dlcStatus": "approved",
+          "dlcCampaignId": "campaign-123-tcr",
+          "dlcCampaignStatus": "MNO_PROVISIONED",
+          "usingSharedBrand": false,
+          "deliveryRate": 0.99,
+          "dlcApprovedAt": "2025-11-19T12:20:00Z"
+        },
+        "logs": [
+          "📨 Received Telnyx webhook: 10dlc.campaign.update",
+          "✅ Campaign APPROVED and PROVISIONED! Ready to send messages!",
+          "🎉 [ChurchName] is now approved for 99% delivery rate!"
+        ]
+      }
+    },
+    {
+      "name": "Scenario 4: Campaign Rejected",
+      "description": "Campaign was rejected - church continues using shared brand",
+      "endpoint": "POST /api/webhooks/10dlc/status",
+      "payload": {
+        "data": {
+          "event_type": "10dlc.campaign.update",
+          "id": "webhook-campaign-rejected-001",
+          "occurred_at": "2025-11-19T12:25:00Z",
+          "payload": {
+            "campaignId": "campaign-123-tcr",
+            "brandId": "4b20017f-8da9-a992-a6c0-683072fb7729",
+            "campaignStatus": "MNO_REJECTED",
+            "failureReasons": "Message samples did not comply with TCPA regulations",
+            "type": "CAMPAIGN_STATUS_UPDATE"
+          }
+        }
+      },
+      "expected_behavior": {
+        "response_code": 202,
+        "church_update": {
+          "dlcStatus": "rejected",
+          "dlcCampaignId": "campaign-123-tcr",
+          "dlcCampaignStatus": "MNO_REJECTED",
+          "dlcRejectionReason": "Message samples did not comply with TCPA regulations"
+        },
+        "logs": [
+          "❌ Campaign rejected: Message samples did not comply with TCPA regulations"
+        ]
+      }
+    }
+  ],
+  "how_to_test": {
+    "step_1": "Get a test church ID from your database",
+    "step_2": "Update church record with a dlcBrandId if testing scenario 1",
+    "step_3": "Send webhook payload with curl",
+    "step_4": "Check logs in Render dashboard",
+    "step_5": "Verify database was updated"
+  },
+  "curl_example_scenario_1": {
+    "command": "curl -X POST http://localhost:3000/api/webhooks/10dlc/status -H 'Content-Type: application/json' -d '{payload_goes_here}'",
+    "note": "Replace http://localhost:3000 with https://connect-yw-backend.onrender.com for production"
+  },
+  "curl_example_full": "curl -X POST https://connect-yw-backend.onrender.com/api/webhooks/10dlc/status -H 'Content-Type: application/json' -d '{\"data\":{\"event_type\":\"10dlc.brand.update\",\"id\":\"webhook-brand-verify-001\",\"occurred_at\":\"2025-11-19T12:00:00Z\",\"payload\":{\"type\":\"TCR_BRAND_WEBHOOK\",\"eventType\":\"BRAND_ADD\",\"brandId\":\"4b20017f-8da9-a992-a6c0-683072fb7729\",\"tcrBrandId\":\"BBRAND1\",\"status\":\"OK\",\"identityStatus\":\"VERIFIED\"}}}'",
+  "expected_responses": {
+    "202_accepted": {
+      "code": 202,
+      "body": {
+        "success": true,
+        "message": "Webhook accepted for processing",
+        "eventType": "10dlc.brand.update"
+      }
+    },
+    "400_bad_request": {
+      "code": 400,
+      "body": {
+        "error": "Invalid webhook payload: missing data field"
+      }
+    },
+    "500_server_error": {
+      "code": 500,
+      "body": {
+        "error": "Internal server error processing webhook"
+      }
+    }
+  }
+}
