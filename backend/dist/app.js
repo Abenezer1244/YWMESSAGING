@@ -158,74 +158,8 @@ app.use(cors({
     origin: corsOrigin,
     credentials: true,
 }));
-// Middleware to capture raw body for webhook signature verification
-// Must run BEFORE express.json() so we can access raw bytes
-// SECURITY: Limits size to prevent DoS attacks
-const MAX_WEBHOOK_SIZE = 1024 * 1024; // 1MB max for webhook payloads
-const WEBHOOK_TIMEOUT_MS = 10000; // 10 second timeout
-app.use((req, res, next) => {
-    // Only process POST requests (webhooks are POST)
-    if (req.method !== 'POST') {
-        return next();
-    }
-    // Only capture raw body for webhook endpoints
-    // This prevents consuming the stream for normal API requests like login
-    const isWebhookEndpoint = req.path?.startsWith('/api/webhooks/');
-    if (!isWebhookEndpoint) {
-        return next();
-    }
-    const chunks = [];
-    let totalSize = 0;
-    let timedOut = false;
-    // Set timeout for webhook payload delivery
-    const timeoutHandle = setTimeout(() => {
-        timedOut = true;
-        req.removeAllListeners('data');
-        req.removeAllListeners('end');
-        req.socket.destroy();
-        console.error('❌ Webhook payload delivery timeout - possible attack or network issue');
-    }, WEBHOOK_TIMEOUT_MS);
-    // Capture raw body chunks
-    req.on('data', (chunk) => {
-        if (timedOut)
-            return;
-        // Enforce size limit to prevent DoS
-        totalSize += chunk.length;
-        if (totalSize > MAX_WEBHOOK_SIZE) {
-            clearTimeout(timeoutHandle);
-            req.removeAllListeners('data');
-            req.removeAllListeners('end');
-            console.error(`❌ Webhook payload exceeds size limit (${totalSize} > ${MAX_WEBHOOK_SIZE})`);
-            return res.status(413).json({ error: 'Payload too large' });
-        }
-        chunks.push(Buffer.from(chunk));
-    });
-    // Process complete body
-    req.on('end', () => {
-        clearTimeout(timeoutHandle);
-        if (timedOut)
-            return;
-        try {
-            // Combine chunks into single buffer
-            const rawBodyBuffer = Buffer.concat(chunks);
-            const rawBodyString = rawBodyBuffer.toString('utf-8');
-            req.rawBody = rawBodyString;
-            req.rawBodyBuffer = rawBodyBuffer;
-            next();
-        }
-        catch (error) {
-            console.error('❌ Error processing raw body:', error);
-            return res.status(400).json({ error: 'Invalid request body' });
-        }
-    });
-    // Handle stream errors
-    req.on('error', (error) => {
-        clearTimeout(timeoutHandle);
-        console.error('❌ Request stream error:', error.message);
-        res.status(400).json({ error: 'Stream error' });
-    });
-});
 // Raw body parser for Stripe webhook (needs buffer, not string)
+// 10DLC webhooks use express.raw() as route middleware for ED25519 signature verification
 app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

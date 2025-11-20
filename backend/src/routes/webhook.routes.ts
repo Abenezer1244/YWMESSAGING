@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, raw } from 'express';
 import crypto from 'crypto';
 import { PrismaClient } from '@prisma/client';
 import Stripe from 'stripe';
@@ -288,11 +288,9 @@ async function handleTelnyx10DLCStatus(req: Request, res: Response) {
     const signature = req.headers['telnyx-signature-ed25519'] as string;
     const timestamp = req.headers['telnyx-timestamp'] as string;
 
-    // Get raw body captured by middleware (required for ED25519 signature verification)
-    interface RequestWithRawBody extends Request {
-      rawBody?: string;
-    }
-    const rawBody = (req as RequestWithRawBody).rawBody;
+    // Get raw body from express.raw() middleware (required for ED25519 signature verification)
+    // req.body is a Buffer when express.raw() is used as middleware
+    const rawBody = (req.body as Buffer).toString('utf-8');
 
     if (!rawBody || !signature || !timestamp) {
       console.error('❌ Missing required webhook data:', {
@@ -394,11 +392,9 @@ async function handleTelnyx10DLCStatusFailover(req: Request, res: Response) {
     const signature = req.headers['telnyx-signature-ed25519'] as string;
     const timestamp = req.headers['telnyx-timestamp'] as string;
 
-    // Get raw body captured by middleware (required for ED25519 signature verification)
-    interface RequestWithRawBody extends Request {
-      rawBody?: string;
-    }
-    const rawBody = (req as RequestWithRawBody).rawBody;
+    // Get raw body from express.raw() middleware (required for ED25519 signature verification)
+    // req.body is a Buffer when express.raw() is used as middleware
+    const rawBody = (req.body as Buffer).toString('utf-8');
 
     if (!rawBody || !signature || !timestamp) {
       console.error('❌ [FAILOVER] Missing required webhook data:', {
@@ -479,9 +475,9 @@ router.post('/webhooks/stripe', handleStripeWebhook);
 router.post('/webhooks/telnyx/mms', handleTelnyxInboundMMS);
 router.post('/webhooks/telnyx/status', handleTelnyxWebhook);
 
-// 10DLC Webhook routes
-router.post('/webhooks/10dlc/status', handleTelnyx10DLCStatus);
-router.post('/webhooks/10dlc/status-failover', handleTelnyx10DLCStatusFailover);
+// 10DLC Webhook routes - use express.raw() to capture raw body for ED25519 signature verification
+router.post('/webhooks/10dlc/status', raw({ type: 'application/json' }), handleTelnyx10DLCStatus);
+router.post('/webhooks/10dlc/status-failover', raw({ type: 'application/json' }), handleTelnyx10DLCStatusFailover);
 router.get('/webhooks/10dlc/status', checkTelnyx10DLCHealth);
 
 export default router;
