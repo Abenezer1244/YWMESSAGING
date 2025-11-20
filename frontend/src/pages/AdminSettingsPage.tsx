@@ -24,6 +24,9 @@ interface ChurchProfile {
   email: string;
   subscriptionStatus: string;
   createdAt: string;
+  wantsPremiumDelivery?: boolean;
+  dlcStatus?: string;
+  deliveryRate?: number;
 }
 
 export function AdminSettingsPage() {
@@ -37,6 +40,8 @@ export function AdminSettingsPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    // Delivery Tier Selection
+    wantsPremiumDelivery: false,
     // 10DLC Brand Information
     ein: '',
     brandPhoneNumber: '',
@@ -58,6 +63,8 @@ export function AdminSettingsPage() {
       setFormData({
         name: data.name || '',
         email: data.email || '',
+        // Delivery Tier Selection
+        wantsPremiumDelivery: data.wantsPremiumDelivery ?? false,
         // 10DLC Brand Information
         ein: data.ein || '',
         brandPhoneNumber: data.brandPhoneNumber || '',
@@ -119,50 +126,52 @@ export function AdminSettingsPage() {
       return;
     }
 
-    // Validation - 10DLC Fields
-    if (!formData.ein.trim()) {
-      toast.error('EIN (Employer Identification Number) is required for 10DLC');
-      return;
-    }
+    // Validation - 10DLC Fields (only required if choosing premium delivery)
+    if (formData.wantsPremiumDelivery) {
+      if (!formData.ein.trim()) {
+        toast.error('EIN (Employer Identification Number) is required for premium 10DLC');
+        return;
+      }
 
-    if (!/^\d+$/.test(formData.ein.trim())) {
-      toast.error('EIN must contain only digits');
-      return;
-    }
+      if (!/^\d+$/.test(formData.ein.trim())) {
+        toast.error('EIN must contain only digits');
+        return;
+      }
 
-    if (!formData.brandPhoneNumber.trim()) {
-      toast.error('Brand contact phone number is required');
-      return;
-    }
+      if (!formData.brandPhoneNumber.trim()) {
+        toast.error('Brand contact phone number is required for premium 10DLC');
+        return;
+      }
 
-    if (!/^\+1\d{10}$/.test(formData.brandPhoneNumber.trim())) {
-      toast.error('Phone must be in format: +1XXXXXXXXXX');
-      return;
-    }
+      if (!/^\+1\d{10}$/.test(formData.brandPhoneNumber.trim())) {
+        toast.error('Phone must be in format: +1XXXXXXXXXX');
+        return;
+      }
 
-    if (!formData.streetAddress.trim()) {
-      toast.error('Street address is required');
-      return;
-    }
+      if (!formData.streetAddress.trim()) {
+        toast.error('Street address is required for premium 10DLC');
+        return;
+      }
 
-    if (!formData.city.trim()) {
-      toast.error('City is required');
-      return;
-    }
+      if (!formData.city.trim()) {
+        toast.error('City is required for premium 10DLC');
+        return;
+      }
 
-    if (!formData.state.trim() || formData.state.length !== 2) {
-      toast.error('State must be 2-letter code (e.g., CA, NY)');
-      return;
-    }
+      if (!formData.state.trim() || formData.state.length !== 2) {
+        toast.error('State must be 2-letter code (e.g., CA, NY)');
+        return;
+      }
 
-    if (!formData.postalCode.trim()) {
-      toast.error('Postal code is required');
-      return;
-    }
+      if (!formData.postalCode.trim()) {
+        toast.error('Postal code is required for premium 10DLC');
+        return;
+      }
 
-    if (!/^\d{5}(-\d{4})?$/.test(formData.postalCode.trim())) {
-      toast.error('Postal code must be 5 digits or 5+4 format');
-      return;
+      if (!/^\d{5}(-\d{4})?$/.test(formData.postalCode.trim())) {
+        toast.error('Postal code must be 5 digits or 5+4 format');
+        return;
+      }
     }
 
     try {
@@ -170,13 +179,15 @@ export function AdminSettingsPage() {
       await updateProfile({
         name: formData.name.trim(),
         email: formData.email.trim(),
+        // Delivery Tier Selection
+        wantsPremiumDelivery: formData.wantsPremiumDelivery,
         // 10DLC Brand Information
-        ein: formData.ein.trim(),
-        brandPhoneNumber: formData.brandPhoneNumber.trim(),
-        streetAddress: formData.streetAddress.trim(),
-        city: formData.city.trim(),
-        state: formData.state.trim().toUpperCase(),
-        postalCode: formData.postalCode.trim(),
+        ein: formData.ein.trim() || undefined,
+        brandPhoneNumber: formData.brandPhoneNumber.trim() || undefined,
+        streetAddress: formData.streetAddress.trim() || undefined,
+        city: formData.city.trim() || undefined,
+        state: formData.state.trim().toUpperCase() || undefined,
+        postalCode: formData.postalCode.trim() || undefined,
         website: formData.website.trim() || undefined,
         entityType: formData.entityType,
         vertical: formData.vertical,
@@ -298,7 +309,86 @@ export function AdminSettingsPage() {
                         />
                       </motion.div>
 
-                      {/* 10DLC Brand Information Section */}
+                      {/* Delivery Tier Selection */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.18 }}
+                        className="mb-8"
+                      >
+                        <SoftCard variant="gradient">
+                          <h3 className="font-semibold text-foreground mb-4">SMS Delivery Tier</h3>
+                          <p className="text-sm text-muted-foreground mb-6">
+                            Choose your SMS delivery performance level. You can upgrade anytime.
+                          </p>
+
+                          <div className="space-y-3">
+                            {/* Shared Brand Option */}
+                            <label className="flex items-start gap-4 p-4 rounded-lg border border-border hover:border-primary cursor-pointer transition" style={{ backgroundColor: !formData.wantsPremiumDelivery ? 'rgba(59, 130, 246, 0.05)' : '' }}>
+                              <input
+                                type="radio"
+                                name="deliveryTier"
+                                checked={!formData.wantsPremiumDelivery}
+                                onChange={() => setFormData({ ...formData, wantsPremiumDelivery: false })}
+                                className="mt-1"
+                              />
+                              <div className="flex-1">
+                                <div className="font-medium text-foreground flex items-center gap-2">
+                                  📊 Standard Delivery
+                                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Recommended</span>
+                                </div>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  65% delivery rate • Instant activation • No EIN required
+                                </p>
+                              </div>
+                            </label>
+
+                            {/* Premium 10DLC Option */}
+                            <label className="flex items-start gap-4 p-4 rounded-lg border border-border hover:border-primary cursor-pointer transition" style={{ backgroundColor: formData.wantsPremiumDelivery ? 'rgba(34, 197, 94, 0.05)' : '' }}>
+                              <input
+                                type="radio"
+                                name="deliveryTier"
+                                checked={formData.wantsPremiumDelivery}
+                                onChange={() => setFormData({ ...formData, wantsPremiumDelivery: true })}
+                                className="mt-1"
+                              />
+                              <div className="flex-1">
+                                <div className="font-medium text-foreground flex items-center gap-2">
+                                  🚀 Premium 10DLC
+                                  <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Best Performance</span>
+                                </div>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  99% delivery rate • 1-2 day approval • Requires EIN & business info
+                                </p>
+                              </div>
+                            </label>
+                          </div>
+
+                          {/* Current Status */}
+                          {profile?.dlcStatus && (
+                            <div className="mt-6 pt-6 border-t border-border">
+                              <p className="text-xs text-muted-foreground mb-2">Current Status:</p>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium text-foreground">
+                                  {profile.dlcStatus === 'shared_brand' && '📊 Standard Delivery (65%)'}
+                                  {profile.dlcStatus === 'pending' && '⏳ Awaiting Approval (99%)'}
+                                  {profile.dlcStatus === 'approved' && '✅ Premium Active (99%)'}
+                                  {profile.dlcStatus === 'rejected' && '❌ Failed - Contact support'}
+                                  {!['shared_brand', 'pending', 'approved', 'rejected'].includes(profile.dlcStatus) && profile.dlcStatus}
+                                </span>
+                                {profile.deliveryRate && (
+                                  <span className="text-xs bg-muted px-2 py-1 rounded">
+                                    {(profile.deliveryRate * 100).toFixed(0)}% delivery
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </SoftCard>
+                      </motion.div>
+
+                      {/* 10DLC Brand Information Section - Only shown if premium selected */}
+                      {formData.wantsPremiumDelivery && (
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -444,6 +534,7 @@ export function AdminSettingsPage() {
                           </div>
                         </SoftCard>
                       </motion.div>
+                      )}
 
                       {/* Account Info */}
                       {profile && (

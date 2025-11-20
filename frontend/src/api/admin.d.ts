@@ -5,6 +5,9 @@ export interface ChurchProfile {
     subscriptionStatus: string;
     createdAt: string;
     updatedAt: string;
+    wantsPremiumDelivery?: boolean;
+    dlcStatus?: string;
+    deliveryRate?: number;
     ein?: string | null;
     brandPhoneNumber?: string | null;
     streetAddress?: string | null;
@@ -46,12 +49,13 @@ export interface ActivityLogsResponse {
  */
 export declare function getProfile(): Promise<ChurchProfile>;
 /**
- * Update church profile (including 10DLC fields)
+ * Update church profile (including 10DLC fields and delivery tier selection)
  */
 export declare function updateProfile(data: {
     name?: string;
     email?: string;
     description?: string;
+    wantsPremiumDelivery?: boolean;
     ein?: string;
     brandPhoneNumber?: string;
     streetAddress?: string;

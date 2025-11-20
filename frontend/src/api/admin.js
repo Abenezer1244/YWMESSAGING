@@ -7,7 +7,7 @@ export async function getProfile() {
     return response.data;
 }
 /**
- * Update church profile (including 10DLC fields)
+ * Update church profile (including 10DLC fields and delivery tier selection)
  */
 export async function updateProfile(data) {
     const response = await client.put('/admin/profile', data);

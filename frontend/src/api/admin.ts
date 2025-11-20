@@ -7,6 +7,10 @@ export interface ChurchProfile {
   subscriptionStatus: string;
   createdAt: string;
   updatedAt: string;
+  // Delivery Tier
+  wantsPremiumDelivery?: boolean;
+  dlcStatus?: string;
+  deliveryRate?: number;
   // 10DLC Brand Information
   ein?: string | null;
   brandPhoneNumber?: string | null;
@@ -57,12 +61,14 @@ export async function getProfile(): Promise<ChurchProfile> {
 }
 
 /**
- * Update church profile (including 10DLC fields)
+ * Update church profile (including 10DLC fields and delivery tier selection)
  */
 export async function updateProfile(data: {
   name?: string;
   email?: string;
   description?: string;
+  // Delivery Tier Selection
+  wantsPremiumDelivery?: boolean;
   // 10DLC Brand Information
   ein?: string;
   brandPhoneNumber?: string;
