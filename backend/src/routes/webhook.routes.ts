@@ -81,7 +81,7 @@ function verifyTelnyxWebhookSignature(
     });
 
     const isValid = crypto.verify(
-      'ed25519',
+      null,
       Buffer.from(signedMessage, 'utf-8'),
       publicKey,
       signatureBuffer
