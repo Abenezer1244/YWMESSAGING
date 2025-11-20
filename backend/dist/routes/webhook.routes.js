@@ -21,14 +21,12 @@ function verifyTelnyxWebhookSignature(payload, signatureHeader, timestampHeader,
     }
     try {
         const publicKeyBuffer = Buffer.from(publicKeyBase64, 'base64');
-        const publicKey = crypto.createPublicKey({
-            key: publicKeyBuffer,
-            format: 'raw',
-            type: 'ed25519',
-        });
         const signedMessage = `${timestampHeader}|${payload}`;
         const signatureBuffer = Buffer.from(signatureHeader, 'base64');
-        const isValid = crypto.verify(null, Buffer.from(signedMessage, 'utf-8'), publicKey, signatureBuffer);
+        // Use crypto.verify directly with raw ED25519 key bytes
+        // This works with all Node.js versions that support ED25519 (no format: 'raw' needed)
+        const isValid = crypto.verify('ed25519', Buffer.from(signedMessage, 'utf-8'), publicKeyBuffer, // Pass raw 32-byte ED25519 key directly
+        signatureBuffer);
         if (!isValid) {
             console.error('❌ ED25519 Signature verification failed');
             return false;
