@@ -7,6 +7,8 @@ export interface UpdateChurchInput {
   name?: string;
   email?: string;
   description?: string;
+  // 10DLC Delivery Option
+  wantsPremiumDelivery?: boolean;
   // 10DLC Brand Information
   ein?: string;
   brandPhoneNumber?: string;
@@ -33,6 +35,8 @@ export async function updateChurchProfile(
         // Basic profile
         ...(input.name && { name: input.name }),
         ...(input.email && { email: input.email }),
+        // 10DLC Delivery Option
+        ...(typeof input.wantsPremiumDelivery === 'boolean' && { wantsPremiumDelivery: input.wantsPremiumDelivery }),
         // 10DLC Brand Information
         ...(input.ein && { ein: input.ein }),
         ...(input.brandPhoneNumber && { brandPhoneNumber: input.brandPhoneNumber }),
@@ -69,6 +73,10 @@ export async function getChurchProfile(churchId: string) {
         subscriptionStatus: true,
         createdAt: true,
         updatedAt: true,
+        // 10DLC Delivery Status
+        wantsPremiumDelivery: true,
+        dlcStatus: true,
+        deliveryRate: true,
         // 10DLC Brand Information
         ein: true,
         brandPhoneNumber: true,

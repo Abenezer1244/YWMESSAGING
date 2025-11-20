@@ -31,12 +31,16 @@ export async function updateProfileHandler(req, res) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
         const { name, email, description, 
+        // 10DLC Delivery Option
+        wantsPremiumDelivery, 
         // 10DLC Brand Information
         ein, brandPhoneNumber, streetAddress, city, state, postalCode, website, entityType, vertical, } = req.body;
         const updated = await updateChurchProfile(churchId, {
             name,
             email,
             description,
+            // 10DLC Delivery Option
+            wantsPremiumDelivery,
             // 10DLC Brand Information
             ein,
             brandPhoneNumber,
@@ -56,10 +60,20 @@ export async function updateProfileHandler(req, res) {
             city,
             state,
         });
-        // 🔄 Trigger 10DLC registration if church has 10DLC fields AND a phone number
-        // Check if 10DLC fields were provided and if church already has a phone number
+        // 🔄 Handle delivery tier selection (Shared Brand vs Premium 10DLC)
+        // If church opted-in to premium 10DLC, trigger registration if they have required fields
+        // If church wants shared brand, skip 10DLC registration
         const has10DLCFields = ein && brandPhoneNumber && streetAddress && city && state && postalCode;
-        if (has10DLCFields && updated.telnyxPhoneNumber) {
+        if (wantsPremiumDelivery === false && updated.dlcStatus === 'pending') {
+            // Church explicitly chose shared brand - set status and skip 10DLC
+            console.log(`📊 Church ${churchId} selected shared brand delivery (65%)`);
+            await prisma.church.update({
+                where: { id: churchId },
+                data: { dlcStatus: 'shared_brand' },
+            });
+        }
+        else if (wantsPremiumDelivery === true && has10DLCFields && updated.telnyxPhoneNumber) {
+            // Church opted-in to premium 10DLC and has all required fields
             console.log(`🔔 Triggering 10DLC registration for church ${churchId} with phone ${updated.telnyxPhoneNumber}`);
             try {
                 // CRITICAL FIX: Verify database persistence before triggering async job
@@ -93,7 +107,7 @@ export async function updateProfileHandler(req, res) {
                 console.error('⚠️ Could not import 10DLC job, skipping async registration:', error);
             }
         }
-        else if (has10DLCFields && !updated.telnyxPhoneNumber) {
+        else if (wantsPremiumDelivery === true && has10DLCFields && !updated.telnyxPhoneNumber) {
             console.log(`⏳ 10DLC info saved but no phone number yet. Registration will trigger when phone is linked.`);
         }
         res.json({
@@ -298,6 +312,11 @@ export async function linkPhoneNumberHandler(req, res) {
             // Don't fail the whole request if webhook creation fails
             // User can manually create it if needed
         }
+        // Get current church state to check delivery preference
+        const church = await prisma.church.findUnique({
+            where: { id: churchId },
+            select: { wantsPremiumDelivery: true },
+        });
         // Update church with phone number and webhook ID
         // Initialize 10DLC fields: start with shared brand for immediate use
         const updated = await prisma.church.update({
@@ -309,7 +328,7 @@ export async function linkPhoneNumberHandler(req, res) {
                 telnyxPurchasedAt: new Date(),
                 // 10DLC: Start with shared brand for 60-70% delivery
                 usingSharedBrand: true,
-                dlcStatus: 'pending',
+                dlcStatus: church?.wantsPremiumDelivery ? 'pending' : 'shared_brand',
                 dlcNextCheckAt: new Date(Date.now() + 12 * 60 * 60 * 1000), // Check in 12 hours
                 deliveryRate: 0.65, // 65% with shared brand
             },
@@ -322,17 +341,22 @@ export async function linkPhoneNumberHandler(req, res) {
                 deliveryRate: true,
             },
         });
-        // Trigger background job to auto-register per-church 10DLC (fire and forget)
-        try {
-            // Import the background job function
-            const { registerPersonal10DLCAsync } = await import('../jobs/10dlc-registration.js');
-            registerPersonal10DLCAsync(churchId, formattedPhone).catch((err) => {
-                console.error(`⚠️ Failed to start 10DLC registration for church ${churchId}:`, err);
-                // Don't fail the request, just log it
-            });
+        // Only trigger 10DLC registration if church opted-in to premium delivery
+        if (church?.wantsPremiumDelivery) {
+            try {
+                // Import the background job function
+                const { registerPersonal10DLCAsync } = await import('../jobs/10dlc-registration.js');
+                registerPersonal10DLCAsync(churchId, formattedPhone).catch((err) => {
+                    console.error(`⚠️ Failed to start 10DLC registration for church ${churchId}:`, err);
+                    // Don't fail the request, just log it
+                });
+            }
+            catch (error) {
+                console.error('⚠️ Could not import 10DLC job, skipping async registration:', error);
+            }
         }
-        catch (error) {
-            console.error('⚠️ Could not import 10DLC job, skipping async registration:', error);
+        else {
+            console.log(`📊 Phone linked but church ${churchId} on shared brand delivery - skipping 10DLC registration`);
         }
         // Log activity
         await logActivity(churchId, req.user?.adminId || '', 'Link Phone Number', {

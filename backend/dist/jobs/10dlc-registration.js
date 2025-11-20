@@ -222,10 +222,16 @@ export async function registerPersonal10DLCAsync(churchId, phoneNumber) {
                 website: true,
                 entityType: true,
                 vertical: true,
+                wantsPremiumDelivery: true,
             }
         });
         if (!church) {
             console.error(`❌ Church not found: ${churchId}`);
+            return;
+        }
+        // 🔍 GUARD CHECK: Skip 10DLC registration if church wants shared brand
+        if (!church.wantsPremiumDelivery) {
+            console.log(`📊 Church ${churchId} opted for shared brand - skipping 10DLC registration`);
             return;
         }
         // Validate church data before sending to Telnyx

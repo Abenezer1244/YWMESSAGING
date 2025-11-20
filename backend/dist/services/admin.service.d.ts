@@ -2,6 +2,7 @@ export interface UpdateChurchInput {
     name?: string;
     email?: string;
     description?: string;
+    wantsPremiumDelivery?: boolean;
     ein?: string;
     brandPhoneNumber?: string;
     streetAddress?: string;
@@ -47,6 +48,7 @@ export declare function updateChurchProfile(churchId: string, input: UpdateChurc
     dlcCampaignSuspendedAt: Date | null;
     dlcCampaignSuspendedReason: string | null;
     usingSharedBrand: boolean;
+    wantsPremiumDelivery: boolean;
     deliveryRate: number;
     ein: string | null;
     brandPhoneNumber: string | null;
@@ -71,6 +73,9 @@ export declare function getChurchProfile(churchId: string): Promise<{
     id: string;
     createdAt: Date;
     updatedAt: Date;
+    dlcStatus: string;
+    wantsPremiumDelivery: boolean;
+    deliveryRate: number;
     ein: string | null;
     brandPhoneNumber: string | null;
     streetAddress: string | null;

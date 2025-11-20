@@ -47,6 +47,7 @@ model Church {
   dlcCampaignSuspendedAt       DateTime? // When campaign was suspended
   dlcCampaignSuspendedReason   String?  // Why campaign was suspended (e.g., "DORMANT")
   usingSharedBrand             Boolean  @default(true) // true = platform brand, false = per-church brand
+  wantsPremiumDelivery         Boolean  @default(false) // Church opted-in to premium 10DLC (99% delivery)
   deliveryRate                 Float    @default(0.65) // Delivery rate (starts 65% with shared, 99% when approved)
 
   // 10DLC Brand Information (Required for brand registration with Telnyx)

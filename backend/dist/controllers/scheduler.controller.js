@@ -112,6 +112,9 @@ export async function getSchedulerStatus(req, res) {
         const rejectedChurches = await prisma.church.count({
             where: { dlcStatus: 'rejected' },
         });
+        const sharedBrandChurches = await prisma.church.count({
+            where: { dlcStatus: 'shared_brand' },
+        });
         res.json({
             status: metrics.isHealthy ? 'healthy' : 'unhealthy',
             metrics: {
@@ -120,6 +123,7 @@ export async function getSchedulerStatus(req, res) {
                     pending: pendingChurches,
                     approved: approvedChurches,
                     rejected: rejectedChurches,
+                    sharedBrand: sharedBrandChurches,
                 },
                 uptime: process.uptime(),
             },
