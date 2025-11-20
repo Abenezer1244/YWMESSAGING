@@ -46,7 +46,7 @@ export function AdminSettingsPage() {
     postalCode: '',
     website: '',
     entityType: 'NON_PROFIT',
-    vertical: 'RELIGION',
+    vertical: 'NGO', // Changed from RELIGION to NGO (valid Telnyx value)
   });
 
   // Load profile on mount
@@ -67,7 +67,7 @@ export function AdminSettingsPage() {
         postalCode: data.postalCode || '',
         website: data.website || '',
         entityType: data.entityType || 'NON_PROFIT',
-        vertical: data.vertical || 'RELIGION',
+        vertical: data.vertical || 'NGO', // Changed from RELIGION to NGO (valid Telnyx value)
       });
     } catch (error) {
       // Show generic error message without exposing backend details
