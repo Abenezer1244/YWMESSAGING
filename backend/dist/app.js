@@ -158,8 +158,10 @@ app.use(cors({
     origin: corsOrigin,
     credentials: true,
 }));
-// Raw body parser for Stripe webhook (SECURITY: required for signature validation)
+// Raw body parsers for webhooks requiring signature validation (SECURITY: required for ED25519/HMAC signature verification)
 app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }));
+app.post('/api/webhooks/10dlc/status', express.raw({ type: 'application/json' }));
+app.post('/api/webhooks/10dlc/status-failover', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
