@@ -23,12 +23,13 @@ function verifyTelnyxWebhookSignature(payload, signatureHeader, timestampHeader,
         const publicKeyBuffer = Buffer.from(publicKeyBase64, 'base64');
         const signedMessage = `${timestampHeader}|${payload}`;
         const signatureBuffer = Buffer.from(signatureHeader, 'base64');
-        // Create DER-encoded ED25519 public key for compatibility with older Node.js versions
-        // DER structure: SEQUENCE { SEQUENCE { OID for Ed25519 }, BIT STRING with key }
+        // Create DER-encoded ED25519 public key (SPKI format per RFC 8410)
+        // Structure: SEQUENCE { AlgorithmIdentifier { OID, NULL }, BIT STRING with key }
+        // Total length: 44 bytes (0x2C)
         // OID for Ed25519 is 1.3.101.112 = 2b 65 70
         const derKey = Buffer.concat([
-            Buffer.from('3025', 'hex'), // SEQUENCE, length 37
-            Buffer.from('300506032b6570', 'hex'), // AlgorithmIdentifier (OID for Ed25519)
+            Buffer.from('302c', 'hex'), // SEQUENCE, length 44
+            Buffer.from('300906032b65700500', 'hex'), // AlgorithmIdentifier with NULL parameter
             Buffer.from('0321', 'hex'), // BIT STRING, length 33
             Buffer.from('00', 'hex'), // No unused bits
             publicKeyBuffer, // 32-byte public key
