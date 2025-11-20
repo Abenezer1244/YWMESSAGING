@@ -32,12 +32,28 @@ function verifyTelnyxWebhookSignature(
     const signedMessage = `${timestampHeader}|${payload}`;
     const signatureBuffer = Buffer.from(signatureHeader, 'base64');
 
-    // Use crypto.verify directly with raw ED25519 key bytes
-    // This works with all Node.js versions that support ED25519 (no format: 'raw' needed)
+    // Create DER-encoded ED25519 public key for compatibility with older Node.js versions
+    // DER structure: SEQUENCE { SEQUENCE { OID for Ed25519 }, BIT STRING with key }
+    // OID for Ed25519 is 1.3.101.112 = 2b 65 70
+    const derKey = Buffer.concat([
+      Buffer.from('3025', 'hex'),           // SEQUENCE, length 37
+      Buffer.from('300506032b6570', 'hex'), // AlgorithmIdentifier (OID for Ed25519)
+      Buffer.from('0321', 'hex'),           // BIT STRING, length 33
+      Buffer.from('00', 'hex'),             // No unused bits
+      publicKeyBuffer,                      // 32-byte public key
+    ]);
+
+    // Create a proper KeyObject for crypto.verify()
+    const publicKey = crypto.createPublicKey({
+      key: derKey,
+      format: 'der',
+      type: 'spki', // Subject Public Key Info format
+    });
+
     const isValid = crypto.verify(
       'ed25519',
       Buffer.from(signedMessage, 'utf-8'),
-      publicKeyBuffer,  // Pass raw 32-byte ED25519 key directly
+      publicKey,
       signatureBuffer
     );
 
