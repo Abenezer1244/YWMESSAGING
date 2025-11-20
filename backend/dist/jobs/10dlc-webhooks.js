@@ -11,8 +11,12 @@ export async function handleTelnyx10DLCWebhook(payload) {
         const eventType = payload.eventType || payload.type;
         const type = payload.type;
         console.log(`📨 Received Telnyx webhook: ${eventType} (type: ${type})`);
-        // Handle different event types
-        if (type === 'TCR_BRAND_UPDATE') {
+        // Check for campaign suspension first (it's a special type of campaign event)
+        if (payload.type === 'TELNYX_EVENT' && payload.status === 'DORMANT') {
+            // Campaign suspension notification
+            await handleCampaignSuspension(payload);
+        }
+        else if (type === 'TCR_BRAND_UPDATE') {
             await handleBrandUpdate(payload);
         }
         else if (type === 'TCR_CAMPAIGN_UPDATE') {
@@ -41,20 +45,16 @@ async function handleBrandUpdate(payload) {
     try {
         // Payload structure is flat at top level - VALIDATE ALL INPUTS
         const brandId = payload?.brandId;
-        const brandIdentityStatus = payload?.brandIdentityStatus; // UNVERIFIED, VERIFIED, etc.
+        const brandIdentityStatus = payload?.brandIdentityStatus; // Only in BRAND_IDENTITY_STATUS_UPDATE events
         const brandName = payload?.brandName;
         const tcrBrandId = payload?.tcrBrandId;
-        const eventType = payload?.eventType; // BRAND_IDENTITY_STATUS_UPDATE, etc.
+        const eventType = payload?.eventType; // BRAND_ADD, BRAND_IDENTITY_STATUS_UPDATE, BRAND_IDENTITY_VET_UPDATE, etc.
         // ENTERPRISE: Validate required fields
         if (!brandId || typeof brandId !== 'string') {
             console.error('❌ Brand webhook missing or invalid brandId:', { brandId });
             throw new Error('Missing required field: brandId');
         }
-        if (!brandIdentityStatus || typeof brandIdentityStatus !== 'string') {
-            console.error('❌ Brand webhook missing or invalid brandIdentityStatus:', { brandIdentityStatus });
-            throw new Error('Missing required field: brandIdentityStatus');
-        }
-        console.log(`🏷️  Brand Update: brandId=${brandId}, status=${brandIdentityStatus}, eventType=${eventType}`);
+        console.log(`🏷️  Brand Update: brandId=${brandId}, status=${brandIdentityStatus || 'N/A'}, eventType=${eventType}`);
         // Find church with this brand - handle not found gracefully
         const church = await prisma.church.findFirst({
             where: { dlcBrandId: brandId },
@@ -66,38 +66,16 @@ async function handleBrandUpdate(payload) {
         }
         console.log(`🏪 Church: ${church.name} (${church.id})`);
         console.log(`   Brand Name: ${brandName || 'N/A'}`);
-        console.log(`   Status: ${brandIdentityStatus}`);
+        if (brandIdentityStatus)
+            console.log(`   Identity Status: ${brandIdentityStatus}`);
         if (tcrBrandId)
             console.log(`   TCR Brand ID: ${tcrBrandId}`);
-        // Handle verification status changes - explicit validation
-        const validStatuses = ['VERIFIED', 'UNVERIFIED', 'FAILED', 'PENDING'];
-        if (!validStatuses.includes(brandIdentityStatus)) {
-            console.warn(`⚠️ Unknown brand status: ${brandIdentityStatus} - treating as informational`);
-        }
         // ENTERPRISE: Wrap database operation in try-catch
         try {
-            if (brandIdentityStatus === 'VERIFIED') {
-                // Brand is fully verified and ready to use
-                console.log(`✅ Brand verified and ready! Setting up campaign...`);
-                await prisma.church.update({
-                    where: { id: church.id },
-                    data: {
-                        dlcStatus: 'brand_verified',
-                        tcrBrandId: tcrBrandId || undefined,
-                    },
-                });
-                console.log(`📋 Next step: Auto-create campaign for ${church.name}`);
-                // Auto-create campaign asynchronously with error tracking
-                createCampaignAsync(church.id).catch((error) => {
-                    console.error(`❌ Failed to auto-create campaign for ${church.name}:`, {
-                        churchId: church.id,
-                        error: error instanceof Error ? error.message : String(error),
-                    });
-                });
-            }
-            else if (brandIdentityStatus === 'UNVERIFIED') {
-                // Brand created but not yet verified
-                console.log(`⏳ Brand created, awaiting verification...`);
+            // Handle different event types differently
+            if (eventType === 'BRAND_ADD') {
+                // Brand just created, awaiting verification
+                console.log(`✅ Brand created: ${brandName || 'Unknown'}`);
                 await prisma.church.update({
                     where: { id: church.id },
                     data: {
@@ -106,20 +84,66 @@ async function handleBrandUpdate(payload) {
                     },
                 });
             }
-            else if (brandIdentityStatus === 'FAILED') {
-                // Brand verification failed
-                console.error(`❌ Brand verification failed for ${church.name}`);
-                await prisma.church.update({
-                    where: { id: church.id },
-                    data: {
-                        dlcStatus: 'rejected',
-                        dlcRejectionReason: `Brand verification failed: ${payload?.description || 'Unknown reason'}`,
-                    },
-                });
+            else if (eventType === 'BRAND_IDENTITY_STATUS_UPDATE' && brandIdentityStatus) {
+                // Handle verification status changes
+                const validStatuses = ['VERIFIED', 'UNVERIFIED', 'FAILED', 'PENDING'];
+                if (!validStatuses.includes(brandIdentityStatus)) {
+                    console.warn(`⚠️ Unknown brand status: ${brandIdentityStatus} - treating as informational`);
+                }
+                if (brandIdentityStatus === 'VERIFIED') {
+                    // Brand is fully verified and ready to use
+                    console.log(`✅ Brand verified and ready! Setting up campaign...`);
+                    await prisma.church.update({
+                        where: { id: church.id },
+                        data: {
+                            dlcStatus: 'brand_verified',
+                            tcrBrandId: tcrBrandId || undefined,
+                        },
+                    });
+                    console.log(`📋 Next step: Auto-create campaign for ${church.name}`);
+                    // Auto-create campaign asynchronously with error tracking
+                    createCampaignAsync(church.id).catch((error) => {
+                        console.error(`❌ Failed to auto-create campaign for ${church.name}:`, {
+                            churchId: church.id,
+                            error: error instanceof Error ? error.message : String(error),
+                        });
+                    });
+                }
+                else if (brandIdentityStatus === 'UNVERIFIED') {
+                    // Brand created but not yet verified
+                    console.log(`⏳ Brand awaiting verification...`);
+                    await prisma.church.update({
+                        where: { id: church.id },
+                        data: {
+                            dlcStatus: 'pending',
+                            tcrBrandId: tcrBrandId || undefined,
+                        },
+                    });
+                }
+                else if (brandIdentityStatus === 'FAILED') {
+                    // Brand verification failed
+                    console.error(`❌ Brand verification failed for ${church.name}`);
+                    await prisma.church.update({
+                        where: { id: church.id },
+                        data: {
+                            dlcStatus: 'rejected',
+                            dlcRejectionReason: `Brand verification failed: ${payload?.description || 'Unknown reason'}`,
+                        },
+                    });
+                }
+                else {
+                    // Other statuses - log but don't update
+                    console.log(`ℹ️ Brand status: ${brandIdentityStatus} - no action needed`);
+                }
+            }
+            else if (eventType === 'BRAND_IDENTITY_VET_UPDATE') {
+                // Brand identity vetting update (intermediate status)
+                console.log(`🔍 Brand identity vetting update: ${payload?.description || 'Unknown change'}`);
+                // Don't update dlcStatus for intermediate events, just log
             }
             else {
-                // Other statuses - log but don't update
-                console.log(`ℹ️ Brand status: ${brandIdentityStatus} - no action needed`);
+                // Unknown event type - log but don't update
+                console.log(`ℹ️ Unknown brand event type: ${eventType} - no action taken`);
             }
         }
         catch (dbError) {
@@ -268,6 +292,69 @@ async function handleCampaignUpdate(payload) {
     }
 }
 /**
+ * Handle campaign suspension notifications (inactivity, T-Mobile fines, etc.)
+ * Campaign suspended when:
+ * - No activity for 15 days
+ * - No active phone numbers assigned
+ * - Deployed with T-Mobile
+ */
+async function handleCampaignSuspension(payload) {
+    try {
+        const campaignId = payload?.campaignId;
+        const status = payload?.status; // e.g., "DORMANT"
+        const description = payload?.description;
+        const brandId = payload?.brandId;
+        console.log(`⚠️ Campaign Suspension Alert: ${status}`);
+        console.log(`   Campaign: ${campaignId}`);
+        console.log(`   Reason: ${description || 'Unknown'}`);
+        if (!campaignId) {
+            console.warn('⚠️ Campaign suspension webhook missing campaignId');
+            return;
+        }
+        // Find church with this campaign
+        const church = await prisma.church.findFirst({
+            where: { dlcCampaignId: campaignId },
+            select: { id: true, name: true, dlcStatus: true },
+        });
+        if (!church) {
+            console.log(`ℹ️ Campaign ${campaignId} not found in local database`);
+            return;
+        }
+        console.log(`🏪 Church: ${church.name} (${church.id})`);
+        if (status === 'DORMANT') {
+            console.warn(`⚠️ Campaign marked as DORMANT due to inactivity`);
+            console.warn(`   Action needed: Re-assign phone number to reactivate`);
+            console.warn(`   Note: First assignment might fail, second will succeed`);
+            try {
+                await prisma.church.update({
+                    where: { id: church.id },
+                    data: {
+                        dlcCampaignSuspended: true,
+                        dlcCampaignSuspendedAt: new Date(),
+                        dlcCampaignSuspendedReason: status,
+                    },
+                });
+                console.log(`   📊 Database updated: dlcCampaignSuspended=true`);
+            }
+            catch (dbError) {
+                console.error(`❌ Database error updating church ${church.id} for suspension:`, {
+                    error: dbError instanceof Error ? dbError.message : String(dbError),
+                    campaignId,
+                    churchId: church.id,
+                });
+                throw dbError;
+            }
+        }
+    }
+    catch (error) {
+        console.error(`❌ Error processing campaign suspension webhook:`, {
+            error: error instanceof Error ? error.message : String(error),
+            payload: { campaignId: payload?.campaignId },
+        });
+        throw error;
+    }
+}
+/**
  * Handle phone number assignment status updates
  * Triggered when phone numbers are linked to campaigns
  */
@@ -295,9 +382,32 @@ async function handlePhoneNumberUpdate(payload) {
         console.log(`🏪 Church: ${church.name} (${church.id})`);
         if (eventType === 'ASSIGNMENT') {
             if (status === 'success') {
-                console.log(`✅ Phone number ${phoneNumber} successfully assigned to campaign`);
-                // TODO: Add dlcNumberAssignedAt field to Church model
-                console.log(`   Campaign: ${campaignId}`);
+                console.log(`✅ Phone number ${phoneNumber} successfully assigned to campaign ${campaignId}`);
+                try {
+                    // Update church with phone number assignment details
+                    await prisma.church.update({
+                        where: { id: church.id },
+                        data: {
+                            dlcNumberAssignedAt: new Date(),
+                            dlcCampaignId: campaignId || undefined,
+                            // Clear any previous suspension flags
+                            dlcCampaignSuspended: false,
+                            dlcCampaignSuspendedAt: null,
+                            dlcCampaignSuspendedReason: null,
+                        },
+                    });
+                    console.log(`   ✅ Database updated: dlcNumberAssignedAt, dlcCampaignId=${campaignId}`);
+                    console.log(`   🎉 Phone number ready for messaging!`);
+                }
+                catch (dbError) {
+                    console.error(`❌ Database error updating church ${church.id} for successful number assignment:`, {
+                        error: dbError instanceof Error ? dbError.message : String(dbError),
+                        phoneNumber,
+                        campaignId,
+                        churchId: church.id,
+                    });
+                    throw dbError;
+                }
             }
             else {
                 console.log(`❌ Phone number assignment failed`);
@@ -309,6 +419,7 @@ async function handlePhoneNumberUpdate(payload) {
                             dlcRejectionReason: `Number assignment failed: ${reasons}`,
                         },
                     });
+                    console.log(`   Reason: ${reasons}`);
                 }
                 catch (dbError) {
                     console.error(`❌ Database error updating church ${church.id} for number assignment failure:`, {
@@ -319,6 +430,32 @@ async function handlePhoneNumberUpdate(payload) {
                     throw dbError;
                 }
             }
+        }
+        else if (eventType === 'DELETION') {
+            // Phone number removed from campaign
+            console.log(`🗑️ Phone number ${phoneNumber} removed from campaign`);
+            try {
+                await prisma.church.update({
+                    where: { id: church.id },
+                    data: {
+                        dlcNumberAssignedAt: null,
+                    },
+                });
+                console.log(`   Phone number unassigned from campaign`);
+            }
+            catch (dbError) {
+                console.error(`❌ Database error updating church for number deletion:`, {
+                    error: dbError instanceof Error ? dbError.message : String(dbError),
+                    phoneNumber,
+                    churchId: church.id,
+                });
+                throw dbError;
+            }
+        }
+        else if (eventType === 'STATUS_UPDATE') {
+            // Phone number status changed
+            console.log(`📊 Phone number ${phoneNumber} status update: ${status}`);
+            // Just log, no database change needed for status updates
         }
     }
     catch (error) {

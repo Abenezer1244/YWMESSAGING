@@ -42,6 +42,10 @@ export declare function updateChurchProfile(churchId: string, input: UpdateChurc
     dlcNextCheckAt: Date | null;
     dlcCampaignId: string | null;
     dlcCampaignStatus: string | null;
+    dlcNumberAssignedAt: Date | null;
+    dlcCampaignSuspended: boolean;
+    dlcCampaignSuspendedAt: Date | null;
+    dlcCampaignSuspendedReason: string | null;
     usingSharedBrand: boolean;
     deliveryRate: number;
     ein: string | null;

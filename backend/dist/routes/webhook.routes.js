@@ -66,7 +66,7 @@ function verifyTelnyxWebhookSignature(payload, signatureHeader, timestampHeader,
             format: 'der',
             type: 'spki', // Subject Public Key Info format
         });
-        const isValid = crypto.verify('ed25519', Buffer.from(signedMessage, 'utf-8'), publicKey, signatureBuffer);
+        const isValid = crypto.verify(null, Buffer.from(signedMessage, 'utf-8'), publicKey, signatureBuffer);
         if (!isValid) {
             console.error('❌ ED25519 Signature verification failed');
             return false;
@@ -302,11 +302,20 @@ async function handleTelnyx10DLCStatus(req, res) {
             console.error('❌ Invalid JSON in webhook payload:', parseError);
             return res.status(400).json({ error: 'Invalid JSON payload' });
         }
+        // Extract the nested payload from Telnyx webhook structure
+        // Telnyx sends: { data: { payload: { brandId, eventType, ... } } }
+        const innerPayload = payload.data?.payload;
+        if (!innerPayload) {
+            console.error('❌ Webhook missing data.payload structure');
+            return res.status(400).json({
+                error: 'Invalid webhook structure: missing data.payload',
+            });
+        }
         // Log the webhook for debugging
         console.log(`\n📨 Received Telnyx 10DLC webhook`);
-        console.log(`   Event Type: ${payload.eventType}`);
-        console.log(`   Brand Name: ${payload.brandName}`);
-        console.log(`   Request ID: ${payload.brandId}`);
+        console.log(`   Event Type: ${innerPayload.eventType}`);
+        console.log(`   Brand Name: ${innerPayload.brandName}`);
+        console.log(`   Brand ID: ${innerPayload.brandId}`);
         // Get public key from environment
         const publicKey = process.env.TELNYX_WEBHOOK_PUBLIC_KEY;
         if (!publicKey) {
@@ -319,8 +328,8 @@ async function handleTelnyx10DLCStatus(req, res) {
         const isValidSignature = verifyTelnyxWebhookSignature(rawBody, signature, timestamp, publicKey);
         if (!isValidSignature) {
             console.error('❌ WEBHOOK SIGNATURE VERIFICATION FAILED - REJECTING');
-            console.error(`   Event Type: ${payload.eventType}`);
-            console.error(`   Brand ID: ${payload.brandId}`);
+            console.error(`   Event Type: ${innerPayload.eventType}`);
+            console.error(`   Brand ID: ${innerPayload.brandId}`);
             return res.status(401).json({
                 error: 'Invalid webhook signature - access denied',
             });
@@ -328,13 +337,13 @@ async function handleTelnyx10DLCStatus(req, res) {
         // Signature verified - safe to process
         console.log(`✅ Webhook signature verified (ED25519) - processing`);
         // Validate webhook payload structure
-        if (!payload.brandId) {
+        if (!innerPayload.brandId) {
             console.warn('⚠️ 10DLC webhook missing brandId field');
             return res.status(400).json({
                 error: 'Invalid webhook payload: missing brandId field',
             });
         }
-        const eventType = payload.eventType;
+        const eventType = innerPayload.eventType;
         if (!eventType) {
             console.warn('⚠️ 10DLC webhook missing eventType');
             return res.status(400).json({
@@ -342,7 +351,7 @@ async function handleTelnyx10DLCStatus(req, res) {
             });
         }
         // Process the webhook asynchronously (don't block response)
-        handleTelnyx10DLCWebhook(payload).catch((error) => {
+        handleTelnyx10DLCWebhook(innerPayload).catch((error) => {
             console.error('⚠️ Error processing 10DLC webhook:', error.message);
         });
         // Return 202 Accepted immediately
@@ -400,8 +409,19 @@ async function handleTelnyx10DLCStatusFailover(req, res) {
             console.error('❌ [FAILOVER] Invalid JSON in webhook payload:', parseError);
             return res.status(400).json({ error: 'Invalid JSON payload' });
         }
+        // Extract the nested payload from Telnyx webhook structure
+        // Telnyx sends: { data: { payload: { brandId, eventType, ... } } }
+        const innerPayload = payload.data?.payload;
+        if (!innerPayload) {
+            console.error('❌ [FAILOVER] Webhook missing data.payload structure');
+            return res.status(400).json({
+                error: 'Invalid webhook structure: missing data.payload',
+            });
+        }
         console.log(`\n📨 Received Telnyx 10DLC webhook (FAILOVER)`);
-        console.log(`   Event Type: ${payload.eventType}`);
+        console.log(`   Event Type: ${innerPayload.eventType}`);
+        console.log(`   Brand ID: ${innerPayload.brandId}`);
+        console.log(`   Brand Name: ${innerPayload.brandName}`);
         const publicKey = process.env.TELNYX_WEBHOOK_PUBLIC_KEY;
         if (!publicKey) {
             console.error('❌ TELNYX_WEBHOOK_PUBLIC_KEY not configured');
@@ -416,14 +436,14 @@ async function handleTelnyx10DLCStatusFailover(req, res) {
             });
         }
         console.log(`✅ Failover webhook signature verified`);
-        // HIGH FIX: Implement consistent payload validation (same as primary endpoint)
-        if (!payload.brandId) {
+        // Validate payload structure (same as primary endpoint)
+        if (!innerPayload.brandId) {
             console.warn('⚠️ [FAILOVER] 10DLC webhook missing brandId field');
             return res.status(400).json({
                 error: 'Invalid webhook payload: missing brandId field',
             });
         }
-        const eventType = payload.eventType;
+        const eventType = innerPayload.eventType;
         if (!eventType) {
             console.warn('⚠️ [FAILOVER] 10DLC webhook missing eventType');
             return res.status(400).json({
@@ -431,7 +451,7 @@ async function handleTelnyx10DLCStatusFailover(req, res) {
             });
         }
         // Process same as primary
-        handleTelnyx10DLCWebhook(payload).catch((error) => {
+        handleTelnyx10DLCWebhook(innerPayload).catch((error) => {
             console.error('⚠️ Error processing 10DLC failover webhook:', error.message);
         });
         console.log(`✅ 10DLC failover webhook accepted for processing`);

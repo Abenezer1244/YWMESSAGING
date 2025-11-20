@@ -1,7 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(DEPLOYMENT_STATUS.md)"
+      "Bash(DEPLOYMENT_STATUS.md)",
+      "Bash(cd:*)",
+      "Bash(npm run build:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(npx prisma:*)"
     ],
     "deny": [],
     "ask": []
