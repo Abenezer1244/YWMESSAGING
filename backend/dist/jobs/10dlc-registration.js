@@ -145,15 +145,17 @@ async function retryWithBackoff(fn, maxRetries = 3, baseDelayMs = 1000) {
             return await fn();
         }
         catch (error) {
-            // Check if error is rate limiting (429) or temporary server error (5xx)
+            // CRITICAL FIX: Also retry on network errors (no response = network issue)
             const statusCode = error.response?.status;
-            const isTemporary = statusCode === 429 || (statusCode >= 500 && statusCode < 600);
+            const isNetworkError = !error.response; // Network errors have no response object
+            const isTemporary = isNetworkError || statusCode === 429 || (statusCode >= 500 && statusCode < 600);
             if (!isTemporary || attempt === maxRetries - 1) {
                 throw error; // Don't retry for permanent errors or final attempt
             }
             // Exponential backoff with jitter
             const delayMs = baseDelayMs * Math.pow(2, attempt) + Math.random() * 1000;
-            console.log(`⏳ Retrying after ${delayMs}ms (attempt ${attempt + 1}/${maxRetries})...`);
+            const errorType = isNetworkError ? 'network error' : `HTTP ${statusCode}`;
+            console.log(`⏳ Retrying after ${delayMs}ms (attempt ${attempt + 1}/${maxRetries}) - ${errorType}...`);
             await new Promise(resolve => setTimeout(resolve, delayMs));
         }
     }
@@ -398,7 +400,12 @@ export async function createCampaignAsync(churchId) {
         // Map Telnyx error to user-friendly message
         const userFriendlyError = mapTelnyxError(error);
         console.error(`❌ Error creating campaign for church ${churchId}:`, userFriendlyError);
+        // MEDIUM FIX: Complete the error logging block to show API response details
         if (error.response?.data) {
+            console.error(`   Telnyx API Response:`, JSON.stringify(error.response.data, null, 2));
+        }
+        if (error.response?.status) {
+            console.error(`   HTTP Status: ${error.response.status}`);
         }
         // Mark as failed but don't crash the system
         await prisma.church.update({

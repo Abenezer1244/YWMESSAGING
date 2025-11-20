@@ -102,11 +102,34 @@ export async function updateProfileHandler(req: Request, res: Response) {
         `🔔 Triggering 10DLC registration for church ${churchId} with phone ${updated.telnyxPhoneNumber}`
       );
       try {
-        const { registerPersonal10DLCAsync } = await import('../jobs/10dlc-registration.js');
-        registerPersonal10DLCAsync(churchId, updated.telnyxPhoneNumber).catch((err: any) => {
-          console.error(`⚠️ Failed to start 10DLC registration for church ${churchId}:`, err);
-          // Don't fail the request, just log it
+        // CRITICAL FIX: Verify database persistence before triggering async job
+        // Fetch fresh church record to ensure all 10DLC fields persisted
+        const freshChurch = await prisma.church.findUnique({
+          where: { id: churchId },
+          select: {
+            ein: true,
+            brandPhoneNumber: true,
+            streetAddress: true,
+            city: true,
+            state: true,
+            postalCode: true,
+            telnyxPhoneNumber: true,
+          },
         });
+
+        // Verify all required fields are actually in database
+        if (freshChurch?.ein && freshChurch?.brandPhoneNumber && freshChurch?.streetAddress &&
+            freshChurch?.city && freshChurch?.state && freshChurch?.postalCode) {
+          const { registerPersonal10DLCAsync } = await import('../jobs/10dlc-registration.js');
+          registerPersonal10DLCAsync(churchId, updated.telnyxPhoneNumber).catch((err: any) => {
+            console.error(`⚠️ Failed to start 10DLC registration for church ${churchId}:`, err);
+            // Don't fail the request, just log it
+          });
+        } else {
+          console.warn(
+            `⚠️ 10DLC fields failed to persist to database. Skipping registration until verified.`
+          );
+        }
       } catch (error) {
         console.error('⚠️ Could not import 10DLC job, skipping async registration:', error);
       }

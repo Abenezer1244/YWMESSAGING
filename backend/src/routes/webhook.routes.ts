@@ -27,8 +27,20 @@ function verifyTelnyxWebhookSignature(
     return false;
   }
 
+  // Safety check: validate public key is provided and not empty
+  if (!publicKeyBase64 || typeof publicKeyBase64 !== 'string' || publicKeyBase64.trim().length === 0) {
+    console.error('❌ CRITICAL: Webhook verification failed - public key not configured or empty');
+    return false;
+  }
+
   try {
     const publicKeyBuffer = Buffer.from(publicKeyBase64, 'base64');
+
+    // Safety check: ensure decoded key is not empty
+    if (publicKeyBuffer.length === 0) {
+      console.error('❌ CRITICAL: Decoded public key is empty - base64 decoding produced no bytes');
+      return false;
+    }
     const signedMessage = `${timestampHeader}|${payload}`;
     const signatureBuffer = Buffer.from(signatureHeader, 'base64');
 
@@ -306,7 +318,16 @@ async function handleTelnyx10DLCStatus(req: Request, res: Response) {
 
     // Get raw body from express.raw() middleware (required for ED25519 signature verification)
     // req.body is a Buffer when express.raw() is used as middleware
-    const rawBody = (req.body as Buffer).toString('utf-8');
+    // Safety check: ensure req.body is actually a Buffer before calling toString()
+    let rawBody: string;
+    if (Buffer.isBuffer(req.body)) {
+      rawBody = req.body.toString('utf-8');
+    } else if (typeof req.body === 'string') {
+      rawBody = req.body;
+    } else {
+      console.error('❌ Webhook req.body is neither Buffer nor string:', typeof req.body);
+      return res.status(400).json({ error: 'Invalid request format - expected raw JSON' });
+    }
 
     if (!rawBody || !signature || !timestamp) {
       console.error('❌ Missing required webhook data:', {
@@ -410,7 +431,16 @@ async function handleTelnyx10DLCStatusFailover(req: Request, res: Response) {
 
     // Get raw body from express.raw() middleware (required for ED25519 signature verification)
     // req.body is a Buffer when express.raw() is used as middleware
-    const rawBody = (req.body as Buffer).toString('utf-8');
+    // Safety check: ensure req.body is actually a Buffer before calling toString()
+    let rawBody: string;
+    if (Buffer.isBuffer(req.body)) {
+      rawBody = req.body.toString('utf-8');
+    } else if (typeof req.body === 'string') {
+      rawBody = req.body;
+    } else {
+      console.error('❌ [FAILOVER] Webhook req.body is neither Buffer nor string:', typeof req.body);
+      return res.status(400).json({ error: 'Invalid request format - expected raw JSON' });
+    }
 
     if (!rawBody || !signature || !timestamp) {
       console.error('❌ [FAILOVER] Missing required webhook data:', {
@@ -455,8 +485,20 @@ async function handleTelnyx10DLCStatusFailover(req: Request, res: Response) {
 
     console.log(`✅ Failover webhook signature verified`);
 
-    if (!payload.data) {
-      return res.status(400).json({ error: 'Invalid webhook payload' });
+    // HIGH FIX: Implement consistent payload validation (same as primary endpoint)
+    if (!payload.brandId) {
+      console.warn('⚠️ [FAILOVER] 10DLC webhook missing brandId field');
+      return res.status(400).json({
+        error: 'Invalid webhook payload: missing brandId field',
+      });
+    }
+
+    const eventType = payload.eventType;
+    if (!eventType) {
+      console.warn('⚠️ [FAILOVER] 10DLC webhook missing eventType');
+      return res.status(400).json({
+        error: 'Invalid webhook payload: missing eventType',
+      });
     }
 
     // Process same as primary
