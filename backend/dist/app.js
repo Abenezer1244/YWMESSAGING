@@ -158,9 +158,10 @@ app.use(cors({
     origin: corsOrigin,
     credentials: true,
 }));
-// Raw body parser for Stripe webhook (needs buffer, not string)
-// 10DLC webhooks use express.raw() as route middleware for ED25519 signature verification
-app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }));
+// Raw body parser for webhooks (must be BEFORE express.json() to intercept raw bytes)
+// This captures raw request body for ED25519 signature verification
+app.use('/api/webhooks/', express.raw({ type: 'application/json' }));
+// JSON parser for all other endpoints
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

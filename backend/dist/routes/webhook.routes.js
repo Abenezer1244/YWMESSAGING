@@ -1,4 +1,4 @@
-import { Router, raw } from 'express';
+import { Router } from 'express';
 import crypto from 'crypto';
 import { PrismaClient } from '@prisma/client';
 import Stripe from 'stripe';
@@ -388,9 +388,9 @@ async function checkTelnyx10DLCHealth(req, res) {
 router.post('/webhooks/stripe', handleStripeWebhook);
 router.post('/webhooks/telnyx/mms', handleTelnyxInboundMMS);
 router.post('/webhooks/telnyx/status', handleTelnyxWebhook);
-// 10DLC Webhook routes - use express.raw() to capture raw body for ED25519 signature verification
-router.post('/webhooks/10dlc/status', raw({ type: 'application/json' }), handleTelnyx10DLCStatus);
-router.post('/webhooks/10dlc/status-failover', raw({ type: 'application/json' }), handleTelnyx10DLCStatusFailover);
+// 10DLC Webhook routes (raw body is captured by app-level middleware before express.json())
+router.post('/webhooks/10dlc/status', handleTelnyx10DLCStatus);
+router.post('/webhooks/10dlc/status-failover', handleTelnyx10DLCStatusFailover);
 router.get('/webhooks/10dlc/status', checkTelnyx10DLCHealth);
 export default router;
 //# sourceMappingURL=webhook.routes.js.map
