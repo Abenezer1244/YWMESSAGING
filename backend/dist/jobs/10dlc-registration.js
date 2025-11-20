@@ -181,8 +181,8 @@ function getTelnyxClient() {
 function getWebhookURLs() {
     const baseUrl = process.env.WEBHOOK_BASE_URL || 'https://connect-yw-backend.onrender.com';
     return {
-        webhookURL: `${baseUrl}/webhooks/10dlc/status`,
-        webhookFailoverURL: `${baseUrl}/webhooks/10dlc/status-failover`,
+        webhookURL: `${baseUrl}/api/webhooks/10dlc/status`,
+        webhookFailoverURL: `${baseUrl}/api/webhooks/10dlc/status-failover`,
     };
 }
 /**
