@@ -42,6 +42,10 @@ model Church {
   dlcNextCheckAt               DateTime? // Next time to check approval status
   dlcCampaignId                String?  // Telnyx campaign ID (for tracking campaign approval)
   dlcCampaignStatus            String?  // Campaign status: TCR_PENDING, TELNYX_ACCEPTED, MNO_PROVISIONED, etc.
+  dlcNumberAssignedAt          DateTime? // When phone number was assigned to campaign
+  dlcCampaignSuspended         Boolean  @default(false) // Campaign suspended due to inactivity
+  dlcCampaignSuspendedAt       DateTime? // When campaign was suspended
+  dlcCampaignSuspendedReason   String?  // Why campaign was suspended (e.g., "DORMANT")
   usingSharedBrand             Boolean  @default(true) // true = platform brand, false = per-church brand
   deliveryRate                 Float    @default(0.65) // Delivery rate (starts 65% with shared, 99% when approved)
 

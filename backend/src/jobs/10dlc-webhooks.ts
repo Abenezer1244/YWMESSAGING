@@ -15,8 +15,11 @@ export async function handleTelnyx10DLCWebhook(payload: any): Promise<void> {
     const type = payload.type;
     console.log(`📨 Received Telnyx webhook: ${eventType} (type: ${type})`);
 
-    // Handle different event types
-    if (type === 'TCR_BRAND_UPDATE') {
+    // Check for campaign suspension first (it's a special type of campaign event)
+    if (payload.type === 'TELNYX_EVENT' && payload.status === 'DORMANT') {
+      // Campaign suspension notification
+      await handleCampaignSuspension(payload);
+    } else if (type === 'TCR_BRAND_UPDATE') {
       await handleBrandUpdate(payload);
     } else if (type === 'TCR_CAMPAIGN_UPDATE') {
       await handleCampaignUpdate(payload);
@@ -309,6 +312,76 @@ async function handleCampaignUpdate(payload: any): Promise<void> {
 }
 
 /**
+ * Handle campaign suspension notifications (inactivity, T-Mobile fines, etc.)
+ * Campaign suspended when:
+ * - No activity for 15 days
+ * - No active phone numbers assigned
+ * - Deployed with T-Mobile
+ */
+async function handleCampaignSuspension(payload: any): Promise<void> {
+  try {
+    const campaignId = payload?.campaignId;
+    const status = payload?.status; // e.g., "DORMANT"
+    const description = payload?.description;
+    const brandId = payload?.brandId;
+
+    console.log(`⚠️ Campaign Suspension Alert: ${status}`);
+    console.log(`   Campaign: ${campaignId}`);
+    console.log(`   Reason: ${description || 'Unknown'}`);
+
+    if (!campaignId) {
+      console.warn('⚠️ Campaign suspension webhook missing campaignId');
+      return;
+    }
+
+    // Find church with this campaign
+    const church = await prisma.church.findFirst({
+      where: { dlcCampaignId: campaignId },
+      select: { id: true, name: true, dlcStatus: true },
+    });
+
+    if (!church) {
+      console.log(`ℹ️ Campaign ${campaignId} not found in local database`);
+      return;
+    }
+
+    console.log(`🏪 Church: ${church.name} (${church.id})`);
+
+    if (status === 'DORMANT') {
+      console.warn(`⚠️ Campaign marked as DORMANT due to inactivity`);
+      console.warn(`   Action needed: Re-assign phone number to reactivate`);
+      console.warn(`   Note: First assignment might fail, second will succeed`);
+
+      try {
+        await prisma.church.update({
+          where: { id: church.id },
+          data: {
+            dlcCampaignSuspended: true,
+            dlcCampaignSuspendedAt: new Date(),
+            dlcCampaignSuspendedReason: status,
+          },
+        });
+
+        console.log(`   📊 Database updated: dlcCampaignSuspended=true`);
+      } catch (dbError) {
+        console.error(`❌ Database error updating church ${church.id} for suspension:`, {
+          error: dbError instanceof Error ? dbError.message : String(dbError),
+          campaignId,
+          churchId: church.id,
+        });
+        throw dbError;
+      }
+    }
+  } catch (error) {
+    console.error(`❌ Error processing campaign suspension webhook:`, {
+      error: error instanceof Error ? error.message : String(error),
+      payload: { campaignId: payload?.campaignId },
+    });
+    throw error;
+  }
+}
+
+/**
  * Handle phone number assignment status updates
  * Triggered when phone numbers are linked to campaigns
  */
@@ -344,10 +417,33 @@ async function handlePhoneNumberUpdate(payload: any): Promise<void> {
 
     if (eventType === 'ASSIGNMENT') {
       if (status === 'success') {
-        console.log(`✅ Phone number ${phoneNumber} successfully assigned to campaign`);
+        console.log(`✅ Phone number ${phoneNumber} successfully assigned to campaign ${campaignId}`);
 
-        // TODO: Add dlcNumberAssignedAt field to Church model
-        console.log(`   Campaign: ${campaignId}`);
+        try {
+          // Update church with phone number assignment details
+          await prisma.church.update({
+            where: { id: church.id },
+            data: {
+              dlcNumberAssignedAt: new Date(),
+              dlcCampaignId: campaignId || undefined,
+              // Clear any previous suspension flags
+              dlcCampaignSuspended: false,
+              dlcCampaignSuspendedAt: null,
+              dlcCampaignSuspendedReason: null,
+            },
+          });
+
+          console.log(`   ✅ Database updated: dlcNumberAssignedAt, dlcCampaignId=${campaignId}`);
+          console.log(`   🎉 Phone number ready for messaging!`);
+        } catch (dbError) {
+          console.error(`❌ Database error updating church ${church.id} for successful number assignment:`, {
+            error: dbError instanceof Error ? dbError.message : String(dbError),
+            phoneNumber,
+            campaignId,
+            churchId: church.id,
+          });
+          throw dbError;
+        }
       } else {
         console.log(`❌ Phone number assignment failed`);
         const reasons = payload.reasons?.join('; ') || payload.reason || 'Unknown error';
@@ -359,6 +455,8 @@ async function handlePhoneNumberUpdate(payload: any): Promise<void> {
               dlcRejectionReason: `Number assignment failed: ${reasons}`,
             },
           });
+
+          console.log(`   Reason: ${reasons}`);
         } catch (dbError) {
           console.error(`❌ Database error updating church ${church.id} for number assignment failure:`, {
             error: dbError instanceof Error ? dbError.message : String(dbError),
@@ -368,6 +466,31 @@ async function handlePhoneNumberUpdate(payload: any): Promise<void> {
           throw dbError;
         }
       }
+    } else if (eventType === 'DELETION') {
+      // Phone number removed from campaign
+      console.log(`🗑️ Phone number ${phoneNumber} removed from campaign`);
+
+      try {
+        await prisma.church.update({
+          where: { id: church.id },
+          data: {
+            dlcNumberAssignedAt: null,
+          },
+        });
+
+        console.log(`   Phone number unassigned from campaign`);
+      } catch (dbError) {
+        console.error(`❌ Database error updating church for number deletion:`, {
+          error: dbError instanceof Error ? dbError.message : String(dbError),
+          phoneNumber,
+          churchId: church.id,
+        });
+        throw dbError;
+      }
+    } else if (eventType === 'STATUS_UPDATE') {
+      // Phone number status changed
+      console.log(`📊 Phone number ${phoneNumber} status update: ${status}`);
+      // Just log, no database change needed for status updates
     }
   } catch (error) {
     console.error(`❌ Error processing phone number update webhook:`, {
