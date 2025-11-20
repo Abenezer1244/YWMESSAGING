@@ -285,7 +285,7 @@ export async function registerPersonal10DLCAsync(
         displayName: church.name,
         country: 'US',
         email: church.email,
-        vertical: church.vertical || 'NGO', // Changed from RELIGION to NGO (valid Telnyx value)
+        vertical: church.vertical === 'RELIGION' ? 'NGO' : (church.vertical || 'NGO'), // Convert RELIGION to NGO (only valid Telnyx value)
         companyName: church.name,
 
         // 10DLC Required Fields (per Telnyx form)
@@ -294,7 +294,7 @@ export async function registerPersonal10DLCAsync(
         ...(church.streetAddress && { street: church.streetAddress }),
         ...(church.city && { city: church.city }),
         ...(church.state && { state: church.state }),
-        zipCode: church.postalCode, // REQUIRED - must always send, not conditional
+        postalCode: church.postalCode, // REQUIRED - must always send, not conditional (correct field name for Telnyx)
 
         // Optional
         ...(church.website && { website: church.website }),
