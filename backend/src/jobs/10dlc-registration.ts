@@ -455,10 +455,20 @@ export async function createCampaignAsync(churchId: string): Promise<void> {
       });
     });
 
-    const campaignId = campaignResponse.data?.campaignId;
+    // Extract campaign ID from response - handle nested structure
+    // Try multiple paths: data.campaignId, data.data.campaignId, campaignId
+    let campaignId = campaignResponse.data?.campaignId ||
+                     campaignResponse.data?.data?.campaignId ||
+                     campaignResponse.data?.id;
+
     if (!campaignId) {
       console.error('❌ No campaign ID returned from Telnyx');
-      console.error('Response:', JSON.stringify(campaignResponse.data, null, 2));
+      console.error('Response structure:', {
+        hasData: !!campaignResponse.data,
+        dataKeys: campaignResponse.data ? Object.keys(campaignResponse.data) : [],
+        nestedDataKeys: campaignResponse.data?.data ? Object.keys(campaignResponse.data.data) : [],
+        fullResponse: JSON.stringify(campaignResponse.data, null, 2).substring(0, 500),
+      });
 
       await prisma.church.update({
         where: { id: churchId },
