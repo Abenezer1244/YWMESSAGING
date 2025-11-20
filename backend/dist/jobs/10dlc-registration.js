@@ -26,6 +26,18 @@ const TELNYX_ERROR_CODES = {
     40333: 'Messaging profile spend limit reached',
 };
 /**
+ * Supported Brand Types for Telnyx 10DLC Registration
+ * SOLE_PROPRIETOR is NOT supported per Telnyx support (20 Nov 2025)
+ */
+const SUPPORTED_ENTITY_TYPES = [
+    'NON_PROFIT', // ✓ Supported - for churches/nonprofits
+    'PRIVATE_CORPORATION', // ✓ Supported
+    'PUBLIC_CORPORATION', // ✓ Supported
+    'GOVERNMENT_ENTITY', // ✓ Supported
+    // Not supported:
+    // 'SOLE_PROPRIETOR',       // ✗ NOT SUPPORTED per Telnyx
+];
+/**
  * Validation Rules from Telnyx API Documentation
  * Required fields for 10DLC brand registration per Telnyx UI form
  */
@@ -44,7 +56,7 @@ const VALIDATION_RULES = {
     postalCode: { max: 10, required: true, pattern: /^\d{5}(-\d{4})?$/ }, // 5 or 9-digit US zipcode
     // Optional
     website: { max: 2000, required: false },
-    entityType: { required: false }, // NON_PROFIT, SOLE_PROPRIETOR, PRIVATE_CORPORATION, etc.
+    entityType: { required: false }, // NON_PROFIT, PRIVATE_CORPORATION, PUBLIC_CORPORATION, GOVERNMENT_ENTITY
     vertical: { required: false }, // RELIGION, EDUCATION, HEALTHCARE, etc.
 };
 /**
@@ -238,10 +250,18 @@ export async function registerPersonal10DLCAsync(churchId, phoneNumber) {
         const webhooks = getWebhookURLs();
         // Register brand with Telnyx using retry logic
         console.log(`📤 Submitting 10DLC brand to Telnyx: "${church.name}"`);
+        // CRITICAL FIX: Validate entityType - only supported types allowed
+        // Telnyx support confirmed SOLE_PROPRIETOR is NOT supported (20 Nov 2025)
+        let validatedEntityType = church.entityType || 'NON_PROFIT';
+        if (!SUPPORTED_ENTITY_TYPES.includes(validatedEntityType)) {
+            console.warn(`⚠️ Entity type "${validatedEntityType}" is not supported by Telnyx. ` +
+                `Defaulting to "NON_PROFIT" for church registration.`);
+            validatedEntityType = 'NON_PROFIT'; // Default to NON_PROFIT for churches
+        }
         const brandResponse = await retryWithBackoff(async () => {
             return await client.post('/10dlc/brand', {
                 // Required fields
-                entityType: church.entityType || 'NON_PROFIT',
+                entityType: validatedEntityType,
                 displayName: church.name,
                 country: 'US',
                 email: church.email,

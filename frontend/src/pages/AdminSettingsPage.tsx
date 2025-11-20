@@ -45,8 +45,8 @@ export function AdminSettingsPage() {
     state: '',
     postalCode: '',
     website: '',
-    entityType: 'NON_PROFIT',
-    vertical: 'NGO', // Changed from RELIGION to NGO (valid Telnyx value)
+    entityType: 'NON_PROFIT', // Telnyx supported: NON_PROFIT, PRIVATE_CORPORATION, PUBLIC_CORPORATION, GOVERNMENT_ENTITY
+    vertical: 'NGO', // NGO is the Telnyx supported value for churches/nonprofits
   });
 
   // Load profile on mount
@@ -66,8 +66,8 @@ export function AdminSettingsPage() {
         state: data.state || '',
         postalCode: data.postalCode || '',
         website: data.website || '',
-        entityType: data.entityType || 'NON_PROFIT',
-        vertical: data.vertical || 'NGO', // Changed from RELIGION to NGO (valid Telnyx value)
+        entityType: data.entityType || 'NON_PROFIT', // Telnyx supported types only
+        vertical: data.vertical || 'NGO', // Telnyx supported value for churches
       });
     } catch (error) {
       // Show generic error message without exposing backend details
@@ -418,10 +418,10 @@ export function AdminSettingsPage() {
                                 }
                                 className="w-full px-3 py-2 bg-muted border border-border rounded-md text-foreground"
                               >
-                                <option value="NON_PROFIT">Non-Profit</option>
-                                <option value="SOLE_PROPRIETOR">Sole Proprietor</option>
+                                <option value="NON_PROFIT">Non-Profit (Recommended for churches)</option>
                                 <option value="PRIVATE_CORPORATION">Private Corporation</option>
-                                <option value="PARTNERSHIP">Partnership</option>
+                                <option value="PUBLIC_CORPORATION">Public Corporation</option>
+                                <option value="GOVERNMENT_ENTITY">Government Entity</option>
                               </select>
                             </div>
                             <div>
@@ -435,11 +435,10 @@ export function AdminSettingsPage() {
                                 }
                                 className="w-full px-3 py-2 bg-muted border border-border rounded-md text-foreground"
                               >
-                                <option value="RELIGION">Religion</option>
+                                <option value="NGO">Non-Governmental Organization (NGO) - For churches</option>
                                 <option value="EDUCATION">Education</option>
                                 <option value="HEALTHCARE">Healthcare</option>
                                 <option value="FINANCE">Finance</option>
-                                <option value="OTHER">Other</option>
                               </select>
                             </div>
                           </div>
