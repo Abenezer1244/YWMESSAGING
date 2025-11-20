@@ -25,7 +25,9 @@ function verifyTelnyxWebhookSignature(payload, signatureHeader, timestampHeader,
         return false;
     }
     try {
-        const publicKeyBuffer = Buffer.from(publicKeyBase64, 'base64');
+        // CRITICAL FIX: Trim whitespace from public key (environment variables can have trailing newlines)
+        const trimmedKey = publicKeyBase64.trim();
+        const publicKeyBuffer = Buffer.from(trimmedKey, 'base64');
         // Safety check: ensure decoded key is not empty
         if (publicKeyBuffer.length === 0) {
             console.error('❌ CRITICAL: Decoded public key is empty - base64 decoding produced no bytes');
@@ -33,6 +35,14 @@ function verifyTelnyxWebhookSignature(payload, signatureHeader, timestampHeader,
         }
         const signedMessage = `${timestampHeader}|${payload}`;
         const signatureBuffer = Buffer.from(signatureHeader, 'base64');
+        // DEBUG: Log signature details for troubleshooting
+        console.log(`📋 Webhook Signature Debug:
+   Timestamp: ${timestampHeader}
+   Payload length: ${payload.length}
+   Public key (trimmed): ${trimmedKey.substring(0, 20)}...${trimmedKey.substring(trimmedKey.length - 20)}
+   Public key hex length: ${publicKeyBuffer.length}
+   Signature hex length: ${signatureBuffer.length}
+   Signed message length: ${signedMessage.length}`);
         // Create DER-encoded ED25519 public key (SPKI format per RFC 8410)
         // RFC 8410: "For all algorithms in this document, the parameters field
         // in the algorithmIdentifier MUST be absent, not NULL."

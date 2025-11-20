@@ -1,20 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(unzip:*)",
-      "Bash(backend/src/jobs/10dlc-registration.ts )",
-      "Bash(backend/src/jobs/10dlc-webhooks.ts )",
-      "Bash(backend/src/routes/webhook.routes.ts )",
-      "Bash(backend/prisma/schema.prisma )",
-      "Bash(backend/prisma/migrations/20251119_add_campaign_tracking/ )",
-      "Bash(PHASE4_COMPLETION_SUMMARY.md )",
-      "Bash(PHASE4_DEPLOYMENT_GUIDE.md )",
-      "Bash(PHASE4_SESSION_SUMMARY.md )",
-      "Bash(PHASE4_QUICK_REFERENCE.md )",
-      "Bash(WEBHOOK_TEST_PAYLOADS.json )",
-      "Bash(TEST_RESULTS_PHASE4.md)",
-      "Bash(/tmp/10dlc-orig.ts)",
-      "Bash(algorithmIdentifier MUST be absent, not NULL.\"\n\nError: \"Failed to read asymmetric key\" - OpenSSL couldn''t parse the DER\nbecause ED25519 public keys should NOT have parameters at all.\n\nWRONG DER Structure (what we had):\nSEQUENCE (length 44)\n  AlgorithmIdentifier SEQUENCE (length 9)\n    OBJECT IDENTIFIER 1.3.101.112\n    NULL                          ← WRONG! Should be absent\n  BIT STRING (33 bytes)\n    [32-byte public key]\n\nCORRECT DER Structure (RFC 8410):\nSEQUENCE (length 40)\n  AlgorithmIdentifier SEQUENCE (length 5)\n    OBJECT IDENTIFIER 1.3.101.112  ← OID only, no parameters\n  BIT STRING (33 bytes)\n    [32-byte public key]\n\nChanges in DER hex:\nBefore: 3028 3009 06 03 2b65 70 0500 0321 00 [key]\nAfter:  3028 3005 06 03 2b65 70 0321 00 [key]\n\nThe AlgorithmIdentifier now has:\n- No NULL parameter (removed 0500)\n- Correct length 5 (just the OID, no parameters)\n\nThis creates a proper RFC 8410 compliant SPKI ED25519 public key that\nOpenSSL will accept.\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
+      "Bash(DEPLOYMENT_STATUS.md)"
     ],
     "deny": [],
     "ask": []
