@@ -95,7 +95,6 @@ async function handleBrandUpdate(payload: any): Promise<void> {
           data: {
             dlcStatus: 'brand_verified',
             tcrBrandId: tcrBrandId || undefined,
-            dlcBrandVerifiedAt: new Date(), // Track verification time
           },
         });
 

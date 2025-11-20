@@ -84,7 +84,6 @@ async function handleBrandUpdate(payload) {
                     data: {
                         dlcStatus: 'brand_verified',
                         tcrBrandId: tcrBrandId || undefined,
-                        dlcBrandVerifiedAt: new Date(), // Track verification time
                     },
                 });
                 console.log(`📋 Next step: Auto-create campaign for ${church.name}`);
