@@ -158,10 +158,21 @@ app.use(cors({
     origin: corsOrigin,
     credentials: true,
 }));
-// Raw body parsers for webhooks requiring signature validation (SECURITY: required for ED25519/HMAC signature verification)
+// Middleware to capture raw body for webhook signature verification
+// Must run BEFORE express.json() so we can access raw bytes
+app.use((req, res, next) => {
+    // Store raw body for webhook signature verification
+    let rawBody = '';
+    req.on('data', (chunk) => {
+        rawBody += chunk.toString('utf-8');
+    });
+    req.on('end', () => {
+        req.rawBody = rawBody;
+        next();
+    });
+});
+// Raw body parser for Stripe webhook (needs buffer, not string)
 app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }));
-app.post('/api/webhooks/10dlc/status', express.raw({ type: 'application/json' }));
-app.post('/api/webhooks/10dlc/status-failover', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

@@ -288,8 +288,12 @@ async function handleTelnyx10DLCStatus(req: Request, res: Response) {
     const signature = req.headers['telnyx-signature-ed25519'] as string;
     const timestamp = req.headers['telnyx-timestamp'] as string;
 
-    // Get raw body as string for signature verification (required for ED25519)
-    const rawBody = typeof req.body === 'string' ? req.body : req.body.toString('utf-8');
+    // Get raw body captured by middleware (required for ED25519 signature verification)
+    const rawBody = (req as any).rawBody || '';
+    if (!rawBody) {
+      console.error('❌ No raw body available for signature verification');
+      return res.status(400).json({ error: 'Missing request body' });
+    }
     const payload = JSON.parse(rawBody);
 
     // Log the webhook for debugging
@@ -375,8 +379,12 @@ async function handleTelnyx10DLCStatusFailover(req: Request, res: Response) {
     const signature = req.headers['telnyx-signature-ed25519'] as string;
     const timestamp = req.headers['telnyx-timestamp'] as string;
 
-    // Get raw body as string for signature verification (required for ED25519)
-    const rawBody = typeof req.body === 'string' ? req.body : req.body.toString('utf-8');
+    // Get raw body captured by middleware (required for ED25519 signature verification)
+    const rawBody = (req as any).rawBody || '';
+    if (!rawBody) {
+      console.error('❌ No raw body available for signature verification (failover)');
+      return res.status(400).json({ error: 'Missing request body' });
+    }
     const payload = JSON.parse(rawBody);
 
     console.log(`\n📨 Received Telnyx 10DLC webhook (FAILOVER)`);
