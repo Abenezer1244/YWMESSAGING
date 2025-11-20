@@ -7,19 +7,22 @@ const prisma = new PrismaClient();
  */
 export async function handleTelnyx10DLCWebhook(payload) {
     try {
-        const eventType = payload.data?.event_type;
-        console.log(`📨 Received Telnyx webhook: ${eventType}`);
-        if (eventType === '10dlc.brand.update') {
+        // Payload structure is flat (from Telnyx webhook JSON at top level)
+        const eventType = payload.eventType || payload.type;
+        const type = payload.type;
+        console.log(`📨 Received Telnyx webhook: ${eventType} (type: ${type})`);
+        // Handle different event types
+        if (type === 'TCR_BRAND_UPDATE') {
             await handleBrandUpdate(payload);
         }
-        else if (eventType === '10dlc.campaign.update') {
+        else if (type === 'TCR_CAMPAIGN_UPDATE') {
             await handleCampaignUpdate(payload);
         }
-        else if (eventType === '10dlc.phone_number.update') {
+        else if (type === 'TCR_PHONE_NUMBER_UPDATE') {
             await handlePhoneNumberUpdate(payload);
         }
         else {
-            console.log(`⚠️ Unknown event type: ${eventType}`);
+            console.log(`⚠️ Unknown event type: ${type}`);
         }
     }
     catch (error) {
@@ -35,12 +38,13 @@ export async function handleTelnyx10DLCWebhook(payload) {
  * - Brand registration failed
  */
 async function handleBrandUpdate(payload) {
-    const payloadData = payload.data?.payload;
-    const brandId = payloadData?.brandId;
-    const status = payloadData?.status;
-    const tcrBrandId = payloadData?.tcrBrandId;
-    const eventType = payloadData?.type; // REGISTRATION, REVET, TCR_BRAND_WEBHOOK, etc.
-    console.log(`🏷️  Brand Update: brandId=${brandId}, status=${status}, eventType=${eventType}`);
+    // Payload structure is flat at top level
+    const brandId = payload.brandId;
+    const brandIdentityStatus = payload.brandIdentityStatus; // UNVERIFIED, VERIFIED, etc.
+    const brandName = payload.brandName;
+    const tcrBrandId = payload.tcrBrandId;
+    const eventType = payload.eventType; // BRAND_IDENTITY_STATUS_UPDATE, etc.
+    console.log(`🏷️  Brand Update: brandId=${brandId}, status=${brandIdentityStatus}, eventType=${eventType}`);
     if (!brandId) {
         console.warn('⚠️ Brand webhook missing brandId');
         return;
@@ -55,47 +59,19 @@ async function handleBrandUpdate(payload) {
         return;
     }
     console.log(`🏪 Church: ${church.name} (${church.id})`);
-    // Handle different event types
-    if (eventType === 'REGISTRATION' && status === 'failed') {
-        // Brand registration failed
-        const reasons = payloadData?.reasons || [];
-        const failureReasons = reasons.map((r) => r.description).join('; ');
-        console.log(`❌ Brand registration failed: ${failureReasons}`);
-        await prisma.church.update({
-            where: { id: church.id },
-            data: {
-                dlcStatus: 'rejected',
-                dlcRejectionReason: failureReasons,
-            },
-        });
-    }
-    else if (eventType === 'TCR_BRAND_WEBHOOK' && payloadData?.eventType === 'BRAND_ADD') {
-        // Brand successfully added to TCR registry
-        console.log(`✅ Brand successfully registered with TCR`);
+    console.log(`   Brand Name: ${brandName}`);
+    console.log(`   Status: ${brandIdentityStatus}`);
+    if (tcrBrandId)
         console.log(`   TCR Brand ID: ${tcrBrandId}`);
-        // Store TCR brand ID for reference
-        await prisma.church.update({
-            where: { id: church.id },
-            data: {
-                tcrBrandId: tcrBrandId,
-            },
-        });
-        // Note: The brand is now in TCR but still pending verification
-        // We'll get another webhook when verification is complete
-    }
     // Handle verification status changes
-    if (status === 'OK' || payloadData?.identityStatus === 'VERIFIED') {
+    if (brandIdentityStatus === 'VERIFIED') {
         // Brand is fully verified and ready to use
         console.log(`✅ Brand verified and ready! Setting up campaign...`);
-        // TODO: These fields need to be added to the Church model:
-        // - dlcBrandVerifiedAt
-        // - dlcCampaignId (for campaign tracking)
-        // For now, update dlcStatus to track progress
         await prisma.church.update({
             where: { id: church.id },
             data: {
                 dlcStatus: 'brand_verified',
-                // dlcBrandVerifiedAt: new Date(), // TODO: Add to schema
+                tcrBrandId: tcrBrandId || undefined,
             },
         });
         console.log(`📋 Next step: Auto-create campaign for ${church.name}`);
@@ -103,6 +79,21 @@ async function handleBrandUpdate(payload) {
         createCampaignAsync(church.id).catch((error) => {
             console.error(`⚠️ Error auto-creating campaign for ${church.name}:`, error.message);
         });
+    }
+    else if (brandIdentityStatus === 'UNVERIFIED') {
+        // Brand created but not yet verified
+        console.log(`⏳ Brand created, awaiting verification...`);
+        await prisma.church.update({
+            where: { id: church.id },
+            data: {
+                dlcStatus: 'pending',
+                tcrBrandId: tcrBrandId || undefined,
+            },
+        });
+    }
+    else {
+        // Other statuses like FAILED, etc.
+        console.log(`ℹ️ Brand status: ${brandIdentityStatus}`);
     }
 }
 /**
@@ -114,11 +105,11 @@ async function handleBrandUpdate(payload) {
  * - Campaign rejected
  */
 async function handleCampaignUpdate(payload) {
-    const payloadData = payload.data?.payload;
-    const campaignId = payloadData?.campaignId;
-    const campaignStatus = payloadData?.campaignStatus;
-    const eventType = payloadData?.type;
-    const brandId = payloadData?.brandId;
+    // Payload structure is flat at top level
+    const campaignId = payload.campaignId;
+    const campaignStatus = payload.campaignStatus;
+    const eventType = payload.eventType;
+    const brandId = payload.brandId;
     console.log(`📢 Campaign Update: campaignId=${campaignId}, status=${campaignStatus}, eventType=${eventType}`);
     if (!campaignId || !brandId) {
         console.warn('⚠️ Campaign webhook missing campaignId or brandId');
@@ -152,7 +143,7 @@ async function handleCampaignUpdate(payload) {
     }
     // Campaign rejected at any stage
     if (campaignStatus === 'TCR_FAILED' || campaignStatus === 'TELNYX_FAILED' || campaignStatus === 'MNO_REJECTED') {
-        const reasons = payloadData?.failureReasons || 'Unknown reason';
+        const reasons = payload.failureReasons || payload.reason || 'Unknown reason';
         console.log(`❌ Campaign rejected at ${campaignStatus} stage: ${reasons}`);
         await prisma.church.update({
             where: { id: church.id },
@@ -193,11 +184,11 @@ async function handleCampaignUpdate(payload) {
  * Triggered when phone numbers are linked to campaigns
  */
 async function handlePhoneNumberUpdate(payload) {
-    const payloadData = payload.data?.payload;
-    const phoneNumber = payloadData?.phoneNumber;
-    const campaignId = payloadData?.campaignId;
-    const status = payloadData?.status;
-    const eventType = payloadData?.type; // ASSIGNMENT, DELETION, STATUS_UPDATE
+    // Payload structure is flat at top level
+    const phoneNumber = payload.phoneNumber;
+    const campaignId = payload.campaignId;
+    const status = payload.status;
+    const eventType = payload.eventType; // ASSIGNMENT, DELETION, STATUS_UPDATE
     console.log(`📱 Phone Number Update: number=${phoneNumber}, campaign=${campaignId}, eventType=${eventType}`);
     if (!phoneNumber) {
         console.warn('⚠️ Phone number webhook missing phoneNumber');
@@ -221,7 +212,7 @@ async function handlePhoneNumberUpdate(payload) {
         }
         else {
             console.log(`❌ Phone number assignment failed`);
-            const reasons = payloadData?.reasons?.join('; ') || 'Unknown error';
+            const reasons = payload.reasons?.join('; ') || payload.reason || 'Unknown error';
             await prisma.church.update({
                 where: { id: church.id },
                 data: {
