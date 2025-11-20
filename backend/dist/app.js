@@ -168,6 +168,12 @@ app.use((req, res, next) => {
     if (req.method !== 'POST') {
         return next();
     }
+    // Only capture raw body for webhook endpoints
+    // This prevents consuming the stream for normal API requests like login
+    const isWebhookEndpoint = req.path?.startsWith('/api/webhooks/');
+    if (!isWebhookEndpoint) {
+        return next();
+    }
     const chunks = [];
     let totalSize = 0;
     let timedOut = false;
