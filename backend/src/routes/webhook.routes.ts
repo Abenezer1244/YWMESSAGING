@@ -366,6 +366,10 @@ async function handleTelnyx10DLCStatus(req: Request, res: Response) {
     console.log(`   Brand Name: ${payload.brandName}`);
     console.log(`   Request ID: ${payload.brandId}`);
 
+    // DEBUG: Log full payload structure to see actual field names
+    console.log(`\n📋 FULL WEBHOOK PAYLOAD STRUCTURE:`);
+    console.log(JSON.stringify(payload, null, 2).substring(0, 1000));
+
     // Get public key from environment
     const publicKey = process.env.TELNYX_WEBHOOK_PUBLIC_KEY;
 
@@ -475,6 +479,10 @@ async function handleTelnyx10DLCStatusFailover(req: Request, res: Response) {
 
     console.log(`\n📨 Received Telnyx 10DLC webhook (FAILOVER)`);
     console.log(`   Event Type: ${payload.eventType}`);
+
+    // DEBUG: Log full payload structure to see actual field names
+    console.log(`\n📋 FULL WEBHOOK PAYLOAD STRUCTURE (FAILOVER):`);
+    console.log(JSON.stringify(payload, null, 2).substring(0, 1000));
 
     const publicKey = process.env.TELNYX_WEBHOOK_PUBLIC_KEY;
     if (!publicKey) {
