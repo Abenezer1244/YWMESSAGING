@@ -33,15 +33,18 @@ function verifyTelnyxWebhookSignature(
     const signatureBuffer = Buffer.from(signatureHeader, 'base64');
 
     // Create DER-encoded ED25519 public key (SPKI format per RFC 8410)
-    // Structure: SEQUENCE { AlgorithmIdentifier { OID, NULL }, BIT STRING with key }
-    // Total length: 44 bytes (0x2C)
+    // RFC 8410: "For all algorithms in this document, the parameters field
+    // in the algorithmIdentifier MUST be absent, not NULL."
+    // Structure: SEQUENCE { AlgorithmIdentifier { OID only }, BIT STRING with key }
+    // Total length: 40 bytes (0x28)
     // OID for Ed25519 is 1.3.101.112 = 2b 65 70
     const derKey = Buffer.concat([
-      Buffer.from('302c', 'hex'),                // SEQUENCE, length 44
-      Buffer.from('300906032b65700500', 'hex'),  // AlgorithmIdentifier with NULL parameter
-      Buffer.from('0321', 'hex'),                // BIT STRING, length 33
-      Buffer.from('00', 'hex'),                  // No unused bits
-      publicKeyBuffer,                           // 32-byte public key
+      Buffer.from('3028', 'hex'),              // SEQUENCE, length 40
+      Buffer.from('3005', 'hex'),              // AlgorithmIdentifier SEQUENCE, length 5 (OID only, no NULL)
+      Buffer.from('06032b6570', 'hex'),        // OBJECT IDENTIFIER for Ed25519
+      Buffer.from('0321', 'hex'),              // BIT STRING, length 33
+      Buffer.from('00', 'hex'),                // No unused bits
+      publicKeyBuffer,                         // 32-byte public key
     ]);
 
     // Create a proper KeyObject for crypto.verify()
