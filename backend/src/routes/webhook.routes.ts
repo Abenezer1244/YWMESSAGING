@@ -360,15 +360,22 @@ async function handleTelnyx10DLCStatus(req: Request, res: Response) {
       return res.status(400).json({ error: 'Invalid JSON payload' });
     }
 
+    // Extract the nested payload from Telnyx webhook structure
+    // Telnyx sends: { data: { payload: { brandId, eventType, ... } } }
+    const innerPayload = payload.data?.payload;
+
+    if (!innerPayload) {
+      console.error('❌ Webhook missing data.payload structure');
+      return res.status(400).json({
+        error: 'Invalid webhook structure: missing data.payload',
+      });
+    }
+
     // Log the webhook for debugging
     console.log(`\n📨 Received Telnyx 10DLC webhook`);
-    console.log(`   Event Type: ${payload.eventType}`);
-    console.log(`   Brand Name: ${payload.brandName}`);
-    console.log(`   Request ID: ${payload.brandId}`);
-
-    // DEBUG: Log full payload structure to see actual field names
-    console.log(`\n📋 FULL WEBHOOK PAYLOAD STRUCTURE:`);
-    console.log(JSON.stringify(payload, null, 2).substring(0, 1000));
+    console.log(`   Event Type: ${innerPayload.eventType}`);
+    console.log(`   Brand Name: ${innerPayload.brandName}`);
+    console.log(`   Brand ID: ${innerPayload.brandId}`);
 
     // Get public key from environment
     const publicKey = process.env.TELNYX_WEBHOOK_PUBLIC_KEY;
@@ -390,8 +397,8 @@ async function handleTelnyx10DLCStatus(req: Request, res: Response) {
 
     if (!isValidSignature) {
       console.error('❌ WEBHOOK SIGNATURE VERIFICATION FAILED - REJECTING');
-      console.error(`   Event Type: ${payload.eventType}`);
-      console.error(`   Brand ID: ${payload.brandId}`);
+      console.error(`   Event Type: ${innerPayload.eventType}`);
+      console.error(`   Brand ID: ${innerPayload.brandId}`);
       return res.status(401).json({
         error: 'Invalid webhook signature - access denied',
       });
@@ -401,14 +408,14 @@ async function handleTelnyx10DLCStatus(req: Request, res: Response) {
     console.log(`✅ Webhook signature verified (ED25519) - processing`);
 
     // Validate webhook payload structure
-    if (!payload.brandId) {
+    if (!innerPayload.brandId) {
       console.warn('⚠️ 10DLC webhook missing brandId field');
       return res.status(400).json({
         error: 'Invalid webhook payload: missing brandId field',
       });
     }
 
-    const eventType = payload.eventType;
+    const eventType = innerPayload.eventType;
     if (!eventType) {
       console.warn('⚠️ 10DLC webhook missing eventType');
       return res.status(400).json({
@@ -417,7 +424,7 @@ async function handleTelnyx10DLCStatus(req: Request, res: Response) {
     }
 
     // Process the webhook asynchronously (don't block response)
-    handleTelnyx10DLCWebhook(payload).catch((error) => {
+    handleTelnyx10DLCWebhook(innerPayload).catch((error) => {
       console.error('⚠️ Error processing 10DLC webhook:', error.message);
     });
 
@@ -477,12 +484,21 @@ async function handleTelnyx10DLCStatusFailover(req: Request, res: Response) {
       return res.status(400).json({ error: 'Invalid JSON payload' });
     }
 
-    console.log(`\n📨 Received Telnyx 10DLC webhook (FAILOVER)`);
-    console.log(`   Event Type: ${payload.eventType}`);
+    // Extract the nested payload from Telnyx webhook structure
+    // Telnyx sends: { data: { payload: { brandId, eventType, ... } } }
+    const innerPayload = payload.data?.payload;
 
-    // DEBUG: Log full payload structure to see actual field names
-    console.log(`\n📋 FULL WEBHOOK PAYLOAD STRUCTURE (FAILOVER):`);
-    console.log(JSON.stringify(payload, null, 2).substring(0, 1000));
+    if (!innerPayload) {
+      console.error('❌ [FAILOVER] Webhook missing data.payload structure');
+      return res.status(400).json({
+        error: 'Invalid webhook structure: missing data.payload',
+      });
+    }
+
+    console.log(`\n📨 Received Telnyx 10DLC webhook (FAILOVER)`);
+    console.log(`   Event Type: ${innerPayload.eventType}`);
+    console.log(`   Brand ID: ${innerPayload.brandId}`);
+    console.log(`   Brand Name: ${innerPayload.brandName}`);
 
     const publicKey = process.env.TELNYX_WEBHOOK_PUBLIC_KEY;
     if (!publicKey) {
@@ -507,15 +523,15 @@ async function handleTelnyx10DLCStatusFailover(req: Request, res: Response) {
 
     console.log(`✅ Failover webhook signature verified`);
 
-    // HIGH FIX: Implement consistent payload validation (same as primary endpoint)
-    if (!payload.brandId) {
+    // Validate payload structure (same as primary endpoint)
+    if (!innerPayload.brandId) {
       console.warn('⚠️ [FAILOVER] 10DLC webhook missing brandId field');
       return res.status(400).json({
         error: 'Invalid webhook payload: missing brandId field',
       });
     }
 
-    const eventType = payload.eventType;
+    const eventType = innerPayload.eventType;
     if (!eventType) {
       console.warn('⚠️ [FAILOVER] 10DLC webhook missing eventType');
       return res.status(400).json({
@@ -524,7 +540,7 @@ async function handleTelnyx10DLCStatusFailover(req: Request, res: Response) {
     }
 
     // Process same as primary
-    handleTelnyx10DLCWebhook(payload).catch((error) => {
+    handleTelnyx10DLCWebhook(innerPayload).catch((error) => {
       console.error('⚠️ Error processing 10DLC failover webhook:', error.message);
     });
 
