@@ -39,69 +39,116 @@ export async function handleTelnyx10DLCWebhook(payload: any): Promise<void> {
  * - Brand registration failed
  */
 async function handleBrandUpdate(payload: any): Promise<void> {
-  // Payload structure is flat at top level
-  const brandId = payload.brandId;
-  const brandIdentityStatus = payload.brandIdentityStatus; // UNVERIFIED, VERIFIED, etc.
-  const brandName = payload.brandName;
-  const tcrBrandId = payload.tcrBrandId;
-  const eventType = payload.eventType; // BRAND_IDENTITY_STATUS_UPDATE, etc.
+  try {
+    // Payload structure is flat at top level - VALIDATE ALL INPUTS
+    const brandId = payload?.brandId;
+    const brandIdentityStatus = payload?.brandIdentityStatus; // UNVERIFIED, VERIFIED, etc.
+    const brandName = payload?.brandName;
+    const tcrBrandId = payload?.tcrBrandId;
+    const eventType = payload?.eventType; // BRAND_IDENTITY_STATUS_UPDATE, etc.
 
-  console.log(`🏷️  Brand Update: brandId=${brandId}, status=${brandIdentityStatus}, eventType=${eventType}`);
+    // ENTERPRISE: Validate required fields
+    if (!brandId || typeof brandId !== 'string') {
+      console.error('❌ Brand webhook missing or invalid brandId:', { brandId });
+      throw new Error('Missing required field: brandId');
+    }
 
-  if (!brandId) {
-    console.warn('⚠️ Brand webhook missing brandId');
-    return;
-  }
+    if (!brandIdentityStatus || typeof brandIdentityStatus !== 'string') {
+      console.error('❌ Brand webhook missing or invalid brandIdentityStatus:', { brandIdentityStatus });
+      throw new Error('Missing required field: brandIdentityStatus');
+    }
 
-  // Find church with this brand
-  const church = await prisma.church.findFirst({
-    where: { dlcBrandId: brandId },
-    select: { id: true, name: true, dlcStatus: true },
-  });
+    console.log(`🏷️  Brand Update: brandId=${brandId}, status=${brandIdentityStatus}, eventType=${eventType}`);
 
-  if (!church) {
-    console.log(`ℹ️ Brand ${brandId} not found in local database (may be from another user)`);
-    return;
-  }
-
-  console.log(`🏪 Church: ${church.name} (${church.id})`);
-  console.log(`   Brand Name: ${brandName}`);
-  console.log(`   Status: ${brandIdentityStatus}`);
-  if (tcrBrandId) console.log(`   TCR Brand ID: ${tcrBrandId}`);
-
-  // Handle verification status changes
-  if (brandIdentityStatus === 'VERIFIED') {
-    // Brand is fully verified and ready to use
-    console.log(`✅ Brand verified and ready! Setting up campaign...`);
-
-    await prisma.church.update({
-      where: { id: church.id },
-      data: {
-        dlcStatus: 'brand_verified',
-        tcrBrandId: tcrBrandId || undefined,
-      },
+    // Find church with this brand - handle not found gracefully
+    const church = await prisma.church.findFirst({
+      where: { dlcBrandId: brandId },
+      select: { id: true, name: true, dlcStatus: true },
     });
 
-    console.log(`📋 Next step: Auto-create campaign for ${church.name}`);
+    if (!church) {
+      console.warn(
+        `⚠️ Brand ${brandId} not found in database - webhook may be from another system or user`
+      );
+      return;
+    }
 
-    // Auto-create campaign asynchronously (fire-and-forget)
-    createCampaignAsync(church.id).catch((error) => {
-      console.error(`⚠️ Error auto-creating campaign for ${church.name}:`, error.message);
-    });
-  } else if (brandIdentityStatus === 'UNVERIFIED') {
-    // Brand created but not yet verified
-    console.log(`⏳ Brand created, awaiting verification...`);
+    console.log(`🏪 Church: ${church.name} (${church.id})`);
+    console.log(`   Brand Name: ${brandName || 'N/A'}`);
+    console.log(`   Status: ${brandIdentityStatus}`);
+    if (tcrBrandId) console.log(`   TCR Brand ID: ${tcrBrandId}`);
 
-    await prisma.church.update({
-      where: { id: church.id },
-      data: {
-        dlcStatus: 'pending',
-        tcrBrandId: tcrBrandId || undefined,
-      },
+    // Handle verification status changes - explicit validation
+    const validStatuses = ['VERIFIED', 'UNVERIFIED', 'FAILED', 'PENDING'];
+    if (!validStatuses.includes(brandIdentityStatus)) {
+      console.warn(`⚠️ Unknown brand status: ${brandIdentityStatus} - treating as informational`);
+    }
+
+    // ENTERPRISE: Wrap database operation in try-catch
+    try {
+      if (brandIdentityStatus === 'VERIFIED') {
+        // Brand is fully verified and ready to use
+        console.log(`✅ Brand verified and ready! Setting up campaign...`);
+
+        await prisma.church.update({
+          where: { id: church.id },
+          data: {
+            dlcStatus: 'brand_verified',
+            tcrBrandId: tcrBrandId || undefined,
+            dlcBrandVerifiedAt: new Date(), // Track verification time
+          },
+        });
+
+        console.log(`📋 Next step: Auto-create campaign for ${church.name}`);
+
+        // Auto-create campaign asynchronously with error tracking
+        createCampaignAsync(church.id).catch((error) => {
+          console.error(`❌ Failed to auto-create campaign for ${church.name}:`, {
+            churchId: church.id,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        });
+      } else if (brandIdentityStatus === 'UNVERIFIED') {
+        // Brand created but not yet verified
+        console.log(`⏳ Brand created, awaiting verification...`);
+
+        await prisma.church.update({
+          where: { id: church.id },
+          data: {
+            dlcStatus: 'pending',
+            tcrBrandId: tcrBrandId || undefined,
+          },
+        });
+      } else if (brandIdentityStatus === 'FAILED') {
+        // Brand verification failed
+        console.error(`❌ Brand verification failed for ${church.name}`);
+
+        await prisma.church.update({
+          where: { id: church.id },
+          data: {
+            dlcStatus: 'rejected',
+            dlcRejectionReason: `Brand verification failed: ${payload?.description || 'Unknown reason'}`,
+          },
+        });
+      } else {
+        // Other statuses - log but don't update
+        console.log(`ℹ️ Brand status: ${brandIdentityStatus} - no action needed`);
+      }
+    } catch (dbError) {
+      console.error(`❌ Database error updating church ${church.id}:`, {
+        error: dbError instanceof Error ? dbError.message : String(dbError),
+        brandId,
+        churchId: church.id,
+      });
+      throw dbError; // Re-throw for caller to handle
+    }
+  } catch (error) {
+    // ENTERPRISE: Log errors with full context
+    console.error(`❌ Error processing brand update webhook:`, {
+      error: error instanceof Error ? error.message : String(error),
+      payload: { brandId: payload?.brandId, eventType: payload?.eventType },
     });
-  } else {
-    // Other statuses like FAILED, etc.
-    console.log(`ℹ️ Brand status: ${brandIdentityStatus}`);
+    throw error; // Let caller handle
   }
 }
 

@@ -289,12 +289,27 @@ async function handleTelnyx10DLCStatus(req: Request, res: Response) {
     const timestamp = req.headers['telnyx-timestamp'] as string;
 
     // Get raw body captured by middleware (required for ED25519 signature verification)
-    const rawBody = (req as any).rawBody || '';
-    if (!rawBody) {
-      console.error('❌ No raw body available for signature verification');
-      return res.status(400).json({ error: 'Missing request body' });
+    interface RequestWithRawBody extends Request {
+      rawBody?: string;
     }
-    const payload = JSON.parse(rawBody);
+    const rawBody = (req as RequestWithRawBody).rawBody;
+
+    if (!rawBody || !signature || !timestamp) {
+      console.error('❌ Missing required webhook data:', {
+        hasRawBody: !!rawBody,
+        hasSignature: !!signature,
+        hasTimestamp: !!timestamp,
+      });
+      return res.status(400).json({ error: 'Missing required webhook headers or body' });
+    }
+
+    let payload: any;
+    try {
+      payload = JSON.parse(rawBody);
+    } catch (parseError) {
+      console.error('❌ Invalid JSON in webhook payload:', parseError);
+      return res.status(400).json({ error: 'Invalid JSON payload' });
+    }
 
     // Log the webhook for debugging
     console.log(`\n📨 Received Telnyx 10DLC webhook`);
@@ -380,12 +395,27 @@ async function handleTelnyx10DLCStatusFailover(req: Request, res: Response) {
     const timestamp = req.headers['telnyx-timestamp'] as string;
 
     // Get raw body captured by middleware (required for ED25519 signature verification)
-    const rawBody = (req as any).rawBody || '';
-    if (!rawBody) {
-      console.error('❌ No raw body available for signature verification (failover)');
-      return res.status(400).json({ error: 'Missing request body' });
+    interface RequestWithRawBody extends Request {
+      rawBody?: string;
     }
-    const payload = JSON.parse(rawBody);
+    const rawBody = (req as RequestWithRawBody).rawBody;
+
+    if (!rawBody || !signature || !timestamp) {
+      console.error('❌ [FAILOVER] Missing required webhook data:', {
+        hasRawBody: !!rawBody,
+        hasSignature: !!signature,
+        hasTimestamp: !!timestamp,
+      });
+      return res.status(400).json({ error: 'Missing required webhook headers or body' });
+    }
+
+    let payload: any;
+    try {
+      payload = JSON.parse(rawBody);
+    } catch (parseError) {
+      console.error('❌ [FAILOVER] Invalid JSON in webhook payload:', parseError);
+      return res.status(400).json({ error: 'Invalid JSON payload' });
+    }
 
     console.log(`\n📨 Received Telnyx 10DLC webhook (FAILOVER)`);
     console.log(`   Event Type: ${payload.eventType}`);
