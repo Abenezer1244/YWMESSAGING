@@ -9,7 +9,11 @@
       "Bash(git push:*)",
       "Bash(npx prisma migrate dev:*)",
       "Bash(npx prisma db push:*)",
-      "Bash(npx prisma:*)"
+      "Bash(npx prisma:*)",
+      "Bash(cat:*)",
+      "Bash(netstat:*)",
+      "Bash(node test_10dlc.js:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

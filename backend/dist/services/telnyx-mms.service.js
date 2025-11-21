@@ -120,8 +120,16 @@ export async function sendMMS(to, message, churchId, mediaS3Url) {
             webhook_url: `${process.env.BACKEND_URL || 'https://api.koinoniasms.com'}/api/webhooks/telnyx/status`,
             webhook_failover_url: `${process.env.BACKEND_URL || 'https://api.koinoniasms.com'}/api/webhooks/telnyx/status`,
         };
-        // Add brand ID if using per-church 10DLC (once approved)
-        if (!church.usingSharedBrand && church.dlcBrandId) {
+        // Add brand ID based on delivery tier
+        if (church.usingSharedBrand) {
+            // Using platform's shared brand (65% delivery)
+            const platformBrandId = process.env.TELNYX_PLATFORM_BRAND_ID;
+            if (platformBrandId) {
+                payload.brand_id = platformBrandId;
+            }
+        }
+        else if (!church.usingSharedBrand && church.dlcBrandId) {
+            // Using church's personal 10DLC brand (99% delivery)
             payload.brand_id = church.dlcBrandId;
         }
         // Add media URL if provided

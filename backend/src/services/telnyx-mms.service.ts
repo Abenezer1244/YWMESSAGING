@@ -141,8 +141,15 @@ export async function sendMMS(
       }/api/webhooks/telnyx/status`,
     };
 
-    // Add brand ID if using per-church 10DLC (once approved)
-    if (!church.usingSharedBrand && church.dlcBrandId) {
+    // Add brand ID based on delivery tier
+    if (church.usingSharedBrand) {
+      // Using platform's shared brand (65% delivery)
+      const platformBrandId = process.env.TELNYX_PLATFORM_BRAND_ID;
+      if (platformBrandId) {
+        payload.brand_id = platformBrandId;
+      }
+    } else if (!church.usingSharedBrand && church.dlcBrandId) {
+      // Using church's personal 10DLC brand (99% delivery)
       payload.brand_id = church.dlcBrandId;
     }
 
