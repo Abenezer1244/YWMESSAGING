@@ -3,6 +3,7 @@ import { authenticateToken } from '../middleware/auth.middleware.js';
 import {
   getProfileHandler,
   updateProfileHandler,
+  getDeliveryTierStatusHandler,
   getCoAdminsHandler,
   inviteCoAdminHandler,
   removeCoAdminHandler,
@@ -19,6 +20,7 @@ router.use(authenticateToken);
 // Church profile endpoints
 router.get('/profile', getProfileHandler);
 router.put('/profile', updateProfileHandler);
+router.get('/delivery-tier-status', getDeliveryTierStatusHandler);
 
 // Co-admin endpoints
 router.get('/co-admins', getCoAdminsHandler);

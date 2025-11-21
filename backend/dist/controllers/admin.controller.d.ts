@@ -13,6 +13,12 @@ declare global {
  */
 export declare function getProfileHandler(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**
+ * GET /api/admin/delivery-tier-status
+ * Get detailed delivery tier information
+ * Returns current tier, benefits, and recommendations
+ */
+export declare function getDeliveryTierStatusHandler(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+/**
  * PUT /api/admin/profile
  * Update church profile
  */

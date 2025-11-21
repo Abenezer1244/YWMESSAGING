@@ -21,6 +21,82 @@ export async function getProfileHandler(req, res) {
     }
 }
 /**
+ * GET /api/admin/delivery-tier-status
+ * Get detailed delivery tier information
+ * Returns current tier, benefits, and recommendations
+ */
+export async function getDeliveryTierStatusHandler(req, res) {
+    try {
+        const churchId = req.user?.churchId;
+        if (!churchId) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        const church = await prisma.church.findUnique({
+            where: { id: churchId },
+            select: {
+                wantsPremiumDelivery: true,
+                dlcStatus: true,
+                deliveryRate: true,
+                dlcApprovedAt: true,
+            },
+        });
+        if (!church) {
+            return res.status(404).json({ error: 'Church not found' });
+        }
+        // Build response based on current tier
+        const tierInfo = {
+            currentTier: church.wantsPremiumDelivery ? 'premium' : 'shared',
+            dlcStatus: church.dlcStatus,
+            deliveryRate: church.deliveryRate || (church.wantsPremiumDelivery ? 0.99 : 0.65),
+            approvedAt: church.dlcApprovedAt,
+        };
+        // Add tier-specific benefits
+        if (church.wantsPremiumDelivery) {
+            Object.assign(tierInfo, {
+                tierName: 'Premium 10DLC',
+                description: 'Your church\'s personally verified SMS brand',
+                expectedDeliveryRate: '99%',
+                benefits: [
+                    'Highest delivery reliability (99%)',
+                    'Your church\'s branded SMS sender',
+                    'Individually verified with carriers',
+                    'Priority handling by carriers',
+                ],
+                setupTime: church.dlcStatus === 'approved' ? 'Complete ✅' : '1-2 days',
+                requirements: [
+                    'Business EIN',
+                    'Church address',
+                    'Brand contact phone',
+                ],
+            });
+        }
+        else {
+            Object.assign(tierInfo, {
+                tierName: 'Standard Delivery (Shared Brand)',
+                description: 'Platform\'s pre-verified shared SMS brand',
+                expectedDeliveryRate: '65%',
+                benefits: [
+                    'Instant activation',
+                    'No EIN required',
+                    'Pre-verified brand',
+                    'Works great for announcements',
+                ],
+                setupTime: 'Ready now ✅',
+                requirements: [],
+                upgradeInfo: {
+                    available: true,
+                    message: 'Upgrade to Premium 10DLC anytime for 99% delivery',
+                },
+            });
+        }
+        res.json(tierInfo);
+    }
+    catch (error) {
+        console.error('Failed to get delivery tier status:', error);
+        res.status(500).json({ error: 'Failed to get delivery tier status' });
+    }
+}
+/**
  * PUT /api/admin/profile
  * Update church profile
  */

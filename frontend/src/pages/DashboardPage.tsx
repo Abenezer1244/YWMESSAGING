@@ -18,7 +18,9 @@ import { getMessageStats, getSummaryStats } from '../api/analytics';
 import { getMembers } from '../api/members';
 import { getGroups } from '../api/groups';
 import { getCurrentNumber } from '../api/numbers';
+import { getProfile } from '../api/admin';
 import { SoftLayout, SoftCard, SoftStat, SoftButton } from '../components/SoftUI';
+import { DeliveryStatusBadge } from '../components/DeliveryStatusBadge';
 import TrialBanner from '../components/TrialBanner';
 import { ChatWidget } from '../components/ChatWidget';
 import WelcomeModal from '../components/WelcomeModal';
@@ -57,6 +59,7 @@ export function DashboardPage() {
   const [showWelcome, setShowWelcome] = useState(false);
   const [showPhoneNumberModal, setShowPhoneNumberModal] = useState(false);
   const [hasPhoneNumber, setHasPhoneNumber] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
 
   // Check if user should see welcome modal based on auth data
   useEffect(() => {
@@ -115,6 +118,14 @@ export function DashboardPage() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
+
+      // Load church profile for delivery tier status
+      try {
+        const profileData = await getProfile();
+        setProfile(profileData);
+      } catch (error) {
+        console.debug('Failed to load profile:', error);
+      }
 
       if (currentBranchId) {
         const groupsData = await getGroups(currentBranchId);
@@ -186,10 +197,55 @@ export function DashboardPage() {
           <h1 className="text-4xl font-bold text-foreground mb-2">
             Welcome back, <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{user?.firstName}</span>
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mb-4">
             {church?.name} • {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
+
+          {/* Delivery Status Badge */}
+          {profile && (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <DeliveryStatusBadge
+                dlcStatus={profile.dlcStatus}
+                deliveryRate={profile.deliveryRate}
+                wantsPremiumDelivery={profile.wantsPremiumDelivery}
+                variant="badge"
+              />
+            </motion.div>
+          )}
         </motion.div>
+
+        {/* Upgrade Prompt for Shared Brand Churches */}
+        {profile?.dlcStatus === 'shared_brand' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="mb-8 border-l-4 border-green-500 bg-green-50 p-4 rounded-lg"
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-semibold text-gray-900">
+                  🚀 Ready for better SMS delivery?
+                </p>
+                <p className="text-xs text-gray-700 mt-1">
+                  Upgrade to Premium 10DLC for 99% delivery rate. Visit your settings to enable it.
+                </p>
+              </div>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => window.location.hash = '#/admin/settings'}
+                className="text-xs font-semibold text-green-700 hover:text-green-800 whitespace-nowrap ml-4"
+              >
+                Upgrade →
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
 
         {/* Loading State */}
         {loading ? (

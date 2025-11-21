@@ -317,10 +317,17 @@ export function AdminSettingsPage() {
                         className="mb-8"
                       >
                         <SoftCard variant="gradient">
-                          <h3 className="font-semibold text-foreground mb-4">SMS Delivery Tier</h3>
+                          <h3 className="font-semibold text-foreground mb-2">SMS Delivery Tier</h3>
                           <p className="text-sm text-muted-foreground mb-6">
-                            Choose your SMS delivery performance level. You can upgrade anytime.
+                            Choose your SMS delivery performance level. Standard is recommended for most churches. You can upgrade to Premium anytime.
                           </p>
+
+                          {/* Helpful Info Box */}
+                          <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p className="text-xs text-blue-900">
+                              <strong>💡 Need help choosing?</strong> Standard works great for announcements and general messaging. Premium is best for time-sensitive or critical messages.
+                            </p>
+                          </div>
 
                           <div className="space-y-3">
                             {/* Shared Brand Option */}
@@ -340,6 +347,11 @@ export function AdminSettingsPage() {
                                 <p className="text-sm text-muted-foreground mt-1">
                                   65% delivery rate • Instant activation • No EIN required
                                 </p>
+                                <div className="text-xs text-muted-foreground mt-2 space-y-1">
+                                  <p>✓ Best for announcements, event notifications</p>
+                                  <p>✓ No business information needed</p>
+                                  <p>✓ Ready to use immediately</p>
+                                </div>
                               </div>
                             </label>
 
@@ -360,6 +372,11 @@ export function AdminSettingsPage() {
                                 <p className="text-sm text-muted-foreground mt-1">
                                   99% delivery rate • 1-2 day approval • Requires EIN & business info
                                 </p>
+                                <div className="text-xs text-muted-foreground mt-2 space-y-1">
+                                  <p>✓ Best for critical or time-sensitive messages</p>
+                                  <p>✓ Highest delivery reliability (99%)</p>
+                                  <p>✓ Individually verified brand</p>
+                                </div>
                               </div>
                             </label>
                           </div>
