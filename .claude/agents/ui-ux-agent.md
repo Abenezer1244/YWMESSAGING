@@ -1,7 +1,7 @@
 ---
 name: ui-ux
 description: UI/UX design review, component design, user experience analysis, accessibility compliance, and design system consistency. Use when designing new features, reviewing UI implementations, or improving user experience.
-tools: Read, Edit, Grep, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_navigate, mcp__playwright__browser_resize, mcp__playwright__browser_console_messages, WebFetch, TodoWrite
+tools: Read, Edit, Grep, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_navigate, mcp__playwright__browser_resize, mcp__playwright__browser_console_messages, mcp__playwright__browser_click, mcp__playwright__browser_type, mcp__playwright__browser_snapshot, mcp__playwright__browser_hover, mcp__playwright__browser_select_option, mcp__playwright__browser_wait_for, WebFetch, TodoWrite, mcp__exa__search, mcp__context7__resolve-library-id, mcp__context7__get-library-docs
 model: sonnet
 color: pink
 ---

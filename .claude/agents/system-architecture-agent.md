@@ -1,7 +1,7 @@
 ---
 name: system-architecture
 description: System design, scalability analysis, architecture patterns, database design, and integration strategies. Use when designing new systems, analyzing performance issues, or planning for scale.
-tools: Grep, Read, WebSearch, WebFetch, Bash, TodoWrite
+tools: Grep, Read, WebSearch, WebFetch, Bash, TodoWrite, mcp__exa__search, mcp__context7__resolve-library-id, mcp__context7__get-library-docs
 model: sonnet
 color: cyan
 ---

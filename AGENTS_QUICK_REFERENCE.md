@@ -1,442 +1,226 @@
-# Koinoniasms: AI Agents Quick Reference Guide
+# Automated Agent System - Quick Reference Card
 
-## 🚀 Available Slash Commands
+## 🚀 Start Here
+```bash
+# 1. Setup
+cp .env.agents.example .env.agents
+# Edit .env.agents with your keys
 
-You can invoke any of these agents using slash commands. Type the command and your request!
+# 2. Deploy webhook
+node scripts/agents-webhook-server.js
 
----
+# 3. Test locally
+node scripts/agents-orchestrator.js pr-review
 
-## 📊 Product Manager Agent
-**Command:** `/product-manager`
-
-**Use for:**
-- Market strategy and roadmap planning
-- Feature prioritization and business decisions
-- User story creation and requirements analysis
-- Competitive analysis and market opportunities
-- Revenue and growth projections
-
-**Example:**
-```
-/product-manager
-
-What features should we prioritize for Q1 2026? Should we focus on email integration, analytics, or mobile app?
+# 4. Monitor logs
+tail -f logs/audit-*.json
 ```
 
----
+## 📡 Webhook Server
+**File:** `scripts/agents-webhook-server.js`
+**Port:** 3000
+**Health:** `GET /health`
+**Webhook:** `POST /webhook`
 
-## 🎨 UI/UX Agent
-**Command:** `/ui-ux`
+## 🎯 Orchestrator Commands
+```bash
+node scripts/agents-orchestrator.js [command]
 
-**Use for:**
-- Design review and feedback
-- Accessibility audits (WCAG compliance)
-- User experience improvements
-- Mobile responsiveness testing
-- Onboarding flow optimization
-- Component design and consistency
-
-**Example:**
-```
-/ui-ux
-
-Review the AdminSettingsPage for accessibility issues and mobile responsiveness at 375px viewport.
+pr-review       # Run PR agents (parallel)
+merge-review    # Run merge agents
+security-audit  # Run security audit
+all            # Run all agents
+audit-log      # Show audit logs
 ```
 
----
+## 🔗 GitHub Actions
 
-## 🏗️ System Architecture Agent
-**Command:** `/system-architecture`
+| File | Trigger | Agents |
+|------|---------|--------|
+| agents-pr-review.yml | PR opened/updated | Backend, Frontend, Security, Design, QA |
+| agents-main-merge.yml | Push to main | Architecture, DevOps, Product |
+| agents-scheduled.yml | Weekly (Mon/Thu) | Security, Architecture, QA |
+| agents-deployment.yml | Deploy events | DevOps, QA |
 
-**Use for:**
-- System design for scale
-- Architecture decision making
-- Technology selection and evaluation
-- Scalability analysis
-- Database design
-- Microservices planning
+## 🤖 The 9 Agents
 
-**Example:**
-```
-/system-architecture
+| Agent | Icon | Role | MCPs |
+|-------|------|------|------|
+| Backend Engineer | 🔧 | API, Database, Logic | Semgrep, Context7 |
+| Senior Frontend | 🎨 | Components, Perf | Playwright, Semgrep, Context7 |
+| Security Analyst | 🔒 | Vulnerabilities | Semgrep, Context7 |
+| Design Review | ✨ | UI/UX, Accessibility | Playwright, Exa, Semgrep, Context7 |
+| QA Testing | ✅ | Test Coverage | Playwright, Semgrep, Context7 |
+| System Architecture | 🏗️ | Scalability | Exa, Context7 |
+| DevOps | 🚀 | Deployment | Exa, Context7 |
+| Product Manager | 📊 | Strategy | Exa, Context7 |
+| UI/UX | 🎨 | Design System | Playwright, Exa, Context7 |
 
-How should we design the architecture to handle 10x growth? What are the bottlenecks?
-```
+## 🌍 Environment Variables
 
----
-
-## 💻 Senior Frontend Engineer Agent
-**Command:** `/senior-frontend`
-
-**Use for:**
-- Frontend code review
-- Component architecture assessment
-- Performance optimization
-- Testing strategy
-- React best practices
-- Bundle size analysis
-
-**Example:**
-```
-/senior-frontend
-
-Review the DashboardPage component for performance issues, code quality, and testing gaps.
+**Required:**
+```bash
+CLAUDE_API_KEY=...
+GITHUB_TOKEN=...
+GITHUB_WEBHOOK_SECRET=...
 ```
 
----
-
-## 🔧 Backend Engineer Agent
-**Command:** `/backend-engineer`
-
-**Use for:**
-- Backend code review
-- API design and contracts
-- Database query optimization
-- Performance analysis
-- Business logic validation
-- Security review for backend
-
-**Example:**
-```
-/backend-engineer
-
-Review the SMS sending service for N+1 queries, missing indexes, and performance bottlenecks.
+**Optional but Recommended:**
+```bash
+SLACK_WEBHOOK_URL=...
+SLACK_CHANNEL=#engineering
 ```
 
----
-
-## ✅ QA Testing Agent
-**Command:** `/qa-testing`
-
-**Use for:**
-- Test plan creation
-- Test case design
-- Testing strategy
-- Quality assurance planning
-- Bug report standards
-- Acceptance criteria definition
-
-**Example:**
-```
-/qa-testing
-
-Create a comprehensive test plan for the email integration feature including all edge cases.
+**Tuning:**
+```bash
+AGENTS_PARALLEL=true         # Faster
+AGENT_TIMEOUT=300            # Seconds
+AGENT_RETRY_COUNT=3          # Retries
+LOG_DIR=./logs               # Audit logs
 ```
 
----
+## 📊 Workflow Triggers
 
-## 🚀 DevOps Engineer Agent
-**Command:** `/devops`
-
-**Use for:**
-- CI/CD pipeline design
-- Deployment strategy
-- Infrastructure planning
-- Monitoring and alerting
-- Backup and disaster recovery
-- Cost optimization
-
-**Example:**
 ```
-/devops
+PR Event
+  ├─ Backend Engineer (API, DB)
+  ├─ Senior Frontend (React/Vue)
+  ├─ Security Analyst (Vulns)
+  ├─ Design Review (UI/UX)
+  └─ QA Testing (Coverage)
 
-Design a CI/CD pipeline for zero-downtime deployments with staging environment and blue-green strategy.
-```
+Main Branch Push
+  ├─ System Architecture (Impact)
+  ├─ DevOps (Deploy ready)
+  └─ Product Manager (Features)
 
----
+Weekly Scheduled
+  ├─ Monday 2 AM: Full Security Audit
+  └─ Thursday 2 AM: Perf Analysis + Regression Tests
 
-## 🔒 Security Analyst Agent
-**Command:** `/security`
-
-**Use for:**
-- Security audits
-- Vulnerability assessment
-- Compliance review (GDPR, HIPAA, SOC 2)
-- Threat modeling
-- Security hardening recommendations
-- OWASP Top 10 analysis
-
-**Example:**
-```
-/security
-
-Conduct a security audit of our authentication system for OWASP Top 10 vulnerabilities.
+Deployment
+  ├─ Pre-deploy: Quality gates
+  └─ Post-deploy: Smoke tests
 ```
 
----
+## 📝 Audit Logs
 
-## 💡 USAGE TIPS
+**Location:** `logs/audit-YYYY-MM-DD.json`
 
-### Asking Good Questions
-
-**Be specific:**
-```
-❌ /backend-engineer
-Review the backend code
-
-✅ /backend-engineer
-Review the message sending service for:
-- N+1 query issues
-- Missing database indexes
-- Caching opportunities
-- Performance bottlenecks
+**Format:**
+```json
+{
+  "timestamp": "2024-11-24T10:30:45Z",
+  "agent": "backend-engineer",
+  "event": "agent_invocation_started",
+  "status": "success",
+  "duration": 45.2,
+  "details": { ... }
+}
 ```
 
-**Provide context:**
-```
-❌ /product-manager
-What should we build?
-
-✅ /product-manager
-We have 1,000 churches and want to grow to 10,000.
-What features drive retention? Should we focus on email integration, analytics, or mobile app first?
+**View:**
+```bash
+node scripts/agents-orchestrator.js audit-log 2024-11-24
 ```
 
-**Ask follow-ups:**
-```
-/security
+## 🔐 GitHub Setup
 
-I saw your recommendations. Can you prioritize them by impact and timeline?
-```
+**1. Secrets** (Settings → Secrets and variables → Actions)
+- `CLAUDE_API_KEY`
+- `CLAUDE_WEBHOOK_URL`
+- `GITHUB_TOKEN`
+- `SLACK_WEBHOOK_URL`
 
----
+**2. Webhook** (Settings → Webhooks → Add webhook)
+- URL: `https://your-domain.com/webhook`
+- Content type: `application/json`
+- Secret: Use `GITHUB_WEBHOOK_SECRET`
+- Events: Pull requests, Pushes, Workflows
 
-## 🎯 COMMON AGENT COMBINATIONS
+**3. Permissions**
+- GitHub token needs: `repo`, `workflow` scopes
 
-### For New Feature Development
-1. **Product Manager** - Define the feature and business case
-2. **System Architect** - Design the architecture
-3. **Backend Engineer** - Review API and database design
-4. **Senior Frontend** - Review UI component design
-5. **QA Testing** - Create test plan
-6. **Security** - Audit for vulnerabilities
+## 🔍 Troubleshooting
 
-### For Performance Issues
-1. **Backend Engineer** - Find database bottlenecks
-2. **Senior Frontend** - Profile rendering performance
-3. **System Architect** - Identify scaling issues
-4. **DevOps** - Review infrastructure metrics
-5. **Security** - Check for security-induced slowdowns
+| Problem | Solution |
+|---------|----------|
+| Agents not triggering | Check Actions tab, verify workflows exist |
+| No PR comments | Verify GitHub token has `repo` scope |
+| Slack not working | Check webhook URL, test with curl |
+| Server not responding | `curl localhost:3000/health` |
+| Missing audit logs | Check `LOG_DIR` permission, create manually |
 
-### For Scaling to 10x
-1. **System Architect** - Design for scale
-2. **Backend Engineer** - Optimize services
-3. **DevOps** - Plan infrastructure
-4. **Security** - Hardening for enterprise
-5. **Product Manager** - Monetize at scale
+## 🚨 Error Codes
 
-### For Launch Readiness
-1. **Security** - Final security audit
-2. **QA Testing** - Comprehensive test plan
-3. **DevOps** - Deployment checklist
-4. **Senior Frontend** - Code quality review
-5. **Product Manager** - Go/no-go decision
+| Code | Meaning | Fix |
+|------|---------|-----|
+| 401 | Invalid signature | Check webhook secret |
+| 403 | Forbidden | GitHub token expired/invalid |
+| 404 | Not found | Check URL path |
+| 500 | Server error | Check logs, restart server |
 
----
+## 📚 Documentation
 
-## 📈 AGENT CAPABILITIES
+- **Full Guide:** `AGENTS_AUTOMATION.md`
+- **Quick Start:** `AGENTS_QUICKSTART.md`
+- **This Card:** `AGENTS_QUICK_REFERENCE.md`
+- **Implementation:** `AGENTS_IMPLEMENTATION_SUMMARY.md`
 
-| Agent | Strengths | Best For |
-|-------|-----------|----------|
-| **Product Manager** | Strategic thinking, market analysis | Business decisions |
-| **UI/UX** | User experience, design systems | User satisfaction |
-| **System Architect** | Scalability, reliability | Growth planning |
-| **Senior Frontend** | React, performance, testing | Code quality |
-| **Backend Engineer** | APIs, databases, optimization | System performance |
-| **QA Testing** | Test planning, quality metrics | Risk reduction |
-| **DevOps** | Deployment, monitoring, reliability | Operational excellence |
-| **Security** | Vulnerability detection, compliance | Risk mitigation |
+## 🎯 Success Metrics
 
----
+Track these after deployment:
+- ✅ Agent invocation frequency
+- ✅ Average response time
+- ✅ Issues found & fixed rate
+- ✅ PR merge time reduction
+- ✅ Security incidents prevention
 
-## 🚀 GETTING THE MOST FROM AGENTS
+## 💡 Pro Tips
 
-### 1. **Be Conversational**
-Agents respond better to natural language:
-```
-/backend-engineer
+1. **Parallel = Faster** → Set `AGENTS_PARALLEL=true` for PR reviews
+2. **Sequential = Safer** → Set `AGENTS_PARALLEL=false` for main branch
+3. **Skip docs** → Add `paths-ignore` for markdown changes
+4. **Labels trigger** → Use `[needs-review]` label for force runs
+5. **Monitors cost** → Reduce unnecessary agent invocations
 
-I'm worried about database performance with 10x growth.
-Which queries are the bottleneck? What indexes are missing?
-How can we optimize without rewriting everything?
-```
-
-### 2. **Ask for Specific Outputs**
-Tell agents what format you want:
-```
-/qa-testing
-
-Create a test plan with:
-- Test cases (30+ cases)
-- Preconditions and steps
-- Expected results
-- Severity levels (Critical/High/Medium/Low)
-- Estimated test execution time
-```
-
-### 3. **Provide Your Context**
-Share relevant information:
-```
-/system-architect
-
-Current: 1,000 churches, 60 msg/min, PostgreSQL on Render
-Target: 10,000 churches, 6,000 msg/min, 99.95% uptime
-Constraints: $85K budget, need zero-downtime deployments
-
-What's the recommended architecture?
-```
-
-### 4. **Request Prioritization**
-Ask agents to help you decide:
-```
-/product-manager
-
-Here are 5 potential features:
-1. Email integration
-2. Analytics dashboard
-3. Message scheduling
-4. Planning Center sync
-5. Mobile app
-
-Which 2 should we build in Q1 2026 to maximize revenue growth?
-```
-
-### 5. **Ask for Actionable Steps**
-Get a roadmap, not just analysis:
-```
-/devops
-
-Create a 12-week plan to implement:
-- CI/CD automation
-- Staging environment
-- Blue-green deployments
-- Datadog monitoring
-
-Include: Week-by-week timeline, tools needed, estimated effort
-```
-
----
-
-## 📚 REFERENCE DOCUMENTS
-
-All agent analyses are saved in these files:
-
-**Master Roadmap:**
-- `COMPREHENSIVE_SAAS_UPGRADE_ROADMAP.md` - Complete strategic overview
-
-**Detailed Guides:**
-- `DEVOPS_INFRASTRUCTURE_STRATEGY.md` - CI/CD, deployment, monitoring
-- `10DLC_DELIVERY_TIER_TEST_PLAN.md` - 41 test cases for current feature
-
-**Agent Configs:**
-- `.claude/agents/` - Agent definitions
-- `.claude/commands/` - Slash command definitions
-
----
-
-## 🎓 LEARNING RESOURCES
-
-### Understanding Each Agent's Methodology
-
-Each agent has its own approach:
-
-**Product Manager** uses:
-- RICE scoring (Reach × Impact × Confidence / Effort)
-- User story format (As a..., I want..., So that...)
-- MoSCoW prioritization (Must, Should, Could, Won't)
-
-**Backend Engineer** uses:
-- Code review patterns
-- Performance profiling
-- Architecture decision records (ADRs)
-
-**Security Analyst** uses:
-- OWASP Top 10 framework
-- CVSS scoring
-- Threat modeling
-
-...and so on. Each agent brings industry best practices.
-
----
-
-## ⚡ QUICK COMMANDS CHEAT SHEET
+## 🆘 Quick Help
 
 ```bash
-# Market and Strategy
-/product-manager
+# Check server health
+curl http://localhost:3000/health
 
-# User Experience
-/ui-ux
+# View today's audit logs
+node scripts/agents-orchestrator.js audit-log
 
-# System Design
-/system-architecture
+# Run agents manually
+node scripts/agents-orchestrator.js pr-review
 
-# Frontend Code
-/senior-frontend
-
-# Backend Code
-/backend-engineer
-
-# Quality Assurance
-/qa-testing
-
-# Operations
-/devops
-
-# Security
-/security
+# View GitHub Actions
+# Go to: https://github.com/org/repo/actions
 ```
 
----
+## 🎓 Learning Path
 
-## 🎯 NEXT STEPS
+1. Read: `AGENTS_QUICKSTART.md` (10 min)
+2. Deploy: Webhook server (5 min)
+3. Configure: GitHub secrets (5 min)
+4. Test: Create PR (5 min)
+5. Monitor: View audit logs (5 min)
+6. Deep dive: `AGENTS_AUTOMATION.md` (optional)
 
-1. **Pick an agent** based on your current need
-2. **Ask a specific question** with context
-3. **Get detailed analysis** tailored to your situation
-4. **Follow up** with clarifications or next steps
-5. **Reference the documents** for strategic context
+## ✨ What Agents Do
 
----
-
-## 💬 EXAMPLE CONVERSATION
-
-```
-You: /product-manager
-What should our Q1 2026 roadmap look like?
-
-Agent: (Provides detailed feature analysis...)
-
-You: /backend-engineer
-Can you review if the architecture supports that roadmap?
-
-Agent: (Reviews and provides optimization suggestions...)
-
-You: /security
-Are there any security risks in that roadmap?
-
-Agent: (Identifies risks and provides hardening plan...)
-
-You: /product-manager
-Given the security requirements and backend constraints,
-which features should we prioritize?
-
-Agent: (Refined prioritization with business impact...)
-```
+| Stage | Agents | Output |
+|-------|--------|--------|
+| **PR Review** | 5 agents | Comments, findings, recommendations |
+| **Merge Analysis** | 3 agents | System impact report, deployment readiness |
+| **Weekly Audit** | 3 agents | Security report, perf analysis, regression risks |
+| **Pre-Deploy** | DevOps | Deployment checklist, quality gates |
+| **Post-Deploy** | QA + DevOps | Smoke test results, verification status |
 
 ---
 
-## 🚀 YOU NOW HAVE
-
-✅ 8 specialized agents ready to help
-✅ Quick-reference guide (this document)
-✅ Detailed analysis documents
-✅ Implementation roadmap
-✅ Strategic guidance on growth
-
-**Start with any `/command` and get expert guidance tailored to your needs!**
-
----
-
-**Last Updated:** November 23, 2025
-**Status:** All agents active and ready for deployment
+**Got stuck?** Check AGENTS_AUTOMATION.md → Troubleshooting section
+**Need setup help?** Follow AGENTS_QUICKSTART.md step-by-step
+**Want full details?** Read AGENTS_AUTOMATION.md chapter by chapter

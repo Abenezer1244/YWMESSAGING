@@ -1,7 +1,7 @@
 ---
 name: backend-engineer
 description: Backend code review, API design, database optimization, business logic validation, and integration patterns. Use for architecture reviews, performance issues, or API design.
-tools: Read, Edit, MultiEdit, Grep, Bash, BashOutput, TodoWrite, WebFetch
+tools: Read, Edit, MultiEdit, Grep, Bash, BashOutput, TodoWrite, WebFetch, mcp__semgrep__scan, mcp__context7__resolve-library-id, mcp__context7__get-library-docs
 model: sonnet
 color: green
 ---

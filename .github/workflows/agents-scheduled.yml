@@ -1,0 +1,114 @@
+name: Scheduled Agent Analysis
+
+on:
+  schedule:
+    # Weekly security audit - every Monday at 2 AM UTC
+    - cron: '0 2 * * 1'
+    # Weekly performance analysis - every Thursday at 2 AM UTC
+    - cron: '0 2 * * 4'
+  workflow_dispatch:
+
+jobs:
+  weekly-security-audit:
+    runs-on: ubuntu-latest
+    name: Weekly Security Audit
+    if: github.event.schedule == '0 2 * * 1' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Invoke Security Analyst Agent
+        run: |
+          echo "🔒 Invoking Weekly Security Audit"
+          curl -X POST ${{ secrets.CLAUDE_WEBHOOK_URL }} \
+            -H "Authorization: Bearer ${{ secrets.CLAUDE_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "agent": "security-analyst",
+              "event_type": "scheduled",
+              "schedule_type": "weekly_security_audit",
+              "repo": "${{ github.repository }}",
+              "branch": "${{ github.ref_name }}",
+              "audit_scope": "full_codebase"
+            }'
+
+  weekly-performance-analysis:
+    runs-on: ubuntu-latest
+    name: Weekly Performance Analysis
+    if: github.event.schedule == '0 2 * * 4' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Invoke System Architecture Agent
+        run: |
+          echo "📈 Invoking Weekly Performance Analysis"
+          curl -X POST ${{ secrets.CLAUDE_WEBHOOK_URL }} \
+            -H "Authorization: Bearer ${{ secrets.CLAUDE_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "agent": "system-architecture",
+              "event_type": "scheduled",
+              "schedule_type": "weekly_performance_audit",
+              "repo": "${{ github.repository }}",
+              "branch": "${{ github.ref_name }}"
+            }'
+
+      - name: Invoke QA Testing Agent
+        run: |
+          echo "✅ Invoking Weekly Regression Testing"
+          curl -X POST ${{ secrets.CLAUDE_WEBHOOK_URL }} \
+            -H "Authorization: Bearer ${{ secrets.CLAUDE_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "agent": "qa-testing",
+              "event_type": "scheduled",
+              "schedule_type": "weekly_regression_tests",
+              "repo": "${{ github.repository }}",
+              "branch": "${{ github.ref_name }}"
+            }'
+
+  monthly-full-audit:
+    runs-on: ubuntu-latest
+    name: Monthly Full System Audit
+    # First Monday of each month at 3 AM UTC
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Invoke All Audit Agents
+        run: |
+          echo "🔍 Running Monthly Full System Audit"
+          # This could trigger multiple agents in sequence
+          curl -X POST ${{ secrets.CLAUDE_WEBHOOK_URL }} \
+            -H "Authorization: Bearer ${{ secrets.CLAUDE_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "agent": "all",
+              "event_type": "scheduled",
+              "schedule_type": "monthly_full_audit",
+              "repo": "${{ github.repository }}",
+              "scope": "comprehensive"
+            }'

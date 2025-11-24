@@ -19,7 +19,20 @@
       "Bash(npm ls:*)",
       "Bash(dir:*)",
       "Bash(npx cloc:*)",
-      "Bash(npm audit:*)"
+      "Bash(npm audit:*)",
+      "SlashCommand(/design-review Test the delivery tier UI components)",
+      "Bash(claude mcp add:*)",
+      "Bash(claude mcp list:*)",
+      "Bash(npm install:*)",
+      "Bash(npx:*)",
+      "Bash(claude mcp:*)",
+      "Bash(uvx semgrep-mcp:*)",
+      "Bash(pipx install:*)",
+      "WebFetch(domain:docs.astral.sh)",
+      "Bash(powershell -ExecutionPolicy ByPass -c \"irm https://astral.sh/uv/install.ps1 | iex\")",
+      "Bash(export PATH=\"C:\\Users\\Windows\\.local\\bin:$PATH\")",
+      "Bash(where uvx:*)",
+      "Bash(\"C:\\Users\\Windows\\.local\\bin\\uvx.exe\" semgrep-mcp --transport stdio)"
     ],
     "deny": [],
     "ask": []

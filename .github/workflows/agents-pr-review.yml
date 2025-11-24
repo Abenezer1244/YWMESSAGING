@@ -1,0 +1,201 @@
+name: Automated Agent Code & Design Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+      - develop
+
+jobs:
+  backend-review:
+    runs-on: ubuntu-latest
+    name: Backend Engineer Review
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Invoke Backend Engineer Agent
+        run: |
+          echo "🔍 Invoking Backend Engineer Agent for PR #${{ github.event.pull_request.number }}"
+          curl -X POST ${{ secrets.CLAUDE_WEBHOOK_URL }} \
+            -H "Authorization: Bearer ${{ secrets.CLAUDE_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "agent": "backend-engineer",
+              "event_type": "pull_request",
+              "pr_number": "${{ github.event.pull_request.number }}",
+              "pr_title": "${{ github.event.pull_request.title }}",
+              "pr_author": "${{ github.event.pull_request.user.login }}",
+              "repo": "${{ github.repository }}",
+              "branch": "${{ github.head_ref }}",
+              "base_branch": "${{ github.base_ref }}"
+            }'
+
+  frontend-review:
+    runs-on: ubuntu-latest
+    name: Senior Frontend Engineer Review
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Invoke Frontend Engineer Agent
+        run: |
+          echo "🎨 Invoking Senior Frontend Engineer Agent for PR #${{ github.event.pull_request.number }}"
+          curl -X POST ${{ secrets.CLAUDE_WEBHOOK_URL }} \
+            -H "Authorization: Bearer ${{ secrets.CLAUDE_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "agent": "senior-frontend",
+              "event_type": "pull_request",
+              "pr_number": "${{ github.event.pull_request.number }}",
+              "pr_title": "${{ github.event.pull_request.title }}",
+              "pr_author": "${{ github.event.pull_request.user.login }}",
+              "repo": "${{ github.repository }}",
+              "branch": "${{ github.head_ref }}",
+              "base_branch": "${{ github.base_ref }}"
+            }'
+
+  security-review:
+    runs-on: ubuntu-latest
+    name: Security Analyst Review
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Invoke Security Analyst Agent
+        run: |
+          echo "🔒 Invoking Security Analyst Agent for PR #${{ github.event.pull_request.number }}"
+          curl -X POST ${{ secrets.CLAUDE_WEBHOOK_URL }} \
+            -H "Authorization: Bearer ${{ secrets.CLAUDE_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "agent": "security-analyst",
+              "event_type": "pull_request",
+              "pr_number": "${{ github.event.pull_request.number }}",
+              "pr_title": "${{ github.event.pull_request.title }}",
+              "pr_author": "${{ github.event.pull_request.user.login }}",
+              "repo": "${{ github.repository }}",
+              "branch": "${{ github.head_ref }}",
+              "base_branch": "${{ github.base_ref }}"
+            }'
+
+  design-review:
+    runs-on: ubuntu-latest
+    name: Design Review Agent
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Invoke Design Review Agent
+        run: |
+          echo "🎨 Invoking Design Review Agent for PR #${{ github.event.pull_request.number }}"
+          curl -X POST ${{ secrets.CLAUDE_WEBHOOK_URL }} \
+            -H "Authorization: Bearer ${{ secrets.CLAUDE_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "agent": "design-review",
+              "event_type": "pull_request",
+              "pr_number": "${{ github.event.pull_request.number }}",
+              "pr_title": "${{ github.event.pull_request.title }}",
+              "pr_author": "${{ github.event.pull_request.user.login }}",
+              "repo": "${{ github.repository }}",
+              "branch": "${{ github.head_ref }}",
+              "base_branch": "${{ github.base_ref }}"
+            }'
+
+  qa-review:
+    runs-on: ubuntu-latest
+    name: QA Testing Agent
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Invoke QA Testing Agent
+        run: |
+          echo "✅ Invoking QA Testing Agent for PR #${{ github.event.pull_request.number }}"
+          curl -X POST ${{ secrets.CLAUDE_WEBHOOK_URL }} \
+            -H "Authorization: Bearer ${{ secrets.CLAUDE_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "agent": "qa-testing",
+              "event_type": "pull_request",
+              "pr_number": "${{ github.event.pull_request.number }}",
+              "pr_title": "${{ github.event.pull_request.title }}",
+              "pr_author": "${{ github.event.pull_request.user.login }}",
+              "repo": "${{ github.repository }}",
+              "branch": "${{ github.head_ref }}",
+              "base_branch": "${{ github.base_ref }}"
+            }'
+
+  summary:
+    runs-on: ubuntu-latest
+    name: Automated Review Summary
+    needs: [backend-review, frontend-review, security-review, design-review, qa-review]
+    if: always()
+    steps:
+      - name: Comment PR with Agent Review Status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const backendStatus = '${{ needs.backend-review.result }}';
+            const frontendStatus = '${{ needs.frontend-review.result }}';
+            const securityStatus = '${{ needs.security-review.result }}';
+            const designStatus = '${{ needs.design-review.result }}';
+            const qaStatus = '${{ needs.qa-review.result }}';
+
+            const comment = `## 🤖 Automated Agent Review Summary
+
+| Agent | Status |
+|-------|--------|
+| 🔧 Backend Engineer | ${backendStatus === 'success' ? '✅' : backendStatus === 'failure' ? '❌' : '⏳'} ${backendStatus} |
+| 🎨 Senior Frontend Engineer | ${frontendStatus === 'success' ? '✅' : frontendStatus === 'failure' ? '❌' : '⏳'} ${frontendStatus} |
+| 🔒 Security Analyst | ${securityStatus === 'success' ? '✅' : securityStatus === 'failure' ? '❌' : '⏳'} ${securityStatus} |
+| 🎨 Design Review | ${designStatus === 'success' ? '✅' : designStatus === 'failure' ? '❌' : '⏳'} ${designStatus} |
+| ✅ QA Testing | ${qaStatus === 'success' ? '✅' : qaStatus === 'failure' ? '❌' : '⏳'} ${qaStatus} |
+
+**Detailed reviews will be posted as individual comments below.**
+
+_Generated by Automated Agent Review System_`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

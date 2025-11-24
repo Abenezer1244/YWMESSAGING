@@ -1,7 +1,7 @@
 ---
 name: senior-frontend
 description: Frontend code review, component architecture, performance optimization, testing strategy, and best practices. Use for code reviews, architecture decisions, or performance issues.
-tools: Read, Edit, MultiEdit, Grep, Bash, BashOutput, TodoWrite, WebFetch
+tools: Read, Edit, MultiEdit, Grep, Bash, BashOutput, TodoWrite, WebFetch, mcp__playwright__browser_navigate, mcp__playwright__browser_click, mcp__playwright__browser_type, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_snapshot, mcp__playwright__browser_console_messages, mcp__playwright__browser_wait_for, mcp__semgrep__scan, mcp__context7__resolve-library-id, mcp__context7__get-library-docs
 model: sonnet
 color: blue
 ---

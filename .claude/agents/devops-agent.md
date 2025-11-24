@@ -1,7 +1,7 @@
 ---
 name: devops
 description: DevOps and infrastructure configuration, CI/CD pipeline design, deployment strategies, monitoring setup, and infrastructure as code. Use for deployment planning, infrastructure issues, or scaling.
-tools: Bash, BashOutput, Read, Edit, Grep, TodoWrite, WebSearch, WebFetch
+tools: Bash, BashOutput, Read, Edit, Grep, TodoWrite, WebSearch, WebFetch, mcp__exa__search, mcp__context7__resolve-library-id, mcp__context7__get-library-docs
 model: sonnet
 color: yellow
 ---

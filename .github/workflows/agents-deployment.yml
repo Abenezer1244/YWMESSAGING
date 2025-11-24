@@ -1,0 +1,117 @@
+name: Automated Agent Deployment Review
+
+on:
+  deployment:
+  deployment_status:
+    environment: production
+  workflow_run:
+    workflows: ['Deploy to Render']
+    types: [completed]
+
+jobs:
+  pre-deployment-checks:
+    runs-on: ubuntu-latest
+    name: Pre-Deployment Quality Gates
+    if: github.event_name == 'deployment'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Invoke DevOps Pre-Deployment Review
+        run: |
+          echo "🚀 Running Pre-Deployment Quality Checks"
+          curl -X POST ${{ secrets.CLAUDE_WEBHOOK_URL }} \
+            -H "Authorization: Bearer ${{ secrets.CLAUDE_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "agent": "devops",
+              "event_type": "deployment",
+              "deployment_phase": "pre_deployment",
+              "environment": "${{ github.event.deployment.environment }}",
+              "repo": "${{ github.repository }}",
+              "ref": "${{ github.event.deployment.ref }}"
+            }'
+
+  post-deployment-validation:
+    runs-on: ubuntu-latest
+    name: Post-Deployment Validation
+    if: github.event.deployment_status.state == 'success'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Invoke QA Smoke Tests
+        run: |
+          echo "✅ Running Post-Deployment Smoke Tests"
+          curl -X POST ${{ secrets.CLAUDE_WEBHOOK_URL }} \
+            -H "Authorization: Bearer ${{ secrets.CLAUDE_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "agent": "qa-testing",
+              "event_type": "deployment",
+              "deployment_phase": "post_deployment",
+              "test_type": "smoke_tests",
+              "environment": "${{ github.event.deployment.environment }}",
+              "repo": "${{ github.repository }}"
+            }'
+
+      - name: Invoke DevOps Post-Deployment Review
+        run: |
+          echo "🚀 Running Post-Deployment Verification"
+          curl -X POST ${{ secrets.CLAUDE_WEBHOOK_URL }} \
+            -H "Authorization: Bearer ${{ secrets.CLAUDE_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "agent": "devops",
+              "event_type": "deployment",
+              "deployment_phase": "post_deployment",
+              "environment": "${{ github.event.deployment.environment }}",
+              "repo": "${{ github.repository }}"
+            }'
+
+  deployment-failure-alert:
+    runs-on: ubuntu-latest
+    name: Deployment Failure Alert
+    if: github.event.deployment_status.state == 'failure'
+    steps:
+      - name: Alert on Deployment Failure
+        run: |
+          echo "❌ Deployment Failed - Alerting Security & DevOps Teams"
+          curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
+            -H "Content-Type: application/json" \
+            -d '{
+              "text": "🚨 Production Deployment Failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "❌ **Deployment Failure Alert**\n\n*Environment:* production\n*Status:* Failed\n*Triggered at:* ${{ github.event.deployment_status.created_at }}\n*Description:* ${{ github.event.deployment_status.description }}"
+                  }
+                }
+              ]
+            }'
+
+  summary:
+    runs-on: ubuntu-latest
+    name: Deployment Summary
+    needs: [pre-deployment-checks, post-deployment-validation]
+    if: always()
+    steps:
+      - name: Log Deployment Status
+        run: |
+          echo "📊 Deployment Review Summary"
+          echo "Pre-deployment: ${{ needs.pre-deployment-checks.result }}"
+          echo "Post-deployment: ${{ needs.post-deployment-validation.result }}"

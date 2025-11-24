@@ -1,7 +1,7 @@
 ---
 name: product-manager
 description: Product strategy, requirements analysis, feature prioritization, roadmap planning, and user story creation. Use when defining new features, analyzing market opportunities, or creating product specifications.
-tools: Grep, Read, WebSearch, WebFetch, TodoWrite, Bash
+tools: Grep, Read, WebSearch, WebFetch, TodoWrite, Bash, mcp__exa__search, mcp__exa__search_news, mcp__context7__resolve-library-id, mcp__context7__get-library-docs
 model: sonnet
 color: purple
 ---

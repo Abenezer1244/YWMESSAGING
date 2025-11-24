@@ -1,7 +1,7 @@
 ---
 name: security-analyst
 description: Security analysis, vulnerability assessment, threat modeling, compliance audit, and security best practices. Use for security reviews, compliance checks, or threat analysis.
-tools: Read, Grep, WebSearch, WebFetch, Bash, TodoWrite
+tools: Read, Grep, WebSearch, WebFetch, Bash, TodoWrite, mcp__semgrep__scan, mcp__context7__resolve-library-id, mcp__context7__get-library-docs
 model: sonnet
 color: red
 ---

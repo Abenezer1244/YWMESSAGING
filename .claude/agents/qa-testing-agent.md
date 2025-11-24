@@ -1,7 +1,7 @@
 ---
 name: qa-testing
 description: Test planning, test case creation, bug reporting, regression testing, and quality assurance. Use when planning testing, creating test cases, or validating features.
-tools: Read, Bash, BashOutput, TodoWrite, WebSearch, Grep
+tools: Read, Bash, BashOutput, TodoWrite, WebSearch, Grep, mcp__playwright__browser_navigate, mcp__playwright__browser_click, mcp__playwright__browser_type, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_snapshot, mcp__playwright__browser_console_messages, mcp__playwright__browser_wait_for, mcp__semgrep__scan, mcp__context7__resolve-library-id, mcp__context7__get-library-docs
 model: sonnet
 color: orange
 ---
