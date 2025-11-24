@@ -148,11 +148,155 @@ Requires these environment variables:
 
 [byterover-mcp]
 
-# important
-## Additional Context
+# Specialized Agents for Team Roles
 
-always use byterover-retrive-knowledge tool to get the related context before any tasks
-always use byterover-store-knowledge to store all the critical informations after sucessful tasks
+Your project has 8 specialized agents configured to handle specific jobs. Invoke them using slash commands or direct agent references.
+
+## Available Agents
+
+### 1. 📊 Product Manager Agent
+**Purpose**: Product strategy, requirements analysis, feature prioritization, and roadmap planning
+**Invocation**: `/product-manager` or `@agent-product-manager`
+**When to use**:
+- Defining new features and user stories
+- Analyzing market opportunities
+- Prioritizing product work using RICE scoring
+- Creating product specifications and roadmaps
+**Config**: `/.claude/agents/product-manager-agent.md`
+
+### 2. 🎨 UI/UX Agent
+**Purpose**: UI/UX design review, component design, accessibility audit, and design system consistency
+**Invocation**: `/ui-ux` or `@agent-ui-ux`
+**When to use**:
+- Reviewing new UI implementations
+- Auditing accessibility compliance (WCAG 2.1)
+- Testing responsive design
+- Ensuring design system consistency
+**Config**: `/.claude/agents/ui-ux-agent.md`
+
+### 3. 🏗️ System Architecture Agent
+**Purpose**: System design, scalability analysis, architecture patterns, and technology selection
+**Invocation**: `/system-architecture` or `@agent-system-architecture`
+**When to use**:
+- Designing new systems for scale
+- Evaluating technology choices
+- Analyzing scalability concerns
+- Creating architecture decision records
+**Config**: `/.claude/agents/system-architecture-agent.md`
+
+### 4. 💻 Senior Frontend Engineer Agent
+**Purpose**: Frontend code review, component architecture, performance optimization, and testing
+**Invocation**: `/senior-frontend` or `@agent-senior-frontend`
+**When to use**:
+- Code reviews for React components
+- Performance optimization and profiling
+- Component architecture assessment
+- Testing strategy and coverage analysis
+**Config**: `/.claude/agents/senior-frontend-engineer-agent.md`
+
+### 5. 🔧 Backend Engineer Agent
+**Purpose**: Backend code review, API design, database optimization, and business logic validation
+**Invocation**: `/backend-engineer` or `@agent-backend-engineer`
+**When to use**:
+- API design and contract review
+- Database query optimization
+- Performance bottleneck analysis
+- Business logic validation
+- Security audit for backend
+**Config**: `/.claude/agents/backend-engineer-agent.md`
+
+### 6. ✅ QA Testing Agent
+**Purpose**: Test planning, test case creation, bug reporting, and quality assurance
+**Invocation**: `/qa-testing` or `@agent-qa-testing`
+**When to use**:
+- Creating comprehensive test plans
+- Designing test cases with edge cases
+- Planning test automation
+- Creating clear bug reports
+- Assessing feature quality
+**Config**: `/.claude/agents/qa-testing-agent.md`
+
+### 7. 🚀 DevOps Configuration Agent
+**Purpose**: DevOps and infrastructure configuration, CI/CD pipeline design, deployment strategies, and monitoring setup
+**Invocation**: `/devops` or `@agent-devops`
+**When to use**:
+- Designing deployment pipelines
+- Planning scaling strategies
+- Configuring monitoring and alerting
+- Creating disaster recovery plans
+- Infrastructure optimization
+**Config**: `/.claude/agents/devops-agent.md`
+
+### 8. 🔒 Security Analyst Agent
+**Purpose**: Security analysis, vulnerability assessment, threat modeling, and compliance audit
+**Invocation**: `/security` or `@agent-security-analyst`
+**When to use**:
+- Security code review and vulnerability assessment
+- Threat modeling and analysis
+- OWASP Top 10 compliance check
+- Compliance audit (GDPR, HIPAA, SOC 2)
+- Security hardening recommendations
+**Config**: `/.claude/agents/security-analyst-agent.md`
+
+---
+
+## Quick Examples
+
+**Product Planning:**
+```
+/product-manager
+
+We need to plan the 10DLC delivery tier feature. What are the key user stories and MVP components?
+```
+
+**UI/UX Review:**
+```
+/ui-ux
+
+Review the AdminSettingsPage for accessibility issues and design consistency.
+```
+
+**Architecture Decision:**
+```
+/system-architecture
+
+How should we design our messaging queue system to handle 10x growth?
+```
+
+**Code Review:**
+```
+/backend-engineer
+
+Review the SMS sending service for performance bottlenecks and database optimization.
+```
+
+**Testing Plan:**
+```
+/qa-testing
+
+Create a test plan for the authentication system including edge cases.
+```
+
+**Deployment:**
+```
+/devops
+
+Design a CI/CD pipeline for our Render deployment with monitoring.
+```
+
+**Security Audit:**
+```
+/security
+
+Conduct a security audit of the API authentication and authorization system.
+```
+
+---
+
+## Important
+
+- Always use byterover-retrive-knowledge tool to get related context before tasks
+- Always use byterover-store-knowledge to store critical information after successful tasks
 - Design review agent configuration: `/.claude/agents/design-review-agent.md`
 - Design principles checklist: `/context/design-principles.md`
 - Custom slash commands: `/context/design-review-slash-command.md`
