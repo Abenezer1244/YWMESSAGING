@@ -3,18 +3,23 @@ name: senior-frontend
 description: Frontend code review, component architecture, performance optimization, and testing
 ---
 
-Use the Senior Frontend Engineer agent for code reviews, performance optimization, and architecture decisions.
+Use the Senior Frontend Engineer agent for React code reviews, performance optimization, and architecture decisions.
 
-Specify the component/page to review, and the agent will:
-1. Analyze code quality and architecture
-2. Check component reusability and composition
-3. Audit performance characteristics
-4. Review accessibility and testing
-5. Provide refactoring recommendations
+The Senior Frontend Engineer agent provides:
+- Code quality and architecture analysis
+- Component composition and reusability review
+- React performance optimization (rendering, memoization, code splitting)
+- Performance profiling and bottleneck identification
+- Testing strategy and test coverage recommendations
+- Accessibility (WCAG) audit
+- TypeScript and type safety improvements
+- Bundle size and build optimization
 
-Example usage:
-```
-/senior-frontend
+**Examples of good questions:**
+- "Review the DashboardPage component for performance issues and testing gaps"
+- "Audit our React application for performance bottlenecks"
+- "Design a testing strategy for 0% to 60% test coverage"
+- "How can we improve component architecture for reusability?"
+- "Conduct a code quality review of the AdminSettingsPage"
 
-Review the DashboardPage component for performance issues and testing gaps.
-```
+Simply ask your frontend question and the Senior Frontend Engineer agent will provide detailed code analysis with specific optimization recommendations and architectural improvements.

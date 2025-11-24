@@ -1,20 +1,25 @@
 ---
 name: ui-ux
-description: UI/UX design review, component design, accessibility audit, and design system consistency
+description: UI/UX design review, accessibility audit, and design system consistency
 ---
 
 Use the UI/UX agent to review interfaces, audit accessibility, and improve user experience.
 
-Specify which pages/components to review, and the agent will:
-1. Analyze user experience and information architecture
-2. Review visual design consistency
-3. Audit accessibility (WCAG compliance)
-4. Test responsive design
-5. Provide specific improvement recommendations
+The UI/UX agent provides:
+- User experience and information architecture analysis
+- Visual design consistency review (design system compliance)
+- WCAG 2.1 AA accessibility audit
+- Responsive design testing (mobile, tablet, desktop)
+- Usability and interaction flow review
+- Color contrast and readability analysis
+- Navigation and wayfinding assessment
+- Accessibility remediation recommendations
 
-Example usage:
-```
-/ui-ux
+**Examples of good questions:**
+- "Review the admin settings page for accessibility issues and design consistency"
+- "Audit our application for WCAG 2.1 AA compliance"
+- "Test the dashboard page for mobile (375px), tablet (768px), and desktop (1440px) responsiveness"
+- "Improve the onboarding flow user experience"
+- "Design a consistent component library and design system"
 
-Review the admin settings page for accessibility issues and design consistency with our design system.
-```
+Simply ask your UI/UX question and the UI/UX agent will provide detailed accessibility analysis with specific remediation recommendations and design improvements.
