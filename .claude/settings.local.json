@@ -13,7 +13,13 @@
       "Bash(cat:*)",
       "Bash(netstat:*)",
       "Bash(node test_10dlc.js:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(node /tmp/test_components.js:*)",
+      "Bash(node:*)",
+      "Bash(npm ls:*)",
+      "Bash(dir:*)",
+      "Bash(npx cloc:*)",
+      "Bash(npm audit:*)"
     ],
     "deny": [],
     "ask": []
