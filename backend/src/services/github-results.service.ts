@@ -259,6 +259,17 @@ function getAgentIcon(agentType: string): string {
 }
 
 /**
+ * Post agent findings to workflow run (if associated with PR)
+ */
+export async function postWorkflowFindings(
+  context: GitHubPRContext,
+  responses: AgentResponse[]
+): Promise<boolean> {
+  // Workflow findings use same PR comment format
+  return postPRComment(context, responses);
+}
+
+/**
  * Helper: Get agent display name
  */
 function getAgentName(agentType: string): string {

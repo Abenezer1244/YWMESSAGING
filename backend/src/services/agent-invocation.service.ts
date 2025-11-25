@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { PrismaClient } from '@prisma/client';
+import { analysisCache } from './analysis-cache.service.js';
 
 const prisma = new PrismaClient();
 
@@ -244,9 +245,20 @@ Format as JSON (same structure as above).`;
 export async function invokeMultipleAgents(
   agents: string[],
   request: AgentInvocationRequest,
-  parallel: boolean = true
+  parallel: boolean = true,
+  enableCache: boolean = true
 ): Promise<AgentResponse[]> {
   console.log(`\n🤖 Invoking ${agents.length} agents (${parallel ? 'parallel' : 'sequential'})`);
+
+  // Check cache for identical analysis (based on changes summary)
+  const cacheKey = request.context?.changesSummary || request.context?.analysis || '';
+  if (enableCache && cacheKey) {
+    const cachedResults = analysisCache.get(cacheKey);
+    if (cachedResults) {
+      console.log(`🎯 Using cached results (skipped ${agents.length} agent invocations)`);
+      return cachedResults;
+    }
+  }
 
   const invocations = agents.map((agentType) =>
     invokeAgent({
@@ -270,6 +282,11 @@ export async function invokeMultipleAgents(
       }
     });
 
+    // Cache successful results
+    if (enableCache && cacheKey && responses.length > 0) {
+      analysisCache.set(cacheKey, responses);
+    }
+
     return responses;
   } else {
     // Run agents sequentially
@@ -282,6 +299,12 @@ export async function invokeMultipleAgents(
         // Continue with other agents
       }
     }
+
+    // Cache successful results
+    if (enableCache && cacheKey && results.length > 0) {
+      analysisCache.set(cacheKey, results);
+    }
+
     return results;
   }
 }
@@ -298,9 +321,7 @@ export async function storeAgentAudit(
   error?: string
 ) {
   try {
-    // Optional: Store in database for audit trail
-    // Uncomment if you have an agent_audit table in your database
-    /*
+    // Store in database for audit trail and compliance tracking
     await prisma.agentAudit.create({
       data: {
         agentType,
@@ -308,14 +329,12 @@ export async function storeAgentAudit(
         githubPrNumber: githubData.pr?.number,
         githubBranch: githubData.pr?.head?.ref,
         status,
-        findings: response?.findings || [],
-        recommendations: response?.recommendations || [],
+        findings: JSON.stringify(response?.findings || []),
+        recommendations: JSON.stringify(response?.recommendations || []),
         severity: response?.severity,
         error,
-        createdAt: new Date(),
       },
     });
-    */
     console.log(`📝 Audit logged for ${agentType}`);
   } catch (auditError: any) {
     console.error(`⚠️ Failed to store audit:`, auditError.message);
@@ -415,4 +434,18 @@ export function getAgentsForEvent(eventType: string): string[] {
     default:
       return [];
   }
+}
+
+/**
+ * Get cache statistics (for debugging/monitoring)
+ */
+export function getCacheStats() {
+  return analysisCache.getStats();
+}
+
+/**
+ * Clear analysis cache (useful for testing/deployments)
+ */
+export function clearAnalysisCache() {
+  analysisCache.clear();
 }

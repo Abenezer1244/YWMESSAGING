@@ -5,9 +5,10 @@ import {
   invokeMultipleAgents,
   getAgentsForEvent,
   combineAgentResponses,
+  storeAgentAudit,
   type AgentResponse,
 } from '../services/agent-invocation.service.js';
-import { postOrUpdatePRFindings } from '../services/github-results.service.js';
+import { postOrUpdatePRFindings, postWorkflowFindings } from '../services/github-results.service.js';
 
 /**
  * GitHub Webhook Controller
@@ -261,6 +262,17 @@ async function handlePullRequestEvent(payload: any) {
     console.log(`\n✅ All agents completed. Processing results...`);
     console.log(`   Successful responses: ${responses.length}/${agents.length}`);
 
+    // Store audit trail for each agent response
+    for (const response of responses) {
+      await storeAgentAudit(
+        response.agentType,
+        'pull_request',
+        { pr },
+        response,
+        'success'
+      );
+    }
+
     // Always attempt to post findings, even if some agents failed
     const repoOwner = pr.base?.repo?.owner?.login || 'unknown';
     const repoName = pr.base?.repo?.name || 'unknown';
@@ -348,6 +360,17 @@ async function handlePushEvent(payload: any) {
     console.log(`\n✅ All agents completed. Post-merge analysis done.`);
     console.log(`   Successful responses: ${responses.length}/${agents.length}`);
 
+    // Store audit trail for each agent response
+    for (const response of responses) {
+      await storeAgentAudit(
+        response.agentType,
+        'push',
+        { after, pusher },
+        response,
+        'success'
+      );
+    }
+
     // Send Slack notification with results
     const severityCounts = {
       critical: responses.filter((r) => r.severity === 'critical').length,
@@ -414,6 +437,36 @@ async function handleWorkflowRunEvent(payload: any) {
 
     console.log(`\n✅ Workflow analysis completed.`);
     console.log(`   Successful responses: ${responses.length}/${agents.length}`);
+
+    // Store audit trail for each agent response
+    for (const response of responses) {
+      await storeAgentAudit(
+        response.agentType,
+        'workflow_run',
+        { workflow },
+        response,
+        'success'
+      );
+    }
+
+    // Post to associated PR if workflow is linked to one
+    if (responses.length > 0 && payload.pull_requests?.length > 0) {
+      const prAssociation = payload.pull_requests[0];
+      const posted = await postWorkflowFindings(
+        {
+          repoOwner: prAssociation.base?.repo?.owner?.login || 'unknown',
+          repoName: prAssociation.base?.repo?.name || 'unknown',
+          prNumber: prAssociation.number,
+        },
+        responses
+      );
+
+      if (posted) {
+        console.log(`✅ Workflow findings posted to PR #${prAssociation.number}`);
+      } else {
+        console.warn(`⚠️ Failed to post workflow findings to PR`);
+      }
+    }
 
     // Send Slack notification
     await notifySlack({

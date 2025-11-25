@@ -420,3 +420,24 @@ model ChatMessage {
 
   @@index([conversationId])
 }
+
+// Agent audit trail for tracking all agent invocations
+model AgentAudit {
+  id                String   @id @default(cuid())
+  agentType         String   // backend-engineer, security-analyst, etc.
+  eventType         String   // pull_request, push, workflow_run
+  githubPrNumber    Int?     // PR number if applicable
+  githubBranch      String?  // Branch name
+  status            String   // success, failed
+  findings          String   @default("[]") // JSON array
+  recommendations   String   @default("[]") // JSON array
+  severity          String?  // critical, high, medium, low, info
+  error             String?  // Error message if failed
+  createdAt         DateTime @default(now())
+
+  @@index([agentType])
+  @@index([eventType])
+  @@index([status])
+  @@index([severity])
+  @@index([createdAt])
+}
