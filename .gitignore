@@ -43,3 +43,4 @@ prisma/.env
 # Testing
 coverage/
 .nyc_output/
+.env.agents
