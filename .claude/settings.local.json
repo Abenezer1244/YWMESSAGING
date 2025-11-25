@@ -46,7 +46,10 @@
       "Bash(fi)",
       "Bash(git reset:*)",
       "Bash(git restore:*)",
-      "Bash(.gitignore)"
+      "Bash(.gitignore)",
+      "Bash(git fetch:*)",
+      "Bash(git merge:*)",
+      "Bash(git rm:*)"
     ],
     "deny": [],
     "ask": []

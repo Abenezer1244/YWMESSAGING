@@ -100,11 +100,8 @@ export async function handleGitHubAgentsWebhook(
     const deliveryId = req.headers['x-github-delivery'] as string;
 
     // Get raw body for signature verification
-    // express.raw() middleware puts raw bytes in req.body as Buffer
-    // Convert Buffer to string exactly as GitHub sent it
-    const rawBody = Buffer.isBuffer(req.body)
-      ? req.body.toString('utf-8')
-      : JSON.stringify(req.body);
+    // Express should preserve raw body for webhook validation
+    const rawBody = JSON.stringify(req.body);
 
     // Debug logging to diagnose payload issues
     console.log('🔍 Webhook payload details:');
