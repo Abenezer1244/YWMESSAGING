@@ -45,6 +45,13 @@ function verifyGitHubSignature(
       .update(payload)
       .digest('hex');
 
+    // Debug: Log first 10 chars of hashes
+    console.log('🔐 Signature verification:');
+    console.log(`   Received: ${signature.substring(0, 10)}...`);
+    console.log(`   Calculated: ${hash.substring(0, 10)}...`);
+    console.log(`   Payload size: ${payload.length} bytes`);
+    console.log(`   Secret length: ${webhookSecret.length} chars`);
+
     // Constant-time comparison to prevent timing attacks
     const isValid = crypto.timingSafeEqual(
       Buffer.from(signature),
@@ -53,6 +60,8 @@ function verifyGitHubSignature(
 
     if (!isValid) {
       console.error('❌ GitHub webhook signature verification failed');
+      console.error(`   Expected: ${hash}`);
+      console.error(`   Received: ${signature}`);
       return false;
     }
 
@@ -96,6 +105,16 @@ export async function handleGitHubAgentsWebhook(
     const rawBody = Buffer.isBuffer(req.body)
       ? req.body.toString('utf-8')
       : JSON.stringify(req.body);
+
+    // Debug logging to diagnose payload issues
+    console.log('🔍 Webhook payload details:');
+    console.log(`   Body type: ${Buffer.isBuffer(req.body) ? 'Buffer' : typeof req.body}`);
+    console.log(`   Body length: ${rawBody.length} bytes`);
+    console.log(`   Signature header: ${signature}`);
+    console.log(`   Expected pattern: sha256=<hash>`);
+    if (rawBody.length < 500) {
+      console.log(`   Payload preview: ${rawBody.substring(0, 200)}`);
+    }
 
     if (!signature) {
       console.warn('⚠️ GitHub webhook missing signature header');
