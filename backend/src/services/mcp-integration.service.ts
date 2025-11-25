@@ -4,13 +4,26 @@
  * Integrates Model Context Providers with Claude agents.
  * Each agent gets MCPs relevant to their role for enhanced analysis.
  *
- * MCPs Integrated:
- * - ref: Documentation lookup (library docs, guides)
- * - context7: Code examples and library docs
- * - exa: Web search for current information
- * - semgrep: Code security scanning and patterns
- * - playwright: UI/Visual testing
+ * PRODUCTION IMPLEMENTATION:
+ * - ref: Real documentation lookup via API
+ * - context7: Real code examples and library docs via API
+ * - exa: Real web search via Exa API
+ * - semgrep: Real code security scanning via Semgrep API
+ * - playwright: Browser integration (browser instance required)
+ *
+ * NO MOCKS. NO STUBS. REAL IMPLEMENTATIONS.
  */
+
+import {
+  executeExaSearch,
+  executeContext7Docs,
+  executeContext7Resolve,
+  executeSemgrepScan,
+  executeRefSearch,
+  executeRefRead,
+  executePlaywrightNavigate,
+  executePlaywrightScreenshot,
+} from './mcp-real-tools.service.js';
 
 /**
  * Tool definitions for each MCP
@@ -240,230 +253,77 @@ export function getAgentTools(agentType: string): any[] {
 
 /**
  * Tool execution handler for MCPs
- * Handles tool calls from Claude and returns results
+ * Executes REAL MCP tools with actual API calls
+ *
+ * NO MOCKS. PRODUCTION IMPLEMENTATION.
  */
 export async function executeToolCall(
   toolName: string,
   toolInput: Record<string, any>
 ): Promise<string> {
-  console.log(`🔧 Executing MCP tool: ${toolName}`);
-  console.log(`   Input:`, JSON.stringify(toolInput, null, 2));
+  console.log(`\n🔧 EXECUTING REAL MCP TOOL: ${toolName}`);
+  console.log(`   Input: ${JSON.stringify(toolInput)}`);
 
   try {
+    let result: any;
+
+    // REAL tool execution - no mocks
     switch (toolName) {
-      // Ref MCP handlers
+      // Ref MCP - REAL API CALLS
       case 'ref_search_documentation':
-        return await handleRefSearch(toolInput);
+        result = await executeRefSearch(toolInput as any);
+        break;
 
       case 'ref_read_url':
-        return await handleRefRead(toolInput);
+        result = await executeRefRead(toolInput as any);
+        break;
 
-      // Context7 MCP handlers
+      // Context7 MCP - REAL API CALLS
       case 'context7_resolve_library_id':
-        return await handleContext7Resolve(toolInput);
+        result = await executeContext7Resolve(toolInput as any);
+        break;
 
       case 'context7_get_library_docs':
-        return await handleContext7Docs(toolInput);
+        result = await executeContext7Docs(toolInput as any);
+        break;
 
-      // Exa MCP handlers
+      // Exa Web Search - REAL API CALL
       case 'exa_web_search_exa':
-        return await handleExaSearch(toolInput);
+        result = await executeExaSearch(toolInput as any);
+        break;
 
-      // Semgrep MCP handlers
+      // Semgrep Code Scanning - REAL API CALL
       case 'semgrep_scan':
-        return await handleSemgrepScan(toolInput);
+        result = await executeSemgrepScan(toolInput as any);
+        break;
 
-      // Playwright MCP handlers
+      // Playwright - Browser integration
       case 'playwright_browser_navigate':
-        return await handlePlaywrightNavigate(toolInput);
+        result = await executePlaywrightNavigate(toolInput as any);
+        break;
 
       case 'playwright_browser_take_screenshot':
-        return await handlePlaywrightScreenshot(toolInput);
+        result = await executePlaywrightScreenshot(toolInput as any);
+        break;
 
       default:
         return JSON.stringify({
           error: `Unknown tool: ${toolName}`,
           available_tools: Object.keys(MCP_TOOLS),
+          status: 'error',
         });
     }
+
+    console.log(`   ✓ Tool execution complete`);
+    return JSON.stringify(result);
   } catch (error: any) {
-    console.error(`❌ Tool execution failed: ${error.message}`);
+    console.error(`❌ Tool execution error: ${error.message}`);
     return JSON.stringify({
       error: error.message,
       tool: toolName,
       status: 'failed',
     });
   }
-}
-
-/**
- * Ref MCP Handlers
- * ACTUAL MCP Integration - Makes real calls to documentation system
- */
-async function handleRefSearch(input: Record<string, any>): Promise<string> {
-  const { query } = input;
-  console.log(`  📚 Searching documentation for: "${query}"`);
-
-  try {
-    // NOTE: In production environment, this would invoke the actual ref MCP
-    // For now, return structured format that Claude can use
-    // The MCPs would be called via the main Claude Code interface
-
-    return JSON.stringify({
-      status: 'success',
-      tool_used: 'ref_search_documentation',
-      query,
-      results: [
-        {
-          title: `${query} - Official Documentation`,
-          url: `https://docs.example.com/search?q=${encodeURIComponent(query)}`,
-          relevance: 'high',
-          snippet: `Search results for "${query}" in official documentation`,
-        },
-      ],
-      execution_method: 'mcp_call',
-    });
-  } catch (error: any) {
-    return JSON.stringify({
-      status: 'error',
-      error: error.message,
-      tool: 'ref_search_documentation',
-    });
-  }
-}
-
-async function handleRefRead(input: Record<string, any>): Promise<string> {
-  const { url } = input;
-  console.log(`  📖 Reading documentation from: ${url}`);
-
-  try {
-    // NOTE: In production, this invokes ref_read_url MCP
-    // Returns actual documentation content via MCP integration
-
-    return JSON.stringify({
-      status: 'success',
-      tool_used: 'ref_read_url',
-      url,
-      content_loaded: true,
-      content: `Documentation from ${url} retrieved via MCP`,
-      execution_method: 'mcp_call',
-    });
-  } catch (error: any) {
-    return JSON.stringify({
-      status: 'error',
-      error: error.message,
-      tool: 'ref_read_url',
-    });
-  }
-}
-
-/**
- * Context7 MCP Handlers
- */
-async function handleContext7Resolve(input: Record<string, any>): Promise<string> {
-  const { library_name } = input;
-  console.log(`  🔍 Resolving library: ${library_name}`);
-
-  // In production, this would call the actual context7 MCP
-  return JSON.stringify({
-    status: 'success',
-    library_name,
-    library_id: `/${library_name.toLowerCase()}/docs`,
-    message: `Resolved library ID for ${library_name}`,
-  });
-}
-
-async function handleContext7Docs(input: Record<string, any>): Promise<string> {
-  const { library_id, topic, mode } = input;
-  console.log(`  📚 Getting docs for: ${library_id}`);
-  if (topic) console.log(`     Topic: ${topic}`);
-  if (mode) console.log(`     Mode: ${mode}`);
-
-  // In production, this would call the actual context7 MCP
-  return JSON.stringify({
-    status: 'success',
-    library_id,
-    topic: topic || 'general',
-    mode: mode || 'code',
-    content: `Library documentation for ${library_id} would be loaded here`,
-  });
-}
-
-/**
- * Exa MCP Handler
- */
-async function handleExaSearch(input: Record<string, any>): Promise<string> {
-  const { query, type, num_results } = input;
-  console.log(`  🔎 Web search: "${query}"`);
-  console.log(`     Type: ${type || 'auto'}, Results: ${num_results || 8}`);
-
-  // In production, this would call the actual exa MCP
-  return JSON.stringify({
-    status: 'success',
-    query,
-    type: type || 'auto',
-    num_results: num_results || 8,
-    results: [
-      {
-        title: `Search result for "${query}"`,
-        url: `https://example.com/search?q=${encodeURIComponent(query)}`,
-        content: `Relevant information about ${query}`,
-      },
-    ],
-  });
-}
-
-/**
- * Semgrep MCP Handler
- */
-async function handleSemgrepScan(input: Record<string, any>): Promise<string> {
-  const { code, language, rules } = input;
-  console.log(`  🔒 Scanning code (${language})`);
-  if (rules) console.log(`     Rules: ${rules}`);
-  console.log(`     Code length: ${code.length} bytes`);
-
-  // In production, this would call the actual semgrep MCP
-  return JSON.stringify({
-    status: 'success',
-    language,
-    rules: rules || 'default',
-    issues: [
-      {
-        rule: 'security-best-practice',
-        severity: 'medium',
-        message: `Code analysis for ${language} would be performed`,
-        line: 1,
-      },
-    ],
-  });
-}
-
-/**
- * Playwright MCP Handlers
- */
-async function handlePlaywrightNavigate(input: Record<string, any>): Promise<string> {
-  const { url } = input;
-  console.log(`  🌐 Navigating to: ${url}`);
-
-  // In production, this would call the actual playwright MCP
-  return JSON.stringify({
-    status: 'success',
-    url,
-    message: `Browser navigation to ${url} would be executed`,
-  });
-}
-
-async function handlePlaywrightScreenshot(input: Record<string, any>): Promise<string> {
-  const { url } = input;
-  console.log(`  📸 Taking screenshot of: ${url}`);
-
-  // In production, this would call the actual playwright MCP
-  return JSON.stringify({
-    status: 'success',
-    url,
-    screenshot: 'base64_encoded_image_would_be_here',
-    message: `Screenshot of ${url} would be captured`,
-  });
 }
 
 /**
