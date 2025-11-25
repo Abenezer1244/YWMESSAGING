@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import express from 'express';
 import { handleGitHubAgentsWebhook, checkGitHubWebhookHealth, } from '../controllers/github-agents.controller.js';
 const router = Router();
 /**
@@ -15,8 +16,11 @@ const router = Router();
  * - Event type in X-Github-Event header
  * - Signature in X-Hub-Signature-256 header
  * - Payload in request body
+ *
+ * CRITICAL: Using express.raw() middleware to capture raw bytes for HMAC verification
+ * This MUST be applied directly to this route to intercept the body before parsing
  */
-router.post('/webhooks/github/agents', handleGitHubAgentsWebhook);
+router.post('/webhooks/github/agents', express.raw({ type: 'application/json' }), handleGitHubAgentsWebhook);
 /**
  * GET /api/webhooks/github/agents/health
  * Health check endpoint
