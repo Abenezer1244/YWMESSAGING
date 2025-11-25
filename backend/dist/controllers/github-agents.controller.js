@@ -88,7 +88,18 @@ export async function handleGitHubAgentsWebhook(req, res) {
         console.log(`   Event Type: ${eventType}`);
         console.log(`   Delivery ID: ${deliveryId}`);
         // Parse webhook payload
-        const payload = req.body;
+        // When express.raw() is used, req.body is a Buffer/string, not parsed JSON
+        // Parse it now that we've verified the signature
+        let payload;
+        if (typeof req.body === 'string') {
+            payload = JSON.parse(req.body);
+        }
+        else if (Buffer.isBuffer(req.body)) {
+            payload = JSON.parse(req.body.toString('utf-8'));
+        }
+        else {
+            payload = req.body; // Already parsed (shouldn't happen with express.raw())
+        }
         // Log webhook details
         if (eventType === 'workflow_run') {
             console.log(`   Workflow: ${payload.workflow_run?.name}`);
