@@ -25,6 +25,8 @@ export interface Config {
   excludePaths: string[];
   logLevel: string;
   requestTimeout: number;
+  apiEndpoint: string;
+  apiKey: string;
 }
 
 /**
@@ -114,6 +116,8 @@ export class ConfigManager {
       excludePaths: ['node_modules', '.git', 'dist'],
       logLevel: 'info',
       requestTimeout: 10000,
+      apiEndpoint: process.env.AGENT_API_ENDPOINT || 'http://localhost:3000',
+      apiKey: process.env.AGENT_API_KEY || '',
     };
   }
 }

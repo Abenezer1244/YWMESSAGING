@@ -29,12 +29,13 @@ export interface AnalysisResult {
 export interface AnalysisIssue {
   message: string;
   severity: 'error' | 'warning' | 'info' | 'hint';
-  line: number;
-  column: number;
+  line?: number;
+  column?: number;
   endLine?: number;
   endColumn?: number;
   code?: string;
   agent: string;
+  suggestion?: string;
   fixSuggestion?: string;
   relatedInformation?: Array<{
     message: string;
@@ -176,12 +177,15 @@ export class DiagnosticsHandler {
       const severity = this.getSeverityLevel(issue.severity);
 
       // Create range (0-indexed in LSP)
+      // Use defaults if line/column not provided
+      const line = issue.line || 1;
+      const column = issue.column || 1;
+      const endLine = issue.endLine || line;
+      const endColumn = issue.endColumn || column + 1;
+
       const range: Range = {
-        start: Position.create(issue.line - 1, issue.column - 1),
-        end: Position.create(
-          issue.endLine ? issue.endLine - 1 : issue.line - 1,
-          issue.endColumn ? issue.endColumn - 1 : issue.column
-        ),
+        start: Position.create(line - 1, column - 1),
+        end: Position.create(endLine - 1, endColumn - 1),
       };
 
       // Build message with agent info
@@ -190,8 +194,10 @@ export class DiagnosticsHandler {
         `**Agent**: ${issue.agent}`,
       ];
 
-      if (issue.fixSuggestion) {
-        messageLines.push(`**Fix**: ${issue.fixSuggestion}`);
+      // Add suggestion or fixSuggestion if available
+      const suggestion = issue.fixSuggestion || issue.suggestion;
+      if (suggestion) {
+        messageLines.push(`**Suggestion**: ${suggestion}`);
       }
 
       const message = messageLines.join('\n');

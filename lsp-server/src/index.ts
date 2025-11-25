@@ -26,6 +26,7 @@ import { configManager } from './config';
 import { hoverProvider } from './hover';
 import { diagnosticsHandler } from './diagnostics';
 import { codeActionsProvider } from './codeActions';
+import { analysisIntegration } from './analysisIntegration';
 
 /**
  * Create connection (IPC by default for LSP)
@@ -126,6 +127,17 @@ connection.onInitialized(() => {
     // Initialize handlers with connection
     diagnosticsHandler.setConnection(connection);
     logger.debug('Diagnostics handler initialized with connection');
+
+    // Configure analysis integration
+    try {
+      const config = configManager.getConfig();
+      analysisIntegration.configure(config.apiEndpoint, config.apiKey);
+      logger.info('✅ Analysis integration configured', {
+        endpoint: config.apiEndpoint,
+      });
+    } catch (error) {
+      logger.warn('Failed to configure analysis integration', error instanceof Error ? error : new Error(String(error)));
+    }
 
     // Watch configuration changes if supported
     if (hasConfigurationCapability) {
@@ -292,51 +304,79 @@ connection.onRequest('custom/clearCache', async () => {
 /**
  * Analyze document
  *
- * When analysis service is integrated:
- * 1. This function will receive file content from documents
- * 2. Send to analysis service via IPC/socket
- * 3. Receive results from analysis service
- * 4. Publish diagnostics to client
- *
- * For now: publishes empty diagnostics as placeholder
+ * Invokes analysis service to analyze file and publishes diagnostics.
+ * Flow:
+ * 1. Check if file should be analyzed (file extension)
+ * 2. Get file content and metadata
+ * 3. Invoke analysis service via API
+ * 4. Convert results to diagnostics
+ * 5. Publish diagnostics to client
  */
 async function analyzeDocument(doc: any): Promise<void> {
   try {
     const startTime = Date.now();
     logger.debug('Analyzing document', { uri: doc.uri });
 
-    // TODO: Integration point with analysis-service
-    // Example flow:
-    // const fileContent = doc.getText();
-    // const results = await analysisService.analyzeFile({
-    //   content: fileContent,
-    //   uri: doc.uri,
-    //   agents: configManager.getAgents(),
-    // });
-    // const diagnostics = convertResultsToDiagnostics(results);
+    // Check if analysis is configured
+    if (!analysisIntegration.isReady()) {
+      logger.debug('Analysis integration not configured, skipping', { uri: doc.uri });
+      return;
+    }
 
-    // For now: empty diagnostics (placeholder)
-    const diagnostics: any[] = [];
+    // Extract file path from URI
+    const filePath = doc.uri.startsWith('file://') ? doc.uri.substring(7) : doc.uri;
+    const fileName = filePath.split(/[\\\/]/).pop() || 'unknown';
+
+    // Check if file should be analyzed
+    if (!analysisIntegration.shouldAnalyzeFile(filePath)) {
+      logger.debug('File not in analyzable formats, skipping', { fileName });
+      return;
+    }
+
+    // Get file content
+    const fileContent = doc.getText();
+    const language = analysisIntegration.detectLanguage(filePath);
+    const agents = configManager.getAgents();
+
+    if (agents.length === 0) {
+      logger.debug('No agents configured, skipping analysis', { fileName });
+      return;
+    }
+
+    // Invoke analysis service
+    const analysisResults = await analysisIntegration.analyzeFile({
+      fileContent,
+      fileName,
+      language,
+      agents: agents.map((a) => a as string),
+    });
+
+    // Convert results to issues
+    const issues = analysisIntegration.convertToIssues(analysisResults.results);
 
     // Publish diagnostics using handler
     await diagnosticsHandler.publishDiagnostics(
       doc.uri,
       {
         uri: doc.uri,
-        issues: [],
+        issues,
         duration: Date.now() - startTime,
       },
       hasDiagnosticRelatedInformationCapability
     );
 
     const duration = Date.now() - startTime;
-    logger.timeLog('Document analysis completed', duration, { uri: doc.uri });
+    logger.timeLog('Document analysis completed', duration, {
+      uri: doc.uri,
+      issuesCount: issues.length,
+    });
 
     // Send analysis complete notification to client
     (connection as any).sendNotification('custom/analysisComplete', {
       uri: doc.uri,
-      issuesCount: diagnostics.length,
+      issuesCount: issues.length,
       duration,
+      timestamp: analysisResults.timestamp,
     });
   } catch (error) {
     logger.error('Error analyzing document', error instanceof Error ? error : new Error(String(error)));
