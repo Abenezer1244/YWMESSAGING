@@ -117,7 +117,7 @@ export class CommunicationError extends AppError {
  * Timeout errors
  */
 export class TimeoutError extends AppError {
-  constructor(message: string, timeoutMs: number) {
+  constructor(message: string, _timeoutMs?: number) {
     super(
       message,
       'TIMEOUT_ERROR',
