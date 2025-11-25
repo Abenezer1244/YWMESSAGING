@@ -85,6 +85,10 @@ const AGENTS = {
     throw new Error(`Unknown agent type: ${agentType}`);
   }
 
+  if (!githubData) {
+    throw new Error(`Missing githubData for ${eventType} event`);
+  }
+
   let basePrompt = `${agent.prompt}\n\n`;
 
   // Build context based on event type
@@ -126,9 +130,9 @@ Format your response as JSON:
 Review the following code push to main branch:
 
 **Commit Information:**
-- SHA: ${githubData.after?.substring(0, 7) || 'unknown'}
-- Author: ${githubData.pusher?.name || 'unknown'}
-- Commits: ${githubData.commits?.length || 0}
+- SHA: ${githubData?.after?.substring(0, 7) || 'unknown'}
+- Author: ${githubData?.pusher?.name || 'unknown'}
+- Commits: ${githubData?.commits?.length || 0}
 
 **Analysis:**
 ${context.analysis || 'Code analysis pending...'}
