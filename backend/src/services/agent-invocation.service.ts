@@ -163,6 +163,9 @@ Format as JSON (same structure as above).`;
 
   try {
     console.log(`\n🤖 Invoking ${agentType} agent...`);
+    console.log(`   API Key present: ${apiKey ? 'YES' : 'NO'}`);
+    console.log(`   API Key length: ${apiKey ? apiKey.length : 0} chars`);
+    console.log(`   First 5 chars: ${apiKey ? apiKey.substring(0, 5) : 'NONE'}...`);
 
     const prompt = buildAgentPrompt(agentType, eventType, context, githubData);
 
@@ -224,7 +227,14 @@ Format as JSON (same structure as above).`;
 
     return agentResponse;
   } catch (error: any) {
-    console.error(`❌ Error invoking ${agentType} agent:`, error.message);
+    console.error(`❌ Error invoking ${agentType} agent:`);
+    console.error(`   Status: ${error.response?.status || 'N/A'}`);
+    console.error(`   Status Text: ${error.response?.statusText || 'N/A'}`);
+    console.error(`   Message: ${error.message}`);
+    console.error(`   URL: ${error.config?.url || 'N/A'}`);
+    if (error.response?.data) {
+      console.error(`   Response: ${JSON.stringify(error.response.data)}`);
+    }
     throw new Error(`Agent invocation failed: ${error.message}`);
   }
 }
