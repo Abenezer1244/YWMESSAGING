@@ -15,6 +15,7 @@ import analyticsRoutes from './routes/analytics.routes.js';
 import billingRoutes from './routes/billing.routes.js';
 import numbersRoutes from './routes/numbers.routes.js';
 import webhookRoutes from './routes/webhook.routes.js';
+import gitHubAgentsRoutes from './routes/github-agents.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import chatRoutes from './routes/chat.routes.js';
 import schedulerRoutes from './routes/scheduler.routes.js';
@@ -175,6 +176,9 @@ app.get('/api/csrf-token', csrfProtection, (req, res) => {
 });
 // Webhook routes (must be after CSRF protection for security)
 app.use('/api', webhookRoutes);
+// GitHub Agents webhook routes (automated agent invocation from CI/CD)
+// No authentication needed - signature verified in handler
+app.use('/api', gitHubAgentsRoutes);
 // Public auth routes with rate limiting
 app.use('/api/auth', authLimiter, authRoutes);
 // Protected API Routes - JWT-based, no CSRF needed
