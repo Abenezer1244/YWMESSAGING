@@ -1,6 +1,12 @@
 import axios from 'axios';
 import { PrismaClient } from '@prisma/client';
 import { analysisCache } from './analysis-cache.service.js';
+import {
+  getAgentTools,
+  executeToolCall,
+  buildToolsArray,
+  logMcpStats,
+} from './mcp-integration.service.js';
 
 const prisma = new PrismaClient();
 
@@ -152,8 +158,16 @@ Format as JSON (same structure as above).`;
 }
 
 /**
- * Invoke a single agent via Claude API
- */export async function invokeAgent(
+ * Invoke a single agent via Claude API with MCP tools
+ *
+ * This implements a proper agentic loop:
+ * 1. Call Claude with MCPs as tools
+ * 2. If Claude uses a tool, execute it
+ * 3. Add tool result back to conversation
+ * 4. Repeat until Claude outputs final response
+ * 5. Parse and return the response
+ */
+export async function invokeAgent(
   request: AgentInvocationRequest
 ): Promise<AgentResponse> {
   const { agentType, eventType, context, githubData } = request;
@@ -164,49 +178,132 @@ Format as JSON (same structure as above).`;
   }
 
   try {
-    console.log(`\n🤖 Invoking ${agentType} agent...`);
+    console.log(`\n🤖 Invoking ${agentType} agent with MCPs...`);
+
+    // Log MCP configuration for this agent
+    logMcpStats(agentType);
 
     const prompt = buildAgentPrompt(agentType, eventType, context, githubData);
+    const tools = buildToolsArray(agentType);
 
-    // Call Claude API
-    const response = await axios.post(
-      'https://api.anthropic.com/v1/messages',
+    // Initialize message history with the user prompt
+    const messages: any[] = [
       {
-        model: 'claude-sonnet-4-5-20250929',
-        max_tokens: 1024,
-        messages: [
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
+        role: 'user',
+        content: prompt,
       },
-      {
-        headers: {
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'content-type': 'application/json',
+    ];
+
+    // Agentic loop - continue until no tool use
+    let iterations = 0;
+    const maxIterations = 10; // Prevent infinite loops
+    let finalResponse: any = null;
+
+    while (iterations < maxIterations) {
+      iterations++;
+      console.log(`\n   🔄 Iteration ${iterations}/${maxIterations}`);
+
+      // Call Claude API
+      const apiResponse = await axios.post(
+        'https://api.anthropic.com/v1/messages',
+        {
+          model: 'claude-sonnet-4-5-20250929',
+          max_tokens: 2048,
+          tools: tools.length > 0 ? tools : undefined,
+          messages,
         },
+        {
+          headers: {
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+            'content-type': 'application/json',
+          },
+        }
+      );
+
+      const response = apiResponse.data;
+      console.log(`   Stop reason: ${response.stop_reason}`);
+
+      // Add assistant response to messages
+      const assistantContent = response.content;
+      messages.push({
+        role: 'assistant',
+        content: assistantContent,
+      });
+
+      // Check stop reason
+      if (response.stop_reason === 'end_turn') {
+        // Agent is done - extract text response
+        const textContent = assistantContent.find((c: any) => c.type === 'text');
+        if (textContent) {
+          finalResponse = textContent.text;
+        }
+        console.log(`   ✅ Agent completed (end_turn)`);
+        break;
+      } else if (response.stop_reason === 'tool_use') {
+        // Agent used a tool - execute it and continue
+        const toolUseBlocks = assistantContent.filter(
+          (c: any) => c.type === 'tool_use'
+        );
+        console.log(`   🔧 Agent used ${toolUseBlocks.length} tool(s)`);
+
+        // Execute each tool
+        const toolResults: any[] = [];
+        for (const toolUse of toolUseBlocks) {
+          const { id, name, input } = toolUse;
+          console.log(`      Executing: ${name}`);
+
+          // Execute the tool
+          const result = await executeToolCall(name, input);
+
+          // Add tool result to messages
+          toolResults.push({
+            type: 'tool_result',
+            tool_use_id: id,
+            content: result,
+          });
+
+          console.log(`      ✓ Tool result added to context`);
+        }
+
+        // Add all tool results in a single user message
+        messages.push({
+          role: 'user',
+          content: toolResults,
+        });
+      } else {
+        // Unknown stop reason
+        console.log(`   ⚠️ Unknown stop reason: ${response.stop_reason}`);
+        break;
       }
-    );
+    }
 
-    // Extract response
-    const responseContent = response.data.content[0]?.text || '';
+    if (iterations >= maxIterations) {
+      console.warn(
+        `⚠️ Agent hit maximum iterations (${maxIterations}), stopping`
+      );
+    }
 
-    // Parse JSON response
+    // Parse final response
     let parsedResponse: any;
     try {
       // Extract JSON from response (might be wrapped in markdown code blocks)
-      const jsonMatch = responseContent.match(/\{[\s\S]*\}/);
-      parsedResponse = jsonMatch ? JSON.parse(jsonMatch[0]) : {};
+      if (finalResponse) {
+        const jsonMatch = finalResponse.match(/\{[\s\S]*\}/);
+        parsedResponse = jsonMatch ? JSON.parse(jsonMatch[0]) : {};
+      } else {
+        parsedResponse = {};
+      }
     } catch (parseError) {
       console.warn(`⚠️ Failed to parse agent response as JSON:`, parseError);
       parsedResponse = {
-        findings: [responseContent],
+        findings: finalResponse
+          ? [finalResponse]
+          : ['Analysis completed without findings'],
         recommendations: [],
         severity: 'info',
         summary: 'Analysis complete',
-        details: responseContent,
+        details: finalResponse || 'No details available',
       };
     }
 
@@ -216,11 +313,11 @@ Format as JSON (same structure as above).`;
       recommendations: parsedResponse.recommendations || [],
       severity: parsedResponse.severity || 'info',
       summary: parsedResponse.summary || 'No summary provided',
-      details: parsedResponse.details || responseContent,
+      details: parsedResponse.details || finalResponse || 'No details',
       timestamp: new Date(),
     };
 
-    console.log(`✅ ${agentType} agent completed`);
+    console.log(`✅ ${agentType} agent completed (${iterations} iterations)`);
     console.log(`   Severity: ${agentResponse.severity}`);
     console.log(`   Findings: ${agentResponse.findings.length}`);
 
@@ -231,7 +328,6 @@ Format as JSON (same structure as above).`;
     console.error(`   Status Text: ${error.response?.statusText || 'N/A'}`);
     console.error(`   Message: ${error.message}`);
     console.error(`   URL: ${error.config?.url || 'N/A'}`);
-    console.error(`   Headers: ${JSON.stringify(error.config?.headers || {})}`);
     if (error.response?.data) {
       console.error(`   Response Body: ${JSON.stringify(error.response.data)}`);
     }
