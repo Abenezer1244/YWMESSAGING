@@ -85,6 +85,10 @@ const AGENTS = {
     throw new Error(`Unknown agent type: ${agentType}`);
   }
 
+  if (!githubData) {
+    throw new Error(`Missing githubData for ${eventType} event`);
+  }
+
   let basePrompt = `${agent.prompt}\n\n`;
 
   // Build context based on event type
@@ -126,12 +130,9 @@ Format your response as JSON:
 Review the following code push to main branch:
 
 **Commit Information:**
-- SHA: ${githubData.commit.after?.substring(0, 7) || 'unknown'}
-- Author: ${githubData.pusher?.name || 'unknown'}
-- Branch: ${githubData.ref?.replace('refs/heads/', '') || 'unknown'}
-
-**Commit Message:**
-${githubData.commit.message || 'No message provided'}
+- SHA: ${githubData?.after?.substring(0, 7) || 'unknown'}
+- Author: ${githubData?.pusher?.name || 'unknown'}
+- Commits: ${githubData?.commits?.length || 0}
 
 **Analysis:**
 ${context.analysis || 'Code analysis pending...'}
@@ -170,7 +171,7 @@ Format as JSON (same structure as above).`;
     const response = await axios.post(
       'https://api.anthropic.com/v1/messages',
       {
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-sonnet-4-5-20250929',
         max_tokens: 1024,
         messages: [
           {
@@ -224,7 +225,15 @@ Format as JSON (same structure as above).`;
 
     return agentResponse;
   } catch (error: any) {
-    console.error(`❌ Error invoking ${agentType} agent:`, error.message);
+    console.error(`❌ Error invoking ${agentType} agent:`);
+    console.error(`   Status: ${error.response?.status || 'N/A'}`);
+    console.error(`   Status Text: ${error.response?.statusText || 'N/A'}`);
+    console.error(`   Message: ${error.message}`);
+    console.error(`   URL: ${error.config?.url || 'N/A'}`);
+    console.error(`   Headers: ${JSON.stringify(error.config?.headers || {})}`);
+    if (error.response?.data) {
+      console.error(`   Response Body: ${JSON.stringify(error.response.data)}`);
+    }
     throw new Error(`Agent invocation failed: ${error.message}`);
   }
 }
