@@ -1,0 +1,216 @@
+{
+  "name": "agent-analyzer",
+  "displayName": "Agent Analyzer",
+  "description": "Real-time code analysis with 8 specialized AI agents (backend, frontend, security, design, QA, architecture, DevOps, product)",
+  "version": "1.0.0",
+  "publisher": "koinonia-yw",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Abenezer1244/YWMESSAGING.git",
+    "directory": "vscode-extension"
+  },
+  "homepage": "https://github.com/Abenezer1244/YWMESSAGING",
+  "bugs": {
+    "url": "https://github.com/Abenezer1244/YWMESSAGING/issues"
+  },
+  "icon": "media/icon.png",
+  "engines": {
+    "vscode": "^1.84.0",
+    "node": ">=18.0.0"
+  },
+  "categories": [
+    "Linters",
+    "Programming Languages",
+    "AI"
+  ],
+  "keywords": [
+    "code-analysis",
+    "ai",
+    "agents",
+    "testing",
+    "security",
+    "performance",
+    "code-quality"
+  ],
+  "activationEvents": [
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact",
+    "onLanguage:javascriptreact",
+    "onCommand:agent-analyzer.start",
+    "workspaceContains:package.json"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "agent-analyzer.start",
+        "title": "Agent Analyzer: Start Analysis",
+        "category": "Agent Analyzer"
+      },
+      {
+        "command": "agent-analyzer.stop",
+        "title": "Agent Analyzer: Stop Analysis",
+        "category": "Agent Analyzer"
+      },
+      {
+        "command": "agent-analyzer.analyzeFile",
+        "title": "Agent Analyzer: Analyze Current File",
+        "category": "Agent Analyzer"
+      },
+      {
+        "command": "agent-analyzer.clearCache",
+        "title": "Agent Analyzer: Clear Analysis Cache",
+        "category": "Agent Analyzer"
+      },
+      {
+        "command": "agent-analyzer.showStats",
+        "title": "Agent Analyzer: Show Statistics",
+        "category": "Agent Analyzer"
+      },
+      {
+        "command": "agent-analyzer.openSettings",
+        "title": "Agent Analyzer: Open Settings",
+        "category": "Agent Analyzer"
+      }
+    ],
+    "configuration": {
+      "title": "Agent Analyzer",
+      "properties": {
+        "agent-analyzer.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable/disable Agent Analyzer"
+        },
+        "agent-analyzer.apiEndpoint": {
+          "type": "string",
+          "default": "http://localhost:3000/api",
+          "description": "Backend API endpoint for agent invocations"
+        },
+        "agent-analyzer.apiKey": {
+          "type": "string",
+          "description": "API key for authentication (use env:AGENT_API_KEY in settings)",
+          "markdownDescription": "API key for authentication. Use `${env:AGENT_API_KEY}` to reference environment variable"
+        },
+        "agent-analyzer.agents": {
+          "type": "array",
+          "default": [
+            "backend-engineer",
+            "senior-frontend",
+            "security-analyst",
+            "design-review",
+            "qa-testing"
+          ],
+          "items": {
+            "type": "string",
+            "enum": [
+              "backend-engineer",
+              "senior-frontend",
+              "security-analyst",
+              "design-review",
+              "qa-testing",
+              "system-architecture",
+              "devops",
+              "product-manager"
+            ]
+          },
+          "description": "List of agents to run on code analysis"
+        },
+        "agent-analyzer.analysisDelay": {
+          "type": "number",
+          "default": 2000,
+          "minimum": 500,
+          "maximum": 10000,
+          "description": "Delay (ms) after file save before starting analysis (debounce)"
+        },
+        "agent-analyzer.enableCache": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable caching of analysis results"
+        },
+        "agent-analyzer.cacheDuration": {
+          "type": "number",
+          "default": 86400000,
+          "description": "Cache duration in milliseconds (default: 24 hours)"
+        },
+        "agent-analyzer.maxFileSize": {
+          "type": "number",
+          "default": 10485760,
+          "description": "Maximum file size to analyze in bytes (default: 10MB)"
+        },
+        "agent-analyzer.excludePaths": {
+          "type": "array",
+          "default": [
+            "node_modules",
+            ".git",
+            "dist",
+            "build",
+            ".next",
+            "out",
+            "coverage"
+          ],
+          "description": "Paths to exclude from analysis"
+        },
+        "agent-analyzer.analyzeOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically analyze files when saved"
+        },
+        "agent-analyzer.logLevel": {
+          "type": "string",
+          "default": "info",
+          "enum": [
+            "debug",
+            "info",
+            "warn",
+            "error"
+          ],
+          "description": "Logging level"
+        },
+        "agent-analyzer.autoFixEnabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable automatic fixes (experimental)"
+        }
+      }
+    },
+    "keybindings": [
+      {
+        "command": "agent-analyzer.analyzeFile",
+        "key": "ctrl+shift+a",
+        "mac": "cmd+shift+a",
+        "when": "editorTextFocus && editorLangId =~ /^(javascript|typescript|typescriptreact|javascriptreact)$/"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --platform=node --target=es2020",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+    "test-compile": "tsc -p ./",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "dev": "npm run esbuild-watch"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^8.1.0",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.84.0",
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "typescript": "^5.3.3",
+    "esbuild": "^0.19.10",
+    "@vscode/test-electron": "^2.3.8",
+    "mocha": "^10.2.0",
+    "@types/mocha": "^10.0.6"
+  }
+}

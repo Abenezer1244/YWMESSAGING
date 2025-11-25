@@ -1,0 +1,39 @@
+{
+  "name": "agent-analyzer-service",
+  "displayName": "Agent Analyzer Analysis Service",
+  "description": "Real-time code analysis service with file watching and agent orchestration",
+  "version": "1.0.0",
+  "publisher": "koinonia-yw",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Abenezer1244/YWMESSAGING.git",
+    "directory": "analysis-service"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "main": "./out/index.js",
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "build": "npm run compile",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "chokidar": "^3.5.3",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "typescript": "^5.3.3",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.8",
+    "ts-jest": "^29.1.1"
+  }
+}
