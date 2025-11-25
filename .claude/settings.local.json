@@ -49,7 +49,12 @@
       "Bash(.gitignore)",
       "Bash(git fetch:*)",
       "Bash(git merge:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(done)",
+      "mcp__Ref__ref_search_documentation",
+      "mcp__exa__get_code_context_exa",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs"
     ],
     "deny": [],
     "ask": []
