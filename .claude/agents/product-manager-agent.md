@@ -1,7 +1,7 @@
 ---
 name: product-manager
 description: Product strategy, requirements analysis, feature prioritization, roadmap planning, and user story creation. Use when defining new features, analyzing market opportunities, or creating product specifications.
-tools: Grep, Read, WebSearch, WebFetch, TodoWrite, Bash, mcp__exa__search, mcp__exa__search_news, mcp__context7__resolve-library-id, mcp__context7__get-library-docs
+tools: Read, Edit, MultiEdit, Write, Grep, Bash, BashOutput, TodoWrite, WebFetch, WebSearch, Glob, LS, NotebookEdit, KillBash, ListMcpResourcesTool, ReadMcpResourceTool, mcp__Ref__ref_search_documentation, mcp__Ref__ref_read_url, mcp__exa__web_search_exa, mcp__exa__get_code_context_exa, mcp__playwright__browser_navigate, mcp__playwright__browser_click, mcp__playwright__browser_type, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_snapshot, mcp__playwright__browser_console_messages, mcp__playwright__browser_wait_for, mcp__playwright__browser_resize, mcp__playwright__browser_hover, mcp__playwright__browser_select_option, mcp__playwright__browser_close, mcp__playwright__browser_tab_list, mcp__playwright__browser_tab_new, mcp__playwright__browser_tab_select, mcp__playwright__browser_tab_close, mcp__semgrep__scan, mcp__context7__resolve-library-id, mcp__context7__get-library-docs
 model: sonnet
 color: purple
 ---
