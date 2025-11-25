@@ -45,6 +45,13 @@ function verifyGitHubSignature(
       .update(payload)
       .digest('hex');
 
+    // Debug: Log first 10 chars of hashes
+    console.log('🔐 Signature verification:');
+    console.log(`   Received: ${signature.substring(0, 10)}...`);
+    console.log(`   Calculated: ${hash.substring(0, 10)}...`);
+    console.log(`   Payload size: ${payload.length} bytes`);
+    console.log(`   Secret length: ${webhookSecret.length} chars`);
+
     // Constant-time comparison to prevent timing attacks
     const isValid = crypto.timingSafeEqual(
       Buffer.from(signature),
@@ -53,6 +60,8 @@ function verifyGitHubSignature(
 
     if (!isValid) {
       console.error('❌ GitHub webhook signature verification failed');
+      console.error(`   Expected: ${hash}`);
+      console.error(`   Received: ${signature}`);
       return false;
     }
 
@@ -94,6 +103,16 @@ export async function handleGitHubAgentsWebhook(
     // Express should preserve raw body for webhook validation
     const rawBody = JSON.stringify(req.body);
 
+    // Debug logging to diagnose payload issues
+    console.log('🔍 Webhook payload details:');
+    console.log(`   Body type: ${Buffer.isBuffer(req.body) ? 'Buffer' : typeof req.body}`);
+    console.log(`   Body length: ${rawBody.length} bytes`);
+    console.log(`   Signature header: ${signature}`);
+    console.log(`   Expected pattern: sha256=<hash>`);
+    if (rawBody.length < 500) {
+      console.log(`   Payload preview: ${rawBody.substring(0, 200)}`);
+    }
+
     if (!signature) {
       console.warn('⚠️ GitHub webhook missing signature header');
       res.status(400).json({ error: 'Missing signature header' });
@@ -121,7 +140,16 @@ export async function handleGitHubAgentsWebhook(
     console.log(`   Delivery ID: ${deliveryId}`);
 
     // Parse webhook payload
-    const payload = req.body as any;
+    // When express.raw() is used, req.body is a Buffer/string, not parsed JSON
+    // Parse it now that we've verified the signature
+    let payload: any;
+    if (typeof req.body === 'string') {
+      payload = JSON.parse(req.body);
+    } else if (Buffer.isBuffer(req.body)) {
+      payload = JSON.parse(req.body.toString('utf-8'));
+    } else {
+      payload = req.body; // Already parsed (shouldn't happen with express.raw())
+    }
 
     // Log webhook details
     if (eventType === 'workflow_run') {
