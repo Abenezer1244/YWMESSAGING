@@ -57,19 +57,31 @@ export class HoverProvider {
   public getWordAtPosition(document: TextDocument, position: Position): string {
     try {
       const text = document.getText();
-      const offset = document.offsetAt(position);
+
+      // Calculate offset from position (line and character)
+      const lines = text.split('\n');
+      let offset = 0;
+      for (let i = 0; i < Math.min(position.line, lines.length); i++) {
+        const line = lines[i];
+        offset += (line ? line.length : 0) + 1; // +1 for \n
+      }
+      offset += position.character;
 
       // Find word boundaries
       let start = offset;
       let end = offset;
 
       // Move start backwards to find word start
-      while (start > 0 && this.isWordCharacter(text[start - 1])) {
+      while (start > 0) {
+        const char = text[start - 1];
+        if (!char || !this.isWordCharacter(char)) break;
         start--;
       }
 
       // Move end forwards to find word end
-      while (end < text.length && this.isWordCharacter(text[end])) {
+      while (end < text.length) {
+        const char = text[end];
+        if (!char || !this.isWordCharacter(char)) break;
         end++;
       }
 
@@ -86,10 +98,13 @@ export class HoverProvider {
   public getLineAtPosition(document: TextDocument, position: Position): string {
     try {
       const text = document.getText();
-      const offset = document.offsetAt(position);
-      const lineStart = text.lastIndexOf('\n', offset) + 1;
-      const lineEnd = text.indexOf('\n', offset);
-      return text.substring(lineStart, lineEnd === -1 ? text.length : lineEnd);
+      const lines = text.split('\n');
+
+      if (position.line >= 0 && position.line < lines.length) {
+        const line = lines[position.line];
+        return line || '';
+      }
+      return '';
     } catch (error) {
       logger.error('Error getting line at position', error);
       return '';

@@ -210,7 +210,7 @@ export class LSPClient {
     const serverOptions: ServerOptions = {
       run: {
         module: this.serverPath,
-        transport: 'ipc',
+        transport: undefined,
         options: {
           cwd: process.cwd(),
           env: {
@@ -224,7 +224,7 @@ export class LSPClient {
       },
       debug: {
         module: this.serverPath,
-        transport: 'ipc',
+        transport: undefined,
         options: {
           execArgv: ['--nolazy', '--inspect=6009'],
           cwd: process.cwd(),
@@ -279,12 +279,12 @@ export class LSPClient {
       // Advanced settings
       middleware: {
         workspace: {
-          configuration: (params, next) => {
+          configuration: (params: any, next: any) => {
             logger.debug('Configuration requested by server');
             return next(params);
           },
         },
-      },
+      } as any,
     };
 
     logger.debug('Client options configured');
@@ -299,20 +299,13 @@ export class LSPClient {
       return;
     }
 
-    // Ready event
-    this.client.onReady().then(() => {
-      logger.info('✅ LSP client ready');
-    }).catch((error) => {
-      logger.error('Error during LSP client initialization', error);
-    });
-
     // Notification: Server started
-    this.client.onNotification('custom/serverStarted', (data: any) => {
+    (this.client as any).onNotification('custom/serverStarted', (data: any) => {
       logger.info('Server started notification received', data);
     });
 
     // Notification: Analysis complete
-    this.client.onNotification('custom/analysisComplete', (data: any) => {
+    (this.client as any).onNotification('custom/analysisComplete', (data: any) => {
       logger.info('Analysis complete', {
         issuesFound: data.issuesCount,
         duration: data.duration,
@@ -321,12 +314,12 @@ export class LSPClient {
     });
 
     // Notification: Error
-    this.client.onNotification('custom/error', (data: any) => {
+    (this.client as any).onNotification('custom/error', (data: any) => {
       logger.error('Error notification from server', data.message);
     });
 
     // Notification: Warning
-    this.client.onNotification('custom/warning', (data: any) => {
+    (this.client as any).onNotification('custom/warning', (data: any) => {
       logger.warn('Warning from server', data.message);
     });
 

@@ -15,14 +15,6 @@ import {
 import { logger } from './logger';
 
 /**
- * TextDocument interface (compatible with vscode-languageserver)
- */
-interface TextDocument {
-  uri: string;
-  getText(range?: any): string;
-}
-
-/**
  * Analysis result interface
  */
 export interface AnalysisResult {

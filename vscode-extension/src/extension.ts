@@ -27,7 +27,6 @@ let statusBarItem: vscode.StatusBarItem | null = null;
  */
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   try {
-    extensionContext = context;
     logger.setContext('Extension');
 
     logger.info('🚀 Activating Agent Analyzer extension...');

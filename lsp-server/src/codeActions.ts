@@ -95,7 +95,8 @@ export class CodeActionsProvider {
 
       // Extract agent and severity from code
       const code = diagnostic.code ? String(diagnostic.code) : 'unknown/unknown';
-      const [agent, severity] = code.split('/');
+      const codeParts = code.split('/');
+      const severity = codeParts[1] || 'unknown';
 
       // Generate actions based on diagnostic
       if (diagnostic.message.includes('unused')) {
@@ -119,7 +120,7 @@ export class CodeActionsProvider {
       }
 
       // Add source action for running all diagnostics
-      actions.push(this.createSourceAction(document, agent));
+      actions.push(this.createSourceAction(document, codeParts[0] || 'analyzer'));
 
       return actions;
     } catch (error) {
@@ -133,13 +134,14 @@ export class CodeActionsProvider {
    */
   private createRemoveLineAction(document: TextDocument, diagnostic: Diagnostic): CodeAction {
     const { range } = diagnostic;
+    const uri = document.uri || '';
 
     return {
       title: 'Remove unused code',
       kind: CodeActionKind.QuickFix,
       edit: {
         changes: {
-          [document.uri]: [
+          [uri]: [
             TextEdit.del(range),
           ],
         },

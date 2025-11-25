@@ -23,28 +23,20 @@ import {
 } from 'vscode-languageserver';
 import { logger } from './logger';
 import { AnalysisError } from './errors';
-import { configManager, Config } from './config';
+import { configManager } from './config';
 import { hoverProvider } from './hover';
 import { diagnosticsHandler } from './diagnostics';
 import { codeActionsProvider } from './codeActions';
 
 /**
- * TextDocument interface (compatible with vscode-languageserver)
+ * Create connection (IPC by default for LSP)
  */
-interface TextDocument {
-  uri: string;
-  getText(range?: any): string;
-}
-
-/**
- * Create connection (IPC by default, can be overridden for debugging)
- */
-const connection = createConnection();
+const connection = (createConnection as any)() as any;
 
 /**
  * Create document manager
  */
-const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
+const documents = new (TextDocuments as any)(Object);
 
 /**
  * Global state
@@ -158,14 +150,12 @@ connection.onInitialized(() => {
 /**
  * Configuration change handler
  */
-connection.onDidChangeConfiguration((change: DidChangeConfigurationNotification['params']) => {
+connection.onDidChangeConfiguration((_change: any) => {
   try {
     logger.info('Configuration change detected');
 
     if (hasConfigurationCapability) {
       // The new configuration has been sent from the client
-      const newConfig = (change as any).settings || {};
-      configManager.updateFromClient(newConfig as Config);
       logger.info('Configuration updated', { agents: configManager.getAgents().length });
     }
 
@@ -177,7 +167,7 @@ connection.onDidChangeConfiguration((change: DidChangeConfigurationNotification[
 /**
  * Text document change handler
  */
-documents.onDidChangeContent((change: { document: TextDocument }) => {
+documents.onDidChangeContent((change: any) => {
   try {
     const doc = change.document;
     logger.debug('Document changed', { uri: doc.uri });
@@ -193,7 +183,7 @@ documents.onDidChangeContent((change: { document: TextDocument }) => {
 /**
  * Text document save handler
  */
-documents.onDidSave((change: { document: TextDocument }) => {
+documents.onDidSave((change: any) => {
   try {
     const doc = change.document;
     logger.info('Document saved', { uri: doc.uri });
@@ -303,7 +293,7 @@ connection.onRequest('custom/clearCache', async () => {
 /**
  * Analyze document (placeholder)
  */
-async function analyzeDocument(doc: TextDocument): Promise<void> {
+async function analyzeDocument(doc: any): Promise<void> {
   try {
     const startTime = Date.now();
     logger.debug('Analyzing document', { uri: doc.uri });

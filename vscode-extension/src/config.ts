@@ -205,7 +205,7 @@ export class ConfigManager {
     if (apiKey.includes('${env:')) {
       // Extract env var name: ${env:AGENT_API_KEY} -> AGENT_API_KEY
       const match = apiKey.match(/\$\{env:([^}]+)\}/);
-      if (match) {
+      if (match && match[1]) {
         apiKey = process.env[match[1]] || '';
       }
     }
