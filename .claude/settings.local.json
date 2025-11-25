@@ -57,7 +57,8 @@
       "mcp__context7__get-library-docs",
       "Bash(npm run compile:*)",
       "Bash(ls -la \"C:\\Users\\Windows\\OneDrive - Seattle Colleges\\Desktop\\YWMESSAGING\\lsp-server\\out 2>/dev/null | head -20 && echo --- && ls -la C:UsersWindowsOneDrive\" - Seattle CollegesDesktopYWMESSAGINGanalysis-serviceout)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(tee:*)"
     ],
     "deny": [],
     "ask": []

@@ -16,6 +16,7 @@ import billingRoutes from './routes/billing.routes.js';
 import numbersRoutes from './routes/numbers.routes.js';
 import webhookRoutes from './routes/webhook.routes.js';
 import gitHubAgentsRoutes from './routes/github-agents.routes.js';
+import agentsRoutes from './routes/agents.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import chatRoutes from './routes/chat.routes.js';
 import schedulerRoutes from './routes/scheduler.routes.js';
@@ -194,6 +195,9 @@ app.use('/api', webhookRoutes);
 // No authentication needed - signature verified in handler
 // Rate limiting applied to prevent abuse and DOS attacks
 app.use('/api', githubWebhookLimiter, gitHubAgentsRoutes);
+// Agents API routes (LSP server, IDE plugins, direct invocation)
+// Rate limited to prevent abuse
+app.use('/api', apiLimiter, agentsRoutes);
 // Public auth routes with rate limiting
 app.use('/api/auth', authLimiter, authRoutes);
 // Protected API Routes - JWT-based, no CSRF needed
