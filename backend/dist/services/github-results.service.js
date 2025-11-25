@@ -187,6 +187,13 @@ function getAgentIcon(agentType) {
     return icons[agentType] || '🤖';
 }
 /**
+ * Post agent findings to workflow run (if associated with PR)
+ */
+export async function postWorkflowFindings(context, responses) {
+    // Workflow findings use same PR comment format
+    return postPRComment(context, responses);
+}
+/**
  * Helper: Get agent display name
  */
 function getAgentName(agentType) {

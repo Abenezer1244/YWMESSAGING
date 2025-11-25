@@ -14,7 +14,6 @@
 import {
   createConnection,
   TextDocuments,
-  Diagnostic,
   DidChangeConfigurationNotification,
   InitializeParams,
   InitializeResult,
@@ -291,36 +290,57 @@ connection.onRequest('custom/clearCache', async () => {
 });
 
 /**
- * Analyze document (placeholder)
+ * Analyze document
+ *
+ * When analysis service is integrated:
+ * 1. This function will receive file content from documents
+ * 2. Send to analysis service via IPC/socket
+ * 3. Receive results from analysis service
+ * 4. Publish diagnostics to client
+ *
+ * For now: publishes empty diagnostics as placeholder
  */
 async function analyzeDocument(doc: any): Promise<void> {
   try {
     const startTime = Date.now();
     logger.debug('Analyzing document', { uri: doc.uri });
 
-    // TODO: Call analysis service when integrated
-    // For now, send empty diagnostics
-    const diagnostics: Diagnostic[] = [];
+    // TODO: Integration point with analysis-service
+    // Example flow:
+    // const fileContent = doc.getText();
+    // const results = await analysisService.analyzeFile({
+    //   content: fileContent,
+    //   uri: doc.uri,
+    //   agents: configManager.getAgents(),
+    // });
+    // const diagnostics = convertResultsToDiagnostics(results);
 
-    // Publish diagnostics
-    connection.sendDiagnostics({
-      uri: doc.uri,
-      diagnostics,
-    });
+    // For now: empty diagnostics (placeholder)
+    const diagnostics: any[] = [];
+
+    // Publish diagnostics using handler
+    await diagnosticsHandler.publishDiagnostics(
+      doc.uri,
+      {
+        uri: doc.uri,
+        issues: [],
+        duration: Date.now() - startTime,
+      },
+      hasDiagnosticRelatedInformationCapability
+    );
 
     const duration = Date.now() - startTime;
     logger.timeLog('Document analysis completed', duration, { uri: doc.uri });
 
-    // Send analysis complete notification
-    connection.sendNotification('custom/analysisComplete', {
+    // Send analysis complete notification to client
+    (connection as any).sendNotification('custom/analysisComplete', {
       uri: doc.uri,
       issuesCount: diagnostics.length,
       duration,
     });
-
   } catch (error) {
-    logger.error('Error analyzing document', error);
-    connection.sendNotification('custom/error', {
+    logger.error('Error analyzing document', error instanceof Error ? error : new Error(String(error)));
+    (connection as any).sendNotification('custom/error', {
       message: 'Failed to analyze document',
       details: error instanceof Error ? error.message : String(error),
     });

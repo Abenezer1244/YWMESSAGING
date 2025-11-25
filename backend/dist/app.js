@@ -88,6 +88,20 @@ const apiLimiter = rateLimit({
         res.status(429).json({ error: 'Too many requests. Please try again later.' });
     },
 });
+// GitHub webhook endpoints: protect against abuse/DOS
+const githubWebhookLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 50, // 50 webhook events per 15 minutes per IP (GitHub typically sends <10/hour)
+    message: 'Too many GitHub webhook requests. Please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => (req.ip || req.socket.remoteAddress),
+    handler: (req, res) => {
+        const ipAddress = (req.ip || req.socket.remoteAddress || 'unknown');
+        logRateLimitExceeded(req.originalUrl || req.path, ipAddress, 50);
+        res.status(429).json({ error: 'GitHub webhook rate limit exceeded. Please try again later.' });
+    },
+});
 // Middleware
 // Enhanced security headers with Content Security Policy
 app.use(helmet({
@@ -178,7 +192,8 @@ app.get('/api/csrf-token', csrfProtection, (req, res) => {
 app.use('/api', webhookRoutes);
 // GitHub Agents webhook routes (automated agent invocation from CI/CD)
 // No authentication needed - signature verified in handler
-app.use('/api', gitHubAgentsRoutes);
+// Rate limiting applied to prevent abuse and DOS attacks
+app.use('/api', githubWebhookLimiter, gitHubAgentsRoutes);
 // Public auth routes with rate limiting
 app.use('/api/auth', authLimiter, authRoutes);
 // Protected API Routes - JWT-based, no CSRF needed

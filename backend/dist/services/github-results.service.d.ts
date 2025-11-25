@@ -29,5 +29,9 @@ export declare function findAgentComment(context: GitHubPRContext): Promise<numb
  * Post or update agent findings on PR (idempotent)
  */
 export declare function postOrUpdatePRFindings(context: GitHubPRContext, responses: AgentResponse[]): Promise<boolean>;
+/**
+ * Post agent findings to workflow run (if associated with PR)
+ */
+export declare function postWorkflowFindings(context: GitHubPRContext, responses: AgentResponse[]): Promise<boolean>;
 export {};
 //# sourceMappingURL=github-results.service.d.ts.map

@@ -24,7 +24,7 @@ export interface AgentResponse {
 /**
  * Invoke multiple agents for a given event
  */
-export declare function invokeMultipleAgents(agents: string[], request: AgentInvocationRequest, parallel?: boolean): Promise<AgentResponse[]>;
+export declare function invokeMultipleAgents(agents: string[], request: AgentInvocationRequest, parallel?: boolean, enableCache?: boolean): Promise<AgentResponse[]>;
 /**
  * Store agent invocation in audit trail
  */
@@ -41,5 +41,20 @@ export declare function combineAgentResponses(responses: AgentResponse[]): strin
  * Get agents to invoke based on event type
  */
 export declare function getAgentsForEvent(eventType: string): string[];
+/**
+ * Get cache statistics (for debugging/monitoring)
+ */
+export declare function getCacheStats(): {
+    size: number;
+    maxSize: number;
+    entries: Array<{
+        hash: string;
+        expiresIn: string;
+    }>;
+};
+/**
+ * Clear analysis cache (useful for testing/deployments)
+ */
+export declare function clearAnalysisCache(): void;
 export {};
 //# sourceMappingURL=agent-invocation.service.d.ts.map
