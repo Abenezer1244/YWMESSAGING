@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import express from 'express';
 import { handleGitHubAgentsWebhook, checkGitHubWebhookHealth, } from '../controllers/github-agents.controller.js';
 const router = Router();
 /**
@@ -20,7 +19,10 @@ const router = Router();
  * CRITICAL: Using express.raw() middleware to capture raw bytes for HMAC verification
  * This MUST be applied directly to this route to intercept the body before parsing
  */
-router.post('/webhooks/github/agents', express.raw({ type: 'application/json' }), handleGitHubAgentsWebhook);
+// IMPORTANT: Do NOT apply express.raw() here - it's already applied globally
+// at app.use('/api/webhooks/', express.raw(...)) in app.ts
+// Applying it twice causes body parsing conflicts
+router.post('/webhooks/github/agents', handleGitHubAgentsWebhook);
 /**
  * GET /api/webhooks/github/agents/health
  * Health check endpoint
