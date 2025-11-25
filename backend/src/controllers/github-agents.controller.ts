@@ -21,7 +21,7 @@ import { postOrUpdatePRFindings } from '../services/github-results.service.js';
  * Format: sha256=hash_value
  */
 function verifyGitHubSignature(
-  payload: Buffer | string,
+  payload: string,
   signatureHeader: string,
   webhookSecret: string
 ): boolean {
@@ -101,23 +101,22 @@ export async function handleGitHubAgentsWebhook(
 
     // Get raw body for signature verification
     // express.raw() middleware provides req.body as Buffer
-    // CRITICAL: Pass Buffer directly to HMAC - no encoding conversion
-    // Any Buffer->String->Buffer conversion can cause encoding mismatches
-    const rawBody = req.body;
+    // CRITICAL: Convert Buffer to string using utf-8, NOT JSON.stringify()
+    // JSON.stringify(Buffer) corrupts the data for HMAC verification
+    const rawBody = Buffer.isBuffer(req.body)
+      ? req.body.toString('utf-8')
+      : typeof req.body === 'string'
+      ? req.body
+      : JSON.stringify(req.body);
 
     // Debug logging to diagnose payload issues
-    const bodyLength = Buffer.isBuffer(rawBody) ? rawBody.length : (rawBody as string).length;
-    const bodyPreview = Buffer.isBuffer(rawBody)
-      ? rawBody.toString('utf-8').substring(0, 200)
-      : (rawBody as string).substring(0, 200);
-
     console.log('🔍 Webhook payload details:');
     console.log(`   Body type: ${Buffer.isBuffer(req.body) ? 'Buffer' : typeof req.body}`);
-    console.log(`   Body length: ${bodyLength} bytes`);
+    console.log(`   Body length: ${rawBody.length} bytes`);
     console.log(`   Signature header: ${signature}`);
     console.log(`   Expected pattern: sha256=<hash>`);
-    if (bodyLength < 500) {
-      console.log(`   Payload preview: ${bodyPreview}`);
+    if (rawBody.length < 500) {
+      console.log(`   Payload preview: ${rawBody.substring(0, 200)}`);
     }
 
     if (!signature) {
@@ -127,7 +126,6 @@ export async function handleGitHubAgentsWebhook(
     }
 
     // Verify webhook signature
-    // Pass Buffer directly - crypto.update() will handle both Buffer and string
     const isValidSignature = verifyGitHubSignature(
       rawBody,
       signature,
@@ -151,12 +149,12 @@ export async function handleGitHubAgentsWebhook(
     // When express.raw() is used, req.body is a Buffer/string, not parsed JSON
     // Parse it now that we've verified the signature
     let payload: any;
-    if (Buffer.isBuffer(rawBody)) {
-      payload = JSON.parse(rawBody.toString('utf-8'));
-    } else if (typeof rawBody === 'string') {
-      payload = JSON.parse(rawBody);
+    if (typeof req.body === 'string') {
+      payload = JSON.parse(req.body);
+    } else if (Buffer.isBuffer(req.body)) {
+      payload = JSON.parse(req.body.toString('utf-8'));
     } else {
-      payload = rawBody; // Already parsed (shouldn't happen with express.raw())
+      payload = req.body; // Already parsed (shouldn't happen with express.raw())
     }
 
     // Log webhook details
