@@ -86,8 +86,9 @@ export async function executeExaSearch(input: {
 }
 
 /**
- * Context7 Library Documentation - Real API Integration
- * Fetches actual library documentation and code examples
+ * Context7 Library Documentation - MCP Tool (Not available in backend)
+ * Context7 is a Claude MCP that works through Claude's tool system, not HTTP API
+ * Agents will use Claude's native Context7 MCP when needed
  */
 export async function executeContext7Docs(input: {
   library_id: string;
@@ -99,59 +100,22 @@ export async function executeContext7Docs(input: {
   console.log(`📚 Context7: Getting docs for ${library_id}`);
   if (topic) console.log(`   Topic: ${topic}`);
 
-  try {
-    // Real context7 API call via mcp_context7_get_library_docs
-    // This would integrate with the actual context7 service
-
-    // For now, structure is set up for integration
-    // When MCPs are available in backend environment, this becomes live
-
-    const response = await axios.get(
-      `https://api.context7.com/docs/${library_id.replace(/\//g, '%2F')}`,
-      {
-        params: {
-          topic,
-          mode,
-          format: 'json',
-        },
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        timeout: 15000,
-      }
-    );
-
-    const docs = response.data;
-
-    console.log(`✓ Context7 returned documentation`);
-
-    return {
-      status: 'success',
-      tool: 'context7_get_library_docs',
-      library_id,
-      topic: topic || 'general',
-      mode,
-      content: docs.content,
-      code_examples: docs.examples || [],
-      api_reference: docs.reference || {},
-      timestamp: new Date().toISOString(),
-    };
-  } catch (error: any) {
-    console.error(`⚠️ Context7 call failed: ${error.message}`);
-
-    return {
-      status: 'warning',
-      tool: 'context7_get_library_docs',
-      library_id,
-      message: 'Documentation fetch failed - proceeding with agent knowledge',
-      error: error.message,
-    };
-  }
+  // Context7 is a Claude MCP, not a backend-accessible HTTP API
+  // Agents access this through Claude's native MCP system
+  return {
+    status: 'skipped',
+    tool: 'context7_get_library_docs',
+    library_id,
+    topic: topic || 'general',
+    mode,
+    message: 'Context7 is a Claude MCP - agents have direct access through Claude API',
+    note: 'This tool is handled by Claude natively, no backend HTTP call needed',
+  };
 }
 
 /**
- * Context7 Library Resolution - Real API Integration
- * Resolves library names to context7 IDs
+ * Context7 Library Resolution - MCP Tool (Not available in backend)
+ * Context7 is a Claude MCP that works through Claude's tool system, not HTTP API
  */
 export async function executeContext7Resolve(input: {
   library_name: string;
@@ -160,48 +124,20 @@ export async function executeContext7Resolve(input: {
 
   console.log(`🔍 Context7 Resolve: ${library_name}`);
 
-  try {
-    // Real context7 resolution API call
-    const response = await axios.get(
-      `https://api.context7.com/resolve/${encodeURIComponent(library_name)}`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        timeout: 5000,
-      }
-    );
-
-    const resolved = response.data;
-
-    console.log(`✓ Resolved to: ${resolved.library_id}`);
-
-    return {
-      status: 'success',
-      tool: 'context7_resolve_library_id',
-      input_name: library_name,
-      library_id: resolved.library_id,
-      full_name: resolved.full_name,
-      description: resolved.description,
-      version: resolved.latest_version,
-      timestamp: new Date().toISOString(),
-    };
-  } catch (error: any) {
-    console.error(`⚠️ Context7 resolve failed: ${error.message}`);
-
-    return {
-      status: 'warning',
-      tool: 'context7_resolve_library_id',
-      input_name: library_name,
-      message: 'Resolution failed - using fallback',
-      fallback_id: `/${library_name.toLowerCase()}/docs`,
-    };
-  }
+  // Context7 is a Claude MCP, not a backend-accessible HTTP API
+  // Agents access this through Claude's native MCP system
+  return {
+    status: 'skipped',
+    tool: 'context7_resolve_library_id',
+    input_name: library_name,
+    message: 'Context7 is a Claude MCP - agents have direct access through Claude API',
+    note: 'This tool is handled by Claude natively, no backend HTTP call needed',
+  };
 }
 
 /**
- * Semgrep Code Security Scanning - Real Local Integration
- * Scans code for vulnerabilities and security issues
+ * Semgrep Code Security Scanning - MCP Tool (Not available in backend)
+ * Semgrep is a Claude MCP that works through Claude's tool system
  */
 export async function executeSemgrepScan(input: {
   code: string;
@@ -213,83 +149,22 @@ export async function executeSemgrepScan(input: {
   console.log(`🔒 Semgrep Scan: ${language} (${rules})`);
   console.log(`   Code size: ${code.length} bytes`);
 
-  try {
-    // Real semgrep API call
-    // Semgrep provides cloud API for code scanning
-
-    const semgrepApiKey = process.env.SEMGREP_API_KEY;
-
-    if (!semgrepApiKey) {
-      console.warn('⚠️ SEMGREP_API_KEY not configured - security scanning unavailable');
-      return {
-        status: 'warning',
-        tool: 'semgrep_scan',
-        error: 'SEMGREP_API_KEY not configured',
-        message: 'Security scanning unavailable',
-        fallback: 'Agent can perform manual code review',
-      };
-    }
-
-    // Real Semgrep API call for code scanning
-    const response = await axios.post(
-      'https://api.semgrep.dev/api/v1/scan',
-      {
-        code,
-        languages: [language],
-        config: {
-          rules: [
-            {
-              id: `rules:${rules}`,
-            },
-          ],
-        },
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${semgrepApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        timeout: 30000,
-      }
-    );
-
-    const results = response.data.results || [];
-
-    console.log(`✓ Semgrep found ${results.length} issues`);
-
-    return {
-      status: 'success',
-      tool: 'semgrep_scan',
-      language,
-      rules,
-      issues_count: results.length,
-      issues: results.map((issue: any) => ({
-        rule_id: issue.rule_id,
-        message: issue.message,
-        severity: issue.severity,
-        line: issue.start?.line,
-        column: issue.start?.col,
-        code_snippet: issue.snippet,
-        fix_available: !!issue.fix,
-      })),
-      timestamp: new Date().toISOString(),
-    };
-  } catch (error: any) {
-    console.error(`⚠️ Semgrep scan failed: ${error.message}`);
-
-    return {
-      status: 'warning',
-      tool: 'semgrep_scan',
-      language,
-      error: error.message,
-      message: 'Automated scanning failed - proceeding with agent analysis',
-    };
-  }
+  // Semgrep is a Claude MCP, not a backend-accessible HTTP API
+  // Agents access this through Claude's native MCP system
+  return {
+    status: 'skipped',
+    tool: 'semgrep_scan',
+    language,
+    rules,
+    message: 'Semgrep is a Claude MCP - agents have direct access through Claude API',
+    note: 'This tool is handled by Claude natively, no backend HTTP call needed',
+    code_length: code.length,
+  };
 }
 
 /**
- * Ref Documentation Search - Real API Integration
- * Searches official documentation repositories
+ * Ref Documentation Search - MCP Tool (Not available in backend)
+ * Ref is a Claude MCP that works through Claude's tool system
  */
 export async function executeRefSearch(input: {
   query: string;
@@ -298,73 +173,20 @@ export async function executeRefSearch(input: {
 
   console.log(`📚 Ref Search: "${query}"`);
 
-  try {
-    // Real ref API integration
-    // This uses the ref MCP system for documentation lookup
-
-    const refApiKey = process.env.REF_API_KEY;
-
-    if (!refApiKey) {
-      console.warn('⚠️ REF_API_KEY not configured - documentation search unavailable');
-      return {
-        status: 'warning',
-        tool: 'ref_search_documentation',
-        error: 'REF_API_KEY not configured',
-        message: 'Documentation search unavailable',
-        fallback: 'Agent will use knowledge base',
-      };
-    }
-
-    // Real Ref API call
-    const response = await axios.post(
-      'https://api.refapi.dev/search',
-      {
-        query,
-        scope: ['official', 'frameworks', 'libraries'],
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${refApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        timeout: 10000,
-      }
-    );
-
-    const docs = response.data.results || [];
-
-    console.log(`✓ Ref found ${docs.length} documentation sources`);
-
-    return {
-      status: 'success',
-      tool: 'ref_search_documentation',
-      query,
-      results_count: docs.length,
-      results: docs.map((doc: any) => ({
-        title: doc.title,
-        url: doc.url,
-        source: doc.source,
-        relevance: doc.relevance_score,
-        snippet: doc.preview,
-      })),
-      timestamp: new Date().toISOString(),
-    };
-  } catch (error: any) {
-    console.error(`⚠️ Ref search failed: ${error.message}`);
-
-    return {
-      status: 'warning',
-      tool: 'ref_search_documentation',
-      query,
-      error: error.message,
-      message: 'Documentation search failed - agent can use general knowledge',
-    };
-  }
+  // Ref is a Claude MCP, not a backend-accessible HTTP API
+  // Agents access this through Claude's native MCP system
+  return {
+    status: 'skipped',
+    tool: 'ref_search_documentation',
+    query,
+    message: 'Ref is a Claude MCP - agents have direct access through Claude API',
+    note: 'This tool is handled by Claude natively, no backend HTTP call needed',
+  };
 }
 
 /**
- * Ref URL Read - Real API Integration
- * Fetches full documentation from specific URL
+ * Ref URL Read - MCP Tool (Not available in backend)
+ * Ref is a Claude MCP that works through Claude's tool system
  */
 export async function executeRefRead(input: {
   url: string;
@@ -373,56 +195,15 @@ export async function executeRefRead(input: {
 
   console.log(`📖 Ref Read: ${url}`);
 
-  try {
-    const refApiKey = process.env.REF_API_KEY;
-
-    if (!refApiKey) {
-      return {
-        status: 'warning',
-        tool: 'ref_read_url',
-        error: 'REF_API_KEY not configured',
-      };
-    }
-
-    // Real Ref API call to fetch documentation
-    const response = await axios.post(
-      'https://api.refapi.dev/fetch',
-      {
-        url,
-        format: 'markdown',
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${refApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        timeout: 15000,
-      }
-    );
-
-    const content = response.data.content;
-
-    console.log(`✓ Ref fetched documentation (${content.length} chars)`);
-
-    return {
-      status: 'success',
-      tool: 'ref_read_url',
-      url,
-      content_length: content.length,
-      content: content.substring(0, 5000), // Limit to 5000 chars for context
-      full_content_available: content.length > 5000,
-      timestamp: new Date().toISOString(),
-    };
-  } catch (error: any) {
-    console.error(`⚠️ Ref read failed: ${error.message}`);
-
-    return {
-      status: 'warning',
-      tool: 'ref_read_url',
-      url,
-      error: error.message,
-    };
-  }
+  // Ref is a Claude MCP, not a backend-accessible HTTP API
+  // Agents access this through Claude's native MCP system
+  return {
+    status: 'skipped',
+    tool: 'ref_read_url',
+    url,
+    message: 'Ref is a Claude MCP - agents have direct access through Claude API',
+    note: 'This tool is handled by Claude natively, no backend HTTP call needed',
+  };
 }
 
 /**
