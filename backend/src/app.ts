@@ -20,6 +20,7 @@ import agentsRoutes from './routes/agents.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import chatRoutes from './routes/chat.routes.js';
 import schedulerRoutes from './routes/scheduler.routes.js';
+import securityRoutes from './routes/security.routes.js';
 
 const app = express();
 
@@ -243,6 +244,9 @@ app.use('/api/scheduler', schedulerRoutes);
 
 // Chat routes - public and protected
 app.use('/api/chat', apiLimiter, chatRoutes);
+
+// Security & code analysis routes - code scanning and analysis tools
+app.use('/api/security', apiLimiter, securityRoutes);
 
 // 404 handler
 app.use((req, res) => {

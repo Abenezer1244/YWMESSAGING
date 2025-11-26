@@ -136,8 +136,9 @@ export async function executeContext7Resolve(input: {
 }
 
 /**
- * Semgrep Code Security Scanning - MCP Tool (Not available in backend)
- * Semgrep is a Claude MCP that works through Claude's tool system
+ * Semgrep Code Security Scanning - Real API Integration
+ * Calls Semgrep's public API for code security scanning
+ * Requires SEMGREP_API_KEY environment variable
  */
 export async function executeSemgrepScan(input: {
   code: string;
@@ -149,17 +150,98 @@ export async function executeSemgrepScan(input: {
   console.log(`🔒 Semgrep Scan: ${language} (${rules})`);
   console.log(`   Code size: ${code.length} bytes`);
 
-  // Semgrep is a Claude MCP, not a backend-accessible HTTP API
-  // Agents access this through Claude's native MCP system
-  return {
-    status: 'skipped',
-    tool: 'semgrep_scan',
-    language,
-    rules,
-    message: 'Semgrep is a Claude MCP - agents have direct access through Claude API',
-    note: 'This tool is handled by Claude natively, no backend HTTP call needed',
-    code_length: code.length,
-  };
+  try {
+    const semgrepToken = process.env.SEMGREP_API_KEY;
+    if (!semgrepToken) {
+      throw new Error('SEMGREP_API_KEY environment variable not configured');
+    }
+
+    // Map common language names to Semgrep language identifiers
+    const languageMap: Record<string, string> = {
+      'js': 'javascript',
+      'ts': 'typescript',
+      'javascript': 'javascript',
+      'typescript': 'typescript',
+      'py': 'python',
+      'python': 'python',
+      'java': 'java',
+      'go': 'go',
+      'rust': 'rust',
+      'c': 'c',
+      'cpp': 'cpp',
+      'c#': 'csharp',
+      'csharp': 'csharp',
+      'ruby': 'ruby',
+      'php': 'php',
+      'json': 'json',
+      'yaml': 'yaml',
+      'html': 'html',
+      'xml': 'xml',
+      'dockerfile': 'dockerfile',
+    };
+
+    const mappedLanguage = languageMap[language.toLowerCase()] || language;
+
+    // Call Semgrep API for code scanning
+    const response = await axios.post(
+      'https://api.semgrep.dev/api/v1/scan',
+      {
+        code,
+        language: mappedLanguage,
+        config: {
+          rules: rules === 'security' ? [{ id: 'semgrep/security' }] : [],
+        },
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${semgrepToken}`,
+          'Content-Type': 'application/json',
+        },
+        timeout: 30000,
+      }
+    );
+
+    const results = response.data.results || [];
+
+    console.log(`✓ Semgrep found ${results.length} issues`);
+
+    return {
+      status: 'success',
+      tool: 'semgrep_scan',
+      language: mappedLanguage,
+      code_length: code.length,
+      results_count: results.length,
+      results: results.map((r: any) => ({
+        rule_id: r.check_id,
+        message: r.extra?.message || r.rule_id,
+        severity: r.extra?.severity || 'unknown',
+        path: r.path,
+        line: r.start?.line,
+        column: r.start?.col,
+        code: r.extra?.lines || code.substring(0, 200),
+      })),
+      timestamp: new Date().toISOString(),
+    };
+  } catch (error: any) {
+    console.error(`❌ Semgrep scan failed: ${error.message}`);
+
+    if (error.message.includes('SEMGREP_API_KEY')) {
+      return {
+        status: 'error',
+        tool: 'semgrep_scan',
+        error: 'SEMGREP_API_KEY not configured - code security scanning unavailable',
+        fallback: 'Agent can proceed with other analysis methods',
+      };
+    }
+
+    return {
+      status: 'error',
+      tool: 'semgrep_scan',
+      error: error.message,
+      language,
+      code_length: code.length,
+    };
+  }
 }
 
 /**
