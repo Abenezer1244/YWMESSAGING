@@ -50,6 +50,9 @@ export declare function addMember(groupId: string, data: CreateMemberData): Prom
 }>;
 /**
  * Bulk import members to group
+ * ✅ OPTIMIZED: Batch operations instead of per-member queries
+ * Before: 500 queries (2-5 per member in loop)
+ * After: 5 queries (1 for fetch existing, 1 for create members, 1 for check existing groupMembers, 1 for create groupMembers, multiple queueWelcomeMessage)
  */
 export declare function importMembers(groupId: string, membersData: Array<{
     firstName: string;

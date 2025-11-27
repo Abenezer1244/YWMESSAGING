@@ -22,6 +22,8 @@ import adminRoutes from './routes/admin.routes.js';
 import chatRoutes from './routes/chat.routes.js';
 import schedulerRoutes from './routes/scheduler.routes.js';
 import securityRoutes from './routes/security.routes.js';
+import { compressionMiddleware } from './middleware/compression.middleware.js';
+import { etagMiddleware } from './middleware/etag.middleware.js';
 const app = express();
 // ✅ SECURITY: Initialize Sentry for error tracking and monitoring
 // Must be done as early as possible in the application lifecycle
@@ -189,6 +191,11 @@ app.use('/api/webhooks/', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+// ✅ OPTIMIZATION: HTTP Response Optimization (Priority 3.1)
+// Compression middleware: Gzip compress responses >1KB (60-70% reduction)
+app.use(compressionMiddleware);
+// ETag middleware: Cache validation for 304 Not Modified responses
+app.use(etagMiddleware);
 // Health check endpoint (no auth needed)
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
