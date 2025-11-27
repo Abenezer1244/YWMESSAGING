@@ -64,7 +64,8 @@
       "mcp__exa__web_search_exa",
       "mcp__Ref__ref_read_url",
       "Bash(timeout 120 bash -c \"cd \\\"C:\\Users\\Windows\\OneDrive - Seattle Colleges\\Desktop\\YWMESSAGING\\backend\\\" && npm list zod 2>&1 | head -5\":*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npm run:*)"
     ],
     "deny": [],
     "ask": []
