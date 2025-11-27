@@ -2,6 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import path from 'path';
 import { authenticateToken } from '../middleware/auth.middleware.js';
+import { messageLimiter, uploadLimiter } from '../middleware/user-rate-limit.middleware.js';
 import * as messageController from '../controllers/message.controller.js';
 import * as conversationController from '../controllers/conversation.controller.js';
 const router = Router();
@@ -45,7 +46,8 @@ const upload = multer({
 });
 // ============ BROADCAST MESSAGING (Existing) ============
 // Send broadcast message
-router.post('/send', authenticateToken, messageController.sendMessage);
+// ✅ OPTIMIZATION: Per-user rate limiting (100 messages/hour)
+router.post('/send', authenticateToken, messageLimiter(), messageController.sendMessage);
 // Get message history (with pagination and filters)
 router.get('/history', authenticateToken, messageController.getMessageHistory);
 // Get single message details
@@ -58,7 +60,8 @@ router.get('/conversations/:conversationId', authenticateToken, conversationCont
 // Send text-only reply
 router.post('/conversations/:conversationId/reply', authenticateToken, conversationController.replyToConversation);
 // Send reply with media attachment (full quality)
-router.post('/conversations/:conversationId/reply-with-media', authenticateToken, upload.single('file'), conversationController.replyWithMedia);
+// ✅ OPTIMIZATION: Per-user upload rate limiting (10 uploads/hour)
+router.post('/conversations/:conversationId/reply-with-media', authenticateToken, uploadLimiter(), upload.single('file'), conversationController.replyWithMedia);
 // Mark conversation as read
 router.patch('/conversations/:conversationId/read', authenticateToken, conversationController.markAsRead);
 // Update conversation status
