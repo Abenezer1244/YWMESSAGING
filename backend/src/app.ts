@@ -27,6 +27,9 @@ import { etagMiddleware } from './middleware/etag.middleware.js';
 
 const app = express();
 
+// Disable Express's built-in ETag generation (we implement our own)
+app.set('etag', false);
+
 // ✅ SECURITY: Initialize Sentry for error tracking and monitoring
 // Must be done as early as possible in the application lifecycle
 initSentry();

@@ -20,15 +20,20 @@ import crypto from 'crypto';
  *    - If different: Returns 200 with new response and new ETag
  */
 function generateETag(content) {
-    return `"${crypto.createHash('md5').update(content).digest('hex')}"`;
+    // Generate a strong ETag using MD5 hash
+    const hash = crypto.createHash('md5').update(content).digest('hex');
+    return `"${hash}"`;
 }
 export function etagMiddleware(req, res, next) {
     // Store original json method
     const originalJson = res.json.bind(res);
-    // Override json method to generate ETag
+    // Override json method to generate ETag and handle caching
     res.json = function (data) {
         const jsonString = JSON.stringify(data);
         const etag = generateETag(jsonString);
+        // Set cache headers for all responses
+        res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour
+        res.setHeader('Expires', new Date(Date.now() + 60 * 60 * 1000).toUTCString());
         // Check if client sent If-None-Match header
         const clientETag = req.headers['if-none-match'];
         if (clientETag === etag) {
@@ -36,15 +41,16 @@ export function etagMiddleware(req, res, next) {
             console.log(`✅ Cache HIT (ETag): ${req.path} - Returning 304 Not Modified`);
             res.status(304);
             res.setHeader('ETag', etag);
-            res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour
             res.end();
             return res;
         }
-        // ETag doesn't match - return full response
+        // ETag doesn't match - return full response with new ETag
         res.setHeader('ETag', etag);
-        res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour
         // Log cache miss in development
-        console.log(`📝 Cache MISS (ETag): ${req.path} - Generated ETag: ${etag}`);
+        if (process.env.NODE_ENV !== 'production') {
+            console.log(`📝 Cache MISS (ETag): ${req.path} - Generated ETag: ${etag}`);
+        }
+        // Call original json method
         return originalJson(data);
     };
     next();
