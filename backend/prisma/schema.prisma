@@ -165,6 +165,9 @@ model Member {
 
   @@index([email])
   @@index([phoneHash])
+  // ✅ Priority 2.3: Composite index for efficient name-based searches (importMembers, search queries)
+  // Supports: WHERE firstName LIKE ... AND lastName LIKE ... queries
+  @@index([firstName, lastName])
 }
 
 // Join table for Group-Member many-to-many
@@ -182,6 +185,9 @@ model GroupMember {
   @@unique([groupId, memberId])
   @@index([groupId])
   @@index([memberId])
+  // ✅ Priority 2.3: Composite index for bulk member lookups in importMembers and broadcasts
+  // Supports: WHERE groupId = ? AND memberId IN (...) queries efficiently
+  @@index([groupId, memberId])
 }
 
 // SMS messages sent by church
@@ -205,6 +211,9 @@ model Message {
   @@index([churchId])
   @@index([status])
   @@index([sentAt])
+  // ✅ Priority 2.3: Composite index for efficient date range queries in getMessageStats
+  // Supports: WHERE churchId = ? AND createdAt >= ? queries (used in stats aggregation)
+  @@index([churchId, createdAt])
 }
 
 // Track delivery status per recipient
@@ -226,6 +235,9 @@ model MessageRecipient {
   @@index([messageId])
   @@index([memberId])
   @@index([status])
+  // ✅ Priority 2.3: Composite index for efficient status aggregations in getBranchStats
+  // Supports: WHERE messageId = ? AND status = 'delivered' queries used in group by aggregations
+  @@index([messageId, status])
 }
 
 // Reusable message templates
