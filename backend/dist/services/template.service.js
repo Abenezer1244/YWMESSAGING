@@ -1,5 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma.js';
 export async function getTemplates(churchId) {
     return await prisma.messageTemplate.findMany({
         where: { churchId },

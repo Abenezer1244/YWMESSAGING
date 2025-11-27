@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import { PLANS } from '../config/plans.js';
-const prisma = new PrismaClient();
 /**
  * SMS billing service - tracks SMS costs and usage
  * Pricing: $0.02 per SMS (Option 3)

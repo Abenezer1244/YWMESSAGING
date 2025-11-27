@@ -1,9 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import { formatToE164 } from '../utils/phone.utils.js';
 import { encrypt, decrypt, hashForSearch } from '../utils/encryption.utils.js';
 import { queueWelcomeMessage } from '../jobs/welcomeMessage.job.js';
 import { getUsage, getCurrentPlan, getPlanLimits } from './billing.service.js';
-const prisma = new PrismaClient();
 /**
  * Get members for a group with pagination and search
  */

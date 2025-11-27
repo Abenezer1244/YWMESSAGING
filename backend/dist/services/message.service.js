@@ -1,5 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma.js';
 /**
  * Resolve recipients based on target type
  * Returns unique opted-in members by phone number

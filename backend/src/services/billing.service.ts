@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import { PLANS, PlanName, PlanLimits } from '../config/plans.js';
-
-const prisma = new PrismaClient();
 
 /**
  * SMS billing service - tracks SMS costs and usage

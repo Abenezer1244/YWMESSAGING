@@ -37,9 +37,9 @@ export type LoginRequest = z.infer<typeof loginSchema>;
 export declare const completeWelcomeSchema: z.ZodObject<{
     userRole: z.ZodEnum<["pastor", "admin", "communications", "volunteer", "other"]>;
 }, "strip", z.ZodTypeAny, {
-    userRole: "admin" | "pastor" | "communications" | "volunteer" | "other";
+    userRole: "other" | "admin" | "pastor" | "communications" | "volunteer";
 }, {
-    userRole: "admin" | "pastor" | "communications" | "volunteer" | "other";
+    userRole: "other" | "admin" | "pastor" | "communications" | "volunteer";
 }>;
 export type CompleteWelcomeRequest = z.infer<typeof completeWelcomeSchema>;
 /**

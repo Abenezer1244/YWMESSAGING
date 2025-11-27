@@ -1,5 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma.js';
 const GROUP_LIMIT_PER_BRANCH = 30;
 /**
  * Get all groups for a branch with member counts

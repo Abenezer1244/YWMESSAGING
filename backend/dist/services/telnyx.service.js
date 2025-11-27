@@ -1,6 +1,5 @@
 import axios from 'axios';
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma.js';
 const TELNYX_BASE_URL = 'https://api.telnyx.com/v2';
 // ============================================================================
 // Utility Functions (Phase 1: Monitoring & Logging)

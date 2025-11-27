@@ -1,10 +1,9 @@
 import axios from 'axios';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import * as s3MediaService from './s3-media.service.js';
 import { formatToE164 } from '../utils/phone.utils.js';
 import { hashForSearch, decrypt, encrypt, decryptPhoneSafe } from '../utils/encryption.utils.js';
 
-const prisma = new PrismaClient();
 const TELNYX_BASE_URL = 'https://api.telnyx.com/v2';
 
 function getTelnyxClient() {
