@@ -10,8 +10,9 @@ declare global {
 /**
  * Middleware to authenticate JWT token
  * Checks cookies first, then falls back to Authorization header
+ * ✅ SECURITY: Also checks if token has been revoked (prevents use after logout)
  */
-export declare function authenticateToken(req: Request, res: Response, next: NextFunction): void;
+export declare function authenticateToken(req: Request, res: Response, next: NextFunction): Promise<void>;
 /**
  * Middleware to check if user has required role
  */

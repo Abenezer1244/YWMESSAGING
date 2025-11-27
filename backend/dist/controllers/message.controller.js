@@ -2,6 +2,8 @@ import * as messageService from '../services/message.service.js';
 import * as telnyxService from '../services/telnyx.service.js';
 import { PrismaClient } from '@prisma/client';
 import { decryptPhoneSafe } from '../utils/encryption.utils.js';
+import { sendMessageSchema, getMessageHistorySchema } from '../lib/validation/schemas.js';
+import { safeValidate } from '../lib/validation/schemas.js';
 const prisma = new PrismaClient();
 /**
  * POST /api/messages/send
@@ -10,31 +12,27 @@ const prisma = new PrismaClient();
 export async function sendMessage(req, res) {
     try {
         const churchId = req.user?.churchId;
-        const { content, targetType, targetIds } = req.body;
         if (!churchId) {
             return res.status(401).json({
                 success: false,
                 error: 'Unauthorized',
             });
         }
-        // Validate input
-        if (!content || !targetType) {
+        // ✅ SECURITY: Validate request body with Zod schema
+        const validationResult = safeValidate(sendMessageSchema, req.body);
+        if (!validationResult.success) {
             return res.status(400).json({
                 success: false,
-                error: 'content and targetType are required',
+                error: 'Validation failed',
+                details: validationResult.errors,
             });
         }
-        if (content.length === 0 || content.length > 1600) {
-            return res.status(400).json({
-                success: false,
-                error: 'Message must be between 1 and 1600 characters',
-            });
-        }
+        const { content, targetType, targetIds } = validationResult.data;
         // Create message record
         const message = await messageService.createMessage(churchId, {
             content,
             targetType,
-            targetIds: targetIds || [],
+            targetIds,
         });
         // Send messages synchronously to all recipients
         (async () => {
@@ -101,15 +99,22 @@ export async function sendMessage(req, res) {
 export async function getMessageHistory(req, res) {
     try {
         const churchId = req.user?.churchId;
-        const page = req.query.page ? parseInt(req.query.page) : 1;
-        const limit = req.query.limit ? parseInt(req.query.limit) : 20;
-        const status = req.query.status;
         if (!churchId) {
             return res.status(401).json({
                 success: false,
                 error: 'Unauthorized',
             });
         }
+        // ✅ SECURITY: Validate query parameters with Zod schema
+        const validationResult = safeValidate(getMessageHistorySchema, req.query);
+        if (!validationResult.success) {
+            return res.status(400).json({
+                success: false,
+                error: 'Validation failed',
+                details: validationResult.errors,
+            });
+        }
+        const { page, limit, status } = validationResult.data;
         const result = await messageService.getMessageHistory(churchId, {
             page,
             limit,

@@ -19,8 +19,16 @@ export interface AgentResponse {
     timestamp: Date;
 }
 /**
- * Invoke a single agent via Claude API
- */ export declare function invokeAgent(request: AgentInvocationRequest): Promise<AgentResponse>;
+ * Invoke a single agent via Claude API with MCP tools
+ *
+ * This implements a proper agentic loop:
+ * 1. Call Claude with MCPs as tools
+ * 2. If Claude uses a tool, execute it
+ * 3. Add tool result back to conversation
+ * 4. Repeat until Claude outputs final response
+ * 5. Parse and return the response
+ */
+export declare function invokeAgent(request: AgentInvocationRequest): Promise<AgentResponse>;
 /**
  * Invoke multiple agents for a given event
  */

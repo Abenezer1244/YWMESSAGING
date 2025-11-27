@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import { logRateLimitExceeded } from './utils/security-logger.js';
 import { csrfProtection } from './middleware/csrf.middleware.js';
+import { initSentry, getSentryRequestHandler, getSentryErrorHandler } from './config/sentry.config.js';
 import authRoutes from './routes/auth.routes.js';
 import branchRoutes from './routes/branch.routes.js';
 import groupRoutes from './routes/group.routes.js';
@@ -20,7 +21,14 @@ import agentsRoutes from './routes/agents.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import chatRoutes from './routes/chat.routes.js';
 import schedulerRoutes from './routes/scheduler.routes.js';
+import securityRoutes from './routes/security.routes.js';
 const app = express();
+// ✅ SECURITY: Initialize Sentry for error tracking and monitoring
+// Must be done as early as possible in the application lifecycle
+initSentry();
+// ✅ SECURITY: Add Sentry request handler middleware
+// Captures request information for error context
+app.use(getSentryRequestHandler());
 // Trust proxy - required for rate limiting and IP detection on Render
 app.set('trust proxy', 1);
 // Rate Limiting Middleware Configurations
@@ -218,6 +226,11 @@ app.use('/api/admin', apiLimiter, adminRoutes);
 app.use('/api/scheduler', schedulerRoutes);
 // Chat routes - public and protected
 app.use('/api/chat', apiLimiter, chatRoutes);
+// Security & code analysis routes - code scanning and analysis tools
+app.use('/api/security', apiLimiter, securityRoutes);
+// ✅ SECURITY: Add Sentry error handler middleware
+// Must be after routes but before the final error handler
+app.use(getSentryErrorHandler());
 // 404 handler
 app.use((req, res) => {
     res.status(404).json({

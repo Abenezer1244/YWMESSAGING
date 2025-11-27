@@ -68,9 +68,9 @@ export declare function updateChurchProfile(churchId: string, input: UpdateChurc
  * Get church profile (including 10DLC fields)
  */
 export declare function getChurchProfile(churchId: string): Promise<{
+    id: string;
     email: string;
     name: string;
-    id: string;
     createdAt: Date;
     updatedAt: Date;
     dlcStatus: string;
@@ -91,9 +91,9 @@ export declare function getChurchProfile(churchId: string): Promise<{
  * Get all co-admins for a church
  */
 export declare function getCoAdmins(churchId: string): Promise<{
-    role: string;
-    email: string;
     id: string;
+    email: string;
+    role: string;
     firstName: string;
     lastName: string;
     lastLoginAt: Date | null;
@@ -133,9 +133,9 @@ export declare function getActivityLogCount(churchId: string): Promise<number>;
  */
 export declare function inviteCoAdmin(churchId: string, email: string, firstName: string, lastName: string): Promise<{
     admin: {
-        role: string;
-        email: string;
         id: string;
+        email: string;
+        role: string;
         firstName: string;
         lastName: string;
         createdAt: Date;

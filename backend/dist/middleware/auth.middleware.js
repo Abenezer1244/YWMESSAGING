@@ -1,10 +1,12 @@
 import { verifyAccessToken } from '../utils/jwt.utils.js';
 import { logPermissionDenied } from '../utils/security-logger.js';
+import { isTokenRevoked } from '../services/token-revocation.service.js';
 /**
  * Middleware to authenticate JWT token
  * Checks cookies first, then falls back to Authorization header
+ * ✅ SECURITY: Also checks if token has been revoked (prevents use after logout)
  */
-export function authenticateToken(req, res, next) {
+export async function authenticateToken(req, res, next) {
     // Try to get token from httpOnly cookie first
     let token = req.cookies.accessToken;
     // Fall back to Authorization header
@@ -19,6 +21,12 @@ export function authenticateToken(req, res, next) {
     const payload = verifyAccessToken(token);
     if (!payload) {
         res.status(401).json({ error: 'Invalid or expired token' });
+        return;
+    }
+    // ✅ SECURITY: Check if token has been revoked (logged out)
+    const revoked = await isTokenRevoked(token, 'access');
+    if (revoked) {
+        res.status(401).json({ error: 'Token has been revoked. Please log in again.' });
         return;
     }
     req.user = payload;
