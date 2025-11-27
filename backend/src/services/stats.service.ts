@@ -1,4 +1,29 @@
 import { prisma } from '../lib/prisma.js';
+import { queryCacheMonitor, CACHE_CONFIG } from './query-cache-monitor.service.js';
+
+// Type definitions for stats
+interface MessageStats {
+  totalMessages: number;
+  deliveredCount: number;
+  failedCount: number;
+  pendingCount: number;
+  deliveryRate: number;
+  byDay: Array<{
+    date: string;
+    count: number;
+    delivered: number;
+    failed: number;
+  }>;
+}
+
+interface BranchStat {
+  id: string;
+  name: string;
+  memberCount: number;
+  messageCount: number;
+  deliveryRate: number;
+  groupCount: number;
+}
 
 /**
  * Get message statistics for a church
@@ -9,100 +34,109 @@ import { prisma } from '../lib/prisma.js';
 export async function getMessageStats(
   churchId: string,
   days: number = 30
-) {
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - days);
+): Promise<MessageStats> {
+  const cacheKey = `${CACHE_CONFIG.STATS_QUERIES.prefix}${churchId}:${days}d`;
 
-  // ✅ Single aggregation query instead of loading all messages + recipients
-  const stats = await prisma.messageRecipient.groupBy({
-    by: ['status'],
-    where: {
-      message: {
-        churchId,
-        createdAt: { gte: startDate },
-      },
-    },
-    _count: {
-      id: true,
+  // ✅ Use Redis cache to avoid repeated database queries
+  return queryCacheMonitor.getOrFetch<MessageStats>({
+    key: cacheKey,
+    ttl: CACHE_CONFIG.STATS_QUERIES.TTL,
+    fetchFn: async () => {
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+
+      // ✅ Single aggregation query instead of loading all messages + recipients
+      const stats = await prisma.messageRecipient.groupBy({
+        by: ['status'],
+        where: {
+          message: {
+            churchId,
+            createdAt: { gte: startDate },
+          },
+        },
+        _count: {
+          id: true,
+        },
+      });
+
+      // ✅ Count total messages
+      const totalMessages = await prisma.message.count({
+        where: {
+          churchId,
+          createdAt: { gte: startDate },
+        },
+      });
+
+      // Map aggregation results
+      const statusCounts = new Map<string, number>();
+      let totalRecipients = 0;
+
+      for (const stat of stats) {
+        const count = stat._count.id;
+        statusCounts.set(stat.status || 'unknown', count);
+        totalRecipients += count;
+      }
+
+      const deliveredCount = statusCounts.get('delivered') || 0;
+      const failedCount = statusCounts.get('failed') || 0;
+      const pendingCount = statusCounts.get('pending') || 0;
+
+      const deliveryRate =
+        totalRecipients > 0
+          ? Math.round((deliveredCount / totalRecipients) * 100)
+          : 0;
+
+      // ✅ Get daily stats - using raw query for efficiency
+      // Group recipients by message date and status
+      const dailyRecipients = await prisma.$queryRaw`
+        SELECT
+          DATE(m.created_at) as date,
+          mr.status,
+          COUNT(*) as count
+        FROM message_recipient mr
+        JOIN message m ON mr.message_id = m.id
+        WHERE m.church_id = ${churchId}
+          AND m.created_at >= ${startDate}
+        GROUP BY DATE(m.created_at), mr.status
+        ORDER BY DATE(m.created_at)
+      ` as Array<{ date: string; status: string; count: number }>;
+
+      // Aggregate by day
+      const byDay: Array<{
+        date: string;
+        count: number;
+        delivered: number;
+        failed: number;
+      }> = [];
+      const dayMap = new Map<string, any>();
+
+      for (const row of dailyRecipients) {
+        if (!dayMap.has(row.date)) {
+          dayMap.set(row.date, { count: 0, delivered: 0, failed: 0 });
+        }
+        const day = dayMap.get(row.date);
+        if (row.status === 'delivered') {
+          day.delivered += row.count;
+        } else if (row.status === 'failed') {
+          day.failed += row.count;
+        }
+        day.count += row.count;
+      }
+
+      for (const [date, data] of dayMap.entries()) {
+        byDay.push({ date, ...data });
+      }
+
+      return {
+        totalMessages,
+        deliveredCount,
+        failedCount,
+        pendingCount,
+        deliveryRate,
+        byDay,
+      };
     },
   });
-
-  // ✅ Count total messages
-  const totalMessages = await prisma.message.count({
-    where: {
-      churchId,
-      createdAt: { gte: startDate },
-    },
-  });
-
-  // Map aggregation results
-  const statusCounts = new Map<string, number>();
-  let totalRecipients = 0;
-
-  for (const stat of stats) {
-    const count = stat._count.id;
-    statusCounts.set(stat.status || 'unknown', count);
-    totalRecipients += count;
-  }
-
-  const deliveredCount = statusCounts.get('delivered') || 0;
-  const failedCount = statusCounts.get('failed') || 0;
-  const pendingCount = statusCounts.get('pending') || 0;
-
-  const deliveryRate =
-    totalRecipients > 0
-      ? Math.round((deliveredCount / totalRecipients) * 100)
-      : 0;
-
-  // ✅ Get daily stats - using raw query for efficiency
-  // Group recipients by message date and status
-  const dailyRecipients = await prisma.$queryRaw`
-    SELECT
-      DATE(m.created_at) as date,
-      mr.status,
-      COUNT(*) as count
-    FROM message_recipient mr
-    JOIN message m ON mr.message_id = m.id
-    WHERE m.church_id = ${churchId}
-      AND m.created_at >= ${startDate}
-    GROUP BY DATE(m.created_at), mr.status
-    ORDER BY DATE(m.created_at)
-  ` as Array<{ date: string; status: string; count: number }>;
-
-  // Aggregate by day
-  const byDay: Array<{
-    date: string;
-    count: number;
-    delivered: number;
-    failed: number;
-  }> = [];
-  const dayMap = new Map<string, any>();
-
-  for (const row of dailyRecipients) {
-    if (!dayMap.has(row.date)) {
-      dayMap.set(row.date, { count: 0, delivered: 0, failed: 0 });
-    }
-    const day = dayMap.get(row.date);
-    if (row.status === 'delivered') {
-      day.delivered += row.count;
-    } else if (row.status === 'failed') {
-      day.failed += row.count;
-    }
-    day.count += row.count;
-  }
-
-  for (const [date, data] of dayMap.entries()) {
-    byDay.push({ date, ...data });
-  }
-
-  return {
-    totalMessages,
-    deliveredCount,
-    failedCount,
-    pendingCount,
-    deliveryRate,
-    byDay,
-  };
 }
 
 /**
@@ -110,8 +144,26 @@ export async function getMessageStats(
  * ✅ OPTIMIZED: Single query with aggregations instead of nested loops
  * Before: 1 + N branches + N*M messages + N*M*X recipients = 107+ queries
  * After: 2 queries total (21x improvement)
+ * ✅ CACHED: 10-minute TTL to reduce repeated database hits
  */
-export async function getBranchStats(churchId: string) {
+export async function getBranchStats(churchId: string): Promise<BranchStat[]> {
+  const cacheKey = `${CACHE_CONFIG.BRANCH_STATS.prefix}${churchId}`;
+
+  // ✅ Use Redis cache for branch stats (less volatile data)
+  return queryCacheMonitor.getOrFetch<BranchStat[]>({
+    key: cacheKey,
+    ttl: CACHE_CONFIG.BRANCH_STATS.TTL,
+    fetchFn: async () => {
+      return getBranchStatsUncached(churchId);
+    },
+  });
+}
+
+/**
+ * Internal uncached version of getBranchStats
+ * Called by cached wrapper
+ */
+async function getBranchStatsUncached(churchId: string): Promise<BranchStat[]> {
   // ✅ Query 1: Get branches with member counts using aggregation
   const branchesWithCounts = await prisma.branch.findMany({
     where: { churchId },
