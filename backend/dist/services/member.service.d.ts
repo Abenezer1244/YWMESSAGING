@@ -22,8 +22,8 @@ export declare function getMembers(groupId: string, options?: {
 }): Promise<{
     data: {
         phone: string;
-        email: string | null;
         id: string;
+        email: string | null;
         firstName: string;
         lastName: string;
         createdAt: Date;

@@ -1,5 +1,7 @@
 import * as groupService from '../services/group.service.js';
 import { PrismaClient } from '@prisma/client';
+import { createGroupSchema, updateGroupSchema } from '../lib/validation/schemas.js';
+import { safeValidate } from '../lib/validation/schemas.js';
 const prisma = new PrismaClient();
 /**
  * SECURITY: Verify branch belongs to authenticated user's church
@@ -70,11 +72,6 @@ export async function createGroup(req, res) {
     try {
         const { branchId } = req.params;
         const churchId = req.user?.churchId;
-        const { name, description, welcomeMessageEnabled, welcomeMessageText } = req.body;
-        console.log(`=== CREATE GROUP DEBUG ===`);
-        console.log(`branchId: ${branchId}`);
-        console.log(`churchId: ${churchId}`);
-        console.log(`name: ${name}`);
         if (!churchId) {
             return res.status(401).json({
                 success: false,
@@ -97,18 +94,21 @@ export async function createGroup(req, res) {
                 error: 'Access denied',
             });
         }
-        // Validate input
-        if (!name || typeof name !== 'string') {
+        // ✅ SECURITY: Validate request body with Zod schema
+        const validationResult = safeValidate(createGroupSchema, req.body);
+        if (!validationResult.success) {
             return res.status(400).json({
                 success: false,
-                error: 'name is required and must be a string',
+                error: 'Validation failed',
+                details: validationResult.errors,
             });
         }
+        const { name, description } = validationResult.data;
         const group = await groupService.createGroup(branchId, {
             name,
             description,
-            welcomeMessageEnabled,
-            welcomeMessageText,
+            welcomeMessageEnabled: req.body.welcomeMessageEnabled,
+            welcomeMessageText: req.body.welcomeMessageText,
         });
         res.status(201).json({
             success: true,
@@ -132,7 +132,6 @@ export async function updateGroup(req, res) {
     try {
         const { groupId } = req.params;
         const churchId = req.user?.churchId;
-        const { name, description, welcomeMessageEnabled, welcomeMessageText } = req.body;
         if (!churchId) {
             return res.status(401).json({
                 success: false,
@@ -147,11 +146,21 @@ export async function updateGroup(req, res) {
                 error: 'Access denied',
             });
         }
+        // ✅ SECURITY: Validate request body with Zod schema
+        const validationResult = safeValidate(updateGroupSchema, req.body);
+        if (!validationResult.success) {
+            return res.status(400).json({
+                success: false,
+                error: 'Validation failed',
+                details: validationResult.errors,
+            });
+        }
+        const { name: validatedName, description: validatedDescription } = validationResult.data;
         const group = await groupService.updateGroup(groupId, {
-            name,
-            description,
-            welcomeMessageEnabled,
-            welcomeMessageText,
+            name: validatedName,
+            description: validatedDescription,
+            welcomeMessageEnabled: req.body.welcomeMessageEnabled,
+            welcomeMessageText: req.body.welcomeMessageText,
         });
         res.json({
             success: true,

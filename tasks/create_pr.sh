@@ -1,0 +1,12 @@
+#!/bin/bash
+curl -X POST \
+  -H "Authorization: token $GITHUB_TOKEN" \
+  -H "Accept: application/vnd.github.v3+json" \
+  -H "Content-Type: application/json" \
+  "https://api.github.com/repos/Abenezer1244/YWMESSAGING/pulls" \
+  -d '{
+    "title": "🧪 Test: Verify Automated Agent System Works End-to-End",
+    "body": "This PR triggers all automated agents to verify the system is working correctly.\n\n## What This Tests\n\n- ✅ GitHub webhook signature verification\n- ✅ Agent invocation (5 agents in parallel)\n- ✅ Claude API integration\n- ✅ GitHub PR comment posting\n- ✅ Slack notification\n\n## Expected Results\n\n1. PR comment with agent findings (within 5-15 seconds)\n2. Slack notification in #all-engineering-automation\n3. Render backend logs showing agent execution\n4. GitHub webhook delivery logs showing 202 Accepted\n\n## Agents Being Tested\n\n- Backend Engineer: Code review, API design, database optimization\n- Senior Frontend Engineer: Component architecture, performance\n- Security Analyst: Vulnerability assessment, OWASP compliance\n- Design Review: UI/UX consistency, accessibility\n- QA Testing: Test coverage, edge cases",
+    "head": "test/agent-automation-verification",
+    "base": "main"
+  }'

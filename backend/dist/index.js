@@ -2,6 +2,7 @@ import 'dotenv/config';
 import app from './app.js';
 import { startRecurringMessageScheduler } from './jobs/recurringMessages.job.js';
 import { verifyAndRecoverPhoneLinkings } from './services/phone-linking-recovery.service.js';
+import { initializeBackupMonitoring } from './utils/backup-monitor.js';
 import cron from 'node-cron';
 const PORT = process.env.PORT || 3000;
 /**
@@ -31,13 +32,15 @@ async function startServer() {
     try {
         // Step 1: Run migrations first
         await autoRunMigrations();
-        // Step 2: Start Express server
+        // Step 2: Check database backup configuration
+        await initializeBackupMonitoring();
+        // Step 3: Start Express server
         app.listen(PORT, () => {
             console.log(`✅ Server running on http://localhost:${PORT}`);
-            // Step 3: Start recurring message scheduler
+            // Step 4: Start recurring message scheduler
             startRecurringMessageScheduler();
             console.log('✅ Message scheduling initialized');
-            // Step 4: Start phone number linking recovery job (every 5 minutes)
+            // Step 5: Start phone number linking recovery job (every 5 minutes)
             cron.schedule('*/5 * * * *', async () => {
                 try {
                     const results = await verifyAndRecoverPhoneLinkings();
