@@ -1,5 +1,7 @@
 import 'dotenv/config';
+import http from 'http';
 import app from './app.js';
+import { initializeWebSocket } from './services/websocket.service.js';
 import { startRecurringMessageScheduler } from './jobs/recurringMessages.job.js';
 import { verifyAndRecoverPhoneLinkings } from './services/phone-linking-recovery.service.js';
 import { initializeBackupMonitoring } from './utils/backup-monitor.js';
@@ -40,15 +42,21 @@ async function startServer() {
     // Step 2: Check database backup configuration
     await initializeBackupMonitoring();
 
-    // Step 3: Start Express server
-    app.listen(PORT, () => {
+    // Step 3: Create HTTP server (required for WebSocket)
+    const server = http.createServer(app);
+
+    // Step 4: Initialize WebSocket for real-time notifications
+    initializeWebSocket(server);
+
+    // Step 5: Start Express/HTTP server
+    server.listen(PORT, () => {
       console.log(`✅ Server running on http://localhost:${PORT}`);
 
-      // Step 4: Start recurring message scheduler
+      // Step 6: Start recurring message scheduler
       startRecurringMessageScheduler();
       console.log('✅ Message scheduling initialized');
 
-      // Step 5: Start phone number linking recovery job (every 5 minutes)
+      // Step 7: Start phone number linking recovery job (every 5 minutes)
       cron.schedule('*/5 * * * *', async () => {
         try {
           const results = await verifyAndRecoverPhoneLinkings();

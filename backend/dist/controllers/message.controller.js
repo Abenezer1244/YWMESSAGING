@@ -1,5 +1,6 @@
 import * as messageService from '../services/message.service.js';
 import * as telnyxService from '../services/telnyx.service.js';
+import * as websocketService from '../services/websocket.service.js';
 import { PrismaClient } from '@prisma/client';
 import { decryptPhoneSafe } from '../utils/encryption.utils.js';
 import { sendMessageSchema, getMessageHistorySchema } from '../lib/validation/schemas.js';
@@ -34,6 +35,18 @@ export async function sendMessage(req, res) {
             targetType,
             targetIds,
         });
+        // 🔔 Emit WebSocket event: Message sent (broadcasting to all users in this church)
+        (async () => {
+            try {
+                const recipients = await prisma.messageRecipient.findMany({
+                    where: { messageId: message.id },
+                });
+                websocketService.broadcastMessageSent(churchId, message.id, recipients.length);
+            }
+            catch (error) {
+                console.error('Failed to emit WebSocket message:sent event:', error);
+            }
+        })();
         // Send messages synchronously to all recipients
         (async () => {
             try {

@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import * as conversationService from '../services/conversation.service.js';
 import * as telnyxMMSService from '../services/telnyx-mms.service.js';
 import * as s3MediaService from '../services/s3-media.service.js';
+import * as websocketService from '../services/websocket.service.js';
 import { hashForSearch } from '../utils/encryption.utils.js';
 import { sendSMS } from '../services/telnyx.service.js';
 import { formatToE164 } from '../utils/phone.utils.js';
@@ -375,9 +376,14 @@ export async function handleTelnyxWebhook(req, res) {
         const messageId = payload.id;
         const telnyxStatus = payload.status;
         console.log(`📨 Telnyx DLR: message=${messageId}, status=${telnyxStatus}`);
-        // Find message by Telnyx ID
+        // Find message by Telnyx ID (include conversation for churchId)
         const message = await prisma.conversationMessage.findFirst({
             where: { providerMessageId: messageId },
+            include: {
+                conversation: {
+                    select: { churchId: true },
+                },
+            },
         });
         if (!message) {
             console.log(`⏭️ Message not found for Telnyx ID: ${messageId} (may not be from conversation)`);
@@ -406,6 +412,13 @@ export async function handleTelnyxWebhook(req, res) {
                 },
             });
             console.log(`✅ Updated message delivery status: ${message.id} → ${status}`);
+            // 🔔 Emit real-time WebSocket event to notify connected clients
+            if (status === 'delivered') {
+                websocketService.broadcastMessageDelivered(message.conversation.churchId, message.id, message.conversationId);
+            }
+            else if (status === 'failed') {
+                websocketService.broadcastMessageFailed(message.conversation.churchId, message.id, `Telnyx delivery failed with status: ${telnyxStatus}`, message.conversationId);
+            }
         }
         res.json({ received: true });
     }
