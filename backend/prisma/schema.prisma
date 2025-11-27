@@ -8,6 +8,24 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+
+  // ✅ CRITICAL: Connection pooling configuration
+  // DATABASE_URL MUST include these parameters for production:
+  // postgresql://user:password@host/db?connection_limit=30&pool_timeout=45
+  //
+  // Parameters:
+  // - connection_limit=30: Maximum connections (default 2-5, too low for production)
+  // - pool_timeout=45: Timeout in seconds before pool returns error
+  //
+  // Without these:
+  // - Multiple PrismaClient instances create separate connection pools
+  // - Each pool exhausts quickly (default 2-5 connections)
+  // - Requests fail with "too many connections" error
+  //
+  // With these:
+  // - Single shared connection pool (30 connections)
+  // - Prevents connection exhaustion
+  // - Production-ready concurrency handling
 }
 
 // Church account

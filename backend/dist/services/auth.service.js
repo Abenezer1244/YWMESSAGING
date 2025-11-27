@@ -1,8 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import { hashPassword, comparePassword } from '../utils/password.utils.js';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt.utils.js';
 import { createCustomer } from './stripe.service.js';
-const prisma = new PrismaClient();
 const TRIAL_DAYS = parseInt(process.env.TRIAL_DAYS || '14');
 /**
  * Register a new church and admin

@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import { hashPassword } from '../utils/password.utils.js';
-const prisma = new PrismaClient();
 /**
  * Update church profile
  */

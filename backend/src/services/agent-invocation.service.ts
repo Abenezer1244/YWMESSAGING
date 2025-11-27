@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import { analysisCache } from './analysis-cache.service.js';
 import {
   getAgentTools,
@@ -7,8 +7,6 @@ import {
   buildToolsArray,
   logMcpStats,
 } from './mcp-integration.service.js';
-
-const prisma = new PrismaClient();
 
 /**
  * Agent Invocation Service

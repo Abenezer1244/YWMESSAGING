@@ -7,9 +7,8 @@
  * 3. Logs results for monitoring and alerting
  * 4. Notifies support if linking fails after max retries
  */
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import { linkPhoneNumberToMessagingProfile } from './telnyx.service.js';
-const prisma = new PrismaClient();
 // Configuration for linking recovery
 const LINKING_RECOVERY_CONFIG = {
     MAX_RETRIES: 3,

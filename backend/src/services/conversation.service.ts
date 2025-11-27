@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import * as telnyxService from './telnyx.service.js';
 import { decrypt, decryptPhoneSafe } from '../utils/encryption.utils.js';
-
-const prisma = new PrismaClient();
 
 /**
  * Get all conversations for a church (sorted by newest)
