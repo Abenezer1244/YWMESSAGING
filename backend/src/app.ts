@@ -22,6 +22,7 @@ import adminRoutes from './routes/admin.routes.js';
 import chatRoutes from './routes/chat.routes.js';
 import schedulerRoutes from './routes/scheduler.routes.js';
 import securityRoutes from './routes/security.routes.js';
+import gdprRoutes from './routes/gdpr.routes.js';
 import { compressionMiddleware } from './middleware/compression.middleware.js';
 import { etagMiddleware } from './middleware/etag.middleware.js';
 
@@ -290,6 +291,10 @@ app.use('/api/chat', apiLimiter, chatRoutes);
 
 // Security & code analysis routes - code scanning and analysis tools
 app.use('/api/security', apiLimiter, securityRoutes);
+
+// GDPR routes - data export, deletion, and consent management
+// Rate limited to prevent abuse
+app.use('/api/gdpr', apiLimiter, gdprRoutes);
 
 // ✅ SECURITY: Add Sentry error handler middleware
 // Must be after routes but before the final error handler

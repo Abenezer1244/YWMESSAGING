@@ -472,3 +472,60 @@ model AgentAudit {
   @@index([severity])
   @@index([createdAt])
 }
+
+// GDPR: Consent audit trail - track all consent changes
+model ConsentLog {
+  id        String   @id @default(cuid())
+  churchId  String
+  memberId  String?
+  adminId   String?
+  type      String   // smsMarketing, emailMarketing, dataProcessing, analytics
+  status    String   // granted, denied, withdrawn
+  reason    String?
+  source    String   // api, web_form, email_link, signup
+  createdAt DateTime @default(now())
+
+  @@index([churchId])
+  @@index([memberId])
+  @@index([adminId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+// GDPR: Account deletion requests - track deletion with grace period
+model AccountDeletionRequest {
+  id                    String   @id @default(cuid())
+  churchId              String   @unique
+  initiatedBy           String   // Admin ID
+  confirmationToken     String   @unique
+  status                String   @default("pending") // pending, confirmed, cancelled
+  scheduledDeletionAt   DateTime
+  actualDeletionAt      DateTime?
+  reason                String?
+  cancelledAt           DateTime?
+  cancelledBy           String?
+  createdAt             DateTime @default(now())
+
+  @@index([churchId])
+  @@index([confirmationToken])
+  @@index([status])
+  @@index([scheduledDeletionAt])
+}
+
+// GDPR: Data exports - track exports for download
+model DataExport {
+  id            String   @id @default(cuid())
+  churchId      String
+  requestedBy   String   // Admin ID
+  status        String   @default("pending") // pending, completed, failed, expired
+  fileUrl       String?
+  fileSize      Int?
+  expiresAt     DateTime
+  errorMessage  String?
+  createdAt     DateTime @default(now())
+  completedAt   DateTime?
+
+  @@index([churchId])
+  @@index([expiresAt])
+  @@index([status])
+}
