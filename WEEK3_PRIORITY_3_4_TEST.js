@@ -20,7 +20,7 @@ const jwt = require('jsonwebtoken');
 
 const API_BASE = 'https://api.koinoniasms.com';
 const TIMEOUT = 30000;
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_ACCESS_SECRET || '7e84beb41ceda67d90d7065c451f1ae951ca84f8999cb7c59c9013ab1d76facc';
 
 let testResults = {
   passed: 0,

@@ -53,7 +53,7 @@ const upload = multer({
 router.post('/send', authenticateToken, messageLimiter(), messageController.sendMessage);
 
 // Get message history (with pagination and filters)
-router.get('/history', authenticateToken, messageController.getMessageHistory);
+router.get('/history', authenticateToken, messageLimiter(), messageController.getMessageHistory);
 
 // Get single message details
 router.get('/:messageId', authenticateToken, messageController.getMessageDetails);

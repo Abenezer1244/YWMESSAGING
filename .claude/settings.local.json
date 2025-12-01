@@ -66,7 +66,10 @@
       "Bash(timeout 120 bash -c \"cd \\\"C:\\Users\\Windows\\OneDrive - Seattle Colleges\\Desktop\\YWMESSAGING\\backend\\\" && npm list zod 2>&1 | head -5\":*)",
       "Bash(find:*)",
       "Bash(npm run:*)",
-      "Bash(timeout 60 node:*)"
+      "Bash(timeout 60 node:*)",
+      "Bash(pkill:*)",
+      "Bash(taskkill:*)",
+      "Bash(timeout 30 node:*)"
     ],
     "deny": [],
     "ask": []
