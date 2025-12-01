@@ -305,6 +305,7 @@ model Admin {
 
   @@index([churchId])
   @@index([role])
+  @@index([churchId, role])  // ✅ For efficient CO_ADMIN lookups in getUsage() and billing queries
 }
 
 // Subscription details (Stripe)

@@ -126,16 +126,14 @@ export async function createMessage(
     },
   });
 
-  // Create message recipient records
-  for (const recipient of recipients) {
-    await prisma.messageRecipient.create({
-      data: {
-        messageId: message.id,
-        memberId: recipient.id,
-        status: 'pending',
-      },
-    });
-  }
+  // Create message recipient records in batch (not one-by-one)
+  await prisma.messageRecipient.createMany({
+    data: recipients.map((recipient) => ({
+      messageId: message.id,
+      memberId: recipient.id,
+      status: 'pending',
+    })),
+  });
 
   return {
     id: message.id,
@@ -275,20 +273,14 @@ export async function updateMessageStats(messageId: string): Promise<void> {
 
 /**
  * Update recipient delivery status
+ * Accepts messageId to avoid redundant database fetch
  */
 export async function updateRecipientStatus(
   recipientId: string,
   status: 'delivered' | 'failed',
+  messageId: string,
   data?: { failureReason?: string }
 ): Promise<void> {
-  const recipient = await prisma.messageRecipient.findUnique({
-    where: { id: recipientId },
-  });
-
-  if (!recipient) {
-    throw new Error('Recipient not found');
-  }
-
   await prisma.messageRecipient.update({
     where: { id: recipientId },
     data: {
@@ -300,5 +292,5 @@ export async function updateRecipientStatus(
   });
 
   // Update message stats
-  await updateMessageStats(recipient.messageId);
+  await updateMessageStats(messageId);
 }

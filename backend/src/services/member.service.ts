@@ -36,6 +36,7 @@ export async function getMembers(
 
   const group = await prisma.group.findUnique({
     where: { id: groupId },
+    select: { id: true },  // Only fetch what we need for validation
   });
 
   if (!group) {
@@ -111,6 +112,7 @@ export async function getMembers(
 export async function addMember(groupId: string, data: CreateMemberData) {
   const group = await prisma.group.findUnique({
     where: { id: groupId },
+    select: { id: true, churchId: true },  // Only fetch what we need
   });
 
   if (!group) {
@@ -132,17 +134,16 @@ export async function addMember(groupId: string, data: CreateMemberData) {
   const formattedPhone = formatToE164(data.phone);
   const phoneHash = hashForSearch(formattedPhone);
 
-  // Check if member with this phone exists
+  // Check if member exists by phone or email in a single query
+  const emailTrim = data.email?.trim();
   let member = await prisma.member.findFirst({
-    where: { phoneHash },
+    where: {
+      OR: [
+        { phoneHash },
+        ...(emailTrim ? [{ email: emailTrim }] : []),
+      ],
+    },
   });
-
-  // Also check by email if phoneHash didn't match
-  if (!member && data.email?.trim()) {
-    member = await prisma.member.findFirst({
-      where: { email: data.email.trim() },
-    });
-  }
 
   // Create member if doesn't exist
   if (!member) {

@@ -144,35 +144,32 @@ export function getPlanLimits(plan: PlanName | string): PlanLimits | null {
  */
 export async function getUsage(churchId: string): Promise<Record<string, number>> {
   try {
-    // Get branches count
-    const branchCount = await prisma.branch.count({
-      where: { churchId },
-    });
+    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
-    // Get members count
-    const memberCount = await prisma.member.count({
-      where: {
-        groups: {
-          some: {
-            group: { churchId },
+    // Run all count queries in parallel (instead of sequentially)
+    const [branchCount, memberCount, coAdminCount, messageCount] = await Promise.all([
+      prisma.branch.count({
+        where: { churchId },
+      }),
+      prisma.member.count({
+        where: {
+          groups: {
+            some: {
+              group: { churchId },
+            },
           },
         },
-      },
-    });
-
-    // Get co-admins count
-    const coAdminCount = await prisma.admin.count({
-      where: { churchId, role: 'CO_ADMIN' },
-    });
-
-    // Get messages sent this month
-    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-    const messageCount = await prisma.message.count({
-      where: {
-        churchId,
-        createdAt: { gte: startOfMonth },
-      },
-    });
+      }),
+      prisma.admin.count({
+        where: { churchId, role: 'CO_ADMIN' },
+      }),
+      prisma.message.count({
+        where: {
+          churchId,
+          createdAt: { gte: startOfMonth },
+        },
+      }),
+    ]);
 
     return {
       branches: branchCount,

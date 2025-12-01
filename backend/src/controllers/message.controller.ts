@@ -267,7 +267,7 @@ export async function handleTelnyxWebhook(req: Request, res: Response) {
 
     if (status) {
       // Update recipient status
-      await messageService.updateRecipientStatus(recipient.id, status, {
+      await messageService.updateRecipientStatus(recipient.id, status, recipient.message.id, {
         failureReason: payload.error_message || undefined,
       });
 
