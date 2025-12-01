@@ -282,6 +282,6 @@ export declare const redisClient: import("@redis/client").RedisClientType<{
         reserve: typeof import("@redis/bloom/dist/commands/top-k/RESERVE");
     };
 } & import("redis").RedisModules, import("redis").RedisFunctions, import("redis").RedisScripts>;
-export declare function connectRedis(): Promise<void>;
+export declare function connectRedis(timeoutMs?: number): Promise<boolean>;
 export declare function disconnectRedis(): Promise<void>;
 //# sourceMappingURL=redis.config.d.ts.map

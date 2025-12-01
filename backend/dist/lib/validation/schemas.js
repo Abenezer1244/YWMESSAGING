@@ -1,241 +1,186 @@
 import { z } from 'zod';
 /**
- * Auth Validation Schemas
- * Used for request body validation in authentication endpoints
+ * Comprehensive Input Validation Schemas
+ *
+ * All user input is validated through these schemas BEFORE processing.
+ * This prevents injection attacks, data corruption, and unexpected errors.
  */
-export const registerSchema = z.object({
-    email: z
-        .string()
-        .email('Invalid email format')
-        .toLowerCase()
-        .trim(),
-    password: z
-        .string()
-        .min(8, 'Password must be at least 8 characters'),
-    firstName: z
-        .string()
-        .min(1, 'First name cannot be empty')
-        .max(100, 'First name is too long')
-        .trim(),
-    lastName: z
-        .string()
-        .min(1, 'Last name cannot be empty')
-        .max(100, 'Last name is too long')
-        .trim(),
-    churchName: z
-        .string()
-        .min(1, 'Church name cannot be empty')
+// ============================================
+// AUTH SCHEMAS
+// ============================================
+export const RegisterSchema = z.object({
+    email: z.string()
+        .email('Invalid email address')
+        .max(255, 'Email too long')
+        .toLowerCase(),
+    password: z.string()
+        .min(12, 'Password must be at least 12 characters')
+        .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+        .regex(/[0-9]/, 'Password must contain at least one number')
+        .regex(/[!@#$%^&*]/, 'Password must contain at least one special character (!@#$%^&*)'),
+    churchName: z.string()
+        .min(1, 'Church name is required')
         .max(255, 'Church name is too long')
         .trim(),
+    churchPhone: z.string()
+        .regex(/^\+?1?\d{9,15}$/, 'Invalid phone number format')
+        .optional(),
 });
-export const loginSchema = z.object({
-    email: z
-        .string()
-        .email('Invalid email format')
-        .toLowerCase()
-        .trim(),
-    password: z
-        .string()
+export const LoginSchema = z.object({
+    email: z.string()
+        .email('Invalid email address')
+        .toLowerCase(),
+    password: z.string()
         .min(1, 'Password is required'),
 });
-export const completeWelcomeSchema = z.object({
-    userRole: z
-        .enum(['pastor', 'admin', 'communications', 'volunteer', 'other'], {
-        errorMap: () => ({ message: 'Invalid user role' }),
-    }),
+export const PasswordResetSchema = z.object({
+    email: z.string()
+        .email('Invalid email address')
+        .toLowerCase(),
 });
-/**
- * Message Validation Schemas
- */
-export const sendMessageSchema = z.object({
-    content: z
-        .string()
-        .min(1, 'Message cannot be empty')
-        .max(1600, 'Message must be 1600 characters or less')
+export const NewPasswordSchema = z.object({
+    token: z.string()
+        .min(1, 'Reset token is required'),
+    password: z.string()
+        .min(12, 'Password must be at least 12 characters')
+        .regex(/[A-Z]/, 'Password must contain uppercase letter')
+        .regex(/[0-9]/, 'Password must contain number'),
+});
+// ============================================
+// MESSAGE SCHEMAS
+// ============================================
+export const SendMessageSchema = z.object({
+    content: z.string()
+        .min(1, 'Message content is required')
+        .max(160, 'Message is too long (max 160 characters)')
         .trim(),
-    targetType: z
-        .enum(['group', 'member', 'segment'], {
-        errorMap: () => ({ message: 'Invalid target type. Must be group, member, or segment' }),
-    }),
-    targetIds: z
-        .array(z.string().uuid('Invalid target ID format'))
-        .optional()
-        .default([]),
-});
-export const getMessageHistorySchema = z.object({
-    page: z
-        .string()
-        .optional()
-        .default('1')
-        .transform((val) => {
-        const parsed = parseInt(val, 10);
-        if (isNaN(parsed) || parsed < 1) {
-            throw new Error('Page must be a positive number');
-        }
-        return parsed;
-    }),
-    limit: z
-        .string()
-        .optional()
-        .default('20')
-        .transform((val) => {
-        const parsed = parseInt(val, 10);
-        if (isNaN(parsed) || parsed < 1 || parsed > 100) {
-            throw new Error('Limit must be between 1 and 100');
-        }
-        return parsed;
-    }),
-    status: z
-        .enum(['pending', 'delivered', 'failed'], {
-        errorMap: () => ({ message: 'Invalid status filter' }),
-    })
+    recipientIds: z.array(z.string().uuid('Invalid recipient ID')).min(1, 'At least one recipient is required'),
+    scheduleTime: z.string()
+        .datetime('Invalid schedule time format')
+        .optional(),
+    groupId: z.string()
+        .uuid('Invalid group ID')
         .optional(),
 });
-/**
- * Group Validation Schemas
- */
-export const createGroupSchema = z.object({
-    name: z
-        .string()
-        .min(1, 'Group name cannot be empty')
-        .max(255, 'Group name is too long')
-        .trim(),
-    description: z
-        .string()
-        .max(500, 'Description is too long')
-        .optional(),
-    memberIds: z
-        .array(z.string().uuid('Invalid member ID format'))
-        .optional()
-        .default([]),
+export const MessageFilterSchema = z.object({
+    status: z.enum(['draft', 'scheduled', 'sending', 'sent', 'failed']).optional(),
+    groupId: z.string().uuid('Invalid group ID').optional(),
+    dateFrom: z.string().datetime('Invalid date format').optional(),
+    dateTo: z.string().datetime('Invalid date format').optional(),
+    limit: z.number().int().min(1).max(100).default(20),
+    offset: z.number().int().min(0).default(0),
 });
-export const updateGroupSchema = z.object({
-    name: z
-        .string()
-        .min(1, 'Group name cannot be empty')
-        .max(255, 'Group name is too long')
-        .trim()
-        .optional(),
-    description: z
-        .string()
-        .max(500, 'Description is too long')
-        .optional(),
-    memberIds: z
-        .array(z.string().uuid('Invalid member ID format'))
-        .optional(),
-});
-/**
- * Member Validation Schemas
- */
-export const createMemberSchema = z.object({
-    firstName: z
-        .string()
-        .min(1, 'First name cannot be empty')
+// ============================================
+// CONTACT SCHEMAS
+// ============================================
+export const CreateContactSchema = z.object({
+    firstName: z.string()
+        .min(1, 'First name is required')
         .max(100, 'First name is too long')
         .trim(),
-    lastName: z
-        .string()
-        .min(1, 'Last name cannot be empty')
+    lastName: z.string()
+        .min(1, 'Last name is required')
         .max(100, 'Last name is too long')
         .trim(),
-    phone: z
-        .string()
-        .regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format. Use E.164 format.')
+    phone: z.string()
+        .regex(/^\+?1?\d{9,15}$/, 'Invalid phone number format')
         .trim(),
-    email: z
-        .string()
-        .email('Invalid email format')
-        .toLowerCase()
-        .trim()
+    email: z.string()
+        .email('Invalid email address')
         .optional(),
-    groupIds: z
-        .array(z.string().uuid('Invalid group ID format'))
-        .optional()
-        .default([]),
+    groupIds: z.array(z.string().uuid()).optional(),
 });
-export const updateMemberSchema = z.object({
-    firstName: z
-        .string()
-        .min(1, 'First name cannot be empty')
-        .max(100, 'First name is too long')
-        .trim()
+export const UpdateContactSchema = CreateContactSchema.partial();
+// ============================================
+// GROUP SCHEMAS
+// ============================================
+export const CreateGroupSchema = z.object({
+    name: z.string()
+        .min(1, 'Group name is required')
+        .max(255, 'Group name is too long')
+        .trim(),
+    description: z.string()
+        .max(1000, 'Description is too long')
         .optional(),
-    lastName: z
-        .string()
-        .min(1, 'Last name cannot be empty')
-        .max(100, 'Last name is too long')
-        .trim()
-        .optional(),
-    phone: z
-        .string()
-        .regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format. Use E.164 format.')
-        .trim()
-        .optional(),
-    email: z
-        .string()
-        .email('Invalid email format')
-        .toLowerCase()
-        .trim()
-        .optional(),
-    groupIds: z
-        .array(z.string().uuid('Invalid group ID format'))
+    color: z.string()
+        .regex(/^#[0-9A-F]{6}$/i, 'Invalid color format (use hex: #RRGGBB)')
         .optional(),
 });
-/**
- * Conversation Validation Schemas
- */
-export const createConversationSchema = z.object({
-    groupId: z.string().uuid('Invalid group ID format'),
-    template: z
-        .enum(['broadcast', 'survey', 'rsvp'], {
-        errorMap: () => ({ message: 'Invalid conversation template type' }),
-    })
+export const UpdateGroupSchema = CreateGroupSchema.partial();
+// ============================================
+// BILLING SCHEMAS
+// ============================================
+export const SubscribeSchema = z.object({
+    planId: z.enum(['starter', 'professional', 'enterprise']),
+    stripeToken: z.string()
+        .min(1, 'Payment token is required'),
+    billingEmail: z.string()
+        .email('Invalid email')
         .optional(),
 });
-/**
- * Billing/Subscription Validation Schemas
- */
-export const updateBillingSchema = z.object({
-    stripePaymentMethodId: z
-        .string()
-        .startsWith('pm_', 'Invalid payment method ID format'),
-    billingName: z
-        .string()
-        .min(1, 'Billing name cannot be empty')
-        .max(255, 'Billing name is too long')
-        .trim()
+export const UpdateBillingSchema = z.object({
+    billingEmail: z.string()
+        .email('Invalid email')
         .optional(),
-    billingEmail: z
-        .string()
-        .email('Invalid email format')
-        .toLowerCase()
-        .trim()
+    billingName: z.string()
+        .max(255)
         .optional(),
 });
-/**
- * Validation helper function
- * Validates request body against a schema and throws ZodError if invalid
- */
-export function validateRequest(schema, data) {
-    return schema.parse(data);
+export function formatValidationErrors(error) {
+    return error.errors.map((err) => ({
+        field: err.path.join('.'),
+        message: err.message,
+        code: err.code,
+    }));
 }
+// ============================================
+// LOWERCASE ALIASES (for backward compatibility)
+// ============================================
+export const registerSchema = RegisterSchema;
+export const loginSchema = LoginSchema;
+export const passwordResetSchema = PasswordResetSchema;
+export const newPasswordSchema = NewPasswordSchema;
+export const sendMessageSchema = SendMessageSchema;
+export const messageFilterSchema = MessageFilterSchema;
+export const createContactSchema = CreateContactSchema;
+export const updateContactSchema = UpdateContactSchema;
+export const createGroupSchema = CreateGroupSchema;
+export const updateGroupSchema = UpdateGroupSchema;
+export const subscribeSchema = SubscribeSchema;
+export const updateBillingSchema = UpdateBillingSchema;
 /**
- * Safe validation helper
- * Returns result with either parsed data or error details
+ * Safe validation wrapper for existing code
+ * Returns { success: boolean, data?: T, errors?: ZodError[] }
  */
 export function safeValidate(schema, data) {
-    const result = schema.safeParse(data);
-    if (result.success) {
-        return { success: true, data: result.data };
+    try {
+        const validated = schema.parse(data);
+        return { success: true, data: validated };
     }
-    const errors = {};
-    result.error.errors.forEach((error) => {
-        const path = error.path.join('.');
-        if (!errors[path]) {
-            errors[path] = [];
+    catch (error) {
+        if (error instanceof z.ZodError) {
+            return {
+                success: false,
+                errors: formatValidationErrors(error),
+            };
         }
-        errors[path].push(error.message);
-    });
-    return { success: false, errors };
+        return {
+            success: false,
+            errors: [{ message: 'Validation error' }],
+        };
+    }
 }
+// Additional schemas needed by existing controllers
+export const completeWelcomeSchema = z.object({
+    firstName: z.string().min(1).max(100),
+    lastName: z.string().min(1).max(100),
+});
+export const getMessageHistorySchema = z.object({
+    status: z.enum(['draft', 'scheduled', 'sending', 'sent', 'failed']).optional(),
+    groupId: z.string().uuid().optional(),
+    dateFrom: z.string().datetime().optional(),
+    dateTo: z.string().datetime().optional(),
+    limit: z.number().int().min(1).max(100).default(20),
+    offset: z.number().int().min(0).default(0),
+});
 //# sourceMappingURL=schemas.js.map

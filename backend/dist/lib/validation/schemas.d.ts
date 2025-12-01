@@ -1,28 +1,205 @@
-import { z } from 'zod';
+import { z, ZodSchema } from 'zod';
 /**
- * Auth Validation Schemas
- * Used for request body validation in authentication endpoints
+ * Comprehensive Input Validation Schemas
+ *
+ * All user input is validated through these schemas BEFORE processing.
+ * This prevents injection attacks, data corruption, and unexpected errors.
  */
+export declare const RegisterSchema: z.ZodObject<{
+    email: z.ZodString;
+    password: z.ZodString;
+    churchName: z.ZodString;
+    churchPhone: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    email: string;
+    password: string;
+    churchName: string;
+    churchPhone?: string | undefined;
+}, {
+    email: string;
+    password: string;
+    churchName: string;
+    churchPhone?: string | undefined;
+}>;
+export declare const LoginSchema: z.ZodObject<{
+    email: z.ZodString;
+    password: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    email: string;
+    password: string;
+}, {
+    email: string;
+    password: string;
+}>;
+export declare const PasswordResetSchema: z.ZodObject<{
+    email: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    email: string;
+}, {
+    email: string;
+}>;
+export declare const NewPasswordSchema: z.ZodObject<{
+    token: z.ZodString;
+    password: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    password: string;
+    token: string;
+}, {
+    password: string;
+    token: string;
+}>;
+export declare const SendMessageSchema: z.ZodObject<{
+    content: z.ZodString;
+    recipientIds: z.ZodArray<z.ZodString, "many">;
+    scheduleTime: z.ZodOptional<z.ZodString>;
+    groupId: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    content: string;
+    recipientIds: string[];
+    scheduleTime?: string | undefined;
+    groupId?: string | undefined;
+}, {
+    content: string;
+    recipientIds: string[];
+    scheduleTime?: string | undefined;
+    groupId?: string | undefined;
+}>;
+export declare const MessageFilterSchema: z.ZodObject<{
+    status: z.ZodOptional<z.ZodEnum<["draft", "scheduled", "sending", "sent", "failed"]>>;
+    groupId: z.ZodOptional<z.ZodString>;
+    dateFrom: z.ZodOptional<z.ZodString>;
+    dateTo: z.ZodOptional<z.ZodString>;
+    limit: z.ZodDefault<z.ZodNumber>;
+    offset: z.ZodDefault<z.ZodNumber>;
+}, "strip", z.ZodTypeAny, {
+    limit: number;
+    offset: number;
+    status?: "draft" | "scheduled" | "sending" | "sent" | "failed" | undefined;
+    groupId?: string | undefined;
+    dateFrom?: string | undefined;
+    dateTo?: string | undefined;
+}, {
+    limit?: number | undefined;
+    status?: "draft" | "scheduled" | "sending" | "sent" | "failed" | undefined;
+    groupId?: string | undefined;
+    dateFrom?: string | undefined;
+    dateTo?: string | undefined;
+    offset?: number | undefined;
+}>;
+export declare const CreateContactSchema: z.ZodObject<{
+    firstName: z.ZodString;
+    lastName: z.ZodString;
+    phone: z.ZodString;
+    email: z.ZodOptional<z.ZodString>;
+    groupIds: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+}, "strip", z.ZodTypeAny, {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    email?: string | undefined;
+    groupIds?: string[] | undefined;
+}, {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    email?: string | undefined;
+    groupIds?: string[] | undefined;
+}>;
+export declare const UpdateContactSchema: z.ZodObject<{
+    firstName: z.ZodOptional<z.ZodString>;
+    lastName: z.ZodOptional<z.ZodString>;
+    phone: z.ZodOptional<z.ZodString>;
+    email: z.ZodOptional<z.ZodOptional<z.ZodString>>;
+    groupIds: z.ZodOptional<z.ZodOptional<z.ZodArray<z.ZodString, "many">>>;
+}, "strip", z.ZodTypeAny, {
+    email?: string | undefined;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    phone?: string | undefined;
+    groupIds?: string[] | undefined;
+}, {
+    email?: string | undefined;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    phone?: string | undefined;
+    groupIds?: string[] | undefined;
+}>;
+export declare const CreateGroupSchema: z.ZodObject<{
+    name: z.ZodString;
+    description: z.ZodOptional<z.ZodString>;
+    color: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    name: string;
+    description?: string | undefined;
+    color?: string | undefined;
+}, {
+    name: string;
+    description?: string | undefined;
+    color?: string | undefined;
+}>;
+export declare const UpdateGroupSchema: z.ZodObject<{
+    name: z.ZodOptional<z.ZodString>;
+    description: z.ZodOptional<z.ZodOptional<z.ZodString>>;
+    color: z.ZodOptional<z.ZodOptional<z.ZodString>>;
+}, "strip", z.ZodTypeAny, {
+    name?: string | undefined;
+    description?: string | undefined;
+    color?: string | undefined;
+}, {
+    name?: string | undefined;
+    description?: string | undefined;
+    color?: string | undefined;
+}>;
+export declare const SubscribeSchema: z.ZodObject<{
+    planId: z.ZodEnum<["starter", "professional", "enterprise"]>;
+    stripeToken: z.ZodString;
+    billingEmail: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    planId: "starter" | "professional" | "enterprise";
+    stripeToken: string;
+    billingEmail?: string | undefined;
+}, {
+    planId: "starter" | "professional" | "enterprise";
+    stripeToken: string;
+    billingEmail?: string | undefined;
+}>;
+export declare const UpdateBillingSchema: z.ZodObject<{
+    billingEmail: z.ZodOptional<z.ZodString>;
+    billingName: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    billingEmail?: string | undefined;
+    billingName?: string | undefined;
+}, {
+    billingEmail?: string | undefined;
+    billingName?: string | undefined;
+}>;
+export type RegisterInput = z.infer<typeof RegisterSchema>;
+export type LoginInput = z.infer<typeof LoginSchema>;
+export type SendMessageInput = z.infer<typeof SendMessageSchema>;
+export type CreateContactInput = z.infer<typeof CreateContactSchema>;
+export type CreateGroupInput = z.infer<typeof CreateGroupSchema>;
+export type SubscribeInput = z.infer<typeof SubscribeSchema>;
+export declare function formatValidationErrors(error: z.ZodError): {
+    field: string;
+    message: string;
+    code: "custom" | "unrecognized_keys" | "invalid_union" | "invalid_union_discriminator" | "invalid_arguments" | "invalid_return_type" | "invalid_string" | "not_multiple_of" | "invalid_literal" | "invalid_type" | "invalid_enum_value" | "invalid_intersection_types" | "invalid_date" | "not_finite" | "too_big" | "too_small";
+}[];
 export declare const registerSchema: z.ZodObject<{
     email: z.ZodString;
     password: z.ZodString;
-    firstName: z.ZodString;
-    lastName: z.ZodString;
     churchName: z.ZodString;
+    churchPhone: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     email: string;
-    firstName: string;
-    lastName: string;
     password: string;
     churchName: string;
+    churchPhone?: string | undefined;
 }, {
     email: string;
-    firstName: string;
-    lastName: string;
     password: string;
     churchName: string;
+    churchPhone?: string | undefined;
 }>;
-export type RegisterRequest = z.infer<typeof registerSchema>;
 export declare const loginSchema: z.ZodObject<{
     email: z.ZodString;
     password: z.ZodString;
@@ -33,92 +210,73 @@ export declare const loginSchema: z.ZodObject<{
     email: string;
     password: string;
 }>;
-export type LoginRequest = z.infer<typeof loginSchema>;
-export declare const completeWelcomeSchema: z.ZodObject<{
-    userRole: z.ZodEnum<["pastor", "admin", "communications", "volunteer", "other"]>;
+export declare const passwordResetSchema: z.ZodObject<{
+    email: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    userRole: "other" | "admin" | "pastor" | "communications" | "volunteer";
+    email: string;
 }, {
-    userRole: "other" | "admin" | "pastor" | "communications" | "volunteer";
+    email: string;
 }>;
-export type CompleteWelcomeRequest = z.infer<typeof completeWelcomeSchema>;
-/**
- * Message Validation Schemas
- */
+export declare const newPasswordSchema: z.ZodObject<{
+    token: z.ZodString;
+    password: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    password: string;
+    token: string;
+}, {
+    password: string;
+    token: string;
+}>;
 export declare const sendMessageSchema: z.ZodObject<{
     content: z.ZodString;
-    targetType: z.ZodEnum<["group", "member", "segment"]>;
-    targetIds: z.ZodDefault<z.ZodOptional<z.ZodArray<z.ZodString, "many">>>;
+    recipientIds: z.ZodArray<z.ZodString, "many">;
+    scheduleTime: z.ZodOptional<z.ZodString>;
+    groupId: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     content: string;
-    targetType: "group" | "member" | "segment";
-    targetIds: string[];
+    recipientIds: string[];
+    scheduleTime?: string | undefined;
+    groupId?: string | undefined;
 }, {
     content: string;
-    targetType: "group" | "member" | "segment";
-    targetIds?: string[] | undefined;
+    recipientIds: string[];
+    scheduleTime?: string | undefined;
+    groupId?: string | undefined;
 }>;
-export type SendMessageRequest = z.infer<typeof sendMessageSchema>;
-export declare const getMessageHistorySchema: z.ZodObject<{
-    page: z.ZodEffects<z.ZodDefault<z.ZodOptional<z.ZodString>>, number, string | undefined>;
-    limit: z.ZodEffects<z.ZodDefault<z.ZodOptional<z.ZodString>>, number, string | undefined>;
-    status: z.ZodOptional<z.ZodEnum<["pending", "delivered", "failed"]>>;
+export declare const messageFilterSchema: z.ZodObject<{
+    status: z.ZodOptional<z.ZodEnum<["draft", "scheduled", "sending", "sent", "failed"]>>;
+    groupId: z.ZodOptional<z.ZodString>;
+    dateFrom: z.ZodOptional<z.ZodString>;
+    dateTo: z.ZodOptional<z.ZodString>;
+    limit: z.ZodDefault<z.ZodNumber>;
+    offset: z.ZodDefault<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
     limit: number;
-    page: number;
-    status?: "pending" | "delivered" | "failed" | undefined;
+    offset: number;
+    status?: "draft" | "scheduled" | "sending" | "sent" | "failed" | undefined;
+    groupId?: string | undefined;
+    dateFrom?: string | undefined;
+    dateTo?: string | undefined;
 }, {
-    limit?: string | undefined;
-    status?: "pending" | "delivered" | "failed" | undefined;
-    page?: string | undefined;
+    limit?: number | undefined;
+    status?: "draft" | "scheduled" | "sending" | "sent" | "failed" | undefined;
+    groupId?: string | undefined;
+    dateFrom?: string | undefined;
+    dateTo?: string | undefined;
+    offset?: number | undefined;
 }>;
-export type GetMessageHistoryRequest = z.infer<typeof getMessageHistorySchema>;
-/**
- * Group Validation Schemas
- */
-export declare const createGroupSchema: z.ZodObject<{
-    name: z.ZodString;
-    description: z.ZodOptional<z.ZodString>;
-    memberIds: z.ZodDefault<z.ZodOptional<z.ZodArray<z.ZodString, "many">>>;
-}, "strip", z.ZodTypeAny, {
-    name: string;
-    memberIds: string[];
-    description?: string | undefined;
-}, {
-    name: string;
-    description?: string | undefined;
-    memberIds?: string[] | undefined;
-}>;
-export type CreateGroupRequest = z.infer<typeof createGroupSchema>;
-export declare const updateGroupSchema: z.ZodObject<{
-    name: z.ZodOptional<z.ZodString>;
-    description: z.ZodOptional<z.ZodString>;
-    memberIds: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
-}, "strip", z.ZodTypeAny, {
-    name?: string | undefined;
-    description?: string | undefined;
-    memberIds?: string[] | undefined;
-}, {
-    name?: string | undefined;
-    description?: string | undefined;
-    memberIds?: string[] | undefined;
-}>;
-export type UpdateGroupRequest = z.infer<typeof updateGroupSchema>;
-/**
- * Member Validation Schemas
- */
-export declare const createMemberSchema: z.ZodObject<{
+export declare const createContactSchema: z.ZodObject<{
     firstName: z.ZodString;
     lastName: z.ZodString;
     phone: z.ZodString;
     email: z.ZodOptional<z.ZodString>;
-    groupIds: z.ZodDefault<z.ZodOptional<z.ZodArray<z.ZodString, "many">>>;
+    groupIds: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
     firstName: string;
     lastName: string;
     phone: string;
-    groupIds: string[];
     email?: string | undefined;
+    groupIds?: string[] | undefined;
 }, {
     firstName: string;
     lastName: string;
@@ -126,13 +284,12 @@ export declare const createMemberSchema: z.ZodObject<{
     email?: string | undefined;
     groupIds?: string[] | undefined;
 }>;
-export type CreateMemberRequest = z.infer<typeof createMemberSchema>;
-export declare const updateMemberSchema: z.ZodObject<{
+export declare const updateContactSchema: z.ZodObject<{
     firstName: z.ZodOptional<z.ZodString>;
     lastName: z.ZodOptional<z.ZodString>;
     phone: z.ZodOptional<z.ZodString>;
-    email: z.ZodOptional<z.ZodString>;
-    groupIds: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    email: z.ZodOptional<z.ZodOptional<z.ZodString>>;
+    groupIds: z.ZodOptional<z.ZodOptional<z.ZodArray<z.ZodString, "many">>>;
 }, "strip", z.ZodTypeAny, {
     email?: string | undefined;
     firstName?: string | undefined;
@@ -146,52 +303,94 @@ export declare const updateMemberSchema: z.ZodObject<{
     phone?: string | undefined;
     groupIds?: string[] | undefined;
 }>;
-export type UpdateMemberRequest = z.infer<typeof updateMemberSchema>;
-/**
- * Conversation Validation Schemas
- */
-export declare const createConversationSchema: z.ZodObject<{
-    groupId: z.ZodString;
-    template: z.ZodOptional<z.ZodEnum<["broadcast", "survey", "rsvp"]>>;
+export declare const createGroupSchema: z.ZodObject<{
+    name: z.ZodString;
+    description: z.ZodOptional<z.ZodString>;
+    color: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    groupId: string;
-    template?: "broadcast" | "survey" | "rsvp" | undefined;
+    name: string;
+    description?: string | undefined;
+    color?: string | undefined;
 }, {
-    groupId: string;
-    template?: "broadcast" | "survey" | "rsvp" | undefined;
+    name: string;
+    description?: string | undefined;
+    color?: string | undefined;
 }>;
-export type CreateConversationRequest = z.infer<typeof createConversationSchema>;
-/**
- * Billing/Subscription Validation Schemas
- */
-export declare const updateBillingSchema: z.ZodObject<{
-    stripePaymentMethodId: z.ZodString;
-    billingName: z.ZodOptional<z.ZodString>;
+export declare const updateGroupSchema: z.ZodObject<{
+    name: z.ZodOptional<z.ZodString>;
+    description: z.ZodOptional<z.ZodOptional<z.ZodString>>;
+    color: z.ZodOptional<z.ZodOptional<z.ZodString>>;
+}, "strip", z.ZodTypeAny, {
+    name?: string | undefined;
+    description?: string | undefined;
+    color?: string | undefined;
+}, {
+    name?: string | undefined;
+    description?: string | undefined;
+    color?: string | undefined;
+}>;
+export declare const subscribeSchema: z.ZodObject<{
+    planId: z.ZodEnum<["starter", "professional", "enterprise"]>;
+    stripeToken: z.ZodString;
     billingEmail: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    stripePaymentMethodId: string;
-    billingName?: string | undefined;
+    planId: "starter" | "professional" | "enterprise";
+    stripeToken: string;
     billingEmail?: string | undefined;
 }, {
-    stripePaymentMethodId: string;
-    billingName?: string | undefined;
+    planId: "starter" | "professional" | "enterprise";
+    stripeToken: string;
     billingEmail?: string | undefined;
 }>;
-export type UpdateBillingRequest = z.infer<typeof updateBillingSchema>;
+export declare const updateBillingSchema: z.ZodObject<{
+    billingEmail: z.ZodOptional<z.ZodString>;
+    billingName: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    billingEmail?: string | undefined;
+    billingName?: string | undefined;
+}, {
+    billingEmail?: string | undefined;
+    billingName?: string | undefined;
+}>;
 /**
- * Validation helper function
- * Validates request body against a schema and throws ZodError if invalid
+ * Safe validation wrapper for existing code
+ * Returns { success: boolean, data?: T, errors?: ZodError[] }
  */
-export declare function validateRequest<T>(schema: z.ZodSchema, data: any): T;
-/**
- * Safe validation helper
- * Returns result with either parsed data or error details
- */
-export declare function safeValidate<T>(schema: z.ZodSchema, data: any): {
-    success: true;
-    data: T;
-} | {
-    success: false;
-    errors: Record<string, string[]>;
+export declare function safeValidate<T>(schema: ZodSchema, data: unknown): {
+    success: boolean;
+    data?: T;
+    errors?: any[];
 };
+export declare const completeWelcomeSchema: z.ZodObject<{
+    firstName: z.ZodString;
+    lastName: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    firstName: string;
+    lastName: string;
+}, {
+    firstName: string;
+    lastName: string;
+}>;
+export declare const getMessageHistorySchema: z.ZodObject<{
+    status: z.ZodOptional<z.ZodEnum<["draft", "scheduled", "sending", "sent", "failed"]>>;
+    groupId: z.ZodOptional<z.ZodString>;
+    dateFrom: z.ZodOptional<z.ZodString>;
+    dateTo: z.ZodOptional<z.ZodString>;
+    limit: z.ZodDefault<z.ZodNumber>;
+    offset: z.ZodDefault<z.ZodNumber>;
+}, "strip", z.ZodTypeAny, {
+    limit: number;
+    offset: number;
+    status?: "draft" | "scheduled" | "sending" | "sent" | "failed" | undefined;
+    groupId?: string | undefined;
+    dateFrom?: string | undefined;
+    dateTo?: string | undefined;
+}, {
+    limit?: number | undefined;
+    status?: "draft" | "scheduled" | "sending" | "sent" | "failed" | undefined;
+    groupId?: string | undefined;
+    dateFrom?: string | undefined;
+    dateTo?: string | undefined;
+    offset?: number | undefined;
+}>;
 //# sourceMappingURL=schemas.d.ts.map

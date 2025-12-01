@@ -6,7 +6,8 @@ import { startRecurringMessageScheduler } from './jobs/recurringMessages.job.js'
 import { verifyAndRecoverPhoneLinkings } from './services/phone-linking-recovery.service.js';
 import { initializeBackupMonitoring } from './utils/backup-monitor.js';
 import cron from 'node-cron';
-const PORT = process.env.PORT || 3000;
+import { connectRedis, disconnectRedis } from './config/redis.config.js';
+const PORT = parseInt(process.env.PORT || '3000', 10);
 /**
  * Auto-run pending database migrations on startup
  * Enterprise-grade automation: Code and database always stay in sync
@@ -32,21 +33,33 @@ async function autoRunMigrations() {
  */
 async function startServer() {
     try {
-        // Step 1: Run migrations first
+        // Step 1: Connect to Redis (required for token revocation service)
+        console.log('🔄 Connecting to Redis (timeout: 10s)...');
+        const redisConnected = await connectRedis(10000);
+        if (redisConnected) {
+            console.log('✅ Redis connected and ready');
+        }
+        else {
+            console.warn('⚠️  Redis unavailable - running in fallback mode');
+            console.warn('   Token revocation service will be limited');
+            console.warn('   Application will continue but with reduced security');
+        }
+        // Step 2: Run migrations
         await autoRunMigrations();
-        // Step 2: Check database backup configuration
+        // Step 3: Check database backup configuration
         await initializeBackupMonitoring();
-        // Step 3: Create HTTP server (required for WebSocket)
+        // Step 4: Create HTTP server (required for WebSocket)
         const server = http.createServer(app);
-        // Step 4: Initialize WebSocket for real-time notifications
+        // Step 5: Initialize WebSocket for real-time notifications
         initializeWebSocket(server);
-        // Step 5: Start Express/HTTP server
-        server.listen(PORT, () => {
-            console.log(`✅ Server running on http://localhost:${PORT}`);
-            // Step 6: Start recurring message scheduler
+        // Step 6: Start Express/HTTP server
+        server.listen(PORT, '0.0.0.0', () => {
+            console.log(`✅ Server started and listening on port ${PORT}`);
+            console.log(`✅ Server running on http://0.0.0.0:${PORT}`);
+            // Step 7: Start recurring message scheduler
             startRecurringMessageScheduler();
             console.log('✅ Message scheduling initialized');
-            // Step 7: Start phone number linking recovery job (every 5 minutes)
+            // Step 8: Start phone number linking recovery job (every 5 minutes)
             cron.schedule('*/5 * * * *', async () => {
                 try {
                     const results = await verifyAndRecoverPhoneLinkings();
@@ -61,12 +74,31 @@ async function startServer() {
             console.log('✅ Phone number linking recovery job scheduled (every 5 minutes)');
             console.log('✅ Application fully initialized and ready');
         });
+        // Handle server errors
+        server.on('error', (error) => {
+            console.error('❌ Server error:', error.message);
+            if (error.code === 'EADDRINUSE') {
+                console.error(`   Port ${PORT} is already in use`);
+            }
+            process.exit(1);
+        });
     }
     catch (error) {
         console.error('❌ Failed to start server:', error);
         process.exit(1);
     }
 }
+// Graceful shutdown handler
+process.on('SIGTERM', async () => {
+    console.log('🛑 SIGTERM signal received: closing Redis connection gracefully');
+    await disconnectRedis();
+    process.exit(0);
+});
+process.on('SIGINT', async () => {
+    console.log('🛑 SIGINT signal received: closing Redis connection gracefully');
+    await disconnectRedis();
+    process.exit(0);
+});
 // Start the application
 startServer();
 //# sourceMappingURL=index.js.map

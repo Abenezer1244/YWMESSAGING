@@ -101,6 +101,26 @@ const apiLimiter = rateLimit({
         res.status(429).json({ error: 'Too many requests. Please try again later.' });
     },
 });
+// Message sending rate limiter - per user to prevent API abuse
+const messageRateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // 100 messages per user per 15 minutes
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => {
+        // Rate limit by user ID (churchId + userId) from JWT
+        const userId = req.user?.userId || (req.ip || req.socket.remoteAddress);
+        const churchId = req.user?.churchId || 'unknown';
+        return `${churchId}:${userId}`;
+    },
+    handler: (req, res) => {
+        const ipAddress = (req.ip || req.socket.remoteAddress || 'unknown');
+        logRateLimitExceeded(req.originalUrl || req.path, ipAddress, 100);
+        res.status(429).json({
+            error: 'Too many messages sent. You can send maximum 100 messages per 15 minutes.'
+        });
+    },
+});
 // GitHub webhook endpoints: protect against abuse/DOS
 const githubWebhookLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -221,7 +241,8 @@ app.use('/api/auth', authLimiter, authRoutes);
 // Apply moderate rate limiting to general API endpoints
 app.use('/api/branches', apiLimiter, branchRoutes);
 app.use('/api/groups', apiLimiter, groupRoutes);
-app.use('/api/messages', apiLimiter, messageRoutes);
+// Apply strict per-user rate limiting to messages (prevent SMS spam)
+app.use('/api/messages', messageRateLimiter, messageRoutes);
 app.use('/api/templates', apiLimiter, templateRoutes);
 app.use('/api/recurring', apiLimiter, recurringRoutes);
 app.use('/api/analytics', apiLimiter, analyticsRoutes);
