@@ -69,7 +69,8 @@
       "Bash(timeout 60 node:*)",
       "Bash(pkill:*)",
       "Bash(taskkill:*)",
-      "Bash(timeout 30 node:*)"
+      "Bash(timeout 30 node:*)",
+      "Bash(npm test:*)"
     ],
     "deny": [],
     "ask": []
