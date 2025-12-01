@@ -3,6 +3,7 @@ import { formatToE164 } from '../utils/phone.utils.js';
 import { encrypt, decrypt, hashForSearch } from '../utils/encryption.utils.js';
 import { queueWelcomeMessage } from '../jobs/welcomeMessage.job.js';
 import { getUsage, getCurrentPlan, getPlanLimits } from './billing.service.js';
+import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from './cache.service.js';
 
 export interface CreateMemberData {
   firstName: string;
@@ -22,6 +23,7 @@ export interface UpdateMemberData {
 
 /**
  * Get members for a group with pagination and search
+ * Note: Search results are not cached (search is dynamic)
  */
 export async function getMembers(
   groupId: string,
@@ -41,6 +43,23 @@ export async function getMembers(
 
   if (!group) {
     throw new Error('Group not found');
+  }
+
+  // Try cache for list view (page 1, no search)
+  const cacheKey = page === 1 && !search ? CACHE_KEYS.groupMembers(groupId) : null;
+  if (cacheKey) {
+    const cached = await getCached<{
+      data: any[];
+      pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        pages: number;
+      };
+    }>(cacheKey);
+    if (cached) {
+      return cached;
+    }
   }
 
   const where: any = {
@@ -95,7 +114,7 @@ export async function getMembers(
     phone: decrypt(member.phone),
   }));
 
-  return {
+  const result = {
     data: decryptedMembers,
     pagination: {
       page,
@@ -104,6 +123,13 @@ export async function getMembers(
       pages: Math.ceil(total / limit),
     },
   };
+
+  // Cache first page (no search) for 30 minutes
+  if (cacheKey) {
+    await setCached(cacheKey, result, CACHE_TTL.MEDIUM);
+  }
+
+  return result;
 }
 
 /**

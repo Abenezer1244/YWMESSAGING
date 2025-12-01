@@ -1,5 +1,6 @@
 import { prisma } from '../lib/prisma.js';
 import { PLANS, PlanName, PlanLimits } from '../config/plans.js';
+import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from './cache.service.js';
 
 /**
  * SMS billing service - tracks SMS costs and usage
@@ -106,16 +107,28 @@ export function getSMSPricing() {
 // ========== Plan Management Functions (used by middleware and services) ==========
 
 /**
- * Get current plan for a church
+ * Get current plan for a church (cached)
  */
 export async function getCurrentPlan(churchId: string): Promise<PlanName | 'trial'> {
   try {
+    // Try cache first
+    const cached = await getCached<string>(CACHE_KEYS.churchPlan(churchId));
+    if (cached) {
+      return cached as PlanName | 'trial';
+    }
+
+    // Cache miss, query database
     const church = await prisma.church.findUnique({
       where: { id: churchId },
       select: { subscriptionStatus: true },
     });
     const status = church?.subscriptionStatus as (PlanName | 'trial') | undefined;
-    return status || 'trial';
+    const plan = status || 'trial';
+
+    // Store in cache (1 hour TTL)
+    await setCached(CACHE_KEYS.churchPlan(churchId), plan, CACHE_TTL.LONG);
+
+    return plan;
   } catch (error) {
     console.error('Failed to get current plan:', error);
     return 'trial';
@@ -140,10 +153,17 @@ export function getPlanLimits(plan: PlanName | string): PlanLimits | null {
 }
 
 /**
- * Get usage for a church
+ * Get usage for a church (cached)
+ * Cache for 30 minutes to reduce database load
  */
 export async function getUsage(churchId: string): Promise<Record<string, number>> {
   try {
+    // Try cache first
+    const cached = await getCached<Record<string, number>>(CACHE_KEYS.billingUsage(churchId));
+    if (cached) {
+      return cached;
+    }
+
     const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
     // Run all count queries in parallel (instead of sequentially)
@@ -171,12 +191,17 @@ export async function getUsage(churchId: string): Promise<Record<string, number>
       }),
     ]);
 
-    return {
+    const usage = {
       branches: branchCount,
       members: memberCount,
       messagesThisMonth: messageCount,
       coAdmins: coAdminCount,
     };
+
+    // Cache for 30 minutes
+    await setCached(CACHE_KEYS.billingUsage(churchId), usage, CACHE_TTL.MEDIUM);
+
+    return usage;
   } catch (error) {
     console.error('Failed to get usage:', error);
     return {
@@ -208,4 +233,17 @@ export async function isOnTrial(churchId: string): Promise<boolean> {
     console.error('Failed to check trial status:', error);
     return false;
   }
+}
+
+/**
+ * Invalidate billing cache when subscription changes
+ * Called after plan changes, usage updates, etc.
+ */
+export async function invalidateBillingCache(churchId: string): Promise<void> {
+  await Promise.all([
+    invalidateCache(CACHE_KEYS.churchPlan(churchId)),
+    invalidateCache(CACHE_KEYS.billingUsage(churchId)),
+    invalidateCache(CACHE_KEYS.churchAll(churchId)), // Also invalidate any other church caches
+  ]);
+  console.log(`[Billing] Cache invalidated for church ${churchId}`);
 }

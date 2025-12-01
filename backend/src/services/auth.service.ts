@@ -2,6 +2,7 @@ import { prisma } from '../lib/prisma.js';
 import { hashPassword, comparePassword } from '../utils/password.utils.js';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt.utils.js';
 import { createCustomer } from './stripe.service.js';
+import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from './cache.service.js';
 
 const TRIAL_DAYS = parseInt(process.env.TRIAL_DAYS || '14');
 
@@ -146,6 +147,9 @@ export async function login(input: LoginInput): Promise<LoginResponse> {
     data: { lastLoginAt: new Date() },
   });
 
+  // Invalidate admin cache to refresh permissions
+  await invalidateCache(CACHE_KEYS.adminRole(admin.id));
+
   return {
     adminId: admin.id,
     churchId: admin.churchId,
@@ -194,9 +198,29 @@ export async function refreshAccessToken(adminId: string): Promise<{
 }
 
 /**
- * Get admin by ID
+ * Get admin by ID (cached for 30 minutes)
  */
 export async function getAdmin(adminId: string) {
+  // Try cache first
+  const cached = await getCached<{
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    welcomeCompleted: boolean;
+    userRole: string;
+    church: {
+      id: string;
+      name: string;
+      email: string;
+      trialEndsAt: Date;
+    };
+  }>(CACHE_KEYS.adminRole(adminId));
+  if (cached) {
+    return cached;
+  }
+
   const admin = await prisma.admin.findUnique({
     where: { id: adminId },
     include: { church: true },
@@ -206,7 +230,7 @@ export async function getAdmin(adminId: string) {
     return null;
   }
 
-  return {
+  const result = {
     id: admin.id,
     email: admin.email,
     firstName: admin.firstName,
@@ -221,4 +245,9 @@ export async function getAdmin(adminId: string) {
       trialEndsAt: admin.church.trialEndsAt,
     },
   };
+
+  // Cache for 30 minutes
+  await setCached(CACHE_KEYS.adminRole(adminId), result, CACHE_TTL.MEDIUM);
+
+  return result;
 }
