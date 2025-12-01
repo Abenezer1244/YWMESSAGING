@@ -31,9 +31,9 @@ let testResults = {
 /**
  * Generate valid JWT token
  */
-function generateTestToken(userId = 'test-user-rate-limit-' + Date.now()) {
+function generateTestToken(adminId = 'test-admin-' + Date.now()) {
   return jwt.sign(
-    { userId, churchId: 'test-church', email: 'test@example.com' },
+    { adminId, churchId: 'test-church', role: 'admin' },
     JWT_SECRET,
     { expiresIn: '1h' }
   );

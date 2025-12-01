@@ -37,7 +37,7 @@ export function createUserRateLimitMiddleware(config: RateLimitConfig) {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Get user ID from authenticated request
-      const userId = (req as any).user?.userId;
+      const userId = (req as any).user?.adminId;
 
       if (!userId) {
         // Unauthenticated request - skip per-user rate limiting

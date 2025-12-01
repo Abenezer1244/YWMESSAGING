@@ -31,7 +31,7 @@ let testResults = {
 /**
  * Generate valid JWT token for testing
  */
-function generateTestToken(userId = 'test-user-123', churchId = 'church-123', email = 'test@example.com') {
+function generateTestToken(adminId = 'test-admin-123', churchId = 'church-123', email = 'test@example.com') {
   return jwt.sign(
     { userId, churchId, email },
     JWT_SECRET,
