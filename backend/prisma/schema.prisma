@@ -93,6 +93,8 @@ model Church {
   subscriptions         Subscription[]
   recurringMessages     RecurringMessage[]
   conversations         Conversation[]
+  planningCenterIntegration PlanningCenterIntegration?
+  npsSurveys            NPSSurvey[]
 
   @@index([subscriptionStatus])
   @@index([trialEndsAt])
@@ -321,6 +323,7 @@ model Subscription {
   churchId        String   @unique
   stripeSubId     String?  @unique
   plan            String   @default("starter") // starter, growth, pro
+  billingCycle    String   @default("monthly") // monthly, annual
   status          String   @default("active") // active, cancelled, past_due
   currentPeriodStart DateTime?
   currentPeriodEnd DateTime?
@@ -333,7 +336,34 @@ model Subscription {
 
   @@index([plan])
   @@index([status])
+  @@index([billingCycle])
   @@index([churchId, status])  // PHASE 1: Composite for active subscriptions lookup (87% query reduction)
+}
+
+// Planning Center Integration
+model PlanningCenterIntegration {
+  id                    String   @id @default(cuid())
+  churchId              String   @unique
+  organizationId        String   // PCO Organization ID
+  accessToken           String   // OAuth2 access token (encrypted in production)
+  refreshToken          String?  // OAuth2 refresh token for auto-renewal
+  expiresAt             DateTime? // When access token expires
+  isEnabled             Boolean  @default(true)
+  memberSyncEnabled     Boolean  @default(true)
+  serviceSyncEnabled    Boolean  @default(false) // For future: sync service schedules
+  syncStatus            String   @default("pending") // pending, active, failed
+  lastSyncAt            DateTime?
+  errorMessage          String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relations
+  church                Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+
+  @@index([churchId])
+  @@index([isEnabled])
+  @@index([syncStatus])
+  @@index([lastSyncAt])
 }
 
 // SMS/MMS Conversations between church and members
@@ -571,4 +601,53 @@ model MFARecoveryCode {
   @@unique([adminId, index])
   @@index([adminId])
   @@index([usedAt])
+}
+
+// NPS: Net Promoter Score survey for customer feedback
+model NPSSurvey {
+  id            String   @id @default(cuid())
+  churchId      String
+  responderId   String?  // Admin ID who responded (optional for anonymous)
+  score         Int      // 0-10 rating
+  category      String   // feedback, feature_request, bug, general, other
+  feedback      String?  // Optional written feedback
+  sentiment     String?  // positive, neutral, negative (auto-detected or manual)
+  followupEmail String?  // Email to send follow-up
+  followupSent  Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  respondedAt   DateTime @default(now())
+
+  church        Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+
+  @@index([churchId])
+  @@index([score])
+  @@index([sentiment])
+  @@index([category])
+  @@index([createdAt])
+  @@index([responderId])
+}
+
+// Dead Letter Queue: Failed operations for later inspection and replay
+model DeadLetterQueue {
+  id               String                @id @default(cuid())
+  category         String                // SMS_SEND, WEBHOOK_INBOUND, SUBSCRIPTION_UPDATE, PAYMENT_PROCESS
+  churchId         String?               // Optional: church that operation belongs to
+  externalId       String?               // Optional: message ID, webhook ID, etc.
+  originalPayload  Json                  // Original operation payload
+  errorMessage     String                // Error that caused failure
+  errorStack       String?               // Stack trace for debugging
+  metadata         Json?                 // Custom metadata (recipientId, messageId, etc.)
+  status           String    @default("PENDING")  // PENDING, RESOLVED, DEAD_LETTER
+  retryCount       Int       @default(0)
+  firstAttemptAt   DateTime  @default(now())     // When first attempt failed
+  lastAttemptAt    DateTime  @default(now())     // When last attempt/inspection occurred
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([status])
+  @@index([category])
+  @@index([churchId])
+  @@index([externalId])
+  @@index([createdAt])
+  @@index([retryCount])
 }
