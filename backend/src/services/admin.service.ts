@@ -1,6 +1,7 @@
 import { prisma } from '../lib/prisma.js';
 import { hashPassword } from '../utils/password.utils.js';
 import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from './cache.service.js';
+import { encrypt, hashForSearch } from '../utils/encryption.utils.js';
 
 export interface UpdateChurchInput {
   name?: string;
@@ -295,11 +296,17 @@ export async function inviteCoAdmin(
     // Hash the temporary password
     const passwordHash = await hashPassword(tempPassword);
 
+    // Encrypt email for new co-admin
+    const encryptedEmail = encrypt(email);
+    const emailHash = hashForSearch(email);
+
     // Create new co-admin
     const newAdmin = await prisma.admin.create({
       data: {
         churchId,
         email,
+        encryptedEmail,
+        emailHash,
         firstName,
         lastName,
         passwordHash,

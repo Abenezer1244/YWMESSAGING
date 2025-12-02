@@ -3,6 +3,7 @@ import { hashPassword, comparePassword } from '../utils/password.utils.js';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt.utils.js';
 import { createCustomer } from './stripe.service.js';
 import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from './cache.service.js';
+import { encrypt, hashForSearch } from '../utils/encryption.utils.js';
 
 const TRIAL_DAYS = parseInt(process.env.TRIAL_DAYS || '14');
 
@@ -73,11 +74,16 @@ export async function registerChurch(input: RegisterInput): Promise<RegisterResp
     },
   });
 
-  // Create admin
+  // Create admin with encrypted email
+  const encryptedEmail = encrypt(input.email);
+  const emailHash = hashForSearch(input.email);
+
   const admin = await prisma.admin.create({
     data: {
       churchId: church.id,
       email: input.email,
+      encryptedEmail,
+      emailHash,
       passwordHash,
       firstName: input.firstName,
       lastName: input.lastName,

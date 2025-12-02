@@ -146,3 +146,25 @@ export function decryptPhoneSafe(phoneData: string): string {
     return phoneData;
   }
 }
+
+/**
+ * Safely decrypt email, handling both encrypted and plain text formats
+ * Some records may have plain text emails (legacy data before encryption was added)
+ * Returns the decrypted email if encrypted, or the original email if already plain text
+ */
+export function decryptEmailSafe(emailData: string): string {
+  try {
+    // Check if it looks encrypted: format is iv:salt:encrypted:tag (4 parts separated by colons)
+    const parts = emailData.split(':');
+    if (parts.length === 4) {
+      // Try to decrypt assuming it's in encrypted format
+      return decrypt(emailData);
+    }
+
+    // Not encrypted - return as-is (plain text email like user@example.com)
+    return emailData;
+  } catch (error) {
+    // If decryption fails for any reason, assume it's plain text
+    return emailData;
+  }
+}

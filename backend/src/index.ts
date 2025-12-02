@@ -1,4 +1,10 @@
 import 'dotenv/config';
+
+// ✅ MONITORING: Initialize Datadog APM BEFORE other imports
+// Must be done before importing any modules that should be traced (express, pg, redis, etc.)
+import { initDatadog } from './config/datadog.config.js';
+initDatadog();
+
 import http from 'http';
 import app from './app.js';
 import { initializeWebSocket } from './services/websocket.service.js';

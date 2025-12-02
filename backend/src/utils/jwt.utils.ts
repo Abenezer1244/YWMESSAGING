@@ -21,6 +21,11 @@ export interface RefreshTokenPayload {
   adminId: string;
 }
 
+export interface MFASessionTokenPayload {
+  adminId: string;
+  churchId: string;
+}
+
 /**
  * Generate access token (short-lived: 15 minutes)
  */
@@ -62,6 +67,30 @@ export function verifyRefreshToken(token: string): RefreshTokenPayload | null {
   try {
     const payload = jwt.verify(token, REFRESH_SECRET) as unknown;
     return payload as RefreshTokenPayload;
+  } catch (error) {
+    return null;
+  }
+}
+
+/**
+ * Generate MFA session token (very short-lived: 5 minutes)
+ * Used during MFA verification step in login flow
+ */
+export function generateMFASessionToken(adminId: string, churchId: string): string {
+  return jwt.sign(
+    { adminId, churchId },
+    ACCESS_SECRET, // Reuse access secret
+    { expiresIn: '5m' }
+  );
+}
+
+/**
+ * Verify MFA session token
+ */
+export function verifyMFASessionToken(token: string): MFASessionTokenPayload | null {
+  try {
+    const payload = jwt.verify(token, ACCESS_SECRET) as unknown;
+    return payload as MFASessionTokenPayload;
   } catch (error) {
     return null;
   }

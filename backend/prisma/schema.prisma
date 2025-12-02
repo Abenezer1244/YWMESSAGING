@@ -152,7 +152,9 @@ model Member {
   lastName  String
   phone     String   // ENCRYPTED: E.164 format (encrypted in database)
   phoneHash String?  // Hash of phone for searchable lookups (HMAC-SHA256) - uniqueness handled in application
-  email     String?  @unique
+  email     String?  @unique // DEPRECATED: Use encryptedEmail instead (kept for backward compatibility)
+  encryptedEmail String? // ENCRYPTED: Encrypted email address (AES-256-GCM)
+  emailHash String?  // Hash of email for searchable lookups (HMAC-SHA256) - uniqueness handled in application
   optInSms  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -164,6 +166,7 @@ model Member {
   conversationMessages ConversationMessage[]
 
   @@index([email])
+  @@index([emailHash])
   @@index([phoneHash])
   // ✅ Priority 2.3: Composite index for efficient name-based searches (importMembers, search queries)
   // Supports: WHERE firstName LIKE ... AND lastName LIKE ... queries
@@ -287,7 +290,9 @@ model RecurringMessage {
 model Admin {
   id            String   @id @default(cuid())
   churchId      String
-  email         String   @unique
+  email         String   @unique // DEPRECATED: Use encryptedEmail instead (kept for backward compatibility)
+  encryptedEmail String?        // ENCRYPTED: Encrypted email address (AES-256-GCM)
+  emailHash     String?         // Hash of email for searchable lookups (HMAC-SHA256) - uniqueness handled in application
   passwordHash  String
   firstName     String
   lastName      String
@@ -302,10 +307,12 @@ model Admin {
 
   // Relations
   church        Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  mfa           AdminMFA?
 
   @@index([churchId])
   @@index([role])
   @@index([churchId, role])  // ✅ For efficient CO_ADMIN lookups in getUsage() and billing queries
+  @@index([emailHash])       // Index for encrypted email lookups
 }
 
 // Subscription details (Stripe)
@@ -528,4 +535,37 @@ model DataExport {
   @@index([churchId])
   @@index([expiresAt])
   @@index([status])
+}
+
+// MFA: Admin multi-factor authentication settings
+model AdminMFA {
+  id              String   @id @default(cuid())
+  adminId         String   @unique
+  totpSecret      String   // Encrypted TOTP secret
+  mfaEnabled      Boolean  @default(false)
+  backupCodesUsed String   @default("[]") // JSON array of used code indices
+  enabledAt       DateTime?
+  disabledAt      DateTime?
+  lastVerifiedAt  DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  admin           Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([mfaEnabled])
+}
+
+// MFA: Recovery codes for account recovery if phone is lost
+model MFARecoveryCode {
+  id          String   @id @default(cuid())
+  adminId     String
+  code        String   @unique // Hashed recovery code
+  index       Int      // Position in recovery codes list
+  usedAt      DateTime?
+  createdAt   DateTime @default(now())
+
+  @@unique([adminId, index])
+  @@index([adminId])
+  @@index([usedAt])
 }
