@@ -249,6 +249,7 @@ export async function cancelAccountDeletion(
 /**
  * Confirm and execute account deletion
  * Requires valid confirmation token
+ * Uses transaction to ensure atomic deletion of all church data
  */
 export async function confirmAccountDeletion(
   churchId: string,
@@ -267,51 +268,139 @@ export async function confirmAccountDeletion(
       throw new Error('Deletion request is not pending');
     }
 
-    // Verify token
+    // Verify token (case-sensitive, hex format)
     if (deletionRequest.confirmationToken !== confirmationToken) {
       throw new Error('Invalid confirmation token');
     }
 
-    // Delete all church data (cascade deletes should handle relations)
-    await Promise.all([
-      // Delete conversations and messages
-      prisma.conversation.deleteMany({ where: { churchId } }),
-      prisma.message.deleteMany({ where: { churchId } }),
-      prisma.messageTemplate.deleteMany({ where: { churchId } }),
+    // Use transaction to ensure atomic deletion
+    // All deletes must succeed or all fail together
+    await prisma.$transaction(async (tx) => {
+      // Step 1: Update deletion request status BEFORE deleting church
+      // This ensures we have an audit trail even if church is deleted
+      await tx.accountDeletionRequest.update({
+        where: { id: deletionRequest.id },
+        data: {
+          status: 'confirmed',
+          actualDeletionAt: new Date(),
+        },
+      });
 
-      // Delete subscriptions
-      prisma.subscription.deleteMany({ where: { churchId } }),
-    ]);
+      // Step 2: Delete all church data
+      // Prisma's onDelete: Cascade will automatically delete related records:
+      // - Branches (and their Groups and GroupMembers cascade)
+      // - Messages (and their MessageRecipients cascade)
+      // - MessageTemplates
+      // - Subscriptions
+      // - Conversations (and their ConversationMessages cascade)
+      // - Admins (and their AdminMFA cascade)
+      // - Numbers
+      // - Webhooks
+      // - etc.
 
-    // Delete groups and members (cascade should handle)
-    const branches = await prisma.branch.findMany({
-      where: { churchId },
-      select: { id: true },
+      // Delete in order of dependencies to avoid constraint issues:
+      // 1. Delete records that depend on Church directly
+      await tx.messageQueue.deleteMany({
+        where: { churchId },
+      });
+
+      await tx.numberPool.deleteMany({
+        where: { churchId },
+      });
+
+      await tx.webhook.deleteMany({
+        where: { churchId },
+      });
+
+      await tx.consentLog.deleteMany({
+        where: { churchId },
+      });
+
+      // 2. Delete records that depend on Conversation
+      await tx.conversationMessage.deleteMany({
+        where: {
+          conversation: { churchId },
+        },
+      });
+
+      // 3. Delete records that depend on Message
+      await tx.messageRecipient.deleteMany({
+        where: {
+          message: { churchId },
+        },
+      });
+
+      // 4. Delete main entities (cascade handles sub-entities)
+      await tx.conversation.deleteMany({
+        where: { churchId },
+      });
+
+      await tx.message.deleteMany({
+        where: { churchId },
+      });
+
+      await tx.messageTemplate.deleteMany({
+        where: { churchId },
+      });
+
+      await tx.subscription.deleteMany({
+        where: { churchId },
+      });
+
+      // 5. Delete organizational structure
+      // Get branches first since groups depend on them
+      const branches = await tx.branch.findMany({
+        where: { churchId },
+        select: { id: true },
+      });
+
+      // Delete groups (cascade handles GroupMembers)
+      await tx.groupMember.deleteMany({
+        where: {
+          group: {
+            branchId: { in: branches.map((b) => b.id) },
+          },
+        },
+      });
+
+      await tx.group.deleteMany({
+        where: {
+          branchId: { in: branches.map((b) => b.id) },
+        },
+      });
+
+      // Delete branches
+      await tx.branch.deleteMany({
+        where: { churchId },
+      });
+
+      // 6. Delete admins (cascade handles AdminMFA)
+      await tx.adminMFA.deleteMany({
+        where: {
+          admin: { churchId },
+        },
+      });
+
+      await tx.admin.deleteMany({
+        where: { churchId },
+      });
+
+      // 7. Finally delete the church
+      await tx.church.delete({
+        where: { id: churchId },
+      });
+
+      // Log deletion for audit trail
+      console.log(
+        `✅ GDPR Deletion Complete: Church ${churchId} deleted at ${new Date().toISOString()}`
+      );
     });
 
-    for (const branch of branches) {
-      await prisma.group.deleteMany({ where: { branchId: branch.id } });
-    }
-
-    // Delete branches
-    await prisma.branch.deleteMany({ where: { churchId } });
-
-    // Delete admins
-    await prisma.admin.deleteMany({ where: { churchId } });
-
-    // Delete church
-    await prisma.church.delete({ where: { id: churchId } });
-
-    // Mark deletion as confirmed
-    await prisma.accountDeletionRequest.update({
-      where: { churchId },
-      data: {
-        status: 'confirmed',
-        actualDeletionAt: new Date(),
-      },
-    });
-
-    return { message: 'Account deleted successfully' };
+    return {
+      message: 'Account deleted successfully',
+      deletedAt: new Date(),
+      churchId,
+    };
   } catch (error) {
     console.error('Failed to confirm account deletion:', error);
     throw new Error(`Deletion confirmation failed: ${(error as Error).message}`);
