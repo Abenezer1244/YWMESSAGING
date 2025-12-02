@@ -1,0 +1,72 @@
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { BrowserRouter } from 'react-router-dom';
+import BackButton from './BackButton';
+
+// Mock useNavigate
+const mockNavigate = vi.fn();
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
+
+const renderWithRouter = (component: React.ReactElement) => {
+  return render(<BrowserRouter>{component}</BrowserRouter>);
+};
+
+describe('BackButton Component', () => {
+  beforeEach(() => {
+    mockNavigate.mockClear();
+  });
+
+  it('should render back button with default text', () => {
+    renderWithRouter(<BackButton />);
+    expect(screen.getByText('Back')).toBeInTheDocument();
+  });
+
+  it('should navigate back (-1) when clicked without "to" prop', async () => {
+    const user = userEvent.setup();
+    renderWithRouter(<BackButton />);
+
+    const button = screen.getByText('Back').closest('button');
+    await user.click(button!);
+
+    expect(mockNavigate).toHaveBeenCalledWith(-1);
+  });
+
+  it('should navigate to specific path when "to" prop is provided', async () => {
+    const user = userEvent.setup();
+    renderWithRouter(<BackButton to="/dashboard" />);
+
+    const button = screen.getByText('Back').closest('button');
+    await user.click(button!);
+
+    expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
+  });
+
+  it('should have correct variant passed to Button', () => {
+    const { container } = renderWithRouter(<BackButton variant="outline" />);
+    const button = container.querySelector('button');
+    expect(button).toBeInTheDocument();
+  });
+
+  it('should accept and apply custom className', () => {
+    const { container } = renderWithRouter(<BackButton className="custom-class" />);
+    const button = container.querySelector('button');
+    expect(button?.className).toContain('custom-class');
+  });
+
+  it('should render SVG icon', () => {
+    const { container } = renderWithRouter(<BackButton />);
+    const svg = container.querySelector('svg');
+    expect(svg).toBeInTheDocument();
+  });
+
+  it('should have correct displayName', () => {
+    expect(BackButton.displayName).toBe('BackButton');
+  });
+});

@@ -1,0 +1,92 @@
+name: Lighthouse CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/lighthouse.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'frontend/**'
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          configPath: './frontend/lighthouserc.json'
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      - name: Upload Lighthouse report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-report
+          path: frontend/.lighthouseci/
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const reportPath = path.join(process.env.GITHUB_WORKSPACE, 'frontend/.lighthouseci/lhr-0.json');
+
+            if (fs.existsSync(reportPath)) {
+              const lhr = JSON.parse(fs.readFileSync(reportPath, 'utf-8'));
+              const scores = lhr.categories;
+
+              const comment = `
+            ## Lighthouse Performance Report
+
+            | Category | Score |
+            |----------|-------|
+            | Performance | ${(scores.performance.score * 100).toFixed(0)}/100 |
+            | Accessibility | ${(scores.accessibility.score * 100).toFixed(0)}/100 |
+            | Best Practices | ${(scores['best-practices'].score * 100).toFixed(0)}/100 |
+            | SEO | ${(scores.seo.score * 100).toFixed(0)}/100 |
+
+            **Core Web Vitals:**
+            - First Contentful Paint: ${lhr.audits['first-contentful-paint'].displayValue}
+            - Largest Contentful Paint: ${lhr.audits['largest-contentful-paint'].displayValue}
+            - Cumulative Layout Shift: ${lhr.audits['cumulative-layout-shift'].displayValue}
+
+            [View detailed report →](https://googlechrome.github.io/lighthouse/viewer/?gist=${lhr.lighthouseVersion})
+              `;
+
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
