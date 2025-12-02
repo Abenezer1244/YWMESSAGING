@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { prisma } from '../lib/prisma.js';
+import { telnyxCircuitBreaker } from '../utils/circuit-breaker.js';
 
 const TELNYX_BASE_URL = 'https://api.telnyx.com/v2';
 
@@ -217,7 +218,9 @@ export async function sendSMS(
       console.log(`   Using personal 10DLC brand: ${church.dlcBrandId}`);
     }
 
-    const response = await client.post('/messages', payload);
+    const response = await telnyxCircuitBreaker.execute(async () => {
+      return await client.post('/messages', payload);
+    });
 
     const messageId = response.data?.data?.id;
     const messageStatus = response.data?.data?.status;
@@ -297,8 +300,10 @@ export async function searchAvailableNumbers(options: {
     );
 
     const client = getTelnyxClient();
-    const response = await client.get('/available_phone_numbers', {
-      params,
+    const response = await telnyxCircuitBreaker.execute(async () => {
+      return await client.get('/available_phone_numbers', {
+        params,
+      });
     });
 
     const numbers = response.data?.data || [];
@@ -353,7 +358,9 @@ export async function purchasePhoneNumber(
     };
 
     console.log(`📝 Sending number_orders request with data:`, JSON.stringify(orderData, null, 2));
-    const response = await client.post('/number_orders', orderData);
+    const response = await telnyxCircuitBreaker.execute(async () => {
+      return await client.post('/number_orders', orderData);
+    });
     console.log(`📝 Number order response:`, JSON.stringify(response.data?.data, null, 2));
 
     const data = response.data?.data;
@@ -491,7 +498,9 @@ export async function createWebhook(webhookUrl: string): Promise<{ id: string }>
     // First, try to get existing messaging profiles
     let messagingProfileId: string | null = null;
     try {
-      const profilesResponse = await client.get('/messaging_profiles');
+      const profilesResponse = await telnyxCircuitBreaker.execute(async () => {
+        return await client.get('/messaging_profiles');
+      });
       const profiles = profilesResponse.data?.data || [];
 
       console.log(`📋 Found ${profiles.length} existing messaging profiles`);
@@ -516,22 +525,26 @@ export async function createWebhook(webhookUrl: string): Promise<{ id: string }>
     if (messagingProfileId) {
       // Update existing messaging profile with webhook
       console.log(`🔄 Updating messaging profile ${messagingProfileId} with webhook URL: ${webhookUrl}`);
-      response = await client.patch(`/messaging_profiles/${messagingProfileId}`, {
-        webhook_url: webhookUrl,
-        webhook_failover_url: webhookUrl,
-        webhook_api_version: '2',
+      response = await telnyxCircuitBreaker.execute(async () => {
+        return await client.patch(`/messaging_profiles/${messagingProfileId}`, {
+          webhook_url: webhookUrl,
+          webhook_failover_url: webhookUrl,
+          webhook_api_version: '2',
+        });
       });
 
       console.log(`✅ Update response:`, response.data?.data);
     } else {
       // Create new messaging profile with webhook
       console.log(`✨ Creating new messaging profile with webhook URL: ${webhookUrl}`);
-      response = await client.post('/messaging_profiles', {
-        name: `Koinonia SMS Profile - ${new Date().toISOString()}`,
-        enabled: true,
-        webhook_url: webhookUrl,
-        webhook_failover_url: webhookUrl,
-        webhook_api_version: '2',
+      response = await telnyxCircuitBreaker.execute(async () => {
+        return await client.post('/messaging_profiles', {
+          name: `Koinonia SMS Profile - ${new Date().toISOString()}`,
+          enabled: true,
+          webhook_url: webhookUrl,
+          webhook_failover_url: webhookUrl,
+          webhook_api_version: '2',
+        });
       });
 
       console.log(`✅ Creation response:`, response.data?.data);
@@ -682,13 +695,15 @@ export async function linkPhoneNumberToMessagingProfile(
           duration: Date.now() - searchStartTime,
         });
 
-        const searchResponse = await client.get('/phone_numbers', {
-          params: {
-            filter: {
-              phone_number: phoneNumber,
+        const searchResponse = await telnyxCircuitBreaker.execute(async () => {
+          return await client.get('/phone_numbers', {
+            params: {
+              filter: {
+                phone_number: phoneNumber,
+              },
+              limit: 10,
             },
-            limit: 10,
-          },
+          });
         });
 
         phoneNumberRecord = searchResponse.data?.data?.[0];
@@ -789,12 +804,14 @@ export async function linkPhoneNumberToMessagingProfile(
       // CORRECTED: Use PATCH /phone_numbers/{id}/messaging endpoint
       // This is the correct endpoint to link a phone number to a messaging profile
       console.log(`[TELNYX_LINKING] Method 1: Linking phone to messaging profile via PATCH /messaging`);
-      const addPhoneResponse = await client.patch(
-        `/phone_numbers/${phoneNumberRecord.id}/messaging`,
-        {
-          messaging_profile_id: messagingProfileId,
-        }
-      );
+      const addPhoneResponse = await telnyxCircuitBreaker.execute(async () => {
+        return await client.patch(
+          `/phone_numbers/${phoneNumberRecord.id}/messaging`,
+          {
+            messaging_profile_id: messagingProfileId,
+          }
+        );
+      });
 
       // Log full response to understand structure
       console.log('[TELNYX_LINKING] Method 1 - Full response:', {
@@ -884,13 +901,15 @@ export async function linkPhoneNumberToMessagingProfile(
             await new Promise(resolve => setTimeout(resolve, delayMs));
           }
 
-          const searchResponse = await client.get('/phone_numbers', {
-            params: {
-              filter: {
-                phone_number: phoneNumber,
+          const searchResponse = await telnyxCircuitBreaker.execute(async () => {
+            return await client.get('/phone_numbers', {
+              params: {
+                filter: {
+                  phone_number: phoneNumber,
+                },
+                limit: 10,
               },
-              limit: 10,
-            },
+            });
           });
 
           retryPhoneNumberRecord = searchResponse.data?.data?.[0] as TelnyxPhoneNumber | undefined || null;
@@ -921,12 +940,14 @@ export async function linkPhoneNumberToMessagingProfile(
         }
 
         // Retry using the correct endpoint: PATCH /phone_numbers/{id}/messaging
-        const retryUpdateResponse = await client.patch(
-          `/phone_numbers/${retryPhoneNumberRecord.id}/messaging`,
-          {
-            messaging_profile_id: messagingProfileId,
-          }
-        );
+        const retryUpdateResponse = await telnyxCircuitBreaker.execute(async () => {
+          return await client.patch(
+            `/phone_numbers/${retryPhoneNumberRecord.id}/messaging`,
+            {
+              messaging_profile_id: messagingProfileId,
+            }
+          );
+        });
 
         // Log full response to understand structure
         console.log('[TELNYX_LINKING] Method 2 - Full response:', {
