@@ -27,6 +27,7 @@ import mfaRoutes from './routes/mfa.routes.js';
 import healthRoutes from './routes/health.js';
 import { compressionMiddleware } from './middleware/compression.middleware.js';
 import { etagMiddleware } from './middleware/etag.middleware.js';
+import AppError, { getSafeErrorMessage, getStatusCode } from './utils/app-error.js';
 
 const app = express();
 
@@ -226,13 +227,25 @@ app.use(
   })
 );
 
+// ✅ SECURITY: Request size limits (DoS protection)
+// Prevents attackers from sending massive payloads to exhaust memory/bandwidth
+// Limits configured for typical API use cases (10 MB for JSON, webhooks)
+
 // Raw body parser for webhooks (must be BEFORE express.json() to intercept raw bytes)
 // This captures raw request body for ED25519 signature verification
-app.use('/api/webhooks/', express.raw({ type: 'application/json' }));
+app.use('/api/webhooks/', express.raw({
+  type: 'application/json',
+  limit: '10 mb'  // Telnyx, Stripe, SendGrid webhooks are typically < 100 KB
+}));
 
 // JSON parser for all other endpoints
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({
+  limit: '10 mb'  // API payloads (conversations, messages, bulk operations) typically < 1 MB
+}));
+app.use(express.urlencoded({
+  extended: true,
+  limit: '10 mb'  // Form submissions (very rare in this app, but limited for safety)
+}));
 app.use(cookieParser());
 
 // ✅ OPTIMIZATION: HTTP Response Optimization (Priority 3.1)
@@ -315,20 +328,44 @@ app.use((req, res) => {
   });
 });
 
-// Error handler
+// Error handler - centralized error response management
 app.use((err: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  // Log error details only in development
-  if (process.env.NODE_ENV === 'development') {
-    console.error('Error:', err);
+  // Log full error details server-side for debugging
+  // (never exposed to client)
+  if (err instanceof AppError) {
+    err.logError();
+  } else {
+    console.error('[UnhandledError]', {
+      message: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : undefined,
+      url: req.originalUrl,
+      method: req.method,
+      timestamp: new Date().toISOString(),
+    });
   }
 
-  // Never expose backend error details to clients
-  const statusCode = err.status || 500;
-  const userMessage = statusCode === 404 ? 'Not Found' : 'Something went wrong. Please try again.';
+  // Extract safe error message and status code
+  const statusCode = getStatusCode(err);
+  const userMessage = getSafeErrorMessage(err);
 
-  res.status(statusCode).json({
+  // Build error response with optional error code for programmatic handling
+  const errorResponse: any = {
     error: userMessage,
-  });
+  };
+
+  // Include error code if available (from new error hierarchy)
+  // Allows clients to programmatically handle specific error types
+  if (err.code) {
+    errorResponse.code = err.code;
+  }
+
+  // Include details if available (useful for validation errors)
+  if (err.details) {
+    errorResponse.details = err.details;
+  }
+
+  // Return safe error response (never includes stack traces or internal details)
+  res.status(statusCode).json(errorResponse);
 });
 
 export default app;
