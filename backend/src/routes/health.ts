@@ -11,6 +11,12 @@ import { Router, Request, Response } from 'express';
 import { prisma } from '../lib/prisma.js';
 import * as redis from 'redis';
 import { validateTelnyxApiKey } from '../services/telnyx.service.js';
+import {
+  getQueryMetrics,
+  getSlowQueryPercentage,
+  getQueryPercentiles,
+  getDatabaseHealth,
+} from '../utils/query-monitor.js';
 
 const router = Router();
 
@@ -252,6 +258,52 @@ router.get('/alive', async (req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
   });
+});
+
+/**
+ * Query Performance Metrics (for monitoring/debugging)
+ * Shows slow query statistics and percentiles
+ * GET /metrics/queries
+ */
+router.get('/metrics/queries', async (req: Request, res: Response) => {
+  try {
+    const metrics = getQueryMetrics();
+    const slowPercentage = getSlowQueryPercentage();
+    const percentiles = getQueryPercentiles();
+    const health = getDatabaseHealth();
+
+    res.status(200).json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      health,
+      metrics: {
+        totalQueries: metrics.totalQueries,
+        slowQueries: metrics.slowQueries,
+        slowQueryPercentage: slowPercentage.toFixed(2) + '%',
+        averageDuration: Math.round(metrics.averageDuration) + 'ms',
+        maxDuration: metrics.maxDuration + 'ms',
+        minDuration: metrics.minDuration === Infinity ? 'N/A' : metrics.minDuration + 'ms',
+      },
+      percentiles: {
+        p50: Math.round(percentiles.p50) + 'ms',
+        p90: Math.round(percentiles.p90) + 'ms',
+        p95: Math.round(percentiles.p95) + 'ms',
+        p99: Math.round(percentiles.p99) + 'ms',
+      },
+      recommendation:
+        health === 'healthy'
+          ? 'Database performance is good'
+          : health === 'degraded'
+            ? 'Database performance is degraded. Consider optimizing slow queries.'
+            : 'Database performance is poor. Investigate slow queries immediately.',
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      timestamp: new Date().toISOString(),
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
 });
 
 export default router;
