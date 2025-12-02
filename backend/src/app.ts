@@ -29,6 +29,7 @@ import healthRoutes from './routes/health.js';
 import { compressionMiddleware } from './middleware/compression.middleware.js';
 import { etagMiddleware } from './middleware/etag.middleware.js';
 import AppError, { getSafeErrorMessage, getStatusCode } from './utils/app-error.js';
+import { loggerMiddleware } from './utils/logger.js';
 
 const app = express();
 
@@ -248,6 +249,10 @@ app.use(express.urlencoded({
   limit: '10 mb'  // Form submissions (very rare in this app, but limited for safety)
 }));
 app.use(cookieParser());
+
+// ✅ LOGGING: Structured logging middleware
+// Logs all requests/responses with correlation IDs for tracing
+app.use(loggerMiddleware);
 
 // ✅ OPTIMIZATION: HTTP Response Optimization (Priority 3.1)
 // Compression middleware: Gzip compress responses >1KB (60-70% reduction)
