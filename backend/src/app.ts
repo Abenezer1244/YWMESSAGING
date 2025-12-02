@@ -24,6 +24,7 @@ import schedulerRoutes from './routes/scheduler.routes.js';
 import securityRoutes from './routes/security.routes.js';
 import gdprRoutes from './routes/gdpr.routes.js';
 import mfaRoutes from './routes/mfa.routes.js';
+import healthRoutes from './routes/health.js';
 import { compressionMiddleware } from './middleware/compression.middleware.js';
 import { etagMiddleware } from './middleware/etag.middleware.js';
 
@@ -241,10 +242,10 @@ app.use(compressionMiddleware);
 // ETag middleware: Cache validation for 304 Not Modified responses
 app.use(etagMiddleware);
 
-// Health check endpoint (no auth needed)
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
+// ✅ Health check routes (no auth needed)
+// Endpoints: /health, /health/detailed, /ready, /alive
+// Used by load balancer, monitoring, and Kubernetes orchestration
+app.use('/', healthRoutes);
 
 // CSRF token endpoint - GET to retrieve a fresh CSRF token
 app.get('/api/csrf-token', csrfProtection, (req, res) => {

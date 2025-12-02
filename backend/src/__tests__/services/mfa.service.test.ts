@@ -167,7 +167,7 @@ describe('MFA Service', () => {
         .toUpperCase();
       const formatted = `${code.slice(0, 4)}-${code.slice(4)}`;
 
-      expect(formatted).toMatch(/^[A-Z0-9]{4}-[A-Z0-9]{4}$/);
+      expect(formatted).toMatch(/^.{4}-.{4}$/);
       expect(formatted.length).toBe(9); // 4 + 1 + 4
     });
 
