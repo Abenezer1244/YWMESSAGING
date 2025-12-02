@@ -6,6 +6,7 @@ import { PrismaClient } from '@prisma/client';
 import { decrypt, decryptPhoneSafe } from '../utils/encryption.utils.js';
 import { sendMessageSchema, getMessageHistorySchema } from '../lib/validation/schemas.js';
 import { safeValidate } from '../lib/validation/schemas.js';
+import { withRetry, TELNYX_RETRY_CONFIG } from '../utils/retry.js';
 import crypto from 'crypto';
 
 const prisma = new PrismaClient();
@@ -74,10 +75,14 @@ export async function sendMessage(req: Request, res: Response) {
             // Decrypt phone number (stored encrypted in database, or plain text for legacy records)
             const decryptedPhone = decryptPhoneSafe(recipient.member.phone);
 
-            const result = await telnyxService.sendSMS(
-              decryptedPhone,
-              content,
-              churchId
+            const result = await withRetry(
+              () => telnyxService.sendSMS(
+                decryptedPhone,
+                content,
+                churchId
+              ),
+              `sendSMS:${recipient.id}`,
+              TELNYX_RETRY_CONFIG
             );
 
             // Update recipient with Telnyx message ID
