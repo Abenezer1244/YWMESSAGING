@@ -72,7 +72,8 @@
       "Bash(timeout 30 node:*)",
       "Bash(npm test:*)",
       "Bash(git show:*)",
-      "Bash(powershell -Command \"Remove-Item -Path ''node_modules\\.prisma'' -Recurse -Force -ErrorAction Continue\")"
+      "Bash(powershell -Command \"Remove-Item -Path ''node_modules\\.prisma'' -Recurse -Force -ErrorAction Continue\")",
+      "Bash(powershell -Command \"Remove-Item -Path ''.\\.prisma'' -Recurse -Force -ErrorAction Continue; npm run build 2>&1 | tail -20\")"
     ],
     "deny": [],
     "ask": []
