@@ -61,7 +61,7 @@ export default function Navigation() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
+          <Link to="/" className="flex items-center gap-2 group rounded focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
             <img src="/logo.svg" alt="Koinonia" className="w-10 h-10 group-hover:opacity-80 transition-opacity duration-normal" />
             <span className="text-lg font-semibold text-foreground hidden sm:block">Koinonia</span>
           </Link>
@@ -73,7 +73,7 @@ export default function Navigation() {
                 key={link.href}
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
-                className={`text-sm font-medium transition-colors duration-normal pb-1 border-b-2 ${
+                className={`text-sm font-medium transition-colors duration-normal pb-1 border-b-2 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary ${
                   activeSection === link.href.substring(1)
                     ? 'text-primary border-primary'
                     : 'text-muted-foreground border-transparent hover:text-primary'
@@ -93,7 +93,7 @@ export default function Navigation() {
             {!isAuthenticated && (
               <button
                 onClick={handleSignIn}
-                className="hidden sm:block text-foreground hover:text-primary font-medium transition-colors duration-normal text-sm"
+                className="hidden sm:block text-foreground hover:text-primary font-medium transition-colors duration-normal text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 Sign In
               </button>
@@ -114,7 +114,7 @@ export default function Navigation() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-md hover:bg-muted transition-colors duration-normal"
+              className="md:hidden p-2 rounded-md hover:bg-muted transition-colors duration-normal focus:outline-none focus:ring-2 focus:ring-primary"
               aria-label="Toggle menu"
             >
               <div className="w-6 h-6 flex flex-col justify-between">
@@ -146,7 +146,7 @@ export default function Navigation() {
                 key={link.href}
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
-                className="block px-4 py-2 text-muted-foreground hover:text-primary hover:bg-muted rounded-lg transition-colors duration-normal font-medium text-sm"
+                className="block px-4 py-2 text-muted-foreground hover:text-primary hover:bg-muted rounded-lg transition-colors duration-normal font-medium text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset"
               >
                 {link.label}
               </a>
@@ -155,7 +155,7 @@ export default function Navigation() {
               {!isAuthenticated && (
                 <button
                   onClick={handleSignIn}
-                  className="w-full px-4 py-2 text-foreground hover:text-primary font-medium transition-colors duration-normal text-left text-sm"
+                  className="w-full px-4 py-2 text-foreground hover:text-primary font-medium transition-colors duration-normal text-left text-sm rounded focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset"
                 >
                   Sign In
                 </button>

@@ -128,7 +128,7 @@ export function Sidebar() {
       <motion.button
         whileHover={{ scale: 1.05 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-4 left-4 z-50 md:hidden p-2 bg-primary rounded-lg text-white"
+        className="fixed top-4 left-4 z-50 md:hidden p-2 bg-primary rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
       >
         {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
       </motion.button>
@@ -169,7 +169,8 @@ export function Sidebar() {
           <motion.button
             whileHover={{ scale: 1.1 }}
             onClick={() => setIsOpen(false)}
-            className="md:hidden p-1 hover:bg-muted rounded"
+            className="md:hidden p-1 hover:bg-muted rounded focus:outline-none focus:ring-2 focus:ring-primary"
+            aria-label="Close sidebar"
           >
             <X className="w-5 h-5 text-muted-foreground" />
           </motion.button>
@@ -194,7 +195,7 @@ export function Sidebar() {
                     <motion.button
                       whileHover={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}
                       onClick={() => setExpandedItem(isExpanded ? null : item.label)}
-                      className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all ${
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset ${
                         isItemActive
                           ? 'bg-primary/20 text-primary'
                           : 'text-muted-foreground hover:text-foreground'
@@ -230,7 +231,7 @@ export function Sidebar() {
                                   navigate(subItem.path);
                                   setIsOpen(false);
                                 }}
-                                className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition-all ${
+                                className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset ${
                                   isActive(subItem.path)
                                     ? 'bg-primary/20 text-primary'
                                     : 'text-muted-foreground hover:text-foreground'
@@ -252,7 +253,7 @@ export function Sidebar() {
                       navigate(item.path);
                       setIsOpen(false);
                     }}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset ${
                       isItemActive
                         ? 'bg-primary/20 text-primary'
                         : 'text-muted-foreground hover:text-foreground'
@@ -283,7 +284,7 @@ export function Sidebar() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-red-500/20 text-red-500 hover:bg-red-500/30 transition-all font-medium"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-red-500/20 text-red-500 hover:bg-red-500/30 transition-all font-medium focus:outline-none focus:ring-2 focus:ring-red-500"
           >
             <LogOut className="w-5 h-5" />
             <span>Logout</span>

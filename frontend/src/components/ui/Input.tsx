@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -28,6 +28,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     const [showPassword, setShowPassword] = useState(false);
     const charCount = typeof value === 'string' ? value.length : 0;
+    const inputId = props.id || useId();
+    const errorId = useId();
+    const helperTextId = useId();
 
     const baseStyles = 'w-full px-4 py-2.5 bg-input border border-input rounded-sm text-foreground transition-colors duration-normal placeholder:text-muted-foreground/50';
 
@@ -44,7 +47,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-medium text-foreground mb-2">
+          <label htmlFor={inputId} className="block text-sm font-medium text-foreground mb-2">
             {label}
             {props.required && <span className="text-destructive ml-1">*</span>}
           </label>
@@ -59,10 +62,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
           <input
             ref={ref}
+            id={inputId}
             type={inputType}
             value={value}
             maxLength={maxLength}
             className={combinedInputClassName}
+            aria-required={props.required}
+            aria-invalid={!!error}
+            aria-describedby={error ? errorId : helperText ? helperTextId : undefined}
             {...props}
           />
 
@@ -70,7 +77,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary rounded p-1"
             >
               {showPassword ? '👁️' : '👁️‍🗨️'}
             </button>
@@ -90,14 +98,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
 
         {error && (
-          <p className="text-xs text-destructive mt-1.5 flex items-center gap-1">
+          <p id={errorId} className="text-xs text-destructive mt-1.5 flex items-center gap-1">
             <span>⚠️</span>
             {error}
           </p>
         )}
 
         {helperText && !error && (
-          <p className="text-xs text-muted-foreground mt-1.5">
+          <p id={helperTextId} className="text-xs text-muted-foreground mt-1.5">
             {helperText}
           </p>
         )}
