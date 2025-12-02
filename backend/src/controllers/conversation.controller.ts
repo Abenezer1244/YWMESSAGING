@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import crypto from 'crypto';
 import { PrismaClient } from '@prisma/client';
 import * as conversationService from '../services/conversation.service.js';
 import * as telnyxMMSService from '../services/telnyx-mms.service.js';
@@ -7,6 +8,13 @@ import * as websocketService from '../services/websocket.service.js';
 import { hashForSearch } from '../utils/encryption.utils.js';
 import { sendSMS } from '../services/telnyx.service.js';
 import { formatToE164 } from '../utils/phone.utils.js';
+import { safeValidate } from '../lib/validation/schemas.js';
+import {
+  ReplyToConversationSchema,
+  UpdateConversationStatusSchema,
+  ReplyWithMediaSchema,
+  ConversationParamSchema,
+} from '../lib/validation/schemas.js';
 
 const prisma = new PrismaClient();
 
@@ -93,15 +101,36 @@ export async function getConversation(req: Request, res: Response) {
 export async function replyToConversation(req: Request, res: Response) {
   try {
     const { conversationId } = req.params;
-    const { content } = req.body;
     const churchId = req.user?.churchId;
 
-    if (!churchId || !conversationId || !content) {
-      return res.status(400).json({
+    if (!churchId) {
+      return res.status(401).json({
         success: false,
-        error: 'Missing required fields',
+        error: 'Unauthorized',
       });
     }
+
+    // ✅ SECURITY: Validate conversation ID parameter
+    const paramValidation = safeValidate(ConversationParamSchema, { conversationId });
+    if (!paramValidation.success) {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: paramValidation.errors,
+      });
+    }
+
+    // ✅ SECURITY: Validate request body with Zod schema
+    const bodyValidation = safeValidate(ReplyToConversationSchema, req.body);
+    if (!bodyValidation.success) {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: bodyValidation.errors,
+      });
+    }
+
+    const { content } = bodyValidation.data as any;
 
     const message = await conversationService.createReply(
       conversationId,
@@ -130,13 +159,32 @@ export async function replyToConversation(req: Request, res: Response) {
 export async function replyWithMedia(req: Request, res: Response) {
   try {
     const { conversationId } = req.params;
-    const { content } = req.body;
     const churchId = req.user?.churchId;
 
-    if (!churchId || !conversationId) {
+    if (!churchId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized',
+      });
+    }
+
+    // ✅ SECURITY: Validate conversation ID parameter
+    const paramValidation = safeValidate(ConversationParamSchema, { conversationId });
+    if (!paramValidation.success) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields',
+        error: 'Validation failed',
+        details: paramValidation.errors,
+      });
+    }
+
+    // ✅ SECURITY: Validate request body with Zod schema (content is optional for media)
+    const bodyValidation = safeValidate(ReplyWithMediaSchema, req.body);
+    if (!bodyValidation.success) {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: bodyValidation.errors,
       });
     }
 
@@ -146,6 +194,8 @@ export async function replyWithMedia(req: Request, res: Response) {
         error: 'No file uploaded',
       });
     }
+
+    const { content } = bodyValidation.data as any;
 
     // Validate file
     const validation = await s3MediaService.validateMediaFile(
@@ -242,7 +292,6 @@ export async function markAsRead(req: Request, res: Response) {
 export async function updateStatus(req: Request, res: Response) {
   try {
     const { conversationId } = req.params;
-    const { status } = req.body;
     const churchId = req.user?.churchId;
 
     if (!churchId) {
@@ -252,12 +301,27 @@ export async function updateStatus(req: Request, res: Response) {
       });
     }
 
-    if (!['open', 'closed', 'archived'].includes(status)) {
+    // ✅ SECURITY: Validate conversation ID parameter
+    const paramValidation = safeValidate(ConversationParamSchema, { conversationId });
+    if (!paramValidation.success) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid status',
+        error: 'Validation failed',
+        details: paramValidation.errors,
       });
     }
+
+    // ✅ SECURITY: Validate request body with Zod schema
+    const bodyValidation = safeValidate(UpdateConversationStatusSchema, req.body);
+    if (!bodyValidation.success) {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: bodyValidation.errors,
+      });
+    }
+
+    const { status } = bodyValidation.data as any;
 
     await conversationService.updateStatus(conversationId, churchId, status);
 
@@ -280,11 +344,146 @@ export async function updateStatus(req: Request, res: Response) {
  * Receive inbound MMS from congregation member
  * Telnyx sends webhook when member texts the church number with media
  */
+/**
+ * ✅ SECURITY: Verify Telnyx webhook signature using ED25519
+ * Reuses the same verification logic as the 10DLC endpoints
+ */
+function verifyTelnyxInboundWebhookSignature(
+  payload: string,
+  signatureHeader: string,
+  timestampHeader: string,
+  publicKeyBase64: string
+): boolean {
+  if (!signatureHeader || !timestampHeader) {
+    console.warn('⚠️ Webhook missing signature or timestamp header');
+    return false;
+  }
+
+  if (!publicKeyBase64 || typeof publicKeyBase64 !== 'string' || publicKeyBase64.trim().length === 0) {
+    console.error('❌ CRITICAL: Webhook verification failed - public key not configured or empty');
+    return false;
+  }
+
+  try {
+    const trimmedKey = publicKeyBase64.trim();
+    const publicKeyBuffer = Buffer.from(trimmedKey, 'base64');
+
+    if (publicKeyBuffer.length === 0) {
+      console.error('❌ CRITICAL: Decoded public key is empty - base64 decoding produced no bytes');
+      return false;
+    }
+
+    const signedMessage = `${timestampHeader}|${payload}`;
+    const signatureBuffer = Buffer.from(signatureHeader, 'base64');
+
+    console.log(`📋 Webhook Signature Debug:
+   Timestamp: ${timestampHeader}
+   Payload length: ${payload.length}
+   Signed message length: ${signedMessage.length}`);
+
+    const derKey = Buffer.concat([
+      Buffer.from('302a', 'hex'),
+      Buffer.from('3005', 'hex'),
+      Buffer.from('06032b6570', 'hex'),
+      Buffer.from('0321', 'hex'),
+      Buffer.from('00', 'hex'),
+      publicKeyBuffer,
+    ]);
+
+    const publicKey = crypto.createPublicKey({
+      key: derKey,
+      format: 'der',
+      type: 'spki',
+    });
+
+    const isValid = crypto.verify(
+      null,
+      Buffer.from(signedMessage, 'utf-8'),
+      publicKey,
+      signatureBuffer
+    );
+
+    if (!isValid) {
+      console.error('❌ ED25519 Signature verification failed');
+      return false;
+    }
+
+    const webhookTimestamp = parseInt(timestampHeader, 10);
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    const timeDifferenceSeconds = Math.abs(currentTimestamp - webhookTimestamp);
+    const MAX_AGE_SECONDS = 5 * 60;
+
+    if (timeDifferenceSeconds > MAX_AGE_SECONDS) {
+      console.warn(
+        `⚠️ Webhook timestamp is ${timeDifferenceSeconds}s old (max: ${MAX_AGE_SECONDS}s) - possible replay attack`
+      );
+      return false;
+    }
+
+    console.log('✅ ED25519 signature verified successfully');
+    return true;
+  } catch (error: any) {
+    console.error('❌ Webhook signature verification error:', error.message);
+    return false;
+  }
+}
+
 export async function handleTelnyxInboundMMS(req: Request, res: Response) {
   try {
-    console.log('🔔 WEBHOOK RECEIVED:', JSON.stringify(req.body, null, 2));
+    // ✅ CRITICAL SECURITY: Verify webhook signature before processing
+    const signature = req.headers['telnyx-signature-ed25519'] as string;
+    const timestamp = req.headers['telnyx-timestamp'] as string;
 
-    const { data } = req.body;
+    let rawBody: string;
+    if (Buffer.isBuffer(req.body)) {
+      rawBody = req.body.toString('utf-8');
+    } else if (typeof req.body === 'string') {
+      rawBody = req.body;
+    } else {
+      console.error('❌ Webhook req.body is neither Buffer nor string:', typeof req.body);
+      return res.status(400).json({ error: 'Invalid request format' });
+    }
+
+    if (!rawBody || !signature || !timestamp) {
+      console.error('❌ Missing required webhook data:', {
+        hasRawBody: !!rawBody,
+        hasSignature: !!signature,
+        hasTimestamp: !!timestamp,
+      });
+      return res.status(400).json({ error: 'Missing required webhook headers or body' });
+    }
+
+    const publicKey = process.env.TELNYX_WEBHOOK_PUBLIC_KEY;
+    if (!publicKey) {
+      console.error('❌ CRITICAL: TELNYX_WEBHOOK_PUBLIC_KEY environment variable not configured');
+      return res.status(500).json({ error: 'Server configuration error - webhook verification disabled' });
+    }
+
+    const isValidSignature = verifyTelnyxInboundWebhookSignature(
+      rawBody,
+      signature,
+      timestamp,
+      publicKey
+    );
+
+    if (!isValidSignature) {
+      console.error('❌ WEBHOOK SIGNATURE VERIFICATION FAILED - REJECTING INBOUND MMS');
+      return res.status(401).json({ error: 'Invalid webhook signature - access denied' });
+    }
+
+    console.log('✅ Webhook signature verified (ED25519) - processing inbound MMS');
+
+    let webhookData: any;
+    try {
+      webhookData = JSON.parse(rawBody);
+    } catch (parseError) {
+      console.error('❌ Invalid JSON in webhook payload:', parseError);
+      return res.status(400).json({ error: 'Invalid JSON payload' });
+    }
+
+    console.log('🔔 WEBHOOK RECEIVED:', JSON.stringify(webhookData, null, 2));
+
+    const { data } = webhookData;
     const eventType = data?.event_type;
 
     // Only process message received events
@@ -448,10 +647,62 @@ export async function handleTelnyxInboundMMS(req: Request, res: Response) {
  * POST /api/webhooks/telnyx/status
  * Receive delivery status updates from Telnyx (for SMS/MMS sent)
  * Updates message delivery status
+ * ✅ SECURITY: Verify Telnyx webhook signature using ED25519
  */
 export async function handleTelnyxWebhook(req: Request, res: Response) {
   try {
-    const { type, data } = req.body;
+    // ✅ CRITICAL SECURITY: Verify webhook signature before processing delivery receipts
+    const signature = req.headers['telnyx-signature-ed25519'] as string;
+    const timestamp = req.headers['telnyx-timestamp'] as string;
+
+    let rawBody: string;
+    if (Buffer.isBuffer(req.body)) {
+      rawBody = req.body.toString('utf-8');
+    } else if (typeof req.body === 'string') {
+      rawBody = req.body;
+    } else {
+      console.error('❌ Webhook req.body is neither Buffer nor string:', typeof req.body);
+      return res.status(400).json({ error: 'Invalid request format' });
+    }
+
+    if (!rawBody || !signature || !timestamp) {
+      console.error('❌ Missing required webhook data for delivery receipt:', {
+        hasRawBody: !!rawBody,
+        hasSignature: !!signature,
+        hasTimestamp: !!timestamp,
+      });
+      return res.status(400).json({ error: 'Missing required webhook headers or body' });
+    }
+
+    const publicKey = process.env.TELNYX_WEBHOOK_PUBLIC_KEY;
+    if (!publicKey) {
+      console.error('❌ CRITICAL: TELNYX_WEBHOOK_PUBLIC_KEY environment variable not configured');
+      return res.status(500).json({ error: 'Server configuration error - webhook verification disabled' });
+    }
+
+    const isValidSignature = verifyTelnyxInboundWebhookSignature(
+      rawBody,
+      signature,
+      timestamp,
+      publicKey
+    );
+
+    if (!isValidSignature) {
+      console.error('❌ DELIVERY RECEIPT WEBHOOK SIGNATURE VERIFICATION FAILED - REJECTING');
+      return res.status(401).json({ error: 'Invalid webhook signature - access denied' });
+    }
+
+    console.log('✅ Delivery receipt webhook signature verified (ED25519) - processing');
+
+    let webhookData: any;
+    try {
+      webhookData = JSON.parse(rawBody);
+    } catch (parseError) {
+      console.error('❌ Invalid JSON in delivery receipt payload:', parseError);
+      return res.status(400).json({ error: 'Invalid JSON payload' });
+    }
+
+    const { type, data } = webhookData;
 
     // Only process delivery receipt events
     if (type !== 'message.dlr') {
