@@ -10,6 +10,7 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../lib/prisma.js';
 import * as redis from 'redis';
+import { validateTelnyxApiKey } from '../services/telnyx.service.js';
 
 const router = Router();
 
@@ -139,6 +140,23 @@ router.get('/health/detailed', async (req: Request, res: Response) => {
       databaseStats = { error: 'Could not fetch stats' };
     }
 
+    // Telnyx API check
+    let telnyxStatus = 'unknown';
+    let telnyxConnectionTime = 0;
+    try {
+      const telnyxStart = Date.now();
+      const isValid = await validateTelnyxApiKey();
+      telnyxConnectionTime = Date.now() - telnyxStart;
+      telnyxStatus = isValid ? 'healthy' : 'unhealthy';
+    } catch (error) {
+      telnyxStatus = 'unhealthy';
+    }
+
+    // Stripe API check (just verify env variable for now)
+    let stripeStatus = 'unknown';
+    const hasStripeKey = !!process.env.STRIPE_SECRET_KEY;
+    stripeStatus = hasStripeKey ? 'configured' : 'unconfigured';
+
     const totalTime = Date.now() - startTime;
     const statusCode =
       databaseStatus === 'healthy' ? 200 : 503;
@@ -163,6 +181,17 @@ router.get('/health/detailed', async (req: Request, res: Response) => {
           status: redisStatus,
           responseTime: `${redisConnectionTime}ms`,
           configured: !!process.env.REDIS_URL,
+        },
+        externalServices: {
+          telnyx: {
+            status: telnyxStatus,
+            responseTime: `${telnyxConnectionTime}ms`,
+            configured: !!process.env.TELNYX_API_KEY,
+          },
+          stripe: {
+            status: stripeStatus,
+            configured: hasStripeKey,
+          },
         },
         process: {
           memory: {
