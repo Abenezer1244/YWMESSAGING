@@ -1,12 +1,21 @@
 import { prisma } from '../lib/prisma.js';
 import * as telnyxService from './telnyx.service.js';
 import { decryptPhoneSafe } from '../utils/encryption.utils.js';
+import { getCached, setCached, invalidateCache } from './cache.service.js';
 /**
  * Get all conversations for a church (sorted by newest)
+ * ✅ OPTIMIZED: Cache conversations list for 5 minutes
+ * Reduces database load for frequently accessed lists
  */
 export async function getConversations(churchId, options = {}) {
     const { status = 'open', page = 1, limit = 20 } = options;
     const skip = (page - 1) * limit;
+    // ✅ CACHE: Check if conversations list is cached
+    const cacheKey = `conversations:${churchId}:${status}:${page}:${limit}`;
+    const cached = await getCached(cacheKey);
+    if (cached) {
+        return cached;
+    }
     try {
         const [conversations, total] = await Promise.all([
             prisma.conversation.findMany({
@@ -46,7 +55,7 @@ export async function getConversations(churchId, options = {}) {
                 },
             }),
         ]);
-        return {
+        const result = {
             data: conversations.map((conv) => ({
                 id: conv.id,
                 member: conv.member,
@@ -63,6 +72,9 @@ export async function getConversations(churchId, options = {}) {
                 pages: Math.ceil(total / limit),
             },
         };
+        // ✅ CACHE: Store conversations list for 5 minutes (300 seconds)
+        await setCached(cacheKey, result, 300);
+        return result;
     }
     catch (error) {
         console.error('Error getting conversations:', error);
@@ -266,6 +278,8 @@ export async function createReply(conversationId, churchId, content) {
             where: { id: conversationId },
             data: { lastMessageAt: new Date() },
         });
+        // ✅ CACHE INVALIDATION: Clear all conversation lists for this church
+        await invalidateCache(`conversations:${churchId}:*`);
         // Broadcast to all members
         await broadcastOutboundToMembers(churchId, content);
         return {
@@ -381,6 +395,8 @@ export async function updateStatus(conversationId, churchId, status) {
             where: { id: conversationId },
             data: { status },
         });
+        // ✅ CACHE INVALIDATION: Clear all conversation lists for this church
+        await invalidateCache(`conversations:${churchId}:*`);
         console.log(`✅ Updated conversation status: ${conversationId} → ${status}`);
     }
     catch (error) {

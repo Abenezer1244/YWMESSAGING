@@ -65,40 +65,13 @@ export declare function updateChurchProfile(churchId: string, input: UpdateChurc
     updatedAt: Date;
 }>;
 /**
- * Get church profile (including 10DLC fields)
+ * Get church profile (including 10DLC fields) - cached for 1 hour
  */
-export declare function getChurchProfile(churchId: string): Promise<{
-    id: string;
-    email: string;
-    name: string;
-    createdAt: Date;
-    updatedAt: Date;
-    dlcStatus: string;
-    wantsPremiumDelivery: boolean;
-    deliveryRate: number;
-    ein: string | null;
-    brandPhoneNumber: string | null;
-    streetAddress: string | null;
-    city: string | null;
-    state: string | null;
-    postalCode: string | null;
-    website: string | null;
-    entityType: string;
-    vertical: string;
-    subscriptionStatus: string;
-} | null>;
+export declare function getChurchProfile(churchId: string): Promise<{} | null>;
 /**
- * Get all co-admins for a church
+ * Get all co-admins for a church - cached for 30 minutes
  */
-export declare function getCoAdmins(churchId: string): Promise<{
-    id: string;
-    email: string;
-    role: string;
-    firstName: string;
-    lastName: string;
-    lastLoginAt: Date | null;
-    createdAt: Date;
-}[]>;
+export declare function getCoAdmins(churchId: string): Promise<{}>;
 /**
  * Remove a co-admin
  */

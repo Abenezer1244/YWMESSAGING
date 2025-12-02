@@ -93,15 +93,15 @@ export declare const CreateContactSchema: z.ZodObject<{
     email: z.ZodOptional<z.ZodString>;
     groupIds: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
+    phone: string;
     firstName: string;
     lastName: string;
-    phone: string;
     email?: string | undefined;
     groupIds?: string[] | undefined;
 }, {
+    phone: string;
     firstName: string;
     lastName: string;
-    phone: string;
     email?: string | undefined;
     groupIds?: string[] | undefined;
 }>;
@@ -113,15 +113,15 @@ export declare const UpdateContactSchema: z.ZodObject<{
     groupIds: z.ZodOptional<z.ZodOptional<z.ZodArray<z.ZodString, "many">>>;
 }, "strip", z.ZodTypeAny, {
     email?: string | undefined;
+    phone?: string | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
-    phone?: string | undefined;
     groupIds?: string[] | undefined;
 }, {
     email?: string | undefined;
+    phone?: string | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
-    phone?: string | undefined;
     groupIds?: string[] | undefined;
 }>;
 export declare const CreateGroupSchema: z.ZodObject<{
@@ -272,15 +272,15 @@ export declare const createContactSchema: z.ZodObject<{
     email: z.ZodOptional<z.ZodString>;
     groupIds: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
+    phone: string;
     firstName: string;
     lastName: string;
-    phone: string;
     email?: string | undefined;
     groupIds?: string[] | undefined;
 }, {
+    phone: string;
     firstName: string;
     lastName: string;
-    phone: string;
     email?: string | undefined;
     groupIds?: string[] | undefined;
 }>;
@@ -292,15 +292,15 @@ export declare const updateContactSchema: z.ZodObject<{
     groupIds: z.ZodOptional<z.ZodOptional<z.ZodArray<z.ZodString, "many">>>;
 }, "strip", z.ZodTypeAny, {
     email?: string | undefined;
+    phone?: string | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
-    phone?: string | undefined;
     groupIds?: string[] | undefined;
 }, {
     email?: string | undefined;
+    phone?: string | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
-    phone?: string | undefined;
     groupIds?: string[] | undefined;
 }>;
 export declare const createGroupSchema: z.ZodObject<{
@@ -361,6 +361,47 @@ export declare function safeValidate<T>(schema: ZodSchema, data: unknown): {
     data?: T;
     errors?: any[];
 };
+export declare const GetConversationsSchema: z.ZodObject<{
+    page: z.ZodDefault<z.ZodPipeline<z.ZodEffects<z.ZodString, number, string>, z.ZodNumber>>;
+    limit: z.ZodDefault<z.ZodPipeline<z.ZodEffects<z.ZodString, number, string>, z.ZodNumber>>;
+    status: z.ZodOptional<z.ZodEnum<["open", "closed", "archived"]>>;
+}, "strip", z.ZodTypeAny, {
+    limit: number;
+    page: number;
+    status?: "open" | "closed" | "archived" | undefined;
+}, {
+    limit?: string | undefined;
+    status?: "open" | "closed" | "archived" | undefined;
+    page?: string | undefined;
+}>;
+export declare const ReplyToConversationSchema: z.ZodObject<{
+    content: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    content: string;
+}, {
+    content: string;
+}>;
+export declare const ReplyWithMediaSchema: z.ZodObject<{
+    content: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    content?: string | undefined;
+}, {
+    content?: string | undefined;
+}>;
+export declare const UpdateConversationStatusSchema: z.ZodObject<{
+    status: z.ZodEnum<["open", "closed", "archived"]>;
+}, "strip", z.ZodTypeAny, {
+    status: "open" | "closed" | "archived";
+}, {
+    status: "open" | "closed" | "archived";
+}>;
+export declare const ConversationParamSchema: z.ZodObject<{
+    conversationId: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    conversationId: string;
+}, {
+    conversationId: string;
+}>;
 export declare const completeWelcomeSchema: z.ZodObject<{
     firstName: z.ZodString;
     lastName: z.ZodString;
@@ -392,5 +433,46 @@ export declare const getMessageHistorySchema: z.ZodObject<{
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
     offset?: number | undefined;
+}>;
+export declare const MFAInitiateSchema: z.ZodObject<{
+    email: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    email: string;
+}, {
+    email: string;
+}>;
+export declare const MFAVerifySchema: z.ZodObject<{
+    secret: z.ZodString;
+    code: z.ZodString;
+    email: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    email: string;
+    code: string;
+    secret: string;
+}, {
+    email: string;
+    code: string;
+    secret: string;
+}>;
+export declare const MFADisableSchema: z.ZodObject<{
+    code: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    code: string;
+}, {
+    code: string;
+}>;
+export declare const RecoveryCodeVerifySchema: z.ZodObject<{
+    code: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    code: string;
+}, {
+    code: string;
+}>;
+export declare const RegenerateRecoveryCodesSchema: z.ZodObject<{
+    code: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    code: string;
+}, {
+    code: string;
 }>;
 //# sourceMappingURL=schemas.d.ts.map

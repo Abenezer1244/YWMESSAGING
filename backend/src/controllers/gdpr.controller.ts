@@ -62,12 +62,12 @@ export async function downloadExport(req: Request, res: Response) {
       });
     }
 
-    // Return as downloadable JSON file
-    res.setHeader('Content-Type', 'application/json');
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="church_data_export_${new Date().toISOString()}.json"`
-    );
+    // ✅ SECURITY: Set download headers with proper Content-Disposition
+    // Prevents header injection, MIME sniffing, and unwanted browser execution
+    const { setDownloadHeaders } = await import('../utils/download-headers.js');
+    const filename = `church_data_export_${new Date().toISOString()}.json`;
+    setDownloadHeaders(res, filename, 'application/json');
+
     res.send(data);
   } catch (error) {
     console.error('Download export error:', error);

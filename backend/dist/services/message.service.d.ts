@@ -30,8 +30,8 @@ export declare function getMessageHistory(churchId: string, options?: {
     data: {
         deliveryRate: number;
         id: string;
-        createdAt: Date;
         status: string;
+        createdAt: Date;
         content: string;
         targetType: string;
         totalRecipients: number;
@@ -56,8 +56,9 @@ export declare function getMessageDetails(messageId: string): Promise<any>;
 export declare function updateMessageStats(messageId: string): Promise<void>;
 /**
  * Update recipient delivery status
+ * Accepts messageId to avoid redundant database fetch
  */
-export declare function updateRecipientStatus(recipientId: string, status: 'delivered' | 'failed', data?: {
+export declare function updateRecipientStatus(recipientId: string, status: 'delivered' | 'failed', messageId: string, data?: {
     failureReason?: string;
 }): Promise<void>;
 //# sourceMappingURL=message.service.d.ts.map

@@ -20,6 +20,12 @@ export declare function getMe(req: Request, res: Response): Promise<void>;
  */
 export declare function logout(req: Request, res: Response): Promise<void>;
 /**
+ * POST /api/auth/verify-mfa
+ * Verify MFA code (TOTP or recovery code) and complete login
+ * Body: { mfaSessionToken: string, code: string }
+ */
+export declare function verifyMFAHandler(req: Request, res: Response): Promise<void>;
+/**
  * POST /api/auth/complete-welcome
  * Mark user's welcome modal as completed and store their role
  */

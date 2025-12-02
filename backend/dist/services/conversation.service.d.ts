@@ -1,5 +1,7 @@
 /**
  * Get all conversations for a church (sorted by newest)
+ * ✅ OPTIMIZED: Cache conversations list for 5 minutes
+ * Reduces database load for frequently accessed lists
  */
 export declare function getConversations(churchId: string, options?: {
     status?: string;

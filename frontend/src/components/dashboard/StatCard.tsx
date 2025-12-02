@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { LucideIcon } from 'lucide-react';
+import { memo } from 'react';
 
 interface StatCardProps {
   icon: LucideIcon;
@@ -12,7 +13,7 @@ interface StatCardProps {
   index?: number;
 }
 
-export function StatCard({
+function StatCardComponent({
   icon: Icon,
   label,
   value,
@@ -57,3 +58,10 @@ export function StatCard({
     </motion.div>
   );
 }
+
+/**
+ * Memoized StatCard component
+ * Prevents re-renders when parent component updates but props remain the same
+ * Shallow comparison of all props (icon, label, value, change, etc.)
+ */
+export const StatCard = memo(StatCardComponent);

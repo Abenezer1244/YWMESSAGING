@@ -19,11 +19,17 @@ import webhookRoutes from './routes/webhook.routes.js';
 import gitHubAgentsRoutes from './routes/github-agents.routes.js';
 import agentsRoutes from './routes/agents.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import adminDLQRoutes from './routes/admin.dlq.routes.js';
 import chatRoutes from './routes/chat.routes.js';
 import schedulerRoutes from './routes/scheduler.routes.js';
 import securityRoutes from './routes/security.routes.js';
+import gdprRoutes from './routes/gdpr.routes.js';
+import mfaRoutes from './routes/mfa.routes.js';
+import healthRoutes from './routes/health.js';
 import { compressionMiddleware } from './middleware/compression.middleware.js';
 import { etagMiddleware } from './middleware/etag.middleware.js';
+import AppError, { getSafeErrorMessage, getStatusCode } from './utils/app-error.js';
+import { loggerMiddleware } from './utils/logger.js';
 const app = express();
 // Disable Express's built-in ETag generation (we implement our own)
 app.set('etag', false);
@@ -206,22 +212,36 @@ app.use(cors({
     origin: corsOrigin,
     credentials: true,
 }));
+// ✅ SECURITY: Request size limits (DoS protection)
+// Prevents attackers from sending massive payloads to exhaust memory/bandwidth
+// Limits configured for typical API use cases (10 MB for JSON, webhooks)
 // Raw body parser for webhooks (must be BEFORE express.json() to intercept raw bytes)
 // This captures raw request body for ED25519 signature verification
-app.use('/api/webhooks/', express.raw({ type: 'application/json' }));
+app.use('/api/webhooks/', express.raw({
+    type: 'application/json',
+    limit: '10 mb' // Telnyx, Stripe, SendGrid webhooks are typically < 100 KB
+}));
 // JSON parser for all other endpoints
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({
+    limit: '10 mb' // API payloads (conversations, messages, bulk operations) typically < 1 MB
+}));
+app.use(express.urlencoded({
+    extended: true,
+    limit: '10 mb' // Form submissions (very rare in this app, but limited for safety)
+}));
 app.use(cookieParser());
+// ✅ LOGGING: Structured logging middleware
+// Logs all requests/responses with correlation IDs for tracing
+app.use(loggerMiddleware);
 // ✅ OPTIMIZATION: HTTP Response Optimization (Priority 3.1)
 // Compression middleware: Gzip compress responses >1KB (60-70% reduction)
 app.use(compressionMiddleware);
 // ETag middleware: Cache validation for 304 Not Modified responses
 app.use(etagMiddleware);
-// Health check endpoint (no auth needed)
-app.get('/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
+// ✅ Health check routes (no auth needed)
+// Endpoints: /health, /health/detailed, /ready, /alive
+// Used by load balancer, monitoring, and Kubernetes orchestration
+app.use('/', healthRoutes);
 // CSRF token endpoint - GET to retrieve a fresh CSRF token
 app.get('/api/csrf-token', csrfProtection, (req, res) => {
     res.json({ csrfToken: req.csrfToken() });
@@ -251,6 +271,8 @@ app.use('/api/numbers', apiLimiter, numbersRoutes);
 app.use('/api/billing', billingLimiter, billingRoutes);
 // Apply moderate rate limiting to admin endpoints
 app.use('/api/admin', apiLimiter, adminRoutes);
+// Dead Letter Queue management (admin only)
+app.use('/api/admin/dlq', apiLimiter, adminDLQRoutes);
 // Scheduler routes - AWS CloudWatch triggers (no auth needed, uses API key instead)
 // No rate limiting - CloudWatch calls are infrequent and from trusted AWS
 app.use('/api/scheduler', schedulerRoutes);
@@ -258,6 +280,12 @@ app.use('/api/scheduler', schedulerRoutes);
 app.use('/api/chat', apiLimiter, chatRoutes);
 // Security & code analysis routes - code scanning and analysis tools
 app.use('/api/security', apiLimiter, securityRoutes);
+// GDPR routes - data export, deletion, and consent management
+// Rate limited to prevent abuse
+app.use('/api/gdpr', apiLimiter, gdprRoutes);
+// MFA routes - multi-factor authentication setup and management
+// Rate limited to prevent brute force attacks
+app.use('/api/mfa', apiLimiter, mfaRoutes);
 // ✅ SECURITY: Add Sentry error handler middleware
 // Must be after routes but before the final error handler
 app.use(getSentryErrorHandler());
@@ -269,18 +297,40 @@ app.use((req, res) => {
         method: req.method,
     });
 });
-// Error handler
+// Error handler - centralized error response management
 app.use((err, req, res, _next) => {
-    // Log error details only in development
-    if (process.env.NODE_ENV === 'development') {
-        console.error('Error:', err);
+    // Log full error details server-side for debugging
+    // (never exposed to client)
+    if (err instanceof AppError) {
+        err.logError();
     }
-    // Never expose backend error details to clients
-    const statusCode = err.status || 500;
-    const userMessage = statusCode === 404 ? 'Not Found' : 'Something went wrong. Please try again.';
-    res.status(statusCode).json({
+    else {
+        console.error('[UnhandledError]', {
+            message: err instanceof Error ? err.message : String(err),
+            stack: err instanceof Error ? err.stack : undefined,
+            url: req.originalUrl,
+            method: req.method,
+            timestamp: new Date().toISOString(),
+        });
+    }
+    // Extract safe error message and status code
+    const statusCode = getStatusCode(err);
+    const userMessage = getSafeErrorMessage(err);
+    // Build error response with optional error code for programmatic handling
+    const errorResponse = {
         error: userMessage,
-    });
+    };
+    // Include error code if available (from new error hierarchy)
+    // Allows clients to programmatically handle specific error types
+    if (err.code) {
+        errorResponse.code = err.code;
+    }
+    // Include details if available (useful for validation errors)
+    if (err.details) {
+        errorResponse.details = err.details;
+    }
+    // Return safe error response (never includes stack traces or internal details)
+    res.status(statusCode).json(errorResponse);
 });
 export default app;
 //# sourceMappingURL=app.js.map

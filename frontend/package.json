@@ -10,7 +10,15 @@
     "start": "node server-simple.js",
     "preview": "vite preview",
     "lint": "eslint src --ext .ts,.tsx",
-    "format": "prettier --write src"
+    "format": "prettier --write src",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest --watch",
+    "lighthouse": "lhci autorun",
+    "lighthouse:baseline": "lhci collect && lhci upload",
+    "lighthouse:validate": "lhci collect && lhci assert"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -53,6 +61,7 @@
     "react-hook-form": "^7.66.0",
     "react-hot-toast": "2.4.1",
     "react-router-dom": "6.19.0",
+    "react-window": "^2.2.3",
     "recharts": "^2.10.0",
     "stripe": "12.16.0",
     "tailwind-merge": "^3.3.1",
@@ -62,21 +71,31 @@
     "zustand": "4.4.5"
   },
   "devDependencies": {
+    "@lhci/cli": "^0.10.0",
     "@tailwindcss/forms": "^0.5.6",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^18.2.31",
     "@types/react-dom": "^18.2.14",
     "@types/recharts": "^1.8.29",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
     "@vitejs/plugin-react": "^4.1.0",
+    "@vitest/coverage-v8": "^4.0.14",
+    "@vitest/ui": "^4.0.14",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.53.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "happy-dom": "^20.0.11",
+    "jsdom": "^27.2.0",
+    "lighthouse": "^12.8.2",
     "postcss": "^8.4.31",
     "prettier": "^3.0.3",
     "tailwindcss": "^3.3.5",
     "typescript": "^5.2.2",
-    "vite": "^7.1.12"
+    "vite": "^7.1.12",
+    "vitest": "^4.0.14"
   }
 }

@@ -4,10 +4,12 @@
  */
 
 export type PlanName = 'starter' | 'growth' | 'pro';
+export type BillingCycle = 'monthly' | 'annual';
 
 export interface PlanLimits {
   name: string;
-  price: number; // in cents
+  monthlyPrice: number; // in cents
+  annualPrice: number; // in cents (20% discount)
   currency: string;
   branches: number;
   members: number;
@@ -16,10 +18,20 @@ export interface PlanLimits {
   features: string[];
 }
 
+/**
+ * Get price for a plan based on billing cycle
+ * Annual billing offers 20% discount ($49 * 12 = $588 monthly total vs $470.40 annual = $39.2/month)
+ */
+export function getPlanPrice(plan: PlanName, billingCycle: BillingCycle): number {
+  const limits = PLANS[plan];
+  return billingCycle === 'annual' ? limits.annualPrice : limits.monthlyPrice;
+}
+
 export const PLANS: Record<PlanName, PlanLimits> = {
   starter: {
     name: 'Starter',
-    price: 4900, // $49.00
+    monthlyPrice: 4900, // $49.00/month
+    annualPrice: 47040, // $470.40/year (20% discount = $39.20/month)
     currency: 'usd',
     branches: 1,
     members: 500,
@@ -36,7 +48,8 @@ export const PLANS: Record<PlanName, PlanLimits> = {
   },
   growth: {
     name: 'Growth',
-    price: 7900, // $79.00
+    monthlyPrice: 7900, // $79.00/month
+    annualPrice: 75840, // $758.40/year (20% discount = $63.20/month)
     currency: 'usd',
     branches: 5,
     members: 2000,
@@ -55,7 +68,8 @@ export const PLANS: Record<PlanName, PlanLimits> = {
   },
   pro: {
     name: 'Pro',
-    price: 12900, // $129.00
+    monthlyPrice: 12900, // $129.00/month
+    annualPrice: 123840, // $1,238.40/year (20% discount = $103.20/month)
     currency: 'usd',
     branches: 10,
     members: 999999, // unlimited

@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Download, Play } from 'lucide-react';
+import { LazyImage } from '../LazyImage';
 
 interface MessageProps {
   id: string;
@@ -16,7 +17,7 @@ interface MessageProps {
   createdAt: string | Date;
 }
 
-export function MessageBubble(props: MessageProps) {
+function MessageBubbleComponent(props: MessageProps) {
   const {
     content,
     direction,
@@ -72,7 +73,7 @@ export function MessageBubble(props: MessageProps) {
             rel="noopener noreferrer"
             className="block mb-2"
           >
-            <img
+            <LazyImage
               src={mediaUrl}
               alt="Message attachment"
               className="max-w-xs rounded-lg hover:opacity-90 cursor-pointer"
@@ -167,3 +168,11 @@ export function MessageBubble(props: MessageProps) {
     </div>
   );
 }
+
+/**
+ * Memoized MessageBubble component
+ * Prevents re-renders of individual messages when conversation re-renders
+ * Shallow comparison of all message props (content, direction, media, status, etc.)
+ * Critical for performance in message lists with many messages
+ */
+export const MessageBubble = memo(MessageBubbleComponent);

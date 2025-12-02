@@ -1,0 +1,1 @@
+{"version":3,"file":"StepIndicator.d.ts","sourceRoot":"","sources":["StepIndicator.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAK,MAAM,OAAO,CAAC;AAE1B,UAAU,kBAAkB;IAC1B,UAAU,EAAE,MAAM,CAAC;IACnB,WAAW,EAAE,MAAM,CAAC;IACpB,UAAU,EAAE,MAAM,EAAE,CAAC;CACtB;AAED,QAAA,MAAM,aAAa,EAAE,KAAK,CAAC,EAAE,CAAC,kBAAkB,CAqD/C,CAAC;AAIF,eAAe,aAAa,CAAC"}

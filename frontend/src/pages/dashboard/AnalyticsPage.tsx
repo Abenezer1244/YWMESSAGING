@@ -1,19 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, Loader } from 'lucide-react';
 import toast from 'react-hot-toast';
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
 import {
   getMessageStats,
   getBranchStats,
@@ -23,6 +11,7 @@ import {
   SummaryStats,
 } from '../../api/analytics';
 import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
+import { DynamicLineChart, DynamicBarChart } from '../../components/charts';
 import { themeColors } from '../../utils/themeColors';
 import { designTokens } from '../../utils/designTokens';
 
@@ -64,6 +53,102 @@ export function AnalyticsPage() {
     }
   };
 
+  /**
+   * Memoized summary stats for display
+   * Prevents re-creating the stats array on every render
+   * Only recalculates when summaryStats changes
+   */
+  const summaryStatsDisplay = useMemo(
+    () =>
+      summaryStats
+        ? [
+            { label: 'Total Messages', value: summaryStats.totalMessages, color: 'text-primary' },
+            { label: 'Delivery Rate', value: `${summaryStats.averageDeliveryRate}%`, color: 'text-green-400' },
+            { label: 'Total Members', value: summaryStats.totalMembers, color: 'text-blue-400' },
+            { label: 'Branches', value: summaryStats.totalBranches, color: 'text-amber-400' },
+            { label: 'Total Groups', value: summaryStats.totalGroups, color: 'text-red-400' },
+          ]
+        : [],
+    [summaryStats]
+  );
+
+  /**
+   * Memoized message stats for display
+   * Prevents re-creating the stats array on every render
+   * Only recalculates when messageStats changes
+   */
+  const messageStatsDisplay = useMemo(
+    () =>
+      messageStats
+        ? [
+            { label: 'Total Messages', value: messageStats.totalMessages, color: 'text-primary' },
+            { label: 'Delivered', value: messageStats.deliveredCount, color: 'text-green-400' },
+            { label: 'Failed', value: messageStats.failedCount, color: 'text-red-400' },
+            { label: 'Pending', value: messageStats.pendingCount, color: 'text-amber-400' },
+          ]
+        : [],
+    [messageStats]
+  );
+
+  /**
+   * Memoized filtered branch stats for chart
+   * Prevents recalculating branch data for chart rendering
+   * Only recalculates when branchStats changes
+   */
+  const branchChartData = useMemo(
+    () => branchStats.sort((a, b) => b.messageCount - a.messageCount),
+    [branchStats]
+  );
+
+  /**
+   * Memoized line chart configuration
+   * Prevents recreating line configuration objects on every render
+   * Only recalculates when chart data or theme colors change
+   */
+  const lineChartLines = useMemo(
+    () => [
+      {
+        dataKey: 'count',
+        stroke: themeColors.primary.base,
+        name: 'Messages Sent',
+      },
+      {
+        dataKey: 'delivered',
+        stroke: themeColors.success.base,
+        name: 'Delivered',
+      },
+      {
+        dataKey: 'failed',
+        stroke: themeColors.danger.base,
+        name: 'Failed',
+      },
+    ],
+    []
+  );
+
+  /**
+   * Memoized bar chart configuration
+   * Prevents recreating bar configuration objects on every render
+   * Only recalculates when chart data or theme colors change
+   */
+  const barChartBars = useMemo(
+    () => [
+      {
+        yAxisId: 'left',
+        dataKey: 'messageCount',
+        fill: themeColors.primary.base,
+        name: 'Messages Sent',
+      },
+      {
+        yAxisId: 'right',
+        dataKey: 'deliveryRate',
+        fill: themeColors.success.base,
+        name: 'Delivery Rate (%)',
+      },
+    ],
+    []
+  );
+
   return (
     <SoftLayout>
       <div className="px-4 md:px-8 py-8 w-full">
@@ -103,13 +188,7 @@ export function AnalyticsPage() {
             {/* Summary Cards */}
             {summaryStats && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                {[
-                  { label: 'Total Messages', value: summaryStats.totalMessages, color: 'text-primary' },
-                  { label: 'Delivery Rate', value: `${summaryStats.averageDeliveryRate}%`, color: 'text-green-400' },
-                  { label: 'Total Members', value: summaryStats.totalMembers, color: 'text-blue-400' },
-                  { label: 'Branches', value: summaryStats.totalBranches, color: 'text-amber-400' },
-                  { label: 'Total Groups', value: summaryStats.totalGroups, color: 'text-red-400' },
-                ].map((stat, idx) => (
+                {summaryStatsDisplay.map((stat, idx) => (
                   <motion.div
                     key={idx}
                     initial={{ opacity: 0, y: 20 }}
@@ -136,39 +215,14 @@ export function AnalyticsPage() {
               >
                 <SoftCard>
                   <h2 className="text-lg font-semibold text-foreground mb-4">Message Volume</h2>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={messageStats.byDay}>
-                      <CartesianGrid strokeDasharray="3 3" stroke={themeColors.border.dark} />
-                      <XAxis
-                        dataKey="date"
-                        tick={{ fontSize: parseInt(designTokens.typography.fontSize.xs) }}
-                        angle={-45}
-                        textAnchor="end"
-                        height={80}
-                      />
-                      <YAxis />
-                      <Tooltip contentStyle={tooltipStyle} />
-                      <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="count"
-                        stroke={themeColors.primary.base}
-                        name="Messages Sent"
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="delivered"
-                        stroke={themeColors.success.base}
-                        name="Delivered"
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="failed"
-                        stroke={themeColors.danger.base}
-                        name="Failed"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+                  <DynamicLineChart
+                    data={messageStats.byDay}
+                    height={300}
+                    lines={lineChartLines}
+                    tooltipStyle={tooltipStyle}
+                    gridStroke={themeColors.border.dark}
+                    fontSize={parseInt(designTokens.typography.fontSize.xs)}
+                  />
                 </SoftCard>
               </motion.div>
             )}
@@ -182,34 +236,15 @@ export function AnalyticsPage() {
               >
                 <SoftCard>
                   <h2 className="text-lg font-semibold text-foreground mb-4">Branch Comparison</h2>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={branchStats}>
-                      <CartesianGrid strokeDasharray="3 3" stroke={themeColors.border.dark} />
-                      <XAxis
-                        dataKey="name"
-                        tick={{ fontSize: parseInt(designTokens.typography.fontSize.xs) }}
-                        angle={-45}
-                        textAnchor="end"
-                        height={80}
-                      />
-                      <YAxis yAxisId="left" />
-                      <YAxis yAxisId="right" orientation="right" />
-                      <Tooltip contentStyle={tooltipStyle} />
-                      <Legend />
-                      <Bar
-                        yAxisId="left"
-                        dataKey="messageCount"
-                        fill={themeColors.primary.base}
-                        name="Messages Sent"
-                      />
-                      <Bar
-                        yAxisId="right"
-                        dataKey="deliveryRate"
-                        fill={themeColors.success.base}
-                        name="Delivery Rate (%)"
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  <DynamicBarChart
+                    data={branchChartData}
+                    height={300}
+                    bars={barChartBars}
+                    tooltipStyle={tooltipStyle}
+                    gridStroke={themeColors.border.dark}
+                    fontSize={parseInt(designTokens.typography.fontSize.xs)}
+                    hasRightAxis={true}
+                  />
                 </SoftCard>
               </motion.div>
             )}
@@ -245,7 +280,7 @@ export function AnalyticsPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border/40">
-                        {branchStats.map((branch, idx) => (
+                        {branchChartData.map((branch, idx) => (
                           <motion.tr
                             key={branch.id}
                             initial={{ opacity: 0 }}
@@ -299,12 +334,7 @@ export function AnalyticsPage() {
                 <SoftCard>
                   <h2 className="text-lg font-semibold text-foreground mb-4">Message Statistics</h2>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    {[
-                      { label: 'Total Messages', value: messageStats.totalMessages, color: 'text-primary' },
-                      { label: 'Delivered', value: messageStats.deliveredCount, color: 'text-green-400' },
-                      { label: 'Failed', value: messageStats.failedCount, color: 'text-red-400' },
-                      { label: 'Pending', value: messageStats.pendingCount, color: 'text-amber-400' },
-                    ].map((stat, idx) => (
+                    {messageStatsDisplay.map((stat, idx) => (
                       <div key={idx}>
                         <p className="text-muted-foreground text-sm mb-1">{stat.label}</p>
                         <p className={`text-2xl font-bold ${stat.color}`}>

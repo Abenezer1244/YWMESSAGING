@@ -13,6 +13,7 @@
  * - Shared across all database operations
  */
 import { PrismaClient } from '@prisma/client';
+import { initializeQueryMonitoring } from '../utils/query-monitor.js';
 // Global variable to hold the singleton
 let prismaCacheInstance;
 /**
@@ -29,6 +30,8 @@ export function getPrismaClient() {
             ? ['error', 'warn']
             : ['query', 'error', 'warn', 'info'],
     });
+    // ✅ Initialize query monitoring for slow query detection
+    initializeQueryMonitoring(prismaCacheInstance);
     return prismaCacheInstance;
 }
 /**

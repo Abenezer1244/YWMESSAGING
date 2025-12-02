@@ -16,7 +16,13 @@
     "format": "prettier --write src",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "loadtest:smoke": "k6 run --vus 1 --iterations 5 --duration 2m scripts/loadtest.k6.js",
+    "loadtest:load": "k6 run --scenario load scripts/loadtest.k6.js",
+    "loadtest:spike": "k6 run --scenario spike scripts/loadtest.k6.js",
+    "loadtest:soak": "k6 run --scenario soak scripts/loadtest.k6.js",
+    "loadtest:conversation": "k6 run --scenario conversation scripts/loadtest.k6.js",
+    "loadtest:all": "npm run loadtest:smoke && npm run loadtest:load && npm run loadtest:spike && npm run loadtest:conversation"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.480.0",
@@ -74,6 +80,7 @@
     "@typescript-eslint/parser": "^6.17.0",
     "eslint": "^8.54.0",
     "jest": "^29.7.0",
+    "k6": "^0.0.0",
     "prettier": "^3.1.0",
     "ts-jest": "^29.4.6",
     "tsx": "^4.7.0",

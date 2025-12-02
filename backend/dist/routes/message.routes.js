@@ -3,8 +3,10 @@ import multer from 'multer';
 import path from 'path';
 import { authenticateToken } from '../middleware/auth.middleware.js';
 import { messageLimiter, uploadLimiter } from '../middleware/user-rate-limit.middleware.js';
+import { validateBody, validateParams } from '../middleware/validation.middleware.js';
 import * as messageController from '../controllers/message.controller.js';
 import * as conversationController from '../controllers/conversation.controller.js';
+import { SendMessageSchema, ReplyToConversationSchema, ConversationParamSchema, UpdateConversationStatusSchema, } from '../lib/validation/schemas.js';
 const router = Router();
 // Configure multer for file uploads
 const upload = multer({
@@ -47,7 +49,8 @@ const upload = multer({
 // ============ BROADCAST MESSAGING (Existing) ============
 // Send broadcast message
 // ✅ OPTIMIZATION: Per-user rate limiting (100 messages/hour)
-router.post('/send', authenticateToken, messageLimiter(), messageController.sendMessage);
+// ✅ VALIDATION: Validate message content, recipients, and optional schedule time
+router.post('/send', authenticateToken, messageLimiter(), validateBody(SendMessageSchema), messageController.sendMessage);
 // Get message history (with pagination and filters)
 router.get('/history', authenticateToken, messageLimiter(), messageController.getMessageHistory);
 // Get single message details
@@ -58,14 +61,18 @@ router.get('/conversations', authenticateToken, conversationController.getConver
 // Get single conversation with all messages
 router.get('/conversations/:conversationId', authenticateToken, conversationController.getConversation);
 // Send text-only reply
-router.post('/conversations/:conversationId/reply', authenticateToken, conversationController.replyToConversation);
+// ✅ OPTIMIZATION: Per-user rate limiting (100 messages/hour - same as broadcast)
+// ✅ VALIDATION: Validate conversation ID and reply content
+router.post('/conversations/:conversationId/reply', authenticateToken, messageLimiter(), validateParams(ConversationParamSchema), validateBody(ReplyToConversationSchema), conversationController.replyToConversation);
 // Send reply with media attachment (full quality)
 // ✅ OPTIMIZATION: Per-user upload rate limiting (10 uploads/hour)
-router.post('/conversations/:conversationId/reply-with-media', authenticateToken, uploadLimiter(), upload.single('file'), conversationController.replyWithMedia);
+// ✅ VALIDATION: Validate conversation ID
+router.post('/conversations/:conversationId/reply-with-media', authenticateToken, uploadLimiter(), validateParams(ConversationParamSchema), upload.single('file'), conversationController.replyWithMedia);
 // Mark conversation as read
 router.patch('/conversations/:conversationId/read', authenticateToken, conversationController.markAsRead);
 // Update conversation status
-router.patch('/conversations/:conversationId/status', authenticateToken, conversationController.updateStatus);
+// ✅ VALIDATION: Validate conversation ID and new status
+router.patch('/conversations/:conversationId/status', authenticateToken, validateParams(ConversationParamSchema), validateBody(UpdateConversationStatusSchema), conversationController.updateStatus);
 // ============ WEBHOOKS (No authentication) ============
 // Telnyx MMS webhook - receive messages from congregation
 router.post('/webhooks/telnyx/mms', conversationController.handleTelnyxInboundMMS);

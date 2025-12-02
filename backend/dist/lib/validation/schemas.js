@@ -170,6 +170,34 @@ export function safeValidate(schema, data) {
         };
     }
 }
+// ============================================
+// CONVERSATION SCHEMAS
+// ============================================
+export const GetConversationsSchema = z.object({
+    page: z.string().regex(/^\d+$/).transform(Number).pipe(z.number().int().min(1)).default('1'),
+    limit: z.string().regex(/^\d+$/).transform(Number).pipe(z.number().int().min(1).max(100)).default('20'),
+    status: z.enum(['open', 'closed', 'archived']).optional(),
+});
+export const ReplyToConversationSchema = z.object({
+    content: z.string()
+        .min(1, 'Message content is required')
+        .max(160, 'Message is too long (max 160 characters)')
+        .trim(),
+});
+export const ReplyWithMediaSchema = z.object({
+    content: z.string()
+        .max(160, 'Message is too long (max 160 characters)')
+        .trim()
+        .optional(),
+});
+export const UpdateConversationStatusSchema = z.object({
+    status: z.enum(['open', 'closed', 'archived'], {
+        errorMap: () => ({ message: 'Status must be one of: open, closed, archived' })
+    }),
+});
+export const ConversationParamSchema = z.object({
+    conversationId: z.string().uuid('Invalid conversation ID'),
+});
 // Additional schemas needed by existing controllers
 export const completeWelcomeSchema = z.object({
     firstName: z.string().min(1).max(100),
@@ -182,5 +210,39 @@ export const getMessageHistorySchema = z.object({
     dateTo: z.string().datetime().optional(),
     limit: z.number().int().min(1).max(100).default(20),
     offset: z.number().int().min(0).default(0),
+});
+// ============================================
+// MFA SCHEMAS (Multi-Factor Authentication)
+// ============================================
+export const MFAInitiateSchema = z.object({
+    email: z.string()
+        .email('Invalid email address')
+        .max(255, 'Email too long'),
+});
+export const MFAVerifySchema = z.object({
+    secret: z.string()
+        .min(1, 'TOTP secret is required')
+        .regex(/^[A-Z2-7]+$/, 'Invalid TOTP secret format'),
+    code: z.string()
+        .length(6, 'Verification code must be 6 digits')
+        .regex(/^\d{6}$/, 'Verification code must contain only digits'),
+    email: z.string()
+        .email('Invalid email address'),
+});
+export const MFADisableSchema = z.object({
+    code: z.string()
+        .length(6, 'Verification code must be 6 digits')
+        .regex(/^\d{6}$/, 'Verification code must contain only digits'),
+});
+export const RecoveryCodeVerifySchema = z.object({
+    code: z.string()
+        .min(8, 'Recovery code is invalid')
+        .max(12, 'Recovery code is invalid')
+        .regex(/^[A-Z0-9-]+$/, 'Recovery code format is invalid'),
+});
+export const RegenerateRecoveryCodesSchema = z.object({
+    code: z.string()
+        .length(6, 'Verification code must be 6 digits')
+        .regex(/^\d{6}$/, 'Verification code must contain only digits'),
 });
 //# sourceMappingURL=schemas.js.map

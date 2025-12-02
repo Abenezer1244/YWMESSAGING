@@ -29,16 +29,12 @@ export declare function markAsRead(req: Request, res: Response): Promise<Respons
  * Update conversation status
  */
 export declare function updateStatus(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
-/**
- * POST /api/webhooks/telnyx/mms
- * Receive inbound MMS from congregation member
- * Telnyx sends webhook when member texts the church number with media
- */
 export declare function handleTelnyxInboundMMS(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**
  * POST /api/webhooks/telnyx/status
  * Receive delivery status updates from Telnyx (for SMS/MMS sent)
  * Updates message delivery status
+ * ✅ SECURITY: Verify Telnyx webhook signature using ED25519
  */
 export declare function handleTelnyxWebhook(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 //# sourceMappingURL=conversation.controller.d.ts.map

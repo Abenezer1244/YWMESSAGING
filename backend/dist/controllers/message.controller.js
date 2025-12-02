@@ -5,6 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import { decryptPhoneSafe } from '../utils/encryption.utils.js';
 import { sendMessageSchema, getMessageHistorySchema } from '../lib/validation/schemas.js';
 import { safeValidate } from '../lib/validation/schemas.js';
+import { withRetry, TELNYX_RETRY_CONFIG } from '../utils/retry.js';
 const prisma = new PrismaClient();
 /**
  * POST /api/messages/send
@@ -61,7 +62,7 @@ export async function sendMessage(req, res) {
                     try {
                         // Decrypt phone number (stored encrypted in database, or plain text for legacy records)
                         const decryptedPhone = decryptPhoneSafe(recipient.member.phone);
-                        const result = await telnyxService.sendSMS(decryptedPhone, content, churchId);
+                        const result = await withRetry(() => telnyxService.sendSMS(decryptedPhone, content, churchId), `sendSMS:${recipient.id}`, TELNYX_RETRY_CONFIG);
                         // Update recipient with Telnyx message ID
                         await prisma.messageRecipient.update({
                             where: { id: recipient.id },
@@ -229,7 +230,7 @@ export async function handleTelnyxWebhook(req, res) {
         }
         if (status) {
             // Update recipient status
-            await messageService.updateRecipientStatus(recipient.id, status, {
+            await messageService.updateRecipientStatus(recipient.id, status, recipient.message.id, {
                 failureReason: payload.error_message || undefined,
             });
             console.log(`Telnyx webhook: Updated message ${messageId} to ${status}`);

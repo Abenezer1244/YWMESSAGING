@@ -23,4 +23,10 @@ export declare function verifyHashForSearch(plaintext: string, hash: string): bo
  * Returns the decrypted phone if encrypted, or the original phone if already plain text
  */
 export declare function decryptPhoneSafe(phoneData: string): string;
+/**
+ * Safely decrypt email, handling both encrypted and plain text formats
+ * Some records may have plain text emails (legacy data before encryption was added)
+ * Returns the decrypted email if encrypted, or the original email if already plain text
+ */
+export declare function decryptEmailSafe(emailData: string): string;
 //# sourceMappingURL=encryption.utils.d.ts.map

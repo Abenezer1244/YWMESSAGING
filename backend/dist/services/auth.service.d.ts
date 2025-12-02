@@ -41,7 +41,7 @@ export declare function refreshAccessToken(adminId: string): Promise<{
     refreshToken: string;
 }>;
 /**
- * Get admin by ID
+ * Get admin by ID (cached for 30 minutes)
  */
 export declare function getAdmin(adminId: string): Promise<{
     id: string;

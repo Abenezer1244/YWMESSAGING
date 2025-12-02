@@ -73,7 +73,15 @@
       "Bash(npm test:*)",
       "Bash(git show:*)",
       "Bash(powershell -Command \"Remove-Item -Path ''node_modules\\.prisma'' -Recurse -Force -ErrorAction Continue\")",
-      "Bash(powershell -Command \"Remove-Item -Path ''.\\.prisma'' -Recurse -Force -ErrorAction Continue; npm run build 2>&1 | tail -20\")"
+      "Bash(powershell -Command \"Remove-Item -Path ''.\\.prisma'' -Recurse -Force -ErrorAction Continue; npm run build 2>&1 | tail -20\")",
+      "Bash(timeout 5 npm run dev:*)",
+      "Bash(timeout 30 npx prisma db push:*)",
+      "mcp__playwright__browser_navigate",
+      "Bash(timeout 30 npm run dev)",
+      "mcp__playwright__browser_wait_for",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_press_key",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

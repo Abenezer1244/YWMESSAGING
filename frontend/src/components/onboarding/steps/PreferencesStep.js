@@ -1,0 +1,21 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { useState } from 'react';
+import Card from '../../ui/Card';
+const PreferencesStep = ({ onNext, onBack }) => {
+    const [preferences, setPreferences] = useState({
+        emailNotifications: true,
+        pushNotifications: true,
+        darkMode: false,
+    });
+    const handleToggle = (key) => {
+        setPreferences((prev) => ({ ...prev, [key]: !prev[key] }));
+    };
+    const handleContinue = () => {
+        localStorage.setItem('onboarding:preferences', JSON.stringify(preferences));
+        onNext();
+    };
+    return (_jsx(Card, { variant: "default", padding: "lg", children: _jsxs("div", { className: "space-y-6", children: [_jsxs("div", { children: [_jsx("h2", { className: "text-2xl font-bold", children: "Customize Your Experience" }), _jsx("p", { className: "text-muted-foreground mt-1", children: "Choose how you want to interact with Koinonia Connect" })] }), _jsxs("div", { className: "space-y-4", children: [_jsxs("div", { className: "flex items-center justify-between p-4 border border-border rounded-sm", children: [_jsxs("div", { className: "space-y-1", children: [_jsx("h3", { className: "font-medium", children: "Email Notifications" }), _jsx("p", { className: "text-sm text-muted-foreground", children: "Receive important updates via email" })] }), _jsxs("label", { className: "flex cursor-pointer", children: [_jsx("input", { type: "checkbox", checked: preferences.emailNotifications, onChange: () => handleToggle('emailNotifications'), className: "sr-only" }), _jsx("div", { className: `relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.emailNotifications ? 'bg-primary' : 'bg-muted'}`, children: _jsx("span", { className: `inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.emailNotifications ? 'translate-x-6' : 'translate-x-1'}` }) })] })] }), _jsxs("div", { className: "flex items-center justify-between p-4 border border-border rounded-sm", children: [_jsxs("div", { className: "space-y-1", children: [_jsx("h3", { className: "font-medium", children: "Push Notifications" }), _jsx("p", { className: "text-sm text-muted-foreground", children: "Get real-time alerts on your device" })] }), _jsxs("label", { className: "flex cursor-pointer", children: [_jsx("input", { type: "checkbox", checked: preferences.pushNotifications, onChange: () => handleToggle('pushNotifications'), className: "sr-only" }), _jsx("div", { className: `relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.pushNotifications ? 'bg-primary' : 'bg-muted'}`, children: _jsx("span", { className: `inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.pushNotifications ? 'translate-x-6' : 'translate-x-1'}` }) })] })] }), _jsxs("div", { className: "flex items-center justify-between p-4 border border-border rounded-sm", children: [_jsxs("div", { className: "space-y-1", children: [_jsx("h3", { className: "font-medium", children: "Dark Mode" }), _jsx("p", { className: "text-sm text-muted-foreground", children: "Use dark theme for better visibility" })] }), _jsxs("label", { className: "flex cursor-pointer", children: [_jsx("input", { type: "checkbox", checked: preferences.darkMode, onChange: () => handleToggle('darkMode'), className: "sr-only" }), _jsx("div", { className: `relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.darkMode ? 'bg-primary' : 'bg-muted'}`, children: _jsx("span", { className: `inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.darkMode ? 'translate-x-6' : 'translate-x-1'}` }) })] })] })] }), _jsxs("div", { className: "flex gap-3 pt-4", children: [_jsx("button", { type: "button", onClick: onBack, className: "flex-1 px-4 py-2.5 border border-border rounded-sm font-medium hover:bg-muted/50 transition-all", children: "Back" }), _jsx("button", { type: "button", onClick: handleContinue, className: "flex-1 bg-primary text-primary-foreground px-4 py-2.5 rounded-sm font-medium hover:opacity-90 transition-all", children: "Continue" })] })] }) }));
+};
+PreferencesStep.displayName = 'PreferencesStep';
+export default PreferencesStep;
+//# sourceMappingURL=PreferencesStep.js.map

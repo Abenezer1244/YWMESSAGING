@@ -28,7 +28,7 @@ export declare function getSMSPricing(): {
     setupFee: number;
 };
 /**
- * Get current plan for a church
+ * Get current plan for a church (cached)
  */
 export declare function getCurrentPlan(churchId: string): Promise<PlanName | 'trial'>;
 /**
@@ -36,11 +36,17 @@ export declare function getCurrentPlan(churchId: string): Promise<PlanName | 'tr
  */
 export declare function getPlanLimits(plan: PlanName | string): PlanLimits | null;
 /**
- * Get usage for a church
+ * Get usage for a church (cached)
+ * Cache for 30 minutes to reduce database load
  */
 export declare function getUsage(churchId: string): Promise<Record<string, number>>;
 /**
  * Check if church is on trial
  */
 export declare function isOnTrial(churchId: string): Promise<boolean>;
+/**
+ * Invalidate billing cache when subscription changes
+ * Called after plan changes, usage updates, etc.
+ */
+export declare function invalidateBillingCache(churchId: string): Promise<void>;
 //# sourceMappingURL=billing.service.d.ts.map

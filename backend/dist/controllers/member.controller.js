@@ -1,5 +1,6 @@
 import { parseCSV, formatAndValidate } from '../utils/csvParser.util.js';
 import * as memberService from '../services/member.service.js';
+import { invalidateCache, CACHE_KEYS } from '../services/cache.service.js';
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 /**
@@ -114,6 +115,8 @@ export async function addMember(req, res) {
             email,
             optInSms,
         });
+        // Invalidate group members cache
+        await invalidateCache(CACHE_KEYS.groupMembers(groupId));
         res.status(201).json({
             success: true,
             data: member,
@@ -174,6 +177,8 @@ export async function importMembers(req, res) {
         }
         // Import to database
         const result = await memberService.importMembers(groupId, parsed.valid);
+        // Invalidate group members cache
+        await invalidateCache(CACHE_KEYS.groupMembers(groupId));
         res.json({
             success: true,
             data: {
@@ -222,6 +227,8 @@ export async function updateMember(req, res) {
             email,
             optInSms,
         });
+        // Invalidate member caches
+        await invalidateCache(CACHE_KEYS.memberAll(memberId));
         res.json({
             success: true,
             data: member,
@@ -257,6 +264,9 @@ export async function removeMember(req, res) {
             });
         }
         const result = await memberService.removeMemberFromGroup(groupId, memberId);
+        // Invalidate group members and member caches
+        await invalidateCache(CACHE_KEYS.groupMembers(groupId));
+        await invalidateCache(CACHE_KEYS.memberAll(memberId));
         res.json({
             success: true,
             data: result,

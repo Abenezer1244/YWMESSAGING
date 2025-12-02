@@ -1,9 +1,11 @@
 import { registerChurch, login, refreshAccessToken, getAdmin } from '../services/auth.service.js';
-import { verifyRefreshToken } from '../utils/jwt.utils.js';
+import { verifyRefreshToken, generateMFASessionToken, verifyMFASessionToken } from '../utils/jwt.utils.js';
 import { logFailedLogin } from '../utils/security-logger.js';
 import { registerSchema, loginSchema, completeWelcomeSchema } from '../lib/validation/schemas.js';
 import { safeValidate } from '../lib/validation/schemas.js';
 import { revokeAllTokens } from '../services/token-revocation.service.js';
+import * as mfaService from '../services/mfa.service.js';
+import { prisma } from '../lib/prisma.js';
 /**
  * POST /api/auth/register
  */
@@ -69,6 +71,24 @@ export async function loginHandler(req, res) {
         }
         const { email, password } = validationResult.data;
         const result = await login({ email, password });
+        // ✅ SECURITY: Check if MFA is enabled
+        const mfaRecord = await prisma.adminMFA.findUnique({
+            where: { adminId: result.adminId },
+        });
+        // If MFA is enabled, require MFA verification
+        if (mfaRecord?.mfaEnabled) {
+            const mfaSessionToken = generateMFASessionToken(result.adminId, result.churchId);
+            res.status(200).json({
+                success: true,
+                mfaRequired: true,
+                mfaSessionToken,
+                data: {
+                    admin: result.admin,
+                    message: 'Enter your 6-digit authentication code',
+                },
+            });
+            return;
+        }
         // ✅ SECURITY: Determine cookie domain based on environment
         const cookieDomain = process.env.NODE_ENV === 'production' ? '.koinoniasms.com' : undefined;
         // Set httpOnly cookies for tokens
@@ -89,6 +109,7 @@ export async function loginHandler(req, res) {
         // ✅ SECURITY: Return tokens for frontend Zustand state (also in HTTPOnly cookies for security)
         res.status(200).json({
             success: true,
+            mfaRequired: false,
             data: {
                 admin: result.admin,
                 church: result.church,
@@ -221,6 +242,94 @@ export async function logout(req, res) {
     catch (error) {
         console.error('Logout error:', error);
         res.status(500).json({ error: 'Logout failed' });
+    }
+}
+/**
+ * POST /api/auth/verify-mfa
+ * Verify MFA code (TOTP or recovery code) and complete login
+ * Body: { mfaSessionToken: string, code: string }
+ */
+export async function verifyMFAHandler(req, res) {
+    try {
+        const { mfaSessionToken, code } = req.body;
+        if (!mfaSessionToken || !code) {
+            res.status(400).json({ error: 'MFA session token and code are required' });
+            return;
+        }
+        // ✅ SECURITY: Verify the MFA session token
+        const payload = verifyMFASessionToken(mfaSessionToken);
+        if (!payload) {
+            res.status(401).json({ error: 'Invalid or expired MFA session token' });
+            return;
+        }
+        const { adminId, churchId } = payload;
+        // ✅ SECURITY: Verify TOTP code first
+        let isValidCode = await mfaService.verifyTOTPCode(adminId, code);
+        // If TOTP verification fails, try recovery code
+        if (!isValidCode) {
+            isValidCode = await mfaService.verifyRecoveryCode(adminId, code);
+        }
+        if (!isValidCode) {
+            res.status(400).json({ error: 'Invalid authentication code' });
+            return;
+        }
+        // ✅ SECURITY: Get admin data and church info
+        const admin = await prisma.admin.findUnique({
+            where: { id: adminId },
+            include: { church: true },
+        });
+        if (!admin) {
+            res.status(404).json({ error: 'Admin not found' });
+            return;
+        }
+        // Generate final access and refresh tokens
+        const { generateAccessToken, generateRefreshToken } = await import('../utils/jwt.utils.js');
+        const accessToken = generateAccessToken(adminId, churchId, admin.role);
+        const refreshToken = generateRefreshToken(adminId);
+        // ✅ SECURITY: Determine cookie domain based on environment
+        const cookieDomain = process.env.NODE_ENV === 'production' ? '.koinoniasms.com' : undefined;
+        // Set httpOnly cookies for tokens
+        res.cookie('accessToken', accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+            sameSite: 'none', // Allow cross-origin cookie sending
+            domain: cookieDomain,
+            maxAge: 15 * 60 * 1000, // 15 minutes
+        });
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+            sameSite: 'none', // Allow cross-origin cookie sending
+            domain: cookieDomain,
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        });
+        // ✅ SECURITY: Return tokens for frontend Zustand state
+        res.status(200).json({
+            success: true,
+            data: {
+                admin: {
+                    id: admin.id,
+                    email: admin.email,
+                    firstName: admin.firstName,
+                    lastName: admin.lastName,
+                    role: admin.role,
+                    welcomeCompleted: admin.welcomeCompleted,
+                    userRole: admin.userRole,
+                },
+                church: {
+                    id: admin.church.id,
+                    name: admin.church.name,
+                    email: admin.church.email,
+                    trialEndsAt: admin.church.trialEndsAt,
+                },
+                accessToken,
+                refreshToken,
+            },
+        });
+    }
+    catch (error) {
+        console.error('MFA verification error:', error);
+        res.status(400).json({ error: error.message || 'MFA verification failed' });
     }
 }
 /**

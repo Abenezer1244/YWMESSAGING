@@ -1,0 +1,1 @@
+{"version":3,"file":"AuthorizationError.d.ts","sourceRoot":"","sources":["../../../src/utils/errors/AuthorizationError.ts"],"names":[],"mappings":"AAAA,OAAO,QAAQ,MAAM,eAAe,CAAC;AAErC;;;GAGG;AACH,qBAAa,kBAAmB,SAAQ,QAAQ;gBAClC,OAAO,GAAE,MAAwB,EAAE,OAAO,CAAC,EAAE,MAAM,CAAC,MAAM,EAAE,GAAG,CAAC;CAI7E;AAED,eAAe,kBAAkB,CAAC"}

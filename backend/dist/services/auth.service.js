@@ -2,6 +2,8 @@ import { prisma } from '../lib/prisma.js';
 import { hashPassword, comparePassword } from '../utils/password.utils.js';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt.utils.js';
 import { createCustomer } from './stripe.service.js';
+import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from './cache.service.js';
+import { encrypt, hashForSearch } from '../utils/encryption.utils.js';
 const TRIAL_DAYS = parseInt(process.env.TRIAL_DAYS || '14');
 /**
  * Register a new church and admin
@@ -33,11 +35,15 @@ export async function registerChurch(input) {
             trialEndsAt,
         },
     });
-    // Create admin
+    // Create admin with encrypted email
+    const encryptedEmail = encrypt(input.email);
+    const emailHash = hashForSearch(input.email);
     const admin = await prisma.admin.create({
         data: {
             churchId: church.id,
             email: input.email,
+            encryptedEmail,
+            emailHash,
             passwordHash,
             firstName: input.firstName,
             lastName: input.lastName,
@@ -98,6 +104,8 @@ export async function login(input) {
         where: { id: admin.id },
         data: { lastLoginAt: new Date() },
     });
+    // Invalidate admin cache to refresh permissions
+    await invalidateCache(CACHE_KEYS.adminRole(admin.id));
     return {
         adminId: admin.id,
         churchId: admin.churchId,
@@ -138,9 +146,14 @@ export async function refreshAccessToken(adminId) {
     };
 }
 /**
- * Get admin by ID
+ * Get admin by ID (cached for 30 minutes)
  */
 export async function getAdmin(adminId) {
+    // Try cache first
+    const cached = await getCached(CACHE_KEYS.adminRole(adminId));
+    if (cached) {
+        return cached;
+    }
     const admin = await prisma.admin.findUnique({
         where: { id: adminId },
         include: { church: true },
@@ -148,7 +161,7 @@ export async function getAdmin(adminId) {
     if (!admin) {
         return null;
     }
-    return {
+    const result = {
         id: admin.id,
         email: admin.email,
         firstName: admin.firstName,
@@ -163,5 +176,8 @@ export async function getAdmin(adminId) {
             trialEndsAt: admin.church.trialEndsAt,
         },
     };
+    // Cache for 30 minutes
+    await setCached(CACHE_KEYS.adminRole(adminId), result, CACHE_TTL.MEDIUM);
+    return result;
 }
 //# sourceMappingURL=auth.service.js.map

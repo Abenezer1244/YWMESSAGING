@@ -1,8 +1,10 @@
-import React from 'react';
-import { MessageSquare, Archive, X, Loader } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { MessageSquare, Loader } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { FixedSizeList as List } from 'react-window';
 import { Conversation } from '../../api/conversations';
-import { SoftCard, SoftButton } from '../SoftUI';
+import { SoftCard } from '../SoftUI';
+import { ConversationItem } from './ConversationItem';
 
 interface ConversationsListProps {
   conversations: Conversation[];
@@ -10,7 +12,49 @@ interface ConversationsListProps {
   onSelectConversation: (conversationId: string) => void;
   onUpdateStatus?: (conversationId: string, status: 'open' | 'closed' | 'archived') => Promise<void>;
   isLoading?: boolean;
+  containerHeight?: number; // Height of the virtual scroll container (default: 600px)
 }
+
+interface RowProps {
+  index: number;
+  style: React.CSSProperties;
+  data: {
+    conversations: Conversation[];
+    selectedConversationId?: string;
+    onSelectConversation: (conversationId: string) => void;
+    onUpdateStatus?: (conversationId: string, status: 'open' | 'closed' | 'archived') => Promise<void>;
+  };
+}
+
+/**
+ * Row renderer for virtual scrolling
+ * Receives item index and style from FixedSizeList
+ * Renders ConversationItem with memoization
+ */
+const Row = React.memo(function Row({ index, style, data }: RowProps) {
+  const {
+    conversations,
+    selectedConversationId,
+    onSelectConversation,
+    onUpdateStatus,
+  } = data;
+
+  const conversation = conversations[index];
+
+  return (
+    <div style={style}>
+      <div className="px-2">
+        <ConversationItem
+          conversation={conversation}
+          isSelected={selectedConversationId === conversation.id}
+          onSelect={onSelectConversation}
+          onUpdateStatus={onUpdateStatus}
+          index={index}
+        />
+      </div>
+    </div>
+  );
+});
 
 export function ConversationsList({
   conversations,
@@ -18,34 +62,22 @@ export function ConversationsList({
   onSelectConversation,
   onUpdateStatus,
   isLoading = false,
+  containerHeight = 600,
 }: ConversationsListProps) {
-  const formatDate = (date: string) => {
-    const d = new Date(date);
-    const now = new Date();
-    const diffHours = (now.getTime() - d.getTime()) / (1000 * 60 * 60);
-
-    if (diffHours < 1) {
-      const diffMins = Math.floor((now.getTime() - d.getTime()) / (1000 * 60));
-      return `${diffMins}m ago`;
-    }
-    if (diffHours < 24) {
-      return `${Math.floor(diffHours)}h ago`;
-    }
-    return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'open':
-        return 'bg-blue-500/20 text-blue-400';
-      case 'closed':
-        return 'bg-red-500/20 text-red-400';
-      case 'archived':
-        return 'bg-gray-500/20 text-gray-400';
-      default:
-        return 'bg-muted text-muted-foreground';
-    }
-  };
+  /**
+   * Memoized row data object
+   * Prevents row renderer from being called unnecessarily
+   * Only recalculates when conversations or selection changes
+   */
+  const rowData = useMemo(
+    () => ({
+      conversations,
+      selectedConversationId,
+      onSelectConversation,
+      onUpdateStatus,
+    }),
+    [conversations, selectedConversationId, onSelectConversation, onUpdateStatus]
+  );
 
   if (isLoading) {
     return (
@@ -70,79 +102,15 @@ export function ConversationsList({
   }
 
   return (
-    <div className="space-y-2">
-      {conversations.map((conversation, idx) => (
-        <motion.div
-          key={conversation.id}
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: idx * 0.05 }}
-        >
-          <button
-            onClick={() => onSelectConversation(conversation.id)}
-            className={`w-full text-left p-4 rounded-lg border transition-all duration-200 ${
-              selectedConversationId === conversation.id
-                ? 'border-primary bg-primary/5'
-                : 'border-border/40 bg-card/50 hover:border-border hover:bg-card'
-            }`}
-          >
-            <div className="flex items-start gap-3">
-              {/* Unread indicator */}
-              {conversation.unreadCount > 0 && (
-                <div className="mt-1 flex-shrink-0">
-                  <div className="w-2 h-2 bg-primary rounded-full" />
-                </div>
-              )}
-
-              {/* Member info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-semibold text-foreground truncate">
-                    {conversation.member.firstName} {conversation.member.lastName}
-                  </h3>
-                  {conversation.unreadCount > 0 && (
-                    <span className="bg-primary/20 text-primary text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0">
-                      {conversation.unreadCount}
-                    </span>
-                  )}
-                </div>
-
-                <p className="text-sm text-muted-foreground truncate mb-2">
-                  {conversation.member.phone}
-                </p>
-
-                {/* Status badge */}
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs font-medium px-2 py-1 rounded ${getStatusColor(conversation.status)}`}>
-                    {conversation.status}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDate(conversation.lastMessageAt)}
-                  </span>
-                </div>
-              </div>
-
-              {/* Actions */}
-              {selectedConversationId === conversation.id && onUpdateStatus && (
-                <div className="flex-shrink-0 flex gap-1" onClick={(e) => e.stopPropagation()}>
-                  {conversation.status !== 'archived' && (
-                    <SoftButton
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => {
-                        onUpdateStatus(conversation.id, 'archived');
-                      }}
-                      className="p-2"
-                    >
-                      <Archive className="w-4 h-4" />
-                    </SoftButton>
-                  )}
-                </div>
-              )}
-            </div>
-          </button>
-        </motion.div>
-      ))}
-    </div>
+    <List
+      height={containerHeight}
+      itemCount={conversations.length}
+      itemSize={88} // Height of each conversation item (ConversationItem + padding)
+      width="100%"
+      itemData={rowData}
+      overscanCount={5} // Render 5 extra items outside visible area for smooth scrolling
+    >
+      {Row}
+    </List>
   );
 }

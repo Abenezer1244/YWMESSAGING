@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import * as billingService from '../services/billing.service.js';
+import { BillingCycle, getPlanPrice } from '../config/plans.js';
 
 const prisma = new PrismaClient();
 
@@ -159,12 +160,19 @@ export async function subscribeHandler(req: Request, res: Response) {
       });
     }
 
-    const { planName, paymentIntentId } = req.body;
+    const { planName, billingCycle = 'monthly', paymentIntentId } = req.body;
 
     if (!planName || !['starter', 'growth', 'pro'].includes(planName)) {
       return res.status(400).json({
         success: false,
         error: 'Invalid plan name',
+      });
+    }
+
+    if (!['monthly', 'annual'].includes(billingCycle)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid billing cycle (must be monthly or annual)',
       });
     }
 
@@ -177,10 +185,30 @@ export async function subscribeHandler(req: Request, res: Response) {
       select: { id: true, subscriptionStatus: true },
     });
 
+    // Create or update subscription record with billing cycle
+    await prisma.subscription.upsert({
+      where: { churchId },
+      update: {
+        plan: planName,
+        billingCycle,
+        status: 'active',
+      },
+      create: {
+        churchId,
+        plan: planName,
+        billingCycle,
+        status: 'active',
+      },
+    });
+
+    // Invalidate billing cache
+    await billingService.invalidateBillingCache(churchId);
+
     res.json({
       success: true,
       data: {
         plan: result.subscriptionStatus,
+        billingCycle,
         subscriptionId: result.id,
       },
     });
@@ -243,12 +271,19 @@ export async function createPaymentIntentHandler(req: Request, res: Response) {
       });
     }
 
-    const { planName } = req.body;
+    const { planName, billingCycle = 'monthly' } = req.body;
 
     if (!planName || !['starter', 'growth', 'pro'].includes(planName)) {
       return res.status(400).json({
         success: false,
         error: 'Invalid plan name',
+      });
+    }
+
+    if (!['monthly', 'annual'].includes(billingCycle)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid billing cycle (must be monthly or annual)',
       });
     }
 
@@ -260,6 +295,9 @@ export async function createPaymentIntentHandler(req: Request, res: Response) {
         error: 'Plan not found',
       });
     }
+
+    // Get price based on billing cycle
+    const amount = getPlanPrice(planName as any, billingCycle as BillingCycle);
 
     // Get church with Stripe customer ID
     const church = await prisma.church.findUnique({
@@ -280,9 +318,11 @@ export async function createPaymentIntentHandler(req: Request, res: Response) {
       success: true,
       data: {
         clientSecret: null, // Will be created by frontend via Stripe.js
-        amount: planLimits.price,
+        amount,
         currency: planLimits.currency,
         plan: planName,
+        billingCycle,
+        savings: billingCycle === 'annual' ? Math.round((planLimits.monthlyPrice * 12 - amount) / 100) : 0,
       },
     });
   } catch (error) {

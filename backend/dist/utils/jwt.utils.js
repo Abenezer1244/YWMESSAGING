@@ -45,6 +45,26 @@ export function verifyRefreshToken(token) {
     }
 }
 /**
+ * Generate MFA session token (very short-lived: 5 minutes)
+ * Used during MFA verification step in login flow
+ */
+export function generateMFASessionToken(adminId, churchId) {
+    return jwt.sign({ adminId, churchId }, ACCESS_SECRET, // Reuse access secret
+    { expiresIn: '5m' });
+}
+/**
+ * Verify MFA session token
+ */
+export function verifyMFASessionToken(token) {
+    try {
+        const payload = jwt.verify(token, ACCESS_SECRET);
+        return payload;
+    }
+    catch (error) {
+        return null;
+    }
+}
+/**
  * Decode token without verification (for debugging)
  */
 export function decodeToken(token) {

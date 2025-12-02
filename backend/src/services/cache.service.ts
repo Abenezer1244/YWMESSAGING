@@ -156,6 +156,10 @@ export const CACHE_KEYS = {
   billingUsage: (churchId: string) => `church:${churchId}:billing:usage`,
   planLimits: (planName: string) => `plan:${planName}:limits`,
 
+  // Planning Center integration (1 hour TTL)
+  planningCenterStatus: (churchId: string) => `church:${churchId}:pco:status`,
+  planningCenterSync: (churchId: string) => `church:${churchId}:pco:sync`,
+
   // Wildcard patterns for invalidation
   churchAll: (churchId: string) => `church:${churchId}:*`,
   adminAll: (adminId: string) => `admin:${adminId}:*`,

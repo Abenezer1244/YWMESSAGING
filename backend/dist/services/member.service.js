@@ -3,17 +3,28 @@ import { formatToE164 } from '../utils/phone.utils.js';
 import { encrypt, decrypt, hashForSearch } from '../utils/encryption.utils.js';
 import { queueWelcomeMessage } from '../jobs/welcomeMessage.job.js';
 import { getUsage, getCurrentPlan, getPlanLimits } from './billing.service.js';
+import { getCached, setCached, CACHE_KEYS, CACHE_TTL } from './cache.service.js';
 /**
  * Get members for a group with pagination and search
+ * Note: Search results are not cached (search is dynamic)
  */
 export async function getMembers(groupId, options = {}) {
     const { page = 1, limit = 50, search } = options;
     const skip = (page - 1) * limit;
     const group = await prisma.group.findUnique({
         where: { id: groupId },
+        select: { id: true }, // Only fetch what we need for validation
     });
     if (!group) {
         throw new Error('Group not found');
+    }
+    // Try cache for list view (page 1, no search)
+    const cacheKey = page === 1 && !search ? CACHE_KEYS.groupMembers(groupId) : null;
+    if (cacheKey) {
+        const cached = await getCached(cacheKey);
+        if (cached) {
+            return cached;
+        }
     }
     const where = {
         groups: {
@@ -63,7 +74,7 @@ export async function getMembers(groupId, options = {}) {
         ...member,
         phone: decrypt(member.phone),
     }));
-    return {
+    const result = {
         data: decryptedMembers,
         pagination: {
             page,
@@ -72,6 +83,11 @@ export async function getMembers(groupId, options = {}) {
             pages: Math.ceil(total / limit),
         },
     };
+    // Cache first page (no search) for 30 minutes
+    if (cacheKey) {
+        await setCached(cacheKey, result, CACHE_TTL.MEDIUM);
+    }
+    return result;
 }
 /**
  * Add single member to group
@@ -79,6 +95,7 @@ export async function getMembers(groupId, options = {}) {
 export async function addMember(groupId, data) {
     const group = await prisma.group.findUnique({
         where: { id: groupId },
+        select: { id: true, churchId: true }, // Only fetch what we need
     });
     if (!group) {
         throw new Error('Group not found');
@@ -93,16 +110,16 @@ export async function addMember(groupId, data) {
     // Format phone to E.164
     const formattedPhone = formatToE164(data.phone);
     const phoneHash = hashForSearch(formattedPhone);
-    // Check if member with this phone exists
+    // Check if member exists by phone or email in a single query
+    const emailTrim = data.email?.trim();
     let member = await prisma.member.findFirst({
-        where: { phoneHash },
+        where: {
+            OR: [
+                { phoneHash },
+                ...(emailTrim ? [{ email: emailTrim }] : []),
+            ],
+        },
     });
-    // Also check by email if phoneHash didn't match
-    if (!member && data.email?.trim()) {
-        member = await prisma.member.findFirst({
-            where: { email: data.email.trim() },
-        });
-    }
     // Create member if doesn't exist
     if (!member) {
         member = await prisma.member.create({

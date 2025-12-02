@@ -3,9 +3,11 @@
  * Defines features and limits for each pricing tier
  */
 export type PlanName = 'starter' | 'growth' | 'pro';
+export type BillingCycle = 'monthly' | 'annual';
 export interface PlanLimits {
     name: string;
-    price: number;
+    monthlyPrice: number;
+    annualPrice: number;
     currency: string;
     branches: number;
     members: number;
@@ -13,6 +15,11 @@ export interface PlanLimits {
     coAdmins: number;
     features: string[];
 }
+/**
+ * Get price for a plan based on billing cycle
+ * Annual billing offers 20% discount ($49 * 12 = $588 monthly total vs $470.40 annual = $39.2/month)
+ */
+export declare function getPlanPrice(plan: PlanName, billingCycle: BillingCycle): number;
 export declare const PLANS: Record<PlanName, PlanLimits>;
 /**
  * Get plan by name

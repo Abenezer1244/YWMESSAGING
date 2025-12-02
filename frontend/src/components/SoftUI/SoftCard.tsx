@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ReactNode } from 'react';
+import { ReactNode, memo } from 'react';
 
 interface SoftCardProps {
   children: ReactNode;
@@ -10,7 +10,7 @@ interface SoftCardProps {
   index?: number;
 }
 
-export function SoftCard({
+function SoftCardComponent({
   children,
   className = '',
   variant = 'default',
@@ -46,3 +46,10 @@ export function SoftCard({
     </motion.div>
   );
 }
+
+/**
+ * Memoized SoftCard component
+ * Prevents re-renders when parent component updates but props remain the same
+ * Shallow comparison of children, className, variant, hover, onClick, and index
+ */
+export const SoftCard = memo(SoftCardComponent);

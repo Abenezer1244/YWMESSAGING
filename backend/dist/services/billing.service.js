@@ -1,5 +1,6 @@
 import { prisma } from '../lib/prisma.js';
 import { PLANS } from '../config/plans.js';
+import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from './cache.service.js';
 /**
  * SMS billing service - tracks SMS costs and usage
  * Pricing: $0.02 per SMS (Option 3)
@@ -84,16 +85,25 @@ export function getSMSPricing() {
 }
 // ========== Plan Management Functions (used by middleware and services) ==========
 /**
- * Get current plan for a church
+ * Get current plan for a church (cached)
  */
 export async function getCurrentPlan(churchId) {
     try {
+        // Try cache first
+        const cached = await getCached(CACHE_KEYS.churchPlan(churchId));
+        if (cached) {
+            return cached;
+        }
+        // Cache miss, query database
         const church = await prisma.church.findUnique({
             where: { id: churchId },
             select: { subscriptionStatus: true },
         });
         const status = church?.subscriptionStatus;
-        return status || 'trial';
+        const plan = status || 'trial';
+        // Store in cache (1 hour TTL)
+        await setCached(CACHE_KEYS.churchPlan(churchId), plan, CACHE_TTL.LONG);
+        return plan;
     }
     catch (error) {
         console.error('Failed to get current plan:', error);
@@ -115,42 +125,50 @@ export function getPlanLimits(plan) {
     return null;
 }
 /**
- * Get usage for a church
+ * Get usage for a church (cached)
+ * Cache for 30 minutes to reduce database load
  */
 export async function getUsage(churchId) {
     try {
-        // Get branches count
-        const branchCount = await prisma.branch.count({
-            where: { churchId },
-        });
-        // Get members count
-        const memberCount = await prisma.member.count({
-            where: {
-                groups: {
-                    some: {
-                        group: { churchId },
+        // Try cache first
+        const cached = await getCached(CACHE_KEYS.billingUsage(churchId));
+        if (cached) {
+            return cached;
+        }
+        const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+        // Run all count queries in parallel (instead of sequentially)
+        const [branchCount, memberCount, coAdminCount, messageCount] = await Promise.all([
+            prisma.branch.count({
+                where: { churchId },
+            }),
+            prisma.member.count({
+                where: {
+                    groups: {
+                        some: {
+                            group: { churchId },
+                        },
                     },
                 },
-            },
-        });
-        // Get co-admins count
-        const coAdminCount = await prisma.admin.count({
-            where: { churchId, role: 'CO_ADMIN' },
-        });
-        // Get messages sent this month
-        const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-        const messageCount = await prisma.message.count({
-            where: {
-                churchId,
-                createdAt: { gte: startOfMonth },
-            },
-        });
-        return {
+            }),
+            prisma.admin.count({
+                where: { churchId, role: 'CO_ADMIN' },
+            }),
+            prisma.message.count({
+                where: {
+                    churchId,
+                    createdAt: { gte: startOfMonth },
+                },
+            }),
+        ]);
+        const usage = {
             branches: branchCount,
             members: memberCount,
             messagesThisMonth: messageCount,
             coAdmins: coAdminCount,
         };
+        // Cache for 30 minutes
+        await setCached(CACHE_KEYS.billingUsage(churchId), usage, CACHE_TTL.MEDIUM);
+        return usage;
     }
     catch (error) {
         console.error('Failed to get usage:', error);
@@ -180,5 +198,17 @@ export async function isOnTrial(churchId) {
         console.error('Failed to check trial status:', error);
         return false;
     }
+}
+/**
+ * Invalidate billing cache when subscription changes
+ * Called after plan changes, usage updates, etc.
+ */
+export async function invalidateBillingCache(churchId) {
+    await Promise.all([
+        invalidateCache(CACHE_KEYS.churchPlan(churchId)),
+        invalidateCache(CACHE_KEYS.billingUsage(churchId)),
+        invalidateCache(CACHE_KEYS.churchAll(churchId)), // Also invalidate any other church caches
+    ]);
+    console.log(`[Billing] Cache invalidated for church ${churchId}`);
 }
 //# sourceMappingURL=billing.service.js.map

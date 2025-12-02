@@ -14,21 +14,14 @@ export interface UpdateMemberData {
 }
 /**
  * Get members for a group with pagination and search
+ * Note: Search results are not cached (search is dynamic)
  */
 export declare function getMembers(groupId: string, options?: {
     page?: number;
     limit?: number;
     search?: string;
 }): Promise<{
-    data: {
-        phone: string;
-        id: string;
-        email: string | null;
-        firstName: string;
-        lastName: string;
-        createdAt: Date;
-        optInSms: boolean;
-    }[];
+    data: any[];
     pagination: {
         page: number;
         limit: number;

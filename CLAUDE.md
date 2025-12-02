@@ -1,5 +1,6 @@
 ALERT: THIS IS NOT A MOCK OR TEST OR DUMMY PROJECT. IT IS A REAL WORLD ENTERPRISE LEVEL SAAS SO NEVER ADD A MOCK OR TEST OR DUMMY CODE.
 
+When read a files and make sure to read the whole lines chunk by chunk so you wouldn't not miss anything because of any reason.
 
 1. First think through the problem, read the codebase for relevant files, and write a plan to tasks/todo.md.
 2. The plan should have a list of todo items that you can check off as you complete them
