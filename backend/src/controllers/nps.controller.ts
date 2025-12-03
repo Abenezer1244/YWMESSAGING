@@ -33,7 +33,7 @@ const AnalyticsQuerySchema = z.object({
 export async function submitSurvey(req: Request, res: Response) {
   try {
     const churchId = req.user?.churchId;
-    const responderId = req.user?.id;
+    const responderId = req.user?.adminId;
 
     if (!churchId) {
       return res.status(401).json({

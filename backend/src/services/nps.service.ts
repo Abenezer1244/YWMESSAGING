@@ -3,7 +3,7 @@
  * Handles survey submission, analytics, and feedback collection
  */
 
-import { prisma } from '../config/database.config.js';
+import { prisma } from '../lib/prisma.js';
 import * as cacheService from './cache.service.js';
 
 // ============================================================================
@@ -74,13 +74,13 @@ export async function submitNPSSurvey(
   }
 
   // Detect sentiment from feedback (simple approach)
-  let sentiment = null;
+  let sentiment: string | null = null;
   if (input.feedback) {
     sentiment = detectSentiment(input.feedback);
   }
 
   // Create survey response
-  const survey = await prisma.npsSurvey.create({
+  const survey = await prisma.nPSSurvey.create({
     data: {
       churchId,
       responderId,
@@ -123,7 +123,7 @@ export async function getNPSAnalytics(
   // Get surveys from last N days
   const cutoffDate = new Date(Date.now() - daysBack * 24 * 60 * 60 * 1000);
 
-  const surveys = await prisma.npsSurvey.findMany({
+  const surveys = await prisma.nPSSurvey.findMany({
     where: {
       churchId,
       createdAt: { gte: cutoffDate },
@@ -218,7 +218,7 @@ export async function getRecentSurveys(
   limit: number = 20,
   offset: number = 0
 ): Promise<NPSSurveyResponse[]> {
-  const surveys = await prisma.npsSurvey.findMany({
+  const surveys = await prisma.nPSSurvey.findMany({
     where: { churchId },
     orderBy: { createdAt: 'desc' },
     take: limit,
@@ -245,7 +245,7 @@ export async function getNPSByCategory(
 ): Promise<Record<string, number>> {
   const cutoffDate = new Date(Date.now() - daysBack * 24 * 60 * 60 * 1000);
 
-  const surveys = await prisma.npsSurvey.findMany({
+  const surveys = await prisma.nPSSurvey.findMany({
     where: {
       churchId,
       createdAt: { gte: cutoffDate },
@@ -338,7 +338,7 @@ export async function sendFollowupEmail(
 ): Promise<void> {
   // TODO: Integrate with Resend email service
   // For now, just mark as sent in database
-  await prisma.npsSurvey.update({
+  await prisma.nPSSurvey.update({
     where: { id: surveyId },
     data: { followupSent: true },
   });

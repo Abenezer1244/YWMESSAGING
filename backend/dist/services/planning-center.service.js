@@ -194,8 +194,6 @@ export async function connectPlanningCenter(churchId, accessToken, refreshToken,
             accessToken: integration.accessToken,
             refreshToken: integration.refreshToken || undefined,
             expiresAt: integration.expiresAt || undefined,
-            clientId: '', // Not stored in DB
-            clientSecret: '', // Not stored in DB
             organizationId: integration.organizationId,
             isEnabled: integration.isEnabled,
             lastSyncAt: integration.lastSyncAt || undefined,
@@ -231,8 +229,6 @@ export async function getPlanningCenterStatus(churchId) {
             accessToken: integration.accessToken,
             refreshToken: integration.refreshToken || undefined,
             expiresAt: integration.expiresAt || undefined,
-            clientId: '',
-            clientSecret: '',
             organizationId: integration.organizationId,
             isEnabled: integration.isEnabled,
             lastSyncAt: integration.lastSyncAt || undefined,
@@ -370,8 +366,7 @@ export async function syncPlanningCenterMembers(churchId) {
                 syncStatus: 'failed',
                 errorMessage: error.message,
             },
-            catch: () => { }, // Ignore if integration doesn't exist
-        }).catch(() => { });
+        }).catch(() => { }); // Ignore if integration doesn't exist
         console.error(`[Planning Center] Sync failed: ${error.message}`);
         return result;
     }

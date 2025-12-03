@@ -48,23 +48,8 @@ const SLOW_QUERY_THRESHOLD_MS = process.env.SLOW_QUERY_THRESHOLD_MS
  * ```
  */
 export function initializeQueryMonitoring(prisma: PrismaClient) {
-  // Hook into Prisma's query events
-  prisma.$on('query', (event: any) => {
-    const startTime = Date.now();
-
-    // Note: 'query' event fires when query starts
-    // We need to track the duration, so we'll use 'query' + custom timing
-    // Actually, Prisma's query event doesn't give us duration directly
-    // We'll need to use middleware instead
-
-    logger.debug('Database query', {
-      query: event.query.substring(0, 200), // Log first 200 chars
-      params: event.params ? event.params.substring(0, 100) : 'none',
-    });
-  });
-
   // Use Prisma middleware for better duration tracking
-  prisma.$use(async (params, next) => {
+  prisma.$use(async (params: any, next: any) => {
     const startTime = Date.now();
     const result = await next(params);
     const duration = Date.now() - startTime;

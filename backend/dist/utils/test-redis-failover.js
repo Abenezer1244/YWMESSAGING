@@ -61,7 +61,7 @@ async function testGracefulDegradation() {
             url: invalidRedisUrl,
             socket: {
                 connectTimeout: 1000, // Fail fast
-                reconnectStrategy: () => null // Don't retry
+                reconnectStrategy: () => false // Don't retry
             }
         });
         try {

@@ -10,16 +10,15 @@ import {
   getRecentSurveys,
   getNPSByCategory,
 } from '../controllers/nps.controller.js';
-import { authenticate } from '../middleware/auth.js';
-import { churchMiddleware } from '../middleware/church.js';
+import { authenticateToken, authorizeChurch } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
 /**
  * All routes require authentication
  */
-router.use(authenticate);
-router.use(churchMiddleware);
+router.use(authenticateToken);
+router.use(authorizeChurch);
 
 /**
  * POST /api/nps/submit

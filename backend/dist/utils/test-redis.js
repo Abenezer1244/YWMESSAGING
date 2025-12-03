@@ -62,7 +62,7 @@ async function testRedisConnection() {
         // Test LPUSH/LPOP (for queues)
         console.log('📍 Step 7: Testing LIST operations (LPUSH/LPOP)');
         const listKey = 'queue-' + Date.now();
-        await client.lPush(listKey, 'job-1', 'job-2', 'job-3');
+        await client.lPush(listKey, ['job-1', 'job-2', 'job-3']);
         console.log(`   ✅ LPUSH: Added 3 jobs to list`);
         const job = await client.lPop(listKey);
         console.log(`   ✅ LPOP: Retrieved job: ${job}\n`);

@@ -190,27 +190,31 @@ app.use(helmet({
     noSniff: true, // Prevent MIME-sniffing
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 }));
-// CORS configuration - allow development, staging, and production URLs
-const corsOrigin = [
-    // Development
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://localhost:5175',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:5173',
-    // Production
-    'https://koinoniasms.com',
-    'https://www.koinoniasms.com',
-    // Render deployments
-    'https://connect-yw-frontend.onrender.com',
-    'https://connect-yw-backend.onrender.com',
-    // Environment-based (fallback)
-    process.env.FRONTEND_URL || 'https://koinoniasms.com'
-];
+// ✅ SECURITY: CORS Configuration Hardening
+// Only allow specific trusted origins to prevent CSRF and unauthorized access
+const corsOrigin = process.env.NODE_ENV === 'production'
+    ? // Production: strict - only allow configured frontend URLs
+        [
+            process.env.FRONTEND_URL, // Primary frontend URL from env
+            process.env.FRONTEND_URL?.replace('https://', 'https://www.'), // www variant
+        ].filter(Boolean)
+    : // Development: allow localhost variants for development/testing
+        [
+            'http://localhost:3000',
+            'http://localhost:5173',
+            'http://localhost:5174',
+            'http://localhost:5175',
+            'http://127.0.0.1:3000',
+            'http://127.0.0.1:5173',
+            process.env.FRONTEND_URL,
+        ];
 app.use(cors({
     origin: corsOrigin,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With'],
+    maxAge: 86400, // 24 hours: how long browser should cache CORS preflight
+    optionsSuccessStatus: 200,
 }));
 // ✅ SECURITY: Request size limits (DoS protection)
 // Prevents attackers from sending massive payloads to exhaust memory/bandwidth

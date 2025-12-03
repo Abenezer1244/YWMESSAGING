@@ -71,7 +71,8 @@ export async function getPlanHandler(req, res) {
                 plan,
                 limits: {
                     name: limits.name,
-                    price: limits.price,
+                    monthlyPrice: limits.monthlyPrice,
+                    annualPrice: limits.annualPrice,
                     currency: limits.currency,
                     branches: limits.branches,
                     members: limits.members,

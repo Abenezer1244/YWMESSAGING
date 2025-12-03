@@ -26,7 +26,7 @@ const AnalyticsQuerySchema = z.object({
 export async function submitSurvey(req, res) {
     try {
         const churchId = req.user?.churchId;
-        const responderId = req.user?.id;
+        const responderId = req.user?.adminId;
         if (!churchId) {
             return res.status(401).json({
                 success: false,

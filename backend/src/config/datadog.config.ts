@@ -24,46 +24,14 @@ export function initDatadog(): void {
       service: 'connect-yw-backend',
       version: process.env.APP_VERSION || '1.0.0',
       env: process.env.NODE_ENV || 'development',
-
       // Sampling: trace 10% of requests in production, 100% in development
       sampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
-
-      // Enable instrumentation for common libraries
-      enabled: true,
-
-      // Database tracing
-      'pg': {
-        service: 'postgres',
-      },
-
-      // HTTP tracing
-      'express': {
-        service: 'express',
-      },
-
-      // External API tracing
-      'http': {
-        service: 'http-client',
-      },
-      'https': {
-        service: 'https-client',
-      },
-
-      // Cache tracing
-      'redis': {
-        service: 'redis',
-      },
-
-      // API tracing for Stripe, Telnyx, etc.
-      'axios': {
-        service: 'http-client',
-      },
     });
 
-    // Add global tags for better filtering and organization
-    tracer.setTag('environment', process.env.NODE_ENV || 'development');
-    tracer.setTag('service', 'connect-yw-backend');
-    tracer.setTag('version', process.env.APP_VERSION || '1.0.0');
+    tracer.use('pg', { service: 'postgres' });
+    tracer.use('express', { service: 'express' });
+    tracer.use('http', { service: 'http-client' });
+    tracer.use('redis', { service: 'redis' });
 
     console.log('✅ Datadog APM initialized');
     console.log(`   Service: connect-yw-backend`);

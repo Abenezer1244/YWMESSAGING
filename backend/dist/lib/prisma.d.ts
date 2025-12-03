@@ -24,7 +24,7 @@ export declare function getPrismaClient(): PrismaClient;
  * ✅ Proper lifecycle: handles disconnect gracefully
  * ✅ Type-safe: full TypeScript support
  */
-export declare const prisma: PrismaClient<import(".prisma/client").Prisma.PrismaClientOptions, never, import("@prisma/client/runtime/library.js").DefaultArgs>;
+export declare const prisma: PrismaClient<import(".prisma/client").Prisma.PrismaClientOptions, never, import("@prisma/client/runtime/library").DefaultArgs>;
 /**
  * Graceful shutdown handler
  * Called on app termination to close database connections

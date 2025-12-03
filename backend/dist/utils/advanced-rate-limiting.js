@@ -252,11 +252,12 @@ export function createRateLimiter(config, keyConfigs = {}) {
                         requestLimit: status.requestLimit,
                         resetTime: status.resetTime,
                     });
-                    return res.status(429).json({
+                    res.status(429).json({
                         error: 'Too Many Requests',
                         message: `Rate limit exceeded. Reset in ${status.retryAfter}ms`,
                         retryAfter: status.retryAfter,
                     });
+                    return;
                 }
                 next();
             }

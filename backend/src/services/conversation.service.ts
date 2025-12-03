@@ -29,7 +29,15 @@ export async function getConversations(
 
   // ✅ CACHE: Check if conversations list is cached
   const cacheKey = `conversations:${churchId}:${status}:${page}:${limit}`;
-  const cached = await getCached(cacheKey);
+  const cached = await getCached<{
+    data: any[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+    };
+  }>(cacheKey);
   if (cached) {
     return cached;
   }

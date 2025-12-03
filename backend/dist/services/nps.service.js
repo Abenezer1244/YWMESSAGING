@@ -2,7 +2,7 @@
  * NPS (Net Promoter Score) Service
  * Handles survey submission, analytics, and feedback collection
  */
-import { prisma } from '../config/database.config.js';
+import { prisma } from '../lib/prisma.js';
 import * as cacheService from './cache.service.js';
 // ============================================================================
 // NPS Service Functions
@@ -26,7 +26,7 @@ export async function submitNPSSurvey(churchId, responderId, input) {
         sentiment = detectSentiment(input.feedback);
     }
     // Create survey response
-    const survey = await prisma.npsSurvey.create({
+    const survey = await prisma.nPSSurvey.create({
         data: {
             churchId,
             responderId,
@@ -61,7 +61,7 @@ export async function getNPSAnalytics(churchId, daysBack = 30) {
     }
     // Get surveys from last N days
     const cutoffDate = new Date(Date.now() - daysBack * 24 * 60 * 60 * 1000);
-    const surveys = await prisma.npsSurvey.findMany({
+    const surveys = await prisma.nPSSurvey.findMany({
         where: {
             churchId,
             createdAt: { gte: cutoffDate },
@@ -138,7 +138,7 @@ export async function getNPSAnalytics(churchId, daysBack = 30) {
  * Get recent surveys for a church
  */
 export async function getRecentSurveys(churchId, limit = 20, offset = 0) {
-    const surveys = await prisma.npsSurvey.findMany({
+    const surveys = await prisma.nPSSurvey.findMany({
         where: { churchId },
         orderBy: { createdAt: 'desc' },
         take: limit,
@@ -159,7 +159,7 @@ export async function getRecentSurveys(churchId, limit = 20, offset = 0) {
  */
 export async function getNPSByCategory(churchId, daysBack = 30) {
     const cutoffDate = new Date(Date.now() - daysBack * 24 * 60 * 60 * 1000);
-    const surveys = await prisma.npsSurvey.findMany({
+    const surveys = await prisma.nPSSurvey.findMany({
         where: {
             churchId,
             createdAt: { gte: cutoffDate },
@@ -239,7 +239,7 @@ export async function invalidateNPSCache(churchId) {
 export async function sendFollowupEmail(surveyId, email, message) {
     // TODO: Integrate with Resend email service
     // For now, just mark as sent in database
-    await prisma.npsSurvey.update({
+    await prisma.nPSSurvey.update({
         where: { id: surveyId },
         data: { followupSent: true },
     });
