@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import { logRateLimitExceeded } from './utils/security-logger.js';
 import { csrfProtection, generateCsrfToken } from './middleware/csrf.middleware.js';
+import { originValidationMiddleware } from './middleware/origin-validation.middleware.js';
 import { initSentry, getSentryRequestHandler, getSentryErrorHandler } from './config/sentry.config.js';
 import authRoutes from './routes/auth.routes.js';
 import branchRoutes from './routes/branch.routes.js';
@@ -254,6 +255,10 @@ app.use(express.urlencoded({
   limit: '10 mb'  // Form submissions (very rare in this app, but limited for safety)
 }));
 app.use(cookieParser());
+
+// ✅ SECURITY: Origin/Referer validation for CSRF protection
+// Prevents cross-site requests to state-changing endpoints
+app.use(originValidationMiddleware);
 
 // ✅ LOGGING: Structured logging middleware
 // Logs all requests/responses with correlation IDs for tracing
