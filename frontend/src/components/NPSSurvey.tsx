@@ -22,9 +22,7 @@ export function NPSSurvey({ onSubmit, onClose }: NPSSurveyProps) {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const submitSurvey = async () => {
     if (score === null) {
       setError('Please select a rating');
       return;
@@ -60,6 +58,11 @@ export function NPSSurvey({ onSubmit, onClose }: NPSSurveyProps) {
       setError((err as Error).message || 'Error submitting survey');
       setIsSubmitting(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await submitSurvey();
   };
 
   if (submitted) {
@@ -133,7 +136,7 @@ export function NPSSurvey({ onSubmit, onClose }: NPSSurveyProps) {
             <Select
               label="Category"
               value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCategory(e.target.value)}
               size="sm"
               className="w-full"
             >
@@ -187,7 +190,7 @@ export function NPSSurvey({ onSubmit, onClose }: NPSSurveyProps) {
             </Button>
             <Button
               color="primary"
-              onPress={handleSubmit}
+              onPress={() => submitSurvey()}
               className="flex-1"
               isLoading={isSubmitting}
               isDisabled={score === null || isSubmitting}

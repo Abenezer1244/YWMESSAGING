@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { MessageSquare, Loader } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { FixedSizeList as List } from 'react-window';
+const { FixedSizeList: List } = require('react-window');
 import { Conversation } from '../../api/conversations';
 import { SoftCard } from '../SoftUI';
 import { ConversationItem } from './ConversationItem';

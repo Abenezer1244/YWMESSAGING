@@ -1,3 +1,4 @@
+import { Route } from '@playwright/test';
 import { test, expect, Page } from '@playwright/test';
 
 /**
@@ -13,7 +14,7 @@ test.describe('User Signup Flow', () => {
   const testPassword = 'E2ETestPassword123!';
   const testPhone = '+12025551234';
 
-  test.beforeEach(async ({ page: testPage }) => {
+  test.beforeEach(async ({ page: testPage }: { page: any }) => {
     page = testPage;
     // Clear any existing auth state
     await page.context().clearCookies();

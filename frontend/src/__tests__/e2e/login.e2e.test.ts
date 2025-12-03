@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect, Page, Route } from '@playwright/test';
 
 /**
  * E2E Test: Admin Login Flow
@@ -12,7 +12,7 @@ test.describe('Admin Login Flow', () => {
   const testEmail = 'test-admin@e2e.test.com';
   const testPassword = 'E2ETestPassword123!';
 
-  test.beforeEach(async ({ page: testPage }) => {
+  test.beforeEach(async ({ page: testPage }: { page: Page }) => {
     page = testPage;
     // Clear any existing auth state
     await page.context().clearCookies();
@@ -238,7 +238,7 @@ test.describe('Admin Login Flow', () => {
     await passwordInput.fill(testPassword);
 
     // Intercept and delay the auth response
-    await page.route('**/api/login', async (route) => {
+    await page.route('**/api/login', async (route: Route) => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
       await route.continue();
     });

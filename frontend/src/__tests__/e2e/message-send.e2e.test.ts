@@ -1,3 +1,4 @@
+import { Route } from '@playwright/test';
 import { test, expect, Page } from '@playwright/test';
 
 /**
@@ -12,7 +13,7 @@ test.describe('Message Sending Flow', () => {
   const testEmail = 'test-admin@e2e.test.com';
   const testPassword = 'E2ETestPassword123!';
 
-  test.beforeEach(async ({ page: testPage }) => {
+  test.beforeEach(async ({ page: testPage }: { page: any }) => {
     page = testPage;
 
     // Login before each test
