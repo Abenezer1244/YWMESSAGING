@@ -1,122 +1,274 @@
-import { describe, it, expect } from '@jest/globals';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
+import * as authService from '../../services/auth.service.js';
+import * as passwordUtils from '../../utils/password.utils.js';
+import * as jwtUtils from '../../utils/jwt.utils.js';
+import * as stripeService from '../../services/stripe.service.js';
+import * as cacheService from '../../services/cache.service.js';
+import { prisma } from '../../lib/prisma.js';
 
-// Mock data
-const mockUser = {
-  id: 'user-123',
-  email: 'pastor@church.com',
-  password: 'SecurePass123!',
-  churchId: 'church-456',
-  role: 'admin',
-};
+// Mock dependencies
+jest.mock('../../lib/prisma.js');
+jest.mock('../../services/stripe.service.js');
+jest.mock('../../services/cache.service.js');
+jest.mock('../../utils/password.utils.js');
+jest.mock('../../utils/jwt.utils.js');
 
-const mockTokenPayload = {
-  userId: mockUser.id,
-  churchId: mockUser.churchId,
-  role: mockUser.role,
-};
+describe('Authentication Service - Unit Tests', () => {
+  const mockAdmin = {
+    id: 'admin-123',
+    email: 'pastor@church.com',
+    passwordHash: '$2b$10$hashedPassword123',
+    firstName: 'John',
+    lastName: 'Doe',
+    churchId: 'church-456',
+    role: 'PRIMARY',
+    welcomeCompleted: false,
+    userRole: 'admin',
+    lastLoginAt: new Date('2024-01-01'),
+  };
 
-describe('Authentication Service', () => {
-  describe('Password Hashing', () => {
-    it('should hash password correctly', async () => {
-      const hashedPassword = await bcrypt.hash(mockUser.password, 10);
-      expect(hashedPassword).not.toBe(mockUser.password);
-      expect(hashedPassword.length).toBeGreaterThan(20);
-    });
+  const mockChurch = {
+    id: 'church-456',
+    name: 'Grace Church',
+    email: 'pastor@church.com',
+    stripeCustomerId: 'cus_123',
+    trialEndsAt: new Date('2024-02-01'),
+  };
 
-    it('should verify correct password', async () => {
-      const hashedPassword = await bcrypt.hash(mockUser.password, 10);
-      const isValid = await bcrypt.compare(mockUser.password, hashedPassword);
-      expect(isValid).toBe(true);
-    });
-
-    it('should reject incorrect password', async () => {
-      const hashedPassword = await bcrypt.hash(mockUser.password, 10);
-      const isValid = await bcrypt.compare('WrongPassword123!', hashedPassword);
-      expect(isValid).toBe(false);
-    });
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  describe('JWT Token Generation', () => {
-    const jwtSecret = 'test-secret-key-super-secure-123';
-
-    it('should create valid access token', () => {
-      const token = jwt.sign(mockTokenPayload, jwtSecret, { expiresIn: '15m' });
-      expect(token).toBeTruthy();
-
-      const decoded = jwt.verify(token, jwtSecret) as any;
-      expect(decoded.userId).toBe(mockUser.id);
-      expect(decoded.churchId).toBe(mockUser.churchId);
-    });
-
-    it('should create valid refresh token', () => {
-      const refreshPayload = { userId: mockUser.id, type: 'refresh' };
-      const token = jwt.sign(refreshPayload, jwtSecret, { expiresIn: '7d' });
-      expect(token).toBeTruthy();
-
-      const decoded = jwt.verify(token, jwtSecret) as any;
-      expect(decoded.type).toBe('refresh');
-    });
-
-    it('should reject expired token', () => {
-      const expiredPayload = {
-        userId: mockUser.id,
-        exp: Math.floor(Date.now() / 1000) - 60, // Expired 1 minute ago
+  describe('registerChurch', () => {
+    it('should register a new church successfully', async () => {
+      const registerInput = {
+        email: 'newpastor@church.com',
+        password: 'SecurePass123!',
+        firstName: 'Jane',
+        lastName: 'Smith',
+        churchName: 'New Grace Church',
       };
-      const token = jwt.sign(expiredPayload, jwtSecret);
 
-      expect(() => {
-        jwt.verify(token, jwtSecret);
-      }).toThrow();
+      // Mock password hashing
+      const hashedPassword = '$2b$10$newHashedPassword';
+      (passwordUtils.hashPassword as jest.Mock).mockResolvedValue(hashedPassword);
+
+      // Mock Stripe customer creation
+      const stripeCustomerId = 'cus_stripe_new';
+      (stripeService.createCustomer as jest.Mock).mockResolvedValue(stripeCustomerId);
+
+      // Mock Prisma calls
+      (prisma.admin.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.church.create as jest.Mock).mockResolvedValue(mockChurch);
+      (prisma.admin.create as jest.Mock).mockResolvedValue({
+        ...mockAdmin,
+        email: registerInput.email,
+        firstName: registerInput.firstName,
+        lastName: registerInput.lastName,
+      });
+      (prisma.admin.update as jest.Mock).mockResolvedValue(mockAdmin);
+
+      // Mock token generation
+      (jwtUtils.generateAccessToken as jest.Mock).mockReturnValue('access_token_123');
+      (jwtUtils.generateRefreshToken as jest.Mock).mockReturnValue('refresh_token_123');
+
+      // Execute
+      const result = await authService.registerChurch(registerInput);
+
+      // Assert
+      expect(result).toBeDefined();
+      expect(result.churchId).toBe(mockChurch.id);
+      expect(result.admin.email).toBe(registerInput.email);
+      expect(passwordUtils.hashPassword).toHaveBeenCalledWith(registerInput.password);
+      expect(stripeService.createCustomer).toHaveBeenCalled();
     });
 
-    it('should reject tampered token', () => {
-      const token = jwt.sign(mockTokenPayload, jwtSecret);
-      const tampered = token.slice(0, -5) + 'xxxxx'; // Tamper with signature
+    it('should prevent registration with existing email', async () => {
+      const registerInput = {
+        email: 'existing@church.com',
+        password: 'SecurePass123!',
+        firstName: 'John',
+        lastName: 'Doe',
+        churchName: 'Existing Church',
+      };
 
-      expect(() => {
-        jwt.verify(tampered, jwtSecret);
-      }).toThrow();
+      // Mock existing admin
+      (prisma.admin.findUnique as jest.Mock).mockResolvedValue(mockAdmin);
+
+      // Execute & Assert
+      await expect(authService.registerChurch(registerInput)).rejects.toThrow();
+      expect(prisma.admin.findUnique).toHaveBeenCalledWith({
+        where: { email: registerInput.email },
+      });
     });
   });
 
-  describe('Multi-tenancy Security', () => {
-    const jwtSecret = 'test-secret-key-super-secure-123';
+  describe('login', () => {
+    it('should login successfully with correct credentials', async () => {
+      const loginInput = {
+        email: mockAdmin.email,
+        password: 'SecurePass123!',
+      };
 
-    it('should include churchId in token', () => {
-      const token = jwt.sign(mockTokenPayload, jwtSecret);
-      const decoded = jwt.verify(token, jwtSecret) as any;
+      // Mock Prisma call
+      (prisma.admin.findUnique as jest.Mock).mockResolvedValue({
+        ...mockAdmin,
+        church: mockChurch,
+      });
 
-      expect(decoded.churchId).toBe(mockUser.churchId);
+      // Mock password verification
+      (passwordUtils.comparePassword as jest.Mock).mockResolvedValue(true);
+
+      // Mock token generation
+      (jwtUtils.generateAccessToken as jest.Mock).mockReturnValue('access_token_123');
+      (jwtUtils.generateRefreshToken as jest.Mock).mockReturnValue('refresh_token_123');
+
+      // Mock cache invalidation
+      (cacheService.invalidateCache as jest.Mock).mockResolvedValue(undefined);
+
+      // Mock lastLoginAt update
+      (prisma.admin.update as jest.Mock).mockResolvedValue(mockAdmin);
+
+      // Execute
+      const result = await authService.login(loginInput);
+
+      // Assert
+      expect(result).toBeDefined();
+      expect(result.adminId).toBe(mockAdmin.id);
+      expect(result.churchId).toBe(mockChurch.id);
+      expect(passwordUtils.comparePassword).toHaveBeenCalledWith(
+        loginInput.password,
+        mockAdmin.passwordHash
+      );
+      expect(prisma.admin.update).toHaveBeenCalled();
     });
 
-    it('should prevent churchId tampering', () => {
-      const token = jwt.sign(mockTokenPayload, jwtSecret);
-      const decoded = jwt.verify(token, jwtSecret) as any;
+    it('should reject login with incorrect password', async () => {
+      const loginInput = {
+        email: mockAdmin.email,
+        password: 'WrongPassword123!',
+      };
 
-      // Verify churchId matches original
-      expect(decoded.churchId).toBe(mockTokenPayload.churchId);
+      // Mock Prisma call
+      (prisma.admin.findUnique as jest.Mock).mockResolvedValue({
+        ...mockAdmin,
+        church: mockChurch,
+      });
 
-      // Cannot change without invalidating signature
-      (decoded as any).churchId = 'hacked-church';
-      const tampered = jwt.sign(decoded, 'wrong-secret');
+      // Mock password verification (fail)
+      (passwordUtils.comparePassword as jest.Mock).mockResolvedValue(false);
 
-      expect(() => {
-        jwt.verify(tampered, jwtSecret);
-      }).toThrow();
+      // Execute & Assert
+      await expect(authService.login(loginInput)).rejects.toThrow('Invalid email or password');
     });
 
-    it('should validate role-based access', () => {
-      const adminToken = jwt.sign({ ...mockTokenPayload, role: 'admin' }, jwtSecret) as any;
-      const userToken = jwt.sign({ ...mockTokenPayload, role: 'user' }, jwtSecret) as any;
+    it('should reject login with non-existent email', async () => {
+      const loginInput = {
+        email: 'nonexistent@church.com',
+        password: 'SecurePass123!',
+      };
 
-      const decodedAdmin = jwt.verify(adminToken, jwtSecret) as any;
-      const decodedUser = jwt.verify(userToken, jwtSecret) as any;
+      // Mock Prisma call (not found)
+      (prisma.admin.findUnique as jest.Mock).mockResolvedValue(null);
 
-      expect(decodedAdmin.role).toBe('admin');
-      expect(decodedUser.role).toBe('user');
-      expect(decodedAdmin.role).not.toBe(decodedUser.role);
+      // Execute & Assert
+      await expect(authService.login(loginInput)).rejects.toThrow('Invalid email or password');
+    });
+  });
+
+  describe('refreshAccessToken', () => {
+    it('should refresh tokens successfully', async () => {
+      const adminId = mockAdmin.id;
+
+      // Mock Prisma call
+      (prisma.admin.findUnique as jest.Mock).mockResolvedValue(mockAdmin);
+
+      // Mock token generation
+      (jwtUtils.generateAccessToken as jest.Mock).mockReturnValue('new_access_token');
+      (jwtUtils.generateRefreshToken as jest.Mock).mockReturnValue('new_refresh_token');
+
+      // Execute
+      const result = await authService.refreshAccessToken(adminId);
+
+      // Assert
+      expect(result).toBeDefined();
+      expect(result.accessToken).toBe('new_access_token');
+      expect(result.refreshToken).toBe('new_refresh_token');
+      expect(jwtUtils.generateAccessToken).toHaveBeenCalledWith(
+        adminId,
+        mockAdmin.churchId,
+        mockAdmin.role
+      );
+    });
+
+    it('should throw error if admin not found', async () => {
+      const adminId = 'nonexistent-admin';
+
+      // Mock Prisma call (not found)
+      (prisma.admin.findUnique as jest.Mock).mockResolvedValue(null);
+
+      // Execute & Assert
+      await expect(authService.refreshAccessToken(adminId)).rejects.toThrow('Admin not found');
+    });
+  });
+
+  describe('getAdmin', () => {
+    it('should retrieve admin from cache if available', async () => {
+      const adminId = mockAdmin.id;
+      const cachedAdmin = {
+        ...mockAdmin,
+        church: mockChurch,
+      };
+
+      // Mock cache hit
+      (cacheService.getCached as jest.Mock).mockResolvedValue(cachedAdmin);
+
+      // Execute
+      const result = await authService.getAdmin(adminId);
+
+      // Assert
+      expect(result).toEqual(cachedAdmin);
+      expect(prisma.admin.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('should fetch admin from database if not cached', async () => {
+      const adminId = mockAdmin.id;
+
+      // Mock cache miss
+      (cacheService.getCached as jest.Mock).mockResolvedValue(null);
+
+      // Mock Prisma call
+      (prisma.admin.findUnique as jest.Mock).mockResolvedValue({
+        ...mockAdmin,
+        church: mockChurch,
+      });
+
+      // Mock cache set
+      (cacheService.setCached as jest.Mock).mockResolvedValue(undefined);
+
+      // Execute
+      const result = await authService.getAdmin(adminId);
+
+      // Assert
+      expect(result).toBeDefined();
+      expect(result.id).toBe(adminId);
+      expect(prisma.admin.findUnique).toHaveBeenCalled();
+    });
+
+    it('should return null if admin not found', async () => {
+      const adminId = 'nonexistent-admin';
+
+      // Mock cache miss
+      (cacheService.getCached as jest.Mock).mockResolvedValue(null);
+
+      // Mock Prisma call (not found)
+      (prisma.admin.findUnique as jest.Mock).mockResolvedValue(null);
+
+      // Execute
+      const result = await authService.getAdmin(adminId);
+
+      // Assert
+      expect(result).toBeNull();
     });
   });
 });

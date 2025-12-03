@@ -1,5 +1,8 @@
 import 'dotenv/config';
 
+// ✅ VALIDATION: Validate all required environment variables at startup (MUST be first)
+import { config } from './config/env.js';
+
 // ✅ MONITORING: Initialize Datadog APM BEFORE other imports
 // Must be done before importing any modules that should be traced (express, pg, redis, etc.)
 import { initDatadog } from './config/datadog.config.js';
