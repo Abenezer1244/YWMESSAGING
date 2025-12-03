@@ -1,8 +1,10 @@
 import { useEffect, useState, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import ReactGA from 'react-ga4';
 import { initializePostHog } from './hooks/useAnalytics';
 import { useIdleLogout } from './hooks/useIdleLogout';
+import { useWebVitals } from './hooks/useWebVitals';
 import ProtectedRoute from './components/ProtectedRoute';
 import { IdleLogoutWarning } from './components/IdleLogoutWarning';
 import { Spinner } from './components/ui';
@@ -55,6 +57,9 @@ function App() {
   // Idle logout detection
   const { showWarning, secondsUntilLogout, handleLogout, dismissWarning } = useIdleLogout();
 
+  // Web Vitals tracking for production monitoring
+  useWebVitals();
+
   // Debug logging only in development
   if (process.env.NODE_ENV === 'development') {
     console.debug('App initialized, auth state:', { isAuthenticated, churchId: church?.id });
@@ -62,6 +67,16 @@ function App() {
 
   // Initialize analytics, fetch CSRF token, and restore auth session on app load
   useEffect(() => {
+    // Initialize Google Analytics 4
+    const gaId = process.env.REACT_APP_GA_ID || process.env.VITE_GA_ID;
+    const isProduction = process.env.NODE_ENV === 'production';
+    if (gaId && isProduction) {
+      ReactGA.initialize(gaId);
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('GA4 initialized with ID:', gaId);
+      }
+    }
+
     // Initialize PostHog
     initializePostHog();
 
