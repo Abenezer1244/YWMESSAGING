@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { createSelectors } from '../hooks/createSelectors';
 
 export interface MessageRecipient {
   type: 'individual' | 'groups' | 'branches' | 'all';
@@ -31,7 +32,7 @@ interface MessageState {
   addMessage: (message: SentMessage) => void;
 }
 
-const useMessageStore = create<MessageState>()((set) => ({
+const useMessageStoreBase = create<MessageState>()((set) => ({
   // State
   messages: [],
   selectedRecipients: null,
@@ -57,4 +58,4 @@ const useMessageStore = create<MessageState>()((set) => ({
   },
 }));
 
-export default useMessageStore;
+export const useMessageStore = createSelectors(useMessageStoreBase);

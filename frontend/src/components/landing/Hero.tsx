@@ -1,7 +1,7 @@
 ﻿import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, Zap, Smartphone, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
-import useAuthStore from '../../stores/authStore';
+import { useAuthStore } from '../../stores/authStore';
 import Button from '../ui/Button';
 import { themeColors } from '../../utils/themeColors';
 

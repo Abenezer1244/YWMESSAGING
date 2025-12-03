@@ -1,6 +1,6 @@
 import { jsx as _jsx, Fragment as _Fragment } from "react/jsx-runtime";
 import { Navigate } from 'react-router-dom';
-import useAuthStore from '../stores/authStore';
+import { useAuthStore } from '../stores/authStore';
 export function ProtectedRoute({ children }) {
     const { isAuthenticated } = useAuthStore();
     if (!isAuthenticated) {

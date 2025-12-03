@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Loader, History, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import toast from 'react-hot-toast';
-import useMessageStore from '../../stores/messageStore';
+import { useMessageStore } from '../../stores/messageStore';
 import { getMessageHistory } from '../../api/messages';
 import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
 export function MessageHistoryPage() {

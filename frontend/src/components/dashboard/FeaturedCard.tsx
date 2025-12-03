@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { memo } from 'react';
 import Button from '../ui/Button';
 
 interface FeaturedCardProps {
@@ -13,7 +14,7 @@ interface FeaturedCardProps {
   index?: number;
 }
 
-export function FeaturedCard({
+function FeaturedCardComponent({
   title,
   description,
   gradient,
@@ -70,3 +71,10 @@ export function FeaturedCard({
     </motion.div>
   );
 }
+
+/**
+ * Memoized FeaturedCard component
+ * Prevents re-renders when parent component updates but props remain the same
+ * Optimized for featured content sections that render multiple cards
+ */
+export const FeaturedCard = memo(FeaturedCardComponent);

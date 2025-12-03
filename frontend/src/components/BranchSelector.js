@@ -1,6 +1,6 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState } from 'react';
-import useBranchStore from '../stores/branchStore';
+import { useBranchStore } from '../stores/branchStore';
 export function BranchSelector() {
     const { branches, currentBranchId, allBranchesMode, setCurrentBranch, setAllBranchesMode } = useBranchStore();
     const [isOpen, setIsOpen] = useState(false);

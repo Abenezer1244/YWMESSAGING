@@ -1,50 +1,88 @@
-2025-12-03T03:09:27.936567667Z 
-2025-12-03T03:09:28.356551125Z Prisma schema loaded from prisma/schema.prisma
-2025-12-03T03:09:28.883836208Z 
-2025-12-03T03:09:28.883867659Z ✔ Generated Prisma Client (v5.13.0) to ./node_modules/@prisma/client in 231ms
-2025-12-03T03:09:28.883872028Z 
-2025-12-03T03:09:28.883876019Z Start using Prisma Client in Node.js (See: https://pris.ly/d/client)
-2025-12-03T03:09:28.883879559Z ```
-2025-12-03T03:09:28.883883829Z import { PrismaClient } from '@prisma/client'
-2025-12-03T03:09:28.883887349Z const prisma = new PrismaClient()
-2025-12-03T03:09:28.883890879Z ```
-2025-12-03T03:09:28.883894489Z or start using Prisma Client at the edge (See: https://pris.ly/d/accelerate)
-2025-12-03T03:09:28.883897959Z ```
-2025-12-03T03:09:28.883903369Z import { PrismaClient } from '@prisma/client/edge'
-2025-12-03T03:09:28.883906859Z const prisma = new PrismaClient()
-2025-12-03T03:09:28.883910279Z ```
-2025-12-03T03:09:28.883913579Z 
-2025-12-03T03:09:28.883917069Z See other ways of importing Prisma Client: http://pris.ly/d/importing-client
-2025-12-03T03:09:28.883920419Z 
-2025-12-03T03:09:28.883925789Z ┌────────────────────────────────────────────────────────────────┐
-2025-12-03T03:09:28.88393212Z │  Supercharge your Prisma Client with global database caching,  │
-2025-12-03T03:09:28.88393572Z │  scalable connection pooling and real-time database events.    │
-2025-12-03T03:09:28.8839544Z │  Explore Prisma Accelerate: https://pris.ly/cli/-accelerate    │
-2025-12-03T03:09:28.88395688Z │  Explore Prisma Pulse: https://pris.ly/cli/-pulse              │
-2025-12-03T03:09:28.88395938Z └────────────────────────────────────────────────────────────────┘
-2025-12-03T03:09:28.88396137Z 
-2025-12-03T03:09:35.953704526Z 
-2025-12-03T03:09:35.953732306Z > connect-frontend@0.1.0 build
-2025-12-03T03:09:35.953736356Z > tsc && npx vite build
-2025-12-03T03:09:35.953738746Z 
-2025-12-03T03:09:42.65724249Z src/__tests__/e2e/conversation-reply.e2e.test.ts(1,36): error TS2307: Cannot find module '@playwright/test' or its corresponding type declarations.
-2025-12-03T03:09:42.657392582Z src/__tests__/e2e/conversation-reply.e2e.test.ts(15,34): error TS7031: Binding element 'testPage' implicitly has an 'any' type.
-2025-12-03T03:09:42.657397873Z src/__tests__/e2e/login.e2e.test.ts(1,36): error TS2307: Cannot find module '@playwright/test' or its corresponding type declarations.
-2025-12-03T03:09:42.657404813Z src/__tests__/e2e/login.e2e.test.ts(15,34): error TS7031: Binding element 'testPage' implicitly has an 'any' type.
-2025-12-03T03:09:42.657435023Z src/__tests__/e2e/login.e2e.test.ts(241,45): error TS7006: Parameter 'route' implicitly has an 'any' type.
-2025-12-03T03:09:42.657440613Z src/__tests__/e2e/message-send.e2e.test.ts(1,36): error TS2307: Cannot find module '@playwright/test' or its corresponding type declarations.
-2025-12-03T03:09:42.657443043Z src/__tests__/e2e/message-send.e2e.test.ts(15,34): error TS7031: Binding element 'testPage' implicitly has an 'any' type.
-2025-12-03T03:09:42.657478234Z src/__tests__/e2e/signup.e2e.test.ts(1,36): error TS2307: Cannot find module '@playwright/test' or its corresponding type declarations.
-2025-12-03T03:09:42.657524904Z src/__tests__/e2e/signup.e2e.test.ts(16,34): error TS7031: Binding element 'testPage' implicitly has an 'any' type.
-2025-12-03T03:09:42.657608616Z src/components/NPSSurvey.tsx(8,67): error TS2307: Cannot find module '@nextui-org/react' or its corresponding type declarations.
-2025-12-03T03:09:42.657636356Z src/components/NPSSurvey.tsx(136,26): error TS7006: Parameter 'e' implicitly has an 'any' type.
-2025-12-03T03:09:42.657665997Z src/components/conversations/ConversationsList.tsx(4,10): error TS2305: Module '"react-window"' has no exported member 'FixedSizeList'.
-2025-12-03T03:09:42.730120351Z npm error Lifecycle script `build` failed with error:
-2025-12-03T03:09:42.730264913Z npm error code 2
-2025-12-03T03:09:42.730335994Z npm error path /opt/render/project/src/frontend
-2025-12-03T03:09:42.730466626Z npm error workspace connect-frontend@0.1.0
-2025-12-03T03:09:42.730574738Z npm error location /opt/render/project/src/frontend
-2025-12-03T03:09:42.730664569Z npm error command failed
-2025-12-03T03:09:42.730912253Z npm error command sh -c tsc && npx vite build
-2025-12-03T03:09:42.782292721Z ==> Build failed 😞
-2025-12-03T03:09:42.782316571Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+Perfect! I've read the entire 1739-line document. Now I'll create a
+  comprehensive todo checklist that covers all the optimization areas and
+  implementation recommendations. This is a real enterprise SaaS project, so I'll    
+   organize it by priority and implementation phases.
+
+● Perfect! I've created a comprehensive 60-item todo checklist from the
+  senior-frontend-engineer-analysis.md document. Here's what I've organized:
+
+  Checklist Summary by Phase:
+
+  🔴 Phase 1 - Core React Optimizations (5 items)
+
+  - React.memo on high-render components (StatCard, SoftCard)
+  - useMemo for expensive data transformations
+  - useCallback for memoized callbacks
+  - React 18 automatic batching verification
+  - React DevTools profiling
+
+  🟠 Phase 2 - Code Splitting (5 items)
+
+  - Lazy load all route pages with React.lazy
+  - Add Suspense boundaries with fallback UI
+  - Split heavy chart components
+  - Configure Vite manual chunks (vendor-react, vendor-ui, vendor-charts,
+  vendor-utils)
+  - Add webpack resource hints
+
+  🟡 Phase 3 - State Management (5 items)
+
+  - Auto-generated selectors for all Zustand stores
+  - Create createSelectors utility hook
+  - Replace manual selectors throughout app
+  - Implement useShallow optimizations
+  - Refactor to derived selectors
+
+  🟢 Phase 4 - Virtual Scrolling & Images (7 items)
+
+  - Virtual scrolling for conversation/message lists
+  - Native lazy loading on images
+  - OptimizedImage component for above-the-fold images
+  - Intersection Observer implementation
+  - Critical image preloading
+  - Width/height attributes and srcSet on images
+
+  🔵 Phase 5 - Bundle Optimization (7 items)
+
+  - Bundle analysis with rollup-plugin-visualizer
+  - Remove duplicate/unused dependencies
+  - Tree shaking optimization (lodash-es, date-fns)
+  - Asset inlining and copying configuration
+  - Terser optimization (drop console logs)
+  - Chunk size warnings and ES2020 targeting
+
+  💜 Phase 6 - Web Vitals & Lighthouse (12 items)
+
+  - Resource hints (preconnect, dns-prefetch)
+  - Font preloading
+  - Semantic HTML
+  - ARIA labels and form attributes
+  - Color contrast verification
+  - CLS prevention (layout shift)
+  - Long task handling with startTransition
+  - Event delegation for lists
+
+  📋 Additional Tasks (17 items)
+
+  - Component architecture refactoring
+  - Vite configuration review
+  - Performance profiling
+  - Lighthouse audits (Performance ≥90, Accessibility ≥95)
+  - Web Vitals verification (LCP ≤2.0s, INP ≤150ms, CLS ≤0.05)
+  - Responsive testing
+  - Documentation
+  - Bundle size verification
+  - Test suite execution
+  - Final summary report
+
+  Performance Targets After Implementation:
+
+  - Bundle: ~450KB → ~280KB (-38%)
+  - Gzipped: ~120KB → ~75KB (-37%)
+  - Lighthouse Performance: 92+
+  - Accessibility: 98+
+  - LCP: <2.0s | INP: <150ms | CLS: <0.05
+
+  The todo list is now ready in the system and you can proceed with checking
+  these items off as you implement each optimization. Each item includes the
+  specific component, pattern, or configuration to update.

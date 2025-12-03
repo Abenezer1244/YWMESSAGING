@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MessageSquare, Phone, Search, Loader } from 'lucide-react';
 import toast from 'react-hot-toast';
-import useAuthStore from '../../stores/authStore';
+import { useAuthStore } from '../../stores/authStore';
 import {
   Conversation,
   ConversationMessage,

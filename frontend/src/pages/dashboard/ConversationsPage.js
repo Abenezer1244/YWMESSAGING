@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MessageSquare, Phone } from 'lucide-react';
 import toast from 'react-hot-toast';
-import useAuthStore from '../../stores/authStore';
+import { useAuthStore } from '../../stores/authStore';
 import { getConversations, getConversation, markConversationAsRead, updateConversationStatus, } from '../../api/conversations';
 import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
 import Input from '../../components/ui/Input';

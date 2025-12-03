@@ -17,8 +17,8 @@ import {
   ChevronRight,
   LogOut,
 } from 'lucide-react';
-import useAuthStore from '../stores/authStore';
-import useBranchStore from '../stores/branchStore';
+import { useAuthStore } from '../stores/authStore';
+import { useBranchStore } from '../stores/branchStore';
 
 interface NavItem {
   label: string;

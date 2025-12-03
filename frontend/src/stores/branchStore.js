@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-const useBranchStore = create()((set, get) => ({
+import { createSelectors } from '../hooks/createSelectors';
+const useBranchStoreBase = create()((set, get) => ({
     // State
     branches: [],
     currentBranchId: null,
@@ -42,5 +43,13 @@ const useBranchStore = create()((set, get) => ({
         }));
     },
 }));
-export default useBranchStore;
+/**
+ * Branch Store with Auto-Generated Selectors
+ *
+ * Usage:
+ * ✅ useStore.use.branches() - Only re-renders when branches array changes
+ * ✅ useStore.use.currentBranchId() - Only re-renders when current branch ID changes
+ * ✅ Manual (still works): useStore((state) => state.branches)
+ */
+export const useBranchStore = createSelectors(useBranchStoreBase);
 //# sourceMappingURL=branchStore.js.map

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ReactNode } from 'react';
+import { ReactNode, memo } from 'react';
 
 interface ChartCardProps {
   title: string;
@@ -8,7 +8,7 @@ interface ChartCardProps {
   index?: number;
 }
 
-export function ChartCard({ title, subtitle, children, index = 0 }: ChartCardProps) {
+function ChartCardComponent({ title, subtitle, children, index = 0 }: ChartCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -27,3 +27,10 @@ export function ChartCard({ title, subtitle, children, index = 0 }: ChartCardPro
     </motion.div>
   );
 }
+
+/**
+ * Memoized ChartCard component
+ * Prevents re-renders when parent component updates but props remain the same
+ * Useful for charts that render multiple times in dashboard
+ */
+export const ChartCard = memo(ChartCardComponent);

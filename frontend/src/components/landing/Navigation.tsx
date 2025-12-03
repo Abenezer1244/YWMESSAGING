@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import useAuthStore from '../../stores/authStore';
+import { useAuthStore } from '../../stores/authStore';
 import DarkModeToggle from '../ui/DarkModeToggle';
 import Button from '../ui/Button';
 

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-const useGroupStore = create()((set, get) => ({
+import { createSelectors } from '../hooks/createSelectors';
+const useGroupStoreBase = create()((set, get) => ({
     // State
     groups: [],
     currentGroupId: null,
@@ -42,5 +43,5 @@ const useGroupStore = create()((set, get) => ({
         }));
     },
 }));
-export default useGroupStore;
+export const useGroupStore = createSelectors(useGroupStoreBase);
 //# sourceMappingURL=groupStore.js.map

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import useBranchStore from '../stores/branchStore';
+import { useBranchStore } from '../stores/branchStore';
 
 export function BranchSelector() {
   const { branches, currentBranchId, allBranchesMode, setCurrentBranch, setAllBranchesMode } = useBranchStore();

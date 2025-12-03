@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { createSelectors } from '../hooks/createSelectors';
 
 export interface Branch {
   id: string;
@@ -31,7 +32,7 @@ interface BranchState {
   removeBranch: (branchId: string) => void;
 }
 
-const useBranchStore = create<BranchState>()((set, get) => ({
+const useBranchStoreBase = create<BranchState>()((set, get) => ({
   // State
   branches: [],
   currentBranchId: null,
@@ -85,4 +86,12 @@ const useBranchStore = create<BranchState>()((set, get) => ({
   },
 }));
 
-export default useBranchStore;
+/**
+ * Branch Store with Auto-Generated Selectors
+ *
+ * Usage:
+ * ✅ useStore.use.branches() - Only re-renders when branches array changes
+ * ✅ useStore.use.currentBranchId() - Only re-renders when current branch ID changes
+ * ✅ Manual (still works): useStore((state) => state.branches)
+ */
+export const useBranchStore = createSelectors(useBranchStoreBase);

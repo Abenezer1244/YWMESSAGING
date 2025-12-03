@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { createSelectors } from '../hooks/createSelectors';
 
 export interface ChatMessage {
   id: string;
@@ -27,7 +28,7 @@ interface ChatState {
   clearChat: () => void;
 }
 
-export const useChatStore = create<ChatState>((set) => ({
+const useChatStoreBase = create<ChatState>((set) => ({
   conversationId: null,
   messages: [],
   isLoading: false,
@@ -55,3 +56,5 @@ export const useChatStore = create<ChatState>((set) => ({
 
   clearChat: () => set({ messages: [], conversationId: null, error: null }),
 }));
+
+export const useChatStore = createSelectors(useChatStoreBase);

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import useGroupStore from '../../stores/groupStore';
+import { useGroupStore } from '../../stores/groupStore';
 import { createRecurringMessage, updateRecurringMessage, RecurringMessage } from '../../api/recurring';
 
 interface RecurringMessageModalProps {

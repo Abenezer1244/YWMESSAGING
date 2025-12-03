@@ -5,6 +5,12 @@ interface ChartCardProps {
     children: ReactNode;
     index?: number;
 }
-export declare function ChartCard({ title, subtitle, children, index }: ChartCardProps): import("react/jsx-runtime").JSX.Element;
+declare function ChartCardComponent({ title, subtitle, children, index }: ChartCardProps): import("react/jsx-runtime").JSX.Element;
+/**
+ * Memoized ChartCard component
+ * Prevents re-renders when parent component updates but props remain the same
+ * Useful for charts that render multiple times in dashboard
+ */
+export declare const ChartCard: import("react").MemoExoticComponent<typeof ChartCardComponent>;
 export {};
 //# sourceMappingURL=ChartCard.d.ts.map

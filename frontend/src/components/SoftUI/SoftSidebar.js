@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutDashboard, GitBranch, Users, MessageSquare, History, FileText, Clock, BarChart3, CreditCard, Settings, Menu, X, ChevronRight, LogOut, Zap, } from 'lucide-react';
-import useAuthStore from '../../stores/authStore';
-import useBranchStore from '../../stores/branchStore';
+import { useAuthStore } from '../../stores/authStore';
+import { useBranchStore } from '../../stores/branchStore';
 export function SoftSidebar() {
     const navigate = useNavigate();
     const location = useLocation();

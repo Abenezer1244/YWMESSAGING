@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import posthog from 'posthog-js';
-import useAuthStore from '../stores/authStore';
+import { useAuthStore } from '../stores/authStore';
 
 // Initialize PostHog only once
 let posthogInitialized = false;

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-const useMessageStore = create()((set) => ({
+import { createSelectors } from '../hooks/createSelectors';
+const useMessageStoreBase = create()((set) => ({
     // State
     messages: [],
     selectedRecipients: null,
@@ -20,5 +21,5 @@ const useMessageStore = create()((set) => ({
         }));
     },
 }));
-export default useMessageStore;
+export const useMessageStore = createSelectors(useMessageStoreBase);
 //# sourceMappingURL=messageStore.js.map

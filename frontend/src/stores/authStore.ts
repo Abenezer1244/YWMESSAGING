@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { logout as logoutApi } from '../api/auth';
+import { createSelectors } from '../hooks/createSelectors';
 
 export interface Admin {
   id: string;
@@ -41,7 +42,7 @@ interface AuthState {
   isTokenExpired: () => boolean;
 }
 
-const useAuthStore = create<AuthState>()((set, get) => ({
+const useAuthStoreBase = create<AuthState>()((set, get) => ({
   // State
   user: null,
   church: null,
@@ -131,4 +132,17 @@ const useAuthStore = create<AuthState>()((set, get) => ({
   },
 }));
 
-export default useAuthStore;
+/**
+ * Auth Store with Auto-Generated Selectors
+ *
+ * Usage:
+ * ✅ Recommended: useAuthStore.use.user()
+ * ✅ Recommended: useAuthStore.use.isAuthenticated()
+ * ✅ Manual (still works): useAuthStore((state) => state.user)
+ *
+ * Benefits of selectors:
+ * - Only re-renders when the selected value actually changes
+ * - Better performance for components using multiple store values
+ * - Type-safe with autocomplete
+ */
+export const useAuthStore = createSelectors(useAuthStoreBase);

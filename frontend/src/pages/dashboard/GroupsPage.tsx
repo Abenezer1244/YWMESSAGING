@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Users, Loader, Trash2, Edit2, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import useGroupStore, { Group } from '../../stores/groupStore';
+import { useGroupStore, Group } from '../../stores/groupStore';
 import { getGroups, deleteGroup } from '../../api/groups';
 import { GroupFormModal } from '../../components/groups/GroupFormModal';
 import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
@@ -55,7 +55,7 @@ export function GroupsPage() {
   const handleModalSuccess = (group: Group) => {
     if (editingGroup) {
       // Update existing
-      setGroups(groups.map((g) => (g.id === group.id ? group : g)));
+      setGroups(groups.map((g: Group) => (g.id === group.id ? group : g)));
     } else {
       // Add new
       setGroups([group, ...groups]);
@@ -120,7 +120,7 @@ export function GroupsPage() {
           </SoftCard>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {groups.map((group, idx) => (
+            {groups.map((group: Group, idx: number) => (
               <motion.div
                 key={group.id}
                 initial={{ opacity: 0, y: 20 }}

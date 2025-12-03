@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Loader, History, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import toast from 'react-hot-toast';
-import useMessageStore, { SentMessage } from '../../stores/messageStore';
+import { useMessageStore, SentMessage } from '../../stores/messageStore';
 import { getMessageHistory } from '../../api/messages';
 import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
 
@@ -147,7 +147,7 @@ export function MessageHistoryPage() {
                     </tr>
                     </thead>
                     <tbody className="divide-y divide-border/40">
-                      {messages.map((message) => (
+                      {messages.map((message: SentMessage) => (
                         <tr key={message.id} className="hover:bg-muted/30 transition-colors duration-normal">
                         <td className="px-6 py-4">
                           <p className="text-sm text-foreground font-medium truncate max-w-xs">

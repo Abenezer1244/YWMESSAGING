@@ -2,7 +2,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import useGroupStore from '../../stores/groupStore';
+import { useGroupStore } from '../../stores/groupStore';
 import { createRecurringMessage, updateRecurringMessage } from '../../api/recurring';
 export default function RecurringMessageModal({ message, onClose }) {
     const { groups } = useGroupStore();

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { createSelectors } from '../hooks/createSelectors';
 
 export interface Group {
   id: string;
@@ -26,7 +27,7 @@ interface GroupState {
   removeGroup: (groupId: string) => void;
 }
 
-const useGroupStore = create<GroupState>()((set, get) => ({
+const useGroupStoreBase = create<GroupState>()((set, get) => ({
   // State
   groups: [],
   currentGroupId: null,
@@ -79,4 +80,4 @@ const useGroupStore = create<GroupState>()((set, get) => ({
   },
 }));
 
-export default useGroupStore;
+export const useGroupStore = createSelectors(useGroupStoreBase);

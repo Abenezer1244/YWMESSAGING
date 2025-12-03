@@ -1,7 +1,7 @@
 ﻿import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Check, Zap } from 'lucide-react';
-import useAuthStore from '../../stores/authStore';
+import { useAuthStore } from '../../stores/authStore';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
 

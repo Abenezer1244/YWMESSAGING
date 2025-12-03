@@ -23,6 +23,20 @@ interface MessageState {
     setLoading: (loading: boolean) => void;
     addMessage: (message: SentMessage) => void;
 }
-declare const useMessageStore: import("zustand").UseBoundStore<import("zustand").StoreApi<MessageState>>;
-export default useMessageStore;
+export declare const useMessageStore: {
+    (): MessageState;
+    <U>(selector: (state: MessageState) => U): U;
+    <U>(selector: (state: MessageState) => U, equalityFn: (a: U, b: U) => boolean): U;
+} & import("zustand").StoreApi<MessageState> & {
+    use: {
+        messages: () => SentMessage[];
+        selectedRecipients: () => MessageRecipient | null;
+        isLoading: () => boolean;
+        setMessages: () => (messages: SentMessage[]) => void;
+        setSelectedRecipients: () => (recipients: MessageRecipient | null) => void;
+        setLoading: () => (loading: boolean) => void;
+        addMessage: () => (message: SentMessage) => void;
+    };
+};
+export {};
 //# sourceMappingURL=messageStore.d.ts.map

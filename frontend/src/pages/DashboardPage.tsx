@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   Users,
@@ -12,8 +12,8 @@ import {
 } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import toast from 'react-hot-toast';
-import useAuthStore from '../stores/authStore';
-import useBranchStore from '../stores/branchStore';
+import { useAuthStore } from '../stores/authStore';
+import { useBranchStore } from '../stores/branchStore';
 import { getMessageStats, getSummaryStats } from '../api/analytics';
 import { getMembers } from '../api/members';
 import { getGroups } from '../api/groups';
@@ -70,29 +70,32 @@ export function DashboardPage() {
     }
   }, [user]);
 
-  const handleWelcomeComplete = (userRole: string, welcomeCompleted: boolean) => {
-    // Update the user in auth store to reflect completion
-    if (user && church) {
-      const { setAuth } = useAuthStore.getState();
-      setAuth(
-        { ...user, welcomeCompleted, userRole },
-        church,
-        useAuthStore.getState().accessToken || '',
-        useAuthStore.getState().refreshToken || ''
-      );
-    }
+  const handleWelcomeComplete = useCallback(
+    (userRole: string, welcomeCompleted: boolean) => {
+      // Update the user in auth store to reflect completion
+      if (user && church) {
+        const { setAuth } = useAuthStore.getState();
+        setAuth(
+          { ...user, welcomeCompleted, userRole },
+          church,
+          useAuthStore.getState().accessToken || '',
+          useAuthStore.getState().refreshToken || ''
+        );
+      }
 
-    // Show phone number purchase modal after welcome is complete
-    // if church doesn't already have a phone number
-    if (!hasPhoneNumber) {
-      setShowPhoneNumberModal(true);
-    }
-  };
+      // Show phone number purchase modal after welcome is complete
+      // if church doesn't already have a phone number
+      if (!hasPhoneNumber) {
+        setShowPhoneNumberModal(true);
+      }
+    },
+    [user, church, hasPhoneNumber]
+  );
 
-  const handlePhoneNumberPurchased = (phoneNumber: string) => {
+  const handlePhoneNumberPurchased = useCallback((phoneNumber: string) => {
     setHasPhoneNumber(true);
     toast.success('Phone number configured successfully!');
-  };
+  }, []);
 
   // Check if church has a phone number
   useEffect(() => {
@@ -155,27 +158,39 @@ export function DashboardPage() {
   const deliveryRate = messageStats?.deliveryRate || 0;
   const totalGroupsActive = summaryStats?.totalGroups || 0;
 
-  const barChartData = messageStats?.byDay
-    ? messageStats.byDay.map((day: any) => ({
-        name: new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' }),
-        delivered: day.delivered,
-        failed: day.failed,
-      }))
-    : [];
+  // Memoize expensive chart data transformations to prevent unnecessary recalculations
+  const barChartData = useMemo(
+    () =>
+      messageStats?.byDay
+        ? messageStats.byDay.map((day: any) => ({
+            name: new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' }),
+            delivered: day.delivered,
+            failed: day.failed,
+          }))
+        : [],
+    [messageStats?.byDay]
+  );
 
-  const lineChartData = messageStats?.byDay
-    ? messageStats.byDay.map((day: any, idx: number) => ({
-        name: `Day ${idx + 1}`,
-        sent: day.count,
-        delivered: day.delivered,
-      }))
-    : [];
+  const lineChartData = useMemo(
+    () =>
+      messageStats?.byDay
+        ? messageStats.byDay.map((day: any, idx: number) => ({
+            name: `Day ${idx + 1}`,
+            sent: day.count,
+            delivered: day.delivered,
+          }))
+        : [],
+    [messageStats?.byDay]
+  );
 
-  const pieData = [
-    { name: 'Delivered', value: messageStats?.deliveredCount || 0 },
-    { name: 'Failed', value: messageStats?.failedCount || 0 },
-    { name: 'Pending', value: messageStats?.pendingCount || 0 },
-  ];
+  const pieData = useMemo(
+    () => [
+      { name: 'Delivered', value: messageStats?.deliveredCount || 0 },
+      { name: 'Failed', value: messageStats?.failedCount || 0 },
+      { name: 'Pending', value: messageStats?.pendingCount || 0 },
+    ],
+    [messageStats?.deliveredCount, messageStats?.failedCount, messageStats?.pendingCount]
+  );
 
   return (
     <>

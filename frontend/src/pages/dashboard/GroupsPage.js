@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Users, Loader, Trash2, Edit2, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import useGroupStore from '../../stores/groupStore';
+import { useGroupStore } from '../../stores/groupStore';
 import { getGroups, deleteGroup } from '../../api/groups';
 import { GroupFormModal } from '../../components/groups/GroupFormModal';
 import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';

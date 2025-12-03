@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-export const useChatStore = create((set) => ({
+import { createSelectors } from '../hooks/createSelectors';
+const useChatStoreBase = create((set) => ({
     conversationId: null,
     messages: [],
     isLoading: false,
@@ -17,4 +18,5 @@ export const useChatStore = create((set) => ({
     closeChat: () => set({ isOpen: false }),
     clearChat: () => set({ messages: [], conversationId: null, error: null }),
 }));
+export const useChatStore = createSelectors(useChatStoreBase);
 //# sourceMappingURL=chatStore.js.map

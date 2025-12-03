@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { register as registerChurch } from '../api/auth';
 import { fetchCsrfToken } from '../api/client';
-import useAuthStore from '../stores/authStore';
+import { useAuthStore } from '../stores/authStore';
 import BackButton from '../components/BackButton';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';

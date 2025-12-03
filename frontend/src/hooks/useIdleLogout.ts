@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import useAuthStore from '../stores/authStore';
+import { useAuthStore } from '../stores/authStore';
 
 /**
  * Hook to detect user inactivity and show logout warning
