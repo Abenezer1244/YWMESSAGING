@@ -151,11 +151,12 @@ export const originValidationMiddleware = (
         userAgent: req.headers['user-agent'],
       });
 
-      return res.status(403).json({
+      res.status(403).json({
         success: false,
         error: 'Request origin not allowed (CSRF protection)',
         code: 'CSRF_INVALID_ORIGIN',
       });
+      return;
     }
   }
 
@@ -192,11 +193,12 @@ export const strictOriginValidationMiddleware = (
       userAgent: req.headers['user-agent'],
     });
 
-    return res.status(403).json({
+    res.status(403).json({
       success: false,
       error: 'Missing Origin header (CSRF protection)',
       code: 'CSRF_MISSING_ORIGIN',
     });
+    return;
   }
 
   // Validate origin
@@ -208,11 +210,12 @@ export const strictOriginValidationMiddleware = (
       userAgent: req.headers['user-agent'],
     });
 
-    return res.status(403).json({
+    res.status(403).json({
       success: false,
       error: originError,
       code: 'CSRF_INVALID_ORIGIN',
     });
+    return;
   }
 
   next();
