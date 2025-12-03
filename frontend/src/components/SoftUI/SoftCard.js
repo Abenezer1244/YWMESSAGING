@@ -1,6 +1,7 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import { motion } from 'framer-motion';
-export function SoftCard({ children, className = '', variant = 'default', hover = true, onClick, index = 0, }) {
+import { memo } from 'react';
+function SoftCardComponent({ children, className = '', variant = 'default', hover = true, onClick, index = 0, }) {
     const baseClasses = 'rounded-2xl p-6 transition-all duration-300 border border-border/40';
     const variants = {
         default: 'bg-card/60 backdrop-blur-md shadow-lg',
@@ -11,4 +12,10 @@ export function SoftCard({ children, className = '', variant = 'default', hover 
             ? { y: -4, boxShadow: '0 20px 40px rgba(59, 130, 246, 0.15)' }
             : {}, onClick: onClick, className: `${baseClasses} ${variants[variant]} ${className} ${onClick ? 'cursor-pointer' : ''}`, children: children }));
 }
+/**
+ * Memoized SoftCard component
+ * Prevents re-renders when parent component updates but props remain the same
+ * Shallow comparison of children, className, variant, hover, onClick, and index
+ */
+export const SoftCard = memo(SoftCardComponent);
 //# sourceMappingURL=SoftCard.js.map

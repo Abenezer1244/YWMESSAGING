@@ -9,6 +9,12 @@ interface StatCardProps {
     iconColor?: string;
     index?: number;
 }
-export declare function StatCard({ icon: Icon, label, value, change, changeType, bgColor, iconColor, index, }: StatCardProps): import("react/jsx-runtime").JSX.Element;
+declare function StatCardComponent({ icon: Icon, label, value, change, changeType, bgColor, iconColor, index, }: StatCardProps): import("react/jsx-runtime").JSX.Element;
+/**
+ * Memoized StatCard component
+ * Prevents re-renders when parent component updates but props remain the same
+ * Shallow comparison of all props (icon, label, value, change, etc.)
+ */
+export declare const StatCard: import("react").MemoExoticComponent<typeof StatCardComponent>;
 export {};
 //# sourceMappingURL=StatCard.d.ts.map

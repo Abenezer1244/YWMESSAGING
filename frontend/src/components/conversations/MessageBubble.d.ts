@@ -1,3 +1,4 @@
+import React from 'react';
 interface MessageProps {
     id: string;
     content: string;
@@ -11,6 +12,13 @@ interface MessageProps {
     mediaDuration?: number | null;
     createdAt: string | Date;
 }
-export declare function MessageBubble(props: MessageProps): import("react/jsx-runtime").JSX.Element;
+declare function MessageBubbleComponent(props: MessageProps): import("react/jsx-runtime").JSX.Element;
+/**
+ * Memoized MessageBubble component
+ * Prevents re-renders of individual messages when conversation re-renders
+ * Shallow comparison of all message props (content, direction, media, status, etc.)
+ * Critical for performance in message lists with many messages
+ */
+export declare const MessageBubble: React.MemoExoticComponent<typeof MessageBubbleComponent>;
 export {};
 //# sourceMappingURL=MessageBubble.d.ts.map
