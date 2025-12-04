@@ -207,15 +207,27 @@ export function ConversationsPage() {
                 </h2>
               </div>
               <div className="flex-1 overflow-y-auto">
-                <div className="p-4">
-                  <ConversationsList
-                    conversations={conversations}
-                    selectedConversationId={selectedConversationId || undefined}
-                    onSelectConversation={handleSelectConversation}
-                    onUpdateStatus={handleUpdateStatus}
-                    isLoading={isLoadingConversations}
-                  />
-                </div>
+                {conversations.length === 0 && !isLoadingConversations ? (
+                  <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+                    <MessageSquare className="w-16 h-16 text-muted-foreground/40 mb-4" />
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      No Conversations Yet
+                    </h3>
+                    <p className="text-muted-foreground text-sm">
+                      Members who text your church number will appear here. Share your church number to get started!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-4">
+                    <ConversationsList
+                      conversations={conversations}
+                      selectedConversationId={selectedConversationId || undefined}
+                      onSelectConversation={handleSelectConversation}
+                      onUpdateStatus={handleUpdateStatus}
+                      isLoading={isLoadingConversations}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Pagination */}
