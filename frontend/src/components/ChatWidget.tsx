@@ -142,7 +142,7 @@ export function ChatWidget({ variant = 'floating', position = 'bottom-right' }: 
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-96 h-[500px] bg-white dark:bg-slate-900 rounded-lg shadow-2xl border border-gray-200 dark:border-slate-700 flex flex-col overflow-hidden"
+              className="w-80 sm:w-96 h-[500px] bg-white dark:bg-slate-900 rounded-lg shadow-2xl border border-gray-200 dark:border-slate-700 flex flex-col overflow-hidden max-w-[calc(100vw-32px)]"
             >
               {/* Header */}
               <div className="text-white p-4 flex items-center justify-between" style={{ backgroundColor: buttonColor }}>

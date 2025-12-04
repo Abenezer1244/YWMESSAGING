@@ -124,6 +124,7 @@ export function LoginPage() {
                 placeholder="pastor@church.com"
                 disabled={isLoading}
                 error={errors.email?.message}
+                autoComplete="email"
                 {...register('email', {
                   required: 'Email is required',
                   pattern: {
@@ -143,6 +144,7 @@ export function LoginPage() {
                 placeholder="••••••••"
                 disabled={isLoading}
                 error={errors.password?.message}
+                autoComplete="current-password"
                 {...register('password', {
                   required: 'Password is required',
                   minLength: {

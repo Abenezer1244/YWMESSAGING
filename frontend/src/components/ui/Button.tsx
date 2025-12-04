@@ -37,11 +37,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const sizeStyles = {
-      xs: 'px-2 py-1 text-xs',
-      sm: 'px-3 py-2 text-sm',
-      md: 'px-4 py-2.5 text-base',
-      lg: 'px-6 py-3 text-lg',
-      xl: 'px-8 py-4 text-lg',
+      xs: 'px-2 py-1 text-xs min-h-8',
+      sm: 'px-3 py-2 text-sm min-h-10',
+      md: 'px-4 py-3 text-base min-h-11',
+      lg: 'px-6 py-3 text-lg min-h-11',
+      xl: 'px-8 py-4 text-lg min-h-12',
     };
 
     const widthStyle = fullWidth ? 'w-full' : '';

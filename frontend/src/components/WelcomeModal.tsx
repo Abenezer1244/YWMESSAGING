@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
+import FocusTrap from 'focus-trap-react';
 import Button from './ui/Button';
 import client from '../api/client';
 
@@ -88,6 +89,20 @@ const WelcomeIllustration = () => (
 export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: WelcomeModalProps) {
   const [selectedRole, setSelectedRole] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Handle Escape key to close modal (WCAG 2.1.2 compliance)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen, onClose]);
 
   const roles = [
     {
@@ -180,21 +195,30 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: Wel
           transition={{ duration: 0.2 }}
           className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 backdrop-blur-md"
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.92, y: 30 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: 30 }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="bg-background border border-border/50 rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden"
+          <FocusTrap
+            focusTrapOptions={{
+              escapeDeactivates: true,
+              clickOutsideDeactivates: true,
+            }}
           >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 30 }}
+              transition={{ duration: 0.4, ease: 'easeOut' }}
+              className="bg-background border border-border/50 rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="welcome-modal-title"
+            >
             {/* Close Button */}
             <div className="absolute top-6 right-6 z-10">
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onClose}
-                className="p-2 hover:bg-muted rounded-lg transition-colors duration-200"
-                aria-label="Close"
+                className="w-11 h-11 flex items-center justify-center hover:bg-muted rounded-lg transition-colors duration-200"
+                aria-label="Close modal (Escape key also works)"
               >
                 <X className="w-5 h-5 text-muted-foreground" />
               </motion.button>
@@ -216,7 +240,7 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: Wel
 
                 {/* Welcome Text */}
                 <motion.div variants={itemVariants}>
-                  <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2 leading-tight">
+                  <h1 id="welcome-modal-title" className="text-2xl md:text-3xl font-bold text-foreground mb-2 leading-tight">
                     Welcome to
                     <br />
                     <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
@@ -342,7 +366,8 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: Wel
                 </motion.div>
               </motion.div>
             </div>
-          </motion.div>
+            </motion.div>
+          </FocusTrap>
         </motion.div>
       )}
     </AnimatePresence>

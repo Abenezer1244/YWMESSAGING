@@ -76,7 +76,7 @@ export function AddMemberModal({ isOpen, groupId, onClose, onSuccess }: AddMembe
               <input
                 type="text"
                 {...register('firstName', { required: 'First name is required' })}
-                autoComplete="off"
+                autoComplete="given-name"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="John"
               />
@@ -88,7 +88,7 @@ export function AddMemberModal({ isOpen, groupId, onClose, onSuccess }: AddMembe
               <input
                 type="text"
                 {...register('lastName', { required: 'Last name is required' })}
-                autoComplete="off"
+                autoComplete="family-name"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Doe"
               />
@@ -102,7 +102,7 @@ export function AddMemberModal({ isOpen, groupId, onClose, onSuccess }: AddMembe
             <input
               type="tel"
               {...register('phone', { required: 'Phone is required' })}
-              autoComplete="off"
+              autoComplete="tel"
               className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="(202) 555-0173"
             />
@@ -116,7 +116,7 @@ export function AddMemberModal({ isOpen, groupId, onClose, onSuccess }: AddMembe
             <input
               type="email"
               {...register('email')}
-              autoComplete="off"
+              autoComplete="email"
               className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="john@example.com"
             />

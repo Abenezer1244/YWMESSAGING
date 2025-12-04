@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, X, Loader, Check, ChevronDown } from 'lucide-react';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
+import FocusTrap from 'focus-trap-react';
 import toast from 'react-hot-toast';
 import Button from './ui/Button';
 import StripePaymentForm from './StripePaymentForm';
@@ -44,6 +45,20 @@ export default function PhoneNumberPurchaseModal({
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'declined' | 'failed'>('idle');
   const [paymentMessage, setPaymentMessage] = useState('');
+
+  // Handle Escape key to close modal (WCAG 2.1.2 compliance)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && paymentStatus !== 'processing') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen, onClose, paymentStatus]);
 
   const handleSearch = async () => {
     if (!areaCode && !state) {
@@ -215,23 +230,32 @@ export default function PhoneNumberPurchaseModal({
           transition={{ duration: 0.2 }}
           className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 backdrop-blur-md"
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.92, y: 30 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: 30 }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="bg-background border border-border/50 rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden"
+          <FocusTrap
+            focusTrapOptions={{
+              escapeDeactivates: paymentStatus !== 'processing',
+              clickOutsideDeactivates: paymentStatus !== 'processing',
+            }}
           >
-            {/* Header */}
-            <div className="bg-gradient-to-r from-primary/10 to-primary/5 border-b border-border/30 p-6 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/20 rounded-lg">
-                  <Phone className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-foreground">
-                    Buy Phone Number
-                  </h2>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 30 }}
+              transition={{ duration: 0.4, ease: 'easeOut' }}
+              className="bg-background border border-border/50 rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="phone-modal-title"
+            >
+              {/* Header */}
+              <div className="bg-gradient-to-r from-primary/10 to-primary/5 border-b border-border/30 p-6 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/20 rounded-lg">
+                    <Phone className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h2 id="phone-modal-title" className="text-lg font-semibold text-foreground">
+                      Buy Phone Number
+                    </h2>
                   <p className="text-xs text-muted-foreground">
                     {step === 'search' && 'Search available numbers'}
                     {step === 'select' && 'Choose a number'}
@@ -245,7 +269,8 @@ export default function PhoneNumberPurchaseModal({
                 whileTap={{ scale: 0.95 }}
                 onClick={onClose}
                 disabled={isLoading}
-                className="p-2 hover:bg-muted rounded-lg transition-colors disabled:opacity-50"
+                className="w-11 h-11 flex items-center justify-center hover:bg-muted rounded-lg transition-colors disabled:opacity-50"
+                aria-label="Close modal (Escape key also works)"
               >
                 <X className="w-5 h-5 text-muted-foreground" />
               </motion.button>
@@ -461,7 +486,8 @@ export default function PhoneNumberPurchaseModal({
                 )}
               </motion.div>
             </div>
-          </motion.div>
+            </motion.div>
+          </FocusTrap>
         </motion.div>
       )}
     </AnimatePresence>

@@ -145,6 +145,7 @@ export function RegisterPage() {
                 placeholder="John"
                 disabled={isLoading}
                 error={errors.firstName?.message}
+                autoComplete="given-name"
                 className="bg-muted border-border text-foreground"
                 {...register('firstName', { required: 'First name is required' })}
               />
@@ -154,6 +155,7 @@ export function RegisterPage() {
                 placeholder="Doe"
                 disabled={isLoading}
                 error={errors.lastName?.message}
+                autoComplete="family-name"
                 className="bg-muted border-border text-foreground"
                 {...register('lastName', { required: 'Last name is required' })}
               />
@@ -165,6 +167,7 @@ export function RegisterPage() {
               placeholder="Grace Community Church"
               disabled={isLoading}
               error={errors.churchName?.message}
+              autoComplete="organization"
               className="bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white"
               {...register('churchName', { required: 'Church name is required' })}
             />
@@ -176,6 +179,7 @@ export function RegisterPage() {
               placeholder="pastor@church.com"
               disabled={isLoading}
               error={errors.email?.message}
+              autoComplete="email"
               className="bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white"
               {...register('email', {
                 required: 'Email is required',
@@ -194,6 +198,7 @@ export function RegisterPage() {
               helperText="Must be at least 8 characters"
               disabled={isLoading}
               error={errors.password?.message}
+              autoComplete="new-password"
               className="bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white"
               {...register('password', {
                 required: 'Password is required',
@@ -210,6 +215,7 @@ export function RegisterPage() {
               placeholder="••••••••"
               disabled={isLoading}
               error={errors.confirmPassword?.message}
+              autoComplete="new-password"
               className="bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white"
               {...register('confirmPassword', {
                 required: 'Please confirm your password',

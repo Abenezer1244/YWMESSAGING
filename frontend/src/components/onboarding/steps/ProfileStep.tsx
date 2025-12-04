@@ -78,6 +78,7 @@ const ProfileStep: React.FC<ProfileStepProps> = ({ onNext, onBack }) => {
             onChange={handleChange}
             error={errors.fullName}
             placeholder="John Doe"
+            autoComplete="name"
             required
           />
 
@@ -89,6 +90,7 @@ const ProfileStep: React.FC<ProfileStepProps> = ({ onNext, onBack }) => {
             onChange={handleChange}
             error={errors.email}
             placeholder="you@company.com"
+            autoComplete="email"
             required
           />
 
@@ -99,6 +101,7 @@ const ProfileStep: React.FC<ProfileStepProps> = ({ onNext, onBack }) => {
             onChange={handleChange}
             error={errors.organization}
             placeholder="Acme Corporation"
+            autoComplete="organization"
             required
           />
 
