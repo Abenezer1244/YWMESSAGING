@@ -3,6 +3,10 @@ interface ImportMetaEnv {
   readonly VITE_POSTHOG_KEY?: string;
   readonly VITE_POSTHOG_HOST?: string;
   readonly VITE_STRIPE_PUBLISHABLE_KEY?: string;
+  readonly VITE_GA_ID?: string;
+  readonly DEV: boolean;
+  readonly PROD: boolean;
+  readonly MODE: 'development' | 'production';
 }
 
 interface ImportMeta {

@@ -83,7 +83,20 @@
       "mcp__playwright__browser_press_key",
       "Bash(grep:*)",
       "Bash(npm i:*)",
-      "mcp__playwright__browser_resize"
+      "mcp__playwright__browser_resize",
+      "Bash(timeout 10 npm run dev:*)",
+      "Bash(semgrep:*)",
+      "Bash(frontend/src/components/ChatWidget.tsx )",
+      "Bash(frontend/src/components/members/AddMemberModal.tsx )",
+      "Bash(frontend/src/components/onboarding/steps/ProfileStep.tsx )",
+      "Bash(frontend/src/components/PhoneNumberPurchaseModal.tsx )",
+      "Bash(frontend/src/components/ui/Button.tsx )",
+      "Bash(frontend/src/components/ui/Input.tsx )",
+      "Bash(frontend/src/components/WelcomeModal.tsx )",
+      "Bash(frontend/src/index.css )",
+      "Bash(frontend/src/pages/LoginPage.tsx )",
+      "Bash(frontend/src/pages/RegisterPage.tsx )",
+      "Bash(tasks-ux-design.md)"
     ],
     "deny": [],
     "ask": []

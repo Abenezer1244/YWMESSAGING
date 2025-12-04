@@ -2,8 +2,10 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useEffect, useState, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import ReactGA from 'react-ga4';
 import { initializePostHog } from './hooks/useAnalytics';
 import { useIdleLogout } from './hooks/useIdleLogout';
+import { useWebVitals } from './hooks/useWebVitals';
 import ProtectedRoute from './components/ProtectedRoute';
 import { IdleLogoutWarning } from './components/IdleLogoutWarning';
 import { Spinner } from './components/ui';
@@ -47,18 +49,29 @@ function App() {
     const [isCheckingAuth, setIsCheckingAuth] = useState(true);
     // Idle logout detection
     const { showWarning, secondsUntilLogout, handleLogout, dismissWarning } = useIdleLogout();
+    // Web Vitals tracking for production monitoring
+    useWebVitals();
     // Debug logging only in development
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.MODE === 'development') {
         console.debug('App initialized, auth state:', { isAuthenticated, churchId: church?.id });
     }
     // Initialize analytics, fetch CSRF token, and restore auth session on app load
     useEffect(() => {
+        // Initialize Google Analytics 4
+        const gaId = import.meta.env.REACT_APP_GA_ID || import.meta.env.VITE_GA_ID;
+        const isProduction = import.meta.env.MODE === 'production';
+        if (gaId && isProduction) {
+            ReactGA.initialize(gaId);
+            if (import.meta.env.MODE === 'development') {
+                console.debug('GA4 initialized with ID:', gaId);
+            }
+        }
         // Initialize PostHog
         initializePostHog();
         // Fetch CSRF token
         fetchCsrfToken().catch(() => {
             // CSRF token initialization failed - non-critical
-            if (process.env.NODE_ENV === 'development') {
+            if (import.meta.env.MODE === 'development') {
                 console.debug('CSRF token initialization failed');
             }
         });
@@ -72,7 +85,7 @@ function App() {
                 // Restore from sessionStorage
                 setAuth(authState.user, authState.church, authState.accessToken, authState.refreshToken, authState.tokenExpiresAt ? Math.ceil((authState.tokenExpiresAt - Date.now()) / 1000) : 3600);
                 setIsCheckingAuth(false);
-                if (process.env.NODE_ENV === 'development') {
+                if (import.meta.env.MODE === 'development') {
                     console.debug('Session restored from sessionStorage');
                 }
                 return;
@@ -102,7 +115,7 @@ function App() {
             // getMe() failed - try refreshing token to extend session
             // This handles case where access token expired but refresh token is valid
             try {
-                if (process.env.NODE_ENV === 'development') {
+                if (import.meta.env.MODE === 'development') {
                     console.debug('getMe() failed, attempting token refresh...', error.response?.status);
                 }
                 // Try to refresh the token
@@ -129,7 +142,7 @@ function App() {
             }
             catch (err) {
                 // Both getMe() and refresh failed - user is not authenticated
-                if (process.env.NODE_ENV === 'development') {
+                if (import.meta.env.MODE === 'development') {
                     console.debug('Session restoration failed, user not authenticated', err);
                 }
                 // Let auth remain logged out

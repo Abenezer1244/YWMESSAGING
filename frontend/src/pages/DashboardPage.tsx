@@ -25,6 +25,8 @@ import TrialBanner from '../components/TrialBanner';
 import { ChatWidget } from '../components/ChatWidget';
 import WelcomeModal from '../components/WelcomeModal';
 import PhoneNumberPurchaseModal from '../components/PhoneNumberPurchaseModal';
+import { OnboardingChecklist } from '../components/onboarding/OnboardingChecklist';
+import { DeliveryRateCard } from '../components/dashboard/DeliveryRateCard';
 
 // Get CSS variable value and convert oklch to hex approximation
 const getCSSColor = (varName: string): string => {
@@ -202,6 +204,11 @@ export function DashboardPage() {
           <TrialBanner />
         </div>
 
+        {/* Onboarding Checklist - shows only to new users */}
+        <div className="mb-8">
+          <OnboardingChecklist />
+        </div>
+
         {/* Welcome Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -310,6 +317,16 @@ export function DashboardPage() {
                 index={3}
               />
             </div>
+
+            {/* Delivery Rate Card - 10DLC Promotion */}
+            {profile && (
+              <div className="mb-8">
+                <DeliveryRateCard
+                  deliveryRate={profile.deliveryRate || deliveryRate}
+                  dlcStatus={profile.dlcStatus}
+                />
+              </div>
+            )}
 
             {/* Charts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">

@@ -61,18 +61,18 @@ function App() {
   useWebVitals();
 
   // Debug logging only in development
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     console.debug('App initialized, auth state:', { isAuthenticated, churchId: church?.id });
   }
 
   // Initialize analytics, fetch CSRF token, and restore auth session on app load
   useEffect(() => {
     // Initialize Google Analytics 4
-    const gaId = process.env.REACT_APP_GA_ID || process.env.VITE_GA_ID;
-    const isProduction = process.env.NODE_ENV === 'production';
+    const gaId = import.meta.env.VITE_GA_ID;
+    const isProduction = import.meta.env.PROD;
     if (gaId && isProduction) {
       ReactGA.initialize(gaId);
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.DEV) {
         console.debug('GA4 initialized with ID:', gaId);
       }
     }
@@ -83,7 +83,7 @@ function App() {
     // Fetch CSRF token
     fetchCsrfToken().catch(() => {
       // CSRF token initialization failed - non-critical
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.DEV) {
         console.debug('CSRF token initialization failed');
       }
     });
@@ -99,7 +99,7 @@ function App() {
         // Restore from sessionStorage
         setAuth(authState.user, authState.church, authState.accessToken, authState.refreshToken, authState.tokenExpiresAt ? Math.ceil((authState.tokenExpiresAt - Date.now()) / 1000) : 3600);
         setIsCheckingAuth(false);
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
           console.debug('Session restored from sessionStorage');
         }
         return;
@@ -129,7 +129,7 @@ function App() {
         // getMe() failed - try refreshing token to extend session
         // This handles case where access token expired but refresh token is valid
         try {
-          if (process.env.NODE_ENV === 'development') {
+          if (import.meta.env.DEV) {
             console.debug('getMe() failed, attempting token refresh...', error.response?.status);
           }
 
@@ -158,7 +158,7 @@ function App() {
           }
         } catch (err) {
           // Both getMe() and refresh failed - user is not authenticated
-          if (process.env.NODE_ENV === 'development') {
+          if (import.meta.env.DEV) {
             console.debug('Session restoration failed, user not authenticated', err);
           }
           // Let auth remain logged out

@@ -15,7 +15,7 @@ import ReactGA from 'react-ga4';
 export function useWebVitals() {
   useEffect(() => {
     // Only track in production environment
-    if (process.env.NODE_ENV !== 'production') {
+    if (!import.meta.env.PROD) {
       return;
     }
 

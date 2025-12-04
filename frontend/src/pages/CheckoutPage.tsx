@@ -59,7 +59,7 @@ function PaymentForm({ planName, planPrice, onSubmit }: any) {
         const userMessage = 'Payment failed. Please verify your card details and try again.';
         setCardError(userMessage);
         toast.error(userMessage);
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
           console.debug('Stripe error:', error.message);
         }
       } else if (paymentIntent?.status === 'succeeded') {
@@ -72,7 +72,7 @@ function PaymentForm({ planName, planPrice, onSubmit }: any) {
       const userMessage = 'Payment processing error. Please try again.';
       setCardError(userMessage);
       toast.error(userMessage);
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.DEV) {
         console.debug('Payment error:', err);
       }
     } finally {
