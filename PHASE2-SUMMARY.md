@@ -77,7 +77,7 @@ Functions implemented:
 - Default TTL: 30s for job lock, 60s for safety
 
 **Dependency**:
-- `redlock@^5.0.1` added to package.json
+- `redlock@^4.2.0` added to package.json (compatible with Redis 4.6.7)
 
 **Integration**:
 - Ready for use in any async operation
@@ -252,7 +252,7 @@ Functions implemented:
 | Files modified | 4 | app.ts imports, cron jobs, package.json, schema |
 | Lines of code (new) | ~2,000+ | All production-grade, no tests |
 | Build errors fixed | 2 | NewRelic imports, Prisma schema |
-| Dependencies added | 1 | redlock@^5.0.1 |
+| Dependencies added | 1 | redlock@^4.2.0 (compatible with Redis 4.6.7) |
 
 ---
 

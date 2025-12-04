@@ -21,6 +21,7 @@ import { redisClient } from '../lib/redis.js';
 /**
  * Initialize Redlock with Redis client
  * Configuration tuned for job locking (not high-frequency operations)
+ * Using Redlock 4.x (compatible with Redis 4.6.7)
  */
 const redlock = new Redlock([redisClient], {
   // Recommended retries for job locking: none needed (we're OK to skip a run)
@@ -31,7 +32,7 @@ const redlock = new Redlock([redisClient], {
   // Drift factor: accounts for time synchronization issues
   driftFactor: 0.01,
 
-  // Automatically extend lock if job still running (5 seconds extension)
+  // Automatically extend lock if job still running (500ms before expiration)
   automaticExtensionThreshold: 500,
 });
 
