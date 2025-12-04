@@ -14,7 +14,7 @@ import ReactGA from 'react-ga4';
 export function useWebVitals() {
     useEffect(() => {
         // Only track in production environment
-        if (import.meta.env.MODE !== 'production') {
+        if (!import.meta.env.PROD) {
             return;
         }
         // Largest Contentful Paint (LCP)

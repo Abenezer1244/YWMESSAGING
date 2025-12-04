@@ -66,7 +66,7 @@ export function AdminSettingsPage() {
         catch (error) {
             // Show generic error message without exposing backend details
             toast.error('Failed to load profile. Please refresh the page.');
-            if (import.meta.env.MODE === 'development') {
+            if (import.meta.env.DEV) {
                 console.debug('Profile load error:', error);
             }
         }
@@ -172,7 +172,7 @@ export function AdminSettingsPage() {
         catch (error) {
             // Show generic error message without exposing backend details
             toast.error('Failed to update profile. Please try again.');
-            if (import.meta.env.MODE === 'development') {
+            if (import.meta.env.DEV) {
                 console.debug('Profile update error:', error);
             }
         }

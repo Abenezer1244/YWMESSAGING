@@ -237,6 +237,63 @@ export function SendMessagePage() {
             </div>
           </motion.div>
 
+          {/* Recipient Preview */}
+          {targetType === 'groups' && selectedGroupIds.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+            >
+              <SoftCard variant="gradient">
+                <div className="space-y-3">
+                  <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    📬 Will send to:
+                  </p>
+                  <div className="space-y-2">
+                    {selectedGroupIds.map((groupId) => {
+                      const group = groups.find((g) => g.id === groupId);
+                      return (
+                        <div key={groupId} className="flex items-center justify-between text-sm">
+                          <span className="text-foreground/80">{group?.name}</span>
+                          <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded">
+                            {group?.memberCount} members
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="border-t border-primary/20 pt-2 mt-2">
+                    <p className="text-sm font-medium text-foreground">
+                      Total: <span className="text-primary">{recipientCount} recipients</span>
+                    </p>
+                  </div>
+                </div>
+              </SoftCard>
+            </motion.div>
+          )}
+
+          {targetType === 'all' && segments > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+            >
+              <SoftCard variant="gradient">
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    📬 Will send to:
+                  </p>
+                  <p className="text-sm text-foreground/80">All members in your church</p>
+                  <div className="border-t border-primary/20 pt-2 mt-2">
+                    <p className="text-sm font-medium text-foreground">
+                      Total: <span className="text-primary">{recipientCount} recipients</span>
+                    </p>
+                  </div>
+                </div>
+              </SoftCard>
+            </motion.div>
+          )}
+
           {/* Cost Summary */}
           {(targetType === 'all' || selectedGroupIds.length > 0) && segments > 0 && (
             <motion.div
