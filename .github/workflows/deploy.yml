@@ -8,6 +8,7 @@ on:
 
 jobs:
   build-and-deploy:
+    needs: security-checks
     runs-on: ubuntu-latest
     
     steps:
@@ -28,7 +29,7 @@ jobs:
         run: cd backend && npm run build
 
       - name: Lint backend
-        run: cd backend && npm run lint --if-present || true
+        run: cd backend && npm run lint --if-present
 
       # Frontend Build
       - name: Install frontend dependencies
@@ -39,10 +40,10 @@ jobs:
 
       # Run tests (if available)
       - name: Run backend tests
-        run: cd backend && npm test --if-present || true
+        run: cd backend && npm test --if-present
         
       - name: Run frontend tests
-        run: cd frontend && npm test --if-present || true
+        run: cd frontend && npm test --if-present
 
       # Deploy to Render (automatic via webhook)
       - name: Trigger Render deployment
@@ -66,9 +67,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run npm audit
-        run: |
-          npm audit --audit-level=moderate || true
+      - name: Run npm audit (Backend)
+        run: cd backend && npm audit --audit-level=moderate
+
+      - name: Run npm audit (Frontend)
+        run: cd frontend && npm audit --audit-level=moderate
 
       - name: Check for hardcoded secrets
         run: |
