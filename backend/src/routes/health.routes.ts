@@ -7,7 +7,7 @@
 
 import { Router, Request, Response } from 'express';
 import { checkDatabaseHealth } from '../lib/prisma.js';
-import { redisClient } from '../lib/redis.js';
+import { redisClient } from '../config/redis.config.js';
 
 const router = Router();
 

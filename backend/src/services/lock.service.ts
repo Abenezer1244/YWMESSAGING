@@ -16,7 +16,7 @@
  */
 
 import Redlock from 'redlock';
-import { redisClient } from '../lib/redis.js';
+import { redisClient } from '../config/redis.config.js';
 
 /**
  * Initialize Redlock with Redis client
