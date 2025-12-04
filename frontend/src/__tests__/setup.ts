@@ -1,6 +1,10 @@
 import { expect, afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { axe, toHaveNoViolations } from 'jest-axe';
+
+// Extend Vitest matchers with jest-axe
+expect.extend(toHaveNoViolations);
 
 // Cleanup after each test
 afterEach(() => {
