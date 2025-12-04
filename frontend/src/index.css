@@ -362,6 +362,18 @@ pre {
    ANIMATIONS & TRANSITIONS
    ============================================ */
 
+/* Respect prefers-reduced-motion for accessibility (WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Fade in on mount */
 .fade-in {
   @apply animate-fade-in;

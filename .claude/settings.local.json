@@ -96,7 +96,9 @@
       "Bash(frontend/src/index.css )",
       "Bash(frontend/src/pages/LoginPage.tsx )",
       "Bash(frontend/src/pages/RegisterPage.tsx )",
-      "Bash(tasks-ux-design.md)"
+      "Bash(tasks-ux-design.md)",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_hover"
     ],
     "deny": [],
     "ask": []
