@@ -1,4 +1,11 @@
-import newrelic from 'newrelic'
+// Optional: Newrelic integration (only if installed)
+let newrelic: any = null;
+try {
+  newrelic = require('newrelic');
+} catch (e) {
+  // newrelic is optional - if not installed, metrics still work locally
+  newrelic = null;
+}
 
 /**
  * Performance Metrics Module
@@ -24,11 +31,15 @@ export class PerformanceMetrics {
     success: boolean = true
   ) {
     // Record overall database latency
-    newrelic.recordMetric('Custom/Database/Query/Latency', duration)
+    if (newrelic) {
+      newrelic.recordMetric('Custom/Database/Query/Latency', duration);
+    }
 
     // Track slow queries (>500ms)
     if (duration > 500) {
-      newrelic.recordMetric('Custom/Database/SlowQuery/Count', 1)
+      if (newrelic) {
+        newrelic.recordMetric('Custom/Database/SlowQuery/Count', 1);
+      }
       if (duration > 1000) {
         // Very slow query (>1s)
         console.warn(`Slow database query detected: ${query} took ${duration}ms`)
@@ -37,7 +48,9 @@ export class PerformanceMetrics {
 
     // Track errors
     if (!success) {
-      newrelic.recordMetric('Custom/Database/Query/Error/Count', 1)
+      if (newrelic) {
+        newrelic.recordMetric('Custom/Database/Query/Error/Count', 1);
+      }
     }
   }
 
@@ -52,18 +65,24 @@ export class PerformanceMetrics {
     duration: number,
     statusCode: number
   ) {
-    const metricName = `Custom/API/${endpoint}/Latency`
-    newrelic.recordMetric(metricName, duration)
+    if (newrelic) {
+      const metricName = `Custom/API/${endpoint}/Latency`
+      newrelic.recordMetric(metricName, duration);
 
-    // Track errors (status >= 400)
-    if (statusCode >= 400) {
-      newrelic.recordMetric(`Custom/API/${endpoint}/Error/Count`, 1)
+      // Track errors (status >= 400)
+      if (statusCode >= 400) {
+        newrelic.recordMetric(`Custom/API/${endpoint}/Error/Count`, 1);
+      }
+
+      // Track slow endpoints (>3000ms)
+      if (duration > 3000) {
+        newrelic.recordMetric(`Custom/API/${endpoint}/Slow/Count`, 1);
+      }
     }
 
-    // Track slow endpoints (>3000ms)
+    // Always log slow endpoints
     if (duration > 3000) {
       console.warn(`Slow API endpoint detected: ${endpoint} took ${duration}ms`)
-      newrelic.recordMetric(`Custom/API/${endpoint}/Slow/Count`, 1)
     }
   }
 
@@ -82,15 +101,17 @@ export class PerformanceMetrics {
   ) {
     // Success rate percentage
     const successRate = count > 0 ? (successCount / count) * 100 : 0
-    newrelic.recordMetric('Custom/Messages/Delivery/Success/Rate', successRate)
+    if (newrelic) {
+      newrelic.recordMetric('Custom/Messages/Delivery/Success/Rate', successRate);
 
-    // Failed delivery count
-    if (failureCount > 0) {
-      newrelic.recordMetric('Custom/Messages/Delivery/Failed/Count', failureCount)
+      // Failed delivery count
+      if (failureCount > 0) {
+        newrelic.recordMetric('Custom/Messages/Delivery/Failed/Count', failureCount);
+      }
+
+      // Average delivery latency
+      newrelic.recordMetric('Custom/Messages/Average/Latency', averageLatency);
     }
-
-    // Average delivery latency
-    newrelic.recordMetric('Custom/Messages/Average/Latency', averageLatency)
 
     // Log warning if success rate drops below 95%
     if (successRate < 95) {
@@ -111,22 +132,24 @@ export class PerformanceMetrics {
     smsCost: number,
     usage: { messagesThisMonth?: number; membersThisMonth?: number }
   ) {
-    // Record SMS costs
-    newrelic.recordMetric('Custom/Billing/SMS/Cost/Total', smsCost / 100) // Convert to dollars
+    if (newrelic) {
+      // Record SMS costs
+      newrelic.recordMetric('Custom/Billing/SMS/Cost/Total', smsCost / 100); // Convert to dollars
 
-    // Record plan usage
-    if (usage.messagesThisMonth) {
-      newrelic.recordMetric(
-        'Custom/Billing/Messages/Usage/Month',
-        usage.messagesThisMonth
-      )
-    }
+      // Record plan usage
+      if (usage.messagesThisMonth) {
+        newrelic.recordMetric(
+          'Custom/Billing/Messages/Usage/Month',
+          usage.messagesThisMonth
+        );
+      }
 
-    if (usage.membersThisMonth) {
-      newrelic.recordMetric(
-        'Custom/Billing/Members/Usage/Month',
-        usage.membersThisMonth
-      )
+      if (usage.membersThisMonth) {
+        newrelic.recordMetric(
+          'Custom/Billing/Members/Usage/Month',
+          usage.membersThisMonth
+        );
+      }
     }
   }
 
@@ -141,12 +164,14 @@ export class PerformanceMetrics {
     trialCount: number,
     expiringSoonCount: number
   ) {
-    newrelic.recordMetric('Custom/Billing/Plan/Active/Count', activeCount)
-    newrelic.recordMetric('Custom/Billing/Trial/Active/Count', trialCount)
-    newrelic.recordMetric(
-      'Custom/Billing/Trial/Expiring/Count',
-      expiringSoonCount
-    )
+    if (newrelic) {
+      newrelic.recordMetric('Custom/Billing/Plan/Active/Count', activeCount);
+      newrelic.recordMetric('Custom/Billing/Trial/Active/Count', trialCount);
+      newrelic.recordMetric(
+        'Custom/Billing/Trial/Expiring/Count',
+        expiringSoonCount
+      );
+    }
 
     // Alert if trials are about to expire
     if (expiringSoonCount > 0) {
@@ -163,13 +188,15 @@ export class PerformanceMetrics {
    * @param duration - Operation duration in milliseconds
    */
   static recordCacheMetric(cacheKey: string, hit: boolean, duration: number) {
-    if (hit) {
-      newrelic.recordMetric('Custom/Cache/Hit/Count', 1)
-    } else {
-      newrelic.recordMetric('Custom/Cache/Miss/Count', 1)
-    }
+    if (newrelic) {
+      if (hit) {
+        newrelic.recordMetric('Custom/Cache/Hit/Count', 1);
+      } else {
+        newrelic.recordMetric('Custom/Cache/Miss/Count', 1);
+      }
 
-    newrelic.recordMetric(`Custom/Cache/${cacheKey}/Latency`, duration)
+      newrelic.recordMetric(`Custom/Cache/${cacheKey}/Latency`, duration);
+    }
   }
 
   /**
@@ -178,18 +205,24 @@ export class PerformanceMetrics {
    * @param errorCode - Error code or name
    */
   static recordError(errorType: string, errorCode: string) {
-    newrelic.recordMetric(
-      `Custom/Errors/${errorType}/Count`,
-      1
-    )
-    newrelic.recordCustomMetric(`Custom/Errors/${errorType}/${errorCode}`, 1)
+    if (newrelic) {
+      newrelic.recordMetric(
+        `Custom/Errors/${errorType}/Count`,
+        1
+      );
+      if (newrelic.recordCustomMetric) {
+        newrelic.recordCustomMetric(`Custom/Errors/${errorType}/${errorCode}`, 1);
+      }
+    }
 
     // Send alert for critical errors
     if (['Payment', 'Database', 'MessageDelivery'].includes(errorType)) {
       console.error(
         `Critical error detected: ${errorType} - ${errorCode}`
-      )
-      newrelic.noticeError(new Error(`${errorType}: ${errorCode}`))
+      );
+      if (newrelic && newrelic.noticeError) {
+        newrelic.noticeError(new Error(`${errorType}: ${errorCode}`));
+      }
     }
   }
 
@@ -248,7 +281,9 @@ export class PerformanceMetrics {
       throw error
     } finally {
       const duration = Date.now() - startTime
-      newrelic.recordMetric(`Custom/Operation/${name}/Latency`, duration)
+      if (newrelic) {
+        newrelic.recordMetric(`Custom/Operation/${name}/Latency`, duration);
+      }
     }
   }
 
@@ -264,7 +299,9 @@ export class PerformanceMetrics {
       return fn()
     } finally {
       const duration = Date.now() - startTime
-      newrelic.recordMetric(`Custom/Operation/${name}/Latency`, duration)
+      if (newrelic) {
+        newrelic.recordMetric(`Custom/Operation/${name}/Latency`, duration);
+      }
     }
   }
 }

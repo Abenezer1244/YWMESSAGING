@@ -1,5 +1,13 @@
 import { PrismaClient } from '@prisma/client'
-import newrelic from 'newrelic'
+
+// Optional: Newrelic integration (only if installed)
+let newrelic: any = null;
+try {
+  newrelic = require('newrelic');
+} catch (e) {
+  // newrelic is optional - if not installed, logging still works
+  newrelic = null;
+}
 
 /**
  * Slow Query Logger
@@ -121,11 +129,13 @@ export function initializeSlowQueryLogging(prisma: PrismaClient) {
       const duration = Date.now() - startTime
 
       // Record error metrics
-      newrelic.recordMetric('Custom/Database/Query/Error/Count', 1)
-      newrelic.recordMetric(
-        'Custom/Database/Query/Error/Latency',
-        duration
-      )
+      if (newrelic) {
+        newrelic.recordMetric('Custom/Database/Query/Error/Count', 1);
+        newrelic.recordMetric(
+          'Custom/Database/Query/Error/Latency',
+          duration
+        );
+      }
 
       console.error(
         `Database error in ${params.model}.${params.action} after ${duration}ms:`,
@@ -144,15 +154,17 @@ function recordQueryMetric(
   params: any,
   duration: number
 ) {
+  if (!newrelic) return;
+
   // Overall query latency
-  newrelic.recordMetric('Custom/Database/Query/Latency', duration)
+  newrelic.recordMetric('Custom/Database/Query/Latency', duration);
 
   // Per-model metrics
   if (params.model) {
     newrelic.recordMetric(
       `Custom/Database/Model/${params.model}/Latency`,
       duration
-    )
+    );
   }
 
   // Per-action metrics (find, create, update, delete, etc.)
@@ -160,7 +172,7 @@ function recordQueryMetric(
     newrelic.recordMetric(
       `Custom/Database/Action/${params.action}/Latency`,
       duration
-    )
+    );
   }
 
   // Per-model-action metrics
@@ -168,7 +180,7 @@ function recordQueryMetric(
     newrelic.recordMetric(
       `Custom/Database/${params.model}/${params.action}/Latency`,
       duration
-    )
+    );
   }
 }
 
@@ -188,13 +200,17 @@ function logSlowQuery(event: SlowQueryEvent, isCritical: boolean = false) {
   }
 
   // Record slow query event to New Relic
-  newrelic.recordMetric('Custom/Database/SlowQuery/Count', 1)
+  if (newrelic) {
+    newrelic.recordMetric('Custom/Database/SlowQuery/Count', 1);
 
-  if (isCritical) {
-    newrelic.recordMetric('Custom/Database/CriticalSlowQuery/Count', 1)
-    newrelic.noticeError(
-      new Error(`Critical slow query: ${event.operation} (${event.duration}ms)`)
-    )
+    if (isCritical) {
+      newrelic.recordMetric('Custom/Database/CriticalSlowQuery/Count', 1);
+      if (newrelic.noticeError) {
+        newrelic.noticeError(
+          new Error(`Critical slow query: ${event.operation} (${event.duration}ms)`)
+        );
+      }
+    }
   }
 
   // Log parameters (sanitized)
@@ -341,16 +357,18 @@ export function collectSlowQueryMetrics() {
   const stats = slowQueryLog.getStats()
   const criticalQueries = slowQueryLog.getByDuration(2000).length
 
-  // Send to New Relic
-  newrelic.recordMetric('Custom/Database/SlowQuery/Total24h', stats.count)
-  newrelic.recordMetric(
-    'Custom/Database/CriticalSlowQuery/Total24h',
-    criticalQueries
-  )
-  newrelic.recordMetric(
-    'Custom/Database/Query/AverageDuration',
-    stats.avgDuration
-  )
+  // Send to New Relic (if available)
+  if (newrelic) {
+    newrelic.recordMetric('Custom/Database/SlowQuery/Total24h', stats.count);
+    newrelic.recordMetric(
+      'Custom/Database/CriticalSlowQuery/Total24h',
+      criticalQueries
+    );
+    newrelic.recordMetric(
+      'Custom/Database/Query/AverageDuration',
+      stats.avgDuration
+    );
+  }
 }
 
 /**
