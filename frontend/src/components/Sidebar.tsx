@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -6,6 +6,7 @@ import {
   GitBranch,
   Users,
   MessageSquare,
+  MessageCircle,
   History,
   FileText,
   Clock,
@@ -19,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { useBranchStore } from '../stores/branchStore';
+import { getConversations } from '../api/conversations';
 
 interface NavItem {
   label: string;
@@ -36,17 +38,39 @@ export function Sidebar() {
   const { currentBranchId } = useBranchStore();
   const [isOpen, setIsOpen] = useState(true);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const handleLogout = async () => {
     await logout();
     navigate('/');
   };
 
+  // Fetch unread conversation count
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const result = await getConversations({ limit: 1000 });
+        const totalUnread = result.data.reduce((sum, conv) => sum + (conv.unreadCount || 0), 0);
+        setUnreadCount(totalUnread);
+      } catch (error) {
+        // Failed to fetch unread count - non-critical
+      }
+    };
+
+    fetchUnreadCount();
+  }, []);
+
   const navigationItems: NavItem[] = [
     {
       label: 'Dashboard',
       icon: <LayoutDashboard className="w-5 h-5" />,
       path: '/dashboard',
+    },
+    {
+      label: 'Conversations',
+      icon: <MessageCircle className="w-5 h-5" />,
+      path: '/conversations',
+      badge: unreadCount > 0 ? unreadCount.toString() : undefined,
     },
     {
       label: 'Branches',
@@ -70,11 +94,6 @@ export function Sidebar() {
       icon: <MessageSquare className="w-5 h-5" />,
       path: '#',
       subItems: [
-        {
-          label: 'Conversations',
-          icon: <MessageSquare className="w-4 h-4" />,
-          path: '/conversations',
-        },
         {
           label: 'Send Message',
           icon: <MessageSquare className="w-4 h-4" />,
