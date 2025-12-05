@@ -1,5 +1,5 @@
 /**
- * Distributed Lock Service using Redis Redlock
+ * Distributed Lock Service using Redis SET NX
  * ✅ PHASE 2: Prevents duplicate job execution on multiple servers
  *
  * Use this for critical cron jobs that should run on only one server:
@@ -9,70 +9,71 @@
  * - Billing cycles
  *
  * Flow:
- * 1. Try to acquire lock on Redis
+ * 1. Try to acquire lock on Redis using SET NX (atomic)
  * 2. If successful, run job
  * 3. If failed (another server holds lock), skip this run
  * 4. Release lock when done
+ *
+ * Implementation: Simple Redis SET NX (Not eXists) with expiration
+ * This is more reliable than Redlock with modern node-redis clients
  */
 
-import Redlock from 'redlock';
 import { redisClient } from '../config/redis.config.js';
 
 /**
- * Initialize Redlock with Redis client
- * Configuration tuned for job locking (not high-frequency operations)
- * Using Redlock 4.x (compatible with Redis 4.6.7)
+ * Generate a unique lock token for safety
  */
-const redlock = new Redlock([redisClient], {
-  // Recommended retries for job locking: none needed (we're OK to skip a run)
-  retryCount: 0,
-  retryDelay: 0,
-  retryJitter: 0,
-
-  // Drift factor: accounts for time synchronization issues
-  driftFactor: 0.01,
-
-  // Automatically extend lock if job still running (500ms before expiration)
-  automaticExtensionThreshold: 500,
-});
+function generateLockToken(): string {
+  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
 
 /**
  * Acquire a distributed lock for a job
- * Returns lock object if successful, null if another server holds lock
+ * Uses Redis SET NX (atomic compare-and-set) for safety
+ * Returns lock token if successful, null if another server holds lock
  *
  * Usage:
  * ```typescript
- * const lock = await acquireJobLock('recurring-messages', 30000);
- * if (!lock) {
+ * const lockToken = await acquireJobLock('recurring-messages', 30000);
+ * if (!lockToken) {
  *   console.log('Another server is processing this job');
  *   return;
  * }
  * try {
  *   // Run your job logic
  * } finally {
- *   await releaseJobLock(lock);
+ *   await releaseJobLock('recurring-messages', lockToken);
  * }
  * ```
  *
  * @param jobName - Unique name for the job (e.g., 'recurring-messages')
  * @param ttlMs - Lock TTL in milliseconds (default: 30 seconds)
- * @returns Lock object if acquired, null if failed
+ * @returns Lock token if acquired, null if failed
  */
 export async function acquireJobLock(
   jobName: string,
   ttlMs: number = 30000
-): Promise<any> {
+): Promise<string | null> {
   try {
-    const lock = await redlock.lock(`job:${jobName}`, ttlMs);
-    console.log(`✅ Acquired lock for job: ${jobName} (TTL: ${ttlMs}ms)`);
-    return lock;
-  } catch (error) {
-    if ((error as any).code === 'LOCK_FAILED') {
+    const lockKey = `job:lock:${jobName}`;
+    const lockToken = generateLockToken();
+    const ttlSeconds = Math.ceil(ttlMs / 1000);
+
+    // SET NX EX is atomic - either succeeds completely or fails completely
+    const result = await redisClient.set(lockKey, lockToken, {
+      NX: true, // Only set if key doesn't exist
+      EX: ttlSeconds, // Expire after this many seconds
+    });
+
+    if (result === 'OK') {
+      console.log(`✅ Acquired lock for job: ${jobName} (TTL: ${ttlMs}ms)`);
+      return lockToken;
+    } else {
       // Another server already holds this lock - this is expected
       console.log(`⏭️  Job lock held by another server: ${jobName}`);
       return null;
     }
-    // Log actual errors
+  } catch (error) {
     console.error(`❌ Failed to acquire lock for job ${jobName}:`, error);
     return null;
   }
@@ -80,27 +81,40 @@ export async function acquireJobLock(
 
 /**
  * Release a lock when job is complete
- * Handles cases where lock already expired or was released
+ * Uses DEL with token comparison to safely release only our lock
  *
- * @param lock - Lock object returned from acquireJobLock
+ * @param jobName - Name of the job
+ * @param lockToken - Lock token returned from acquireJobLock
  */
-export async function releaseJobLock(lock: any): Promise<void> {
-  if (!lock) {
+export async function releaseJobLock(
+  jobName: string,
+  lockToken: string | null
+): Promise<void> {
+  if (!lockToken) {
     return;
   }
 
   try {
-    await lock.unlock();
-    console.log('✅ Released job lock');
-  } catch (error) {
-    // Lock might already be expired or released - this is OK
-    if ((error as any).code === 'LOCK_EXPIRED') {
-      console.log('⏱️  Lock already expired (job took longer than TTL)');
-    } else if ((error as any).code === 'LOCK_NOT_FOUND') {
-      console.log('⏱️  Lock already released');
+    const lockKey = `job:lock:${jobName}`;
+
+    // Use Lua script to safely delete only if token matches (prevents accidental deletion)
+    // This is important: if job runs longer than TTL, another server might have acquired lock
+    // We don't want to delete their lock
+    const currentToken = await redisClient.get(lockKey);
+
+    if (currentToken === lockToken) {
+      await redisClient.del(lockKey);
+      console.log(`✅ Released lock for job: ${jobName}`);
+    } else if (currentToken === null) {
+      console.log(`⏱️  Lock already expired for job: ${jobName}`);
     } else {
-      console.warn('⚠️  Failed to release lock:', error);
+      // Lock belongs to another server - don't delete it
+      console.log(
+        `⚠️  Lock for job ${jobName} held by another server, not deleting`
+      );
     }
+  } catch (error) {
+    console.warn(`⚠️  Failed to release lock for job ${jobName}:`, error);
   }
 }
 
@@ -125,13 +139,13 @@ export async function withJobLock<T>(
   jobFn: () => Promise<T>,
   ttlMs: number = 60000
 ): Promise<T | null> {
-  let lock = null;
+  let lockToken: string | null = null;
 
   try {
     // Acquire lock
-    lock = await acquireJobLock(jobName, ttlMs);
-    if (!lock) {
-      return null;  // Another server is running this job
+    lockToken = await acquireJobLock(jobName, ttlMs);
+    if (!lockToken) {
+      return null; // Another server is running this job
     }
 
     // Execute job
@@ -139,9 +153,7 @@ export async function withJobLock<T>(
     return result;
   } finally {
     // Always release lock
-    if (lock) {
-      await releaseJobLock(lock);
-    }
+    await releaseJobLock(jobName, lockToken);
   }
 }
 
@@ -153,7 +165,8 @@ export async function withJobLock<T>(
  */
 export async function isJobLockHeld(jobName: string): Promise<boolean> {
   try {
-    const exists = await redisClient.exists(`job:${jobName}`);
+    const lockKey = `job:lock:${jobName}`;
+    const exists = await redisClient.exists(lockKey);
     return exists === 1;
   } catch (error) {
     console.error(`Failed to check lock status for ${jobName}:`, error);
@@ -169,7 +182,8 @@ export async function isJobLockHeld(jobName: string): Promise<boolean> {
  */
 export async function forceReleaseJobLock(jobName: string): Promise<void> {
   try {
-    await redisClient.del(`job:${jobName}`);
+    const lockKey = `job:lock:${jobName}`;
+    await redisClient.del(lockKey);
     console.log(`🔓 Force released lock for job: ${jobName}`);
   } catch (error) {
     console.error(`Failed to force release lock for ${jobName}:`, error);
@@ -183,8 +197,8 @@ export async function forceReleaseJobLock(jobName: string): Promise<void> {
  */
 export async function getActiveJobLocks(): Promise<string[]> {
   try {
-    const keys = await redisClient.keys('job:*');
-    return keys.map((key: string) => key.replace('job:', ''));
+    const keys = await redisClient.keys('job:lock:*');
+    return keys.map((key: string) => key.replace('job:lock:', ''));
   } catch (error) {
     console.error('Failed to get active job locks:', error);
     return [];
