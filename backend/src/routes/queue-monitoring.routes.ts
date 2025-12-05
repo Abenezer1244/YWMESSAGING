@@ -6,7 +6,7 @@
 
 import { Router, Request, Response } from 'express';
 import { smsQueue, mmsQueue, mailQueue } from '../jobs/queue.js';
-import { authMiddleware } from '../middleware/auth.middleware.js';
+import { authenticateToken } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
@@ -19,7 +19,7 @@ const router = Router();
  *   mail: { waiting, active, completed, failed, delayed }
  * }
  */
-router.get('/metrics', authMiddleware, async (req: Request, res: Response) => {
+router.get('/metrics', authenticateToken, async (req: Request, res: Response) => {
   try {
     // If queues are disabled, return empty metrics
     if (!smsQueue) {
@@ -61,7 +61,7 @@ router.get('/metrics', authMiddleware, async (req: Request, res: Response) => {
  * GET /api/admin/queue/health
  * Check queue service health
  */
-router.get('/health', authMiddleware, async (req: Request, res: Response) => {
+router.get('/health', authenticateToken, async (req: Request, res: Response) => {
   try {
     if (!smsQueue) {
       return res.json({
@@ -110,7 +110,7 @@ router.get('/health', authMiddleware, async (req: Request, res: Response) => {
  * GET /api/admin/queue/failed
  * Get recently failed queue jobs (last 50)
  */
-router.get('/failed', authMiddleware, async (req: Request, res: Response) => {
+router.get('/failed', authenticateToken, async (req: Request, res: Response) => {
   try {
     if (!smsQueue) {
       return res.json({
@@ -152,7 +152,7 @@ router.get('/failed', authMiddleware, async (req: Request, res: Response) => {
  * Retry all failed SMS jobs
  * Admin only
  */
-router.post('/retry-failed', authMiddleware, async (req: Request, res: Response) => {
+router.post('/retry-failed', authenticateToken, async (req: Request, res: Response) => {
   try {
     if (!smsQueue) {
       return res.status(400).json({
@@ -190,7 +190,7 @@ router.post('/retry-failed', authMiddleware, async (req: Request, res: Response)
  * Clear all failed jobs from queue
  * Admin only
  */
-router.post('/clear-failed', authMiddleware, async (req: Request, res: Response) => {
+router.post('/clear-failed', authenticateToken, async (req: Request, res: Response) => {
   try {
     if (!smsQueue) {
       return res.status(400).json({

@@ -242,6 +242,7 @@ export const CACHE_KEYS = {
   // Church settings (1 hour TTL)
   churchSettings: (churchId: string) => `church:${churchId}:settings`,
   churchPlan: (churchId: string) => `church:${churchId}:plan`,
+  churchStats: (churchId: string) => `church:${churchId}:stats`,
 
   // Admin permissions (30 minutes TTL)
   adminPermissions: (adminId: string) => `admin:${adminId}:permissions`,

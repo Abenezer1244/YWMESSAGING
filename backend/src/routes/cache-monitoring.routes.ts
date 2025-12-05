@@ -6,7 +6,7 @@
 
 import { Router, Request, Response } from 'express';
 import { cacheMetrics } from '../services/cache.service.js';
-import { authMiddleware } from '../middleware/auth.middleware.js';
+import { authenticateToken } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
@@ -21,7 +21,7 @@ const router = Router();
  *   status: 'excellent' | 'good' | 'warning' | 'poor'
  * }
  */
-router.get('/metrics', authMiddleware, (req: Request, res: Response) => {
+router.get('/metrics', authenticateToken, (req: Request, res: Response) => {
   try {
     const hitRate = cacheMetrics.getHitRate();
 
@@ -63,7 +63,7 @@ router.get('/metrics', authMiddleware, (req: Request, res: Response) => {
  * Reset cache metrics (useful for period analysis)
  * Admin only
  */
-router.post('/reset', authMiddleware, (req: Request, res: Response) => {
+router.post('/reset', authenticateToken, (req: Request, res: Response) => {
   try {
     const before = {
       hits: cacheMetrics.hits,
@@ -92,7 +92,7 @@ router.post('/reset', authMiddleware, (req: Request, res: Response) => {
  * GET /api/admin/cache/health
  * Check cache service health
  */
-router.get('/health', authMiddleware, (req: Request, res: Response) => {
+router.get('/health', authenticateToken, (req: Request, res: Response) => {
   try {
     const hitRate = cacheMetrics.getHitRate();
     const totalOps = cacheMetrics.hits + cacheMetrics.misses;

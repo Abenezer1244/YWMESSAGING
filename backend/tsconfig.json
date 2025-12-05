@@ -15,9 +15,9 @@
     "sourceMap": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "types": ["node", "jest", "@testing-library/jest-dom"]
+    "types": ["node"]
   },
-  "include": ["src", "tests"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist", "src/**/*.test.ts", "src/__tests__"],
   "ts-node": {
     "compilerOptions": {
