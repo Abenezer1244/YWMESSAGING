@@ -6,9 +6,9 @@ import * as telnyxMMSService from '../services/telnyx-mms.service.js';
 const prisma = new PrismaClient();
 const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
 
-// DEPRECATED: Queues are no longer used - messages are sent synchronously
-// Keep this file for reference only. Queue creation disabled.
-// To re-enable queues in the future, uncomment the lines below and set ENABLE_QUEUES=true
+// ✅ PHASE 1: SMS queue re-enabled for improved reliability and throughput
+// Queues are created when ENABLE_QUEUES=true (set in .env or deployment config)
+// This provides exponential backoff retry, job tracking, and better error handling
 
 let mailQueue: any = null;
 let smsQueue: any = null;
@@ -78,21 +78,36 @@ if (analyticsQueue) {
 }
 
 // ============ SMS JOB PROCESSOR ============
-// Process SMS messages from MessageQueue
+// Process SMS messages from message queue
+// ✅ PHASE 1: Handles both new broadcast messages and legacy conversation messages
 // Only register if queues are enabled
 if (smsQueue) {
   smsQueue.process(async (job) => {
-  const { phone, churchId, content, conversationMessageId } = job.data;
+  const { phone, churchId, content, recipientId, messageId, conversationMessageId, queueId } = job.data;
 
   try {
     console.log(`📤 SMS Queue: Processing job ${job.id}`);
     console.log(`   To: ${phone}`);
     console.log(`   Content: ${content.substring(0, 50)}...`);
+    console.log(`   Attempt: ${job.attemptsMade + 1}/${job.opts.attempts}`);
 
     // Send via Telnyx
     const result = await telnyxService.sendSMS(phone, content, churchId);
 
-    // Update message with Telnyx ID
+    // Update messageRecipient with Telnyx ID (for new broadcast messages)
+    if (recipientId) {
+      await prisma.messageRecipient.update({
+        where: { id: recipientId },
+        data: {
+          providerMessageId: result.messageSid,
+          status: 'pending',
+        },
+      }).catch((err) => {
+        console.warn(`Warning: Could not update messageRecipient ${recipientId}: ${err.message}`);
+      });
+    }
+
+    // Update conversationMessage with Telnyx ID (for legacy conversation messages)
     if (conversationMessageId) {
       await prisma.conversationMessage.update({
         where: { id: conversationMessageId },
@@ -100,35 +115,51 @@ if (smsQueue) {
           providerMessageId: result.messageSid,
           deliveryStatus: 'pending',
         },
+      }).catch((err) => {
+        console.warn(`Warning: Could not update conversationMessage ${conversationMessageId}: ${err.message}`);
       });
     }
 
-    // Update queue status
-    await prisma.messageQueue.update({
-      where: {
-        id: job.data.queueId || conversationMessageId,
-      },
-      data: {
-        status: 'sent',
-        sentAt: new Date(),
-      },
-    }).catch(() => {
-      // Ignore if queue record not found
-    });
+    // Update legacy messageQueue status if present
+    if (queueId) {
+      await prisma.messageQueue.update({
+        where: { id: queueId },
+        data: {
+          status: 'sent',
+          sentAt: new Date(),
+        },
+      }).catch(() => {
+        // Ignore if queue record not found
+      });
+    }
 
     console.log(`✅ SMS sent: ${result.messageSid}`);
     return { success: true, messageSid: result.messageSid };
   } catch (error: any) {
-    console.error(`❌ SMS job failed: ${error.message}`);
+    console.error(`❌ SMS job ${job.id} failed (attempt ${job.attemptsMade + 1}): ${error.message}`);
 
-    // Update queue with error
-    if (job.data.queueId) {
+    // Update messageRecipient status on final failure
+    if (recipientId && job.attemptsMade + 1 >= job.opts.attempts) {
+      await prisma.messageRecipient.update({
+        where: { id: recipientId },
+        data: {
+          status: 'failed',
+          failureReason: error.message,
+          failedAt: new Date(),
+        },
+      }).catch((err) => {
+        console.warn(`Warning: Could not mark recipient as failed: ${err.message}`);
+      });
+    }
+
+    // Update legacy queue with error
+    if (queueId) {
       await prisma.messageQueue.update({
-        where: { id: job.data.queueId },
+        where: { id: queueId },
         data: {
           status: 'failed',
           lastError: error.message,
-          retryCount: (job.data.retryCount || 0) + 1,
+          retryCount: job.attemptsMade,
           failedAt: new Date(),
         },
       }).catch(() => {
