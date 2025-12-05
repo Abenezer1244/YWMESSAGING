@@ -98,7 +98,12 @@
       "Bash(frontend/src/pages/RegisterPage.tsx )",
       "Bash(tasks-ux-design.md)",
       "mcp__playwright__browser_click",
-      "mcp__playwright__browser_hover"
+      "mcp__playwright__browser_hover",
+      "Bash(timeout 60 npm test -- tests/services/auth.service.test.ts)",
+      "Bash(timeout 120 npm test:*)",
+      "Bash(timeout 90 npm test:*)",
+      "Bash(timeout 30 npx prisma migrate:*)",
+      "Bash(npm view:*)"
     ],
     "deny": [],
     "ask": []
