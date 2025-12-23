@@ -6,6 +6,7 @@ import { decryptPhoneSafe } from '../utils/encryption.utils.js';
 import { sendMessageSchema, getMessageHistorySchema } from '../lib/validation/schemas.js';
 import { safeValidate } from '../lib/validation/schemas.js';
 import { withRetry, TELNYX_RETRY_CONFIG } from '../utils/retry.js';
+import { smsQueue } from '../jobs/queue.js';
 const prisma = new PrismaClient();
 /**
  * POST /api/messages/send
@@ -48,7 +49,8 @@ export async function sendMessage(req, res) {
                 console.error('Failed to emit WebSocket message:sent event:', error);
             }
         })();
-        // Send messages synchronously to all recipients
+        // ✅ PHASE 1: Queue SMS messages for improved reliability and throughput
+        // Messages are now sent asynchronously via Bull queue with automatic retry
         (async () => {
             try {
                 // Get all recipients for this message
@@ -56,22 +58,43 @@ export async function sendMessage(req, res) {
                     where: { messageId: message.id },
                     include: { member: true },
                 });
-                console.log(`📤 Sending message to ${recipients.length} recipients`);
-                // Send to each recipient
+                console.log(`📤 Queueing message to ${recipients.length} recipients`);
+                // Queue each recipient for SMS sending
                 for (const recipient of recipients) {
                     try {
                         // Decrypt phone number (stored encrypted in database, or plain text for legacy records)
                         const decryptedPhone = decryptPhoneSafe(recipient.member.phone);
-                        const result = await withRetry(() => telnyxService.sendSMS(decryptedPhone, content, churchId), `sendSMS:${recipient.id}`, TELNYX_RETRY_CONFIG);
-                        // Update recipient with Telnyx message ID
-                        await prisma.messageRecipient.update({
-                            where: { id: recipient.id },
-                            data: {
-                                providerMessageId: result.messageSid,
-                                status: 'pending', // Pending delivery confirmation from Telnyx
-                            },
-                        });
-                        console.log(`   ✓ Sent to ${recipient.member.firstName} ${recipient.member.lastName}`);
+                        // Queue the SMS job with automatic retry (handled by Bull)
+                        if (smsQueue) {
+                            await smsQueue.add({
+                                phone: decryptedPhone,
+                                churchId,
+                                content,
+                                recipientId: recipient.id,
+                                messageId: message.id,
+                            }, {
+                                attempts: 3, // Automatic retry up to 3 times
+                                backoff: {
+                                    type: 'exponential',
+                                    delay: 2000, // Start with 2 second delay
+                                },
+                                removeOnComplete: true,
+                                removeOnFail: false, // Keep failed jobs for analysis
+                            });
+                            console.log(`   ✓ Queued SMS to ${recipient.member.firstName} ${recipient.member.lastName}`);
+                        }
+                        else {
+                            // Fallback: Send directly if queue is disabled
+                            const result = await withRetry(() => telnyxService.sendSMS(decryptedPhone, content, churchId), `sendSMS:${recipient.id}`, TELNYX_RETRY_CONFIG);
+                            await prisma.messageRecipient.update({
+                                where: { id: recipient.id },
+                                data: {
+                                    providerMessageId: result.messageSid,
+                                    status: 'pending',
+                                },
+                            });
+                            console.log(`   ✓ Sent to ${recipient.member.firstName} ${recipient.member.lastName}`);
+                        }
                     }
                     catch (error) {
                         // Mark as failed but continue with other recipients
@@ -83,17 +106,17 @@ export async function sendMessage(req, res) {
                                 failedAt: new Date(),
                             },
                         });
-                        console.error(`   ✗ Failed to send to ${recipient.member.firstName}: ${error.message}`);
+                        console.error(`   ✗ Failed to queue SMS to ${recipient.member.firstName}: ${error.message}`);
                     }
                 }
                 // Update message stats
                 await messageService.updateMessageStats(message.id);
-                console.log(`✅ Message broadcast complete: ${message.id}`);
+                console.log(`✅ Message queued for delivery: ${message.id}`);
             }
             catch (error) {
-                console.error('❌ Error sending message batch:', error.message);
+                console.error('❌ Error queueing message batch:', error.message);
             }
-        })(); // Fire and forget - don't wait for sending to complete
+        })(); // Fire and forget - don't wait for queuing to complete
         res.status(201).json({
             success: true,
             data: message,

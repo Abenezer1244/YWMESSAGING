@@ -26,11 +26,12 @@ import schedulerRoutes from './routes/scheduler.routes.js';
 import securityRoutes from './routes/security.routes.js';
 import gdprRoutes from './routes/gdpr.routes.js';
 import mfaRoutes from './routes/mfa.routes.js';
-import healthRoutes from './routes/health.js';
+import healthRoutes from './routes/health.routes.js';
 import { compressionMiddleware } from './middleware/compression.middleware.js';
 import { etagMiddleware } from './middleware/etag.middleware.js';
 import AppError, { getSafeErrorMessage, getStatusCode } from './utils/app-error.js';
 import { loggerMiddleware } from './utils/logger.js';
+import { initializeSession } from './config/session.config.js';
 const app = express();
 // Disable Express's built-in ETag generation (we implement our own)
 app.set('etag', false);
@@ -235,6 +236,13 @@ app.use(express.urlencoded({
     limit: '10 mb' // Form submissions (very rare in this app, but limited for safety)
 }));
 app.use(cookieParser());
+// ✅ SESSION MANAGEMENT: Redis-backed session store
+// CRITICAL FOR HORIZONTAL SCALING:
+// - Sessions stored in Redis (not memory) → survives server restarts
+// - Works with load balancers (no sticky sessions needed)
+// - Enables multi-server deployments
+// Must be after cookieParser and before routes
+app.use(initializeSession());
 // ✅ SECURITY: Origin/Referer validation for CSRF protection
 // Prevents cross-site requests to state-changing endpoints
 app.use(originValidationMiddleware);

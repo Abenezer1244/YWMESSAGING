@@ -14,6 +14,11 @@ export async function register(req, res) {
         // ✅ SECURITY: Validate request body with Zod schema (blocks 60-80% of injection attacks)
         const validationResult = safeValidate(registerSchema, req.body);
         if (!validationResult.success) {
+            console.error('Registration validation failed:', {
+                errors: validationResult.errors,
+                receivedFields: Object.keys(req.body),
+                receivedData: { email: req.body.email, firstName: req.body.firstName, lastName: req.body.lastName, churchName: req.body.churchName }
+            });
             res.status(400).json({ error: 'Validation failed', details: validationResult.errors });
             return;
         }
