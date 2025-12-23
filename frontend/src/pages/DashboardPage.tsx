@@ -140,10 +140,10 @@ export function DashboardPage() {
   }, [user]);
 
   useEffect(() => {
-    if (branchesLoaded && currentBranchId) {
+    if (branchesLoaded) {
       loadDashboardData();
     }
-  }, [branchesLoaded, currentBranchId]);
+  }, [branchesLoaded]);
 
   const loadDashboardData = async () => {
     try {
