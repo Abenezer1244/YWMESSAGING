@@ -17,10 +17,17 @@ export const RegisterSchema = z.object({
     .max(255, 'Email too long')
     .toLowerCase(),
   password: z.string()
-    .min(12, 'Password must be at least 12 characters')
+    .min(8, 'Password must be at least 8 characters')
     .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number')
-    .regex(/[!@#$%^&*]/, 'Password must contain at least one special character (!@#$%^&*)'),
+    .regex(/[0-9]/, 'Password must contain at least one number'),
+  firstName: z.string()
+    .min(1, 'First name is required')
+    .max(100, 'First name is too long')
+    .trim(),
+  lastName: z.string()
+    .min(1, 'Last name is required')
+    .max(100, 'Last name is too long')
+    .trim(),
   churchName: z.string()
     .min(1, 'Church name is required')
     .max(255, 'Church name is too long')

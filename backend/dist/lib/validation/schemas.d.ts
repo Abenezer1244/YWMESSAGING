@@ -8,16 +8,22 @@ import { z, ZodSchema } from 'zod';
 export declare const RegisterSchema: z.ZodObject<{
     email: z.ZodString;
     password: z.ZodString;
+    firstName: z.ZodString;
+    lastName: z.ZodString;
     churchName: z.ZodString;
     churchPhone: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     email: string;
     password: string;
+    firstName: string;
+    lastName: string;
     churchName: string;
     churchPhone?: string | undefined;
 }, {
     email: string;
     password: string;
+    firstName: string;
+    lastName: string;
     churchName: string;
     churchPhone?: string | undefined;
 }>;
@@ -187,16 +193,22 @@ export declare function formatValidationErrors(error: z.ZodError): {
 export declare const registerSchema: z.ZodObject<{
     email: z.ZodString;
     password: z.ZodString;
+    firstName: z.ZodString;
+    lastName: z.ZodString;
     churchName: z.ZodString;
     churchPhone: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     email: string;
     password: string;
+    firstName: string;
+    lastName: string;
     churchName: string;
     churchPhone?: string | undefined;
 }, {
     email: string;
     password: string;
+    firstName: string;
+    lastName: string;
     churchName: string;
     churchPhone?: string | undefined;
 }>;
