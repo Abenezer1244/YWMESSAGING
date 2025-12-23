@@ -14,6 +14,15 @@ interface OnboardingStep {
 
 export function OnboardingChecklist() {
   const navigate = useNavigate();
+
+  // Define action handlers that don't depend on state
+  const stepActions = {
+    create_branch: () => navigate('/branches'),
+    create_group: () => navigate('/groups'),
+    add_members: () => navigate('/members'),
+    send_message: () => navigate('/send-message'),
+  };
+
   const [steps, setSteps] = useState<OnboardingStep[]>([
     {
       id: 'create_branch',
@@ -21,7 +30,7 @@ export function OnboardingChecklist() {
       description: 'Set up a physical location or main campus to organize your members',
       completed: false,
       estimatedTime: '1 min',
-      action: () => navigate('/branches'),
+      action: stepActions.create_branch,
     },
     {
       id: 'create_group',
@@ -29,7 +38,7 @@ export function OnboardingChecklist() {
       description: 'Organize members by ministry, department, or team (e.g., "Sunday School", "Worship Team")',
       completed: false,
       estimatedTime: '1 min',
-      action: () => navigate('/groups'),
+      action: stepActions.create_group,
     },
     {
       id: 'add_members',
@@ -37,7 +46,7 @@ export function OnboardingChecklist() {
       description: 'Upload your contact list via CSV or add members manually',
       completed: false,
       estimatedTime: '2 mins',
-      action: () => navigate('/members'),
+      action: stepActions.add_members,
     },
     {
       id: 'send_message',
@@ -45,7 +54,7 @@ export function OnboardingChecklist() {
       description: 'Try sending a test message to your first group and see instant delivery',
       completed: false,
       estimatedTime: '2 mins',
-      action: () => navigate('/send-message'),
+      action: stepActions.send_message,
     },
   ]);
 
@@ -53,12 +62,18 @@ export function OnboardingChecklist() {
   const completedCount = steps.filter((s) => s.completed).length;
   const progress = (completedCount / steps.length) * 100;
 
-  // Load completion state from localStorage
+  // Load completion state from localStorage and restore action functions
   useEffect(() => {
     const saved = localStorage.getItem('onboarding_progress');
     if (saved) {
       try {
-        setSteps(JSON.parse(saved));
+        const savedData = JSON.parse(saved);
+        // Restore action functions since JSON.parse can't preserve them
+        const stepsWithActions = savedData.map((step: any) => ({
+          ...step,
+          action: stepActions[step.id as keyof typeof stepActions] || (() => {}),
+        }));
+        setSteps(stepsWithActions);
       } catch (error) {
         console.error('Failed to parse onboarding progress:', error);
       }
