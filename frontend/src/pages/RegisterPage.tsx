@@ -66,14 +66,10 @@ export function RegisterPage() {
       console.log('Registration successful, setting auth:', { admin, church, accessToken: accessToken ? 'present' : 'missing' });
       setAuth(admin, church, accessToken, refreshToken);
 
-      toast.success('Registration successful!');
+      // Navigate immediately - setAuth is synchronous (Zustand)
+      navigate('/dashboard', { replace: true });
 
-      // Use replace: true to ensure clean navigation
-      // and add a small delay to allow state to update
-      setTimeout(() => {
-        console.log('Navigating to dashboard');
-        navigate('/dashboard', { replace: true });
-      }, 100);
+      toast.success('Registration successful!');
     } catch (error: any) {
       setIsLoading(false);
 
