@@ -30,6 +30,7 @@ const BackButton: React.FC<BackButtonProps> = ({
       onClick={handleClick}
       variant={variant}
       size={size}
+      data-testid="back-button"
       className={`inline-flex items-center gap-2 ${className}`}
     >
       <svg

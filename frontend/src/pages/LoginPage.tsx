@@ -29,6 +29,7 @@ export function LoginPage() {
   }, []);
 
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+    mode: 'onBlur',
     defaultValues: {
       email: '',
       password: '',
@@ -169,6 +170,7 @@ export function LoginPage() {
               Don't have an account?{' '}
               <Link
                 to="/register"
+                data-testid="signup-link"
                 className="text-primary hover:text-primary/80 font-semibold transition-colors"
               >
                 Sign up
