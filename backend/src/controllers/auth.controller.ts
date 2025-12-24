@@ -28,10 +28,11 @@ export async function register(req: Request, res: Response): Promise<void> {
     const { email, password, firstName, lastName, churchName } = validationResult.data as any;
     const result = await registerChurch({ email, password, firstName, lastName, churchName });
 
-    // ✅ SECURITY: Determine cookie domain and sameSite based on environment
-    // Production: .koinoniasms.com with sameSite: 'none' for cross-domain
+    // ✅ SECURITY: Determine cookie domain and sameSite based on hostname (not NODE_ENV)
+    // Production: .koinoniasms.com with sameSite: 'none' for cross-subdomain requests
     // Development: undefined domain with sameSite: 'Lax' for localhost
-    const isProduction = process.env.NODE_ENV === 'production';
+    const hostname = req.hostname || '';
+    const isProduction = hostname.includes('koinoniasms.com');
     const cookieDomain = isProduction ? '.koinoniasms.com' : undefined;
     const sameSite = isProduction ? 'none' : 'lax'; // 'none' requires secure: true; 'lax' is safe for localhost
 
@@ -108,8 +109,9 @@ export async function loginHandler(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    // ✅ SECURITY: Determine cookie domain and sameSite based on environment
-    const isProduction = process.env.NODE_ENV === 'production';
+    // ✅ SECURITY: Determine cookie domain and sameSite based on hostname (not NODE_ENV)
+    const hostname = req.hostname || '';
+    const isProduction = hostname.includes('koinoniasms.com');
     const cookieDomain = isProduction ? '.koinoniasms.com' : undefined;
     const sameSite = isProduction ? 'none' : 'lax'; // 'none' requires secure: true; 'lax' is safe for localhost
 
@@ -172,8 +174,9 @@ export async function refreshToken(req: Request, res: Response): Promise<void> {
 
     const result = await refreshAccessToken(payload.adminId);
 
-    // ✅ SECURITY: Determine cookie domain and sameSite based on environment
-    const isProduction = process.env.NODE_ENV === 'production';
+    // ✅ SECURITY: Determine cookie domain and sameSite based on hostname (not NODE_ENV)
+    const hostname = req.hostname || '';
+    const isProduction = hostname.includes('koinoniasms.com');
     const cookieDomain = isProduction ? '.koinoniasms.com' : undefined;
     const sameSite = isProduction ? 'none' : 'lax'; // 'none' requires secure: true; 'lax' is safe for localhost
 
