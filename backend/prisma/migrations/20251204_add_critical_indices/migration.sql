@@ -21,12 +21,9 @@ CREATE INDEX IF NOT EXISTS "ConversationMessage_createdAt_idx"
 
 -- 2. Add missing indices to Member table
 -- These indices improve performance for:
--- - SMS segmentation queries: WHERE churchId = ? AND optInSms = true
 -- - Member pagination by creation date
 -- - Bulk member lookups by creation time
-
-CREATE INDEX IF NOT EXISTS "Member_churchId_optInSms_idx"
-  ON "Member"("churchId", "optInSms");
+-- Note: Member does not have churchId - it's connected via Group → Branch → Church relationship
 
 CREATE INDEX IF NOT EXISTS "Member_createdAt_idx"
   ON "Member"("createdAt");
