@@ -113,7 +113,16 @@
       "Bash(findstr:*)",
       "Bash(if [ -f \"C:\\Users\\Windows\\OneDrive - Seattle Colleges\\Desktop\\YWMESSAGING\\PRODUCTION-TEST-REPORT.md\" ])",
       "Bash(then cat \"C:\\Users\\Windows\\OneDrive - Seattle Colleges\\Desktop\\YWMESSAGING\\PRODUCTION-TEST-REPORT.md\")",
-      "Bash(else echo \"File does not exist\")"
+      "Bash(else echo \"File does not exist\")",
+      "Bash(timeout 15 node:*)",
+      "Bash(powershell -Command \"Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; echo ''Node processes stopped''\")",
+      "Bash(timeout 15 bash:*)",
+      "Bash(timeout 60 npm run dev)",
+      "Bash(timeout 120 npm run dev)",
+      "Bash(mcp__playwright__browser_navigate http://localhost:5173/register)",
+      "Bash(timeout 180 node:*)",
+      "Bash(ls:*)",
+      "Bash(timeout 10 bash:*)"
     ],
     "deny": [],
     "ask": []

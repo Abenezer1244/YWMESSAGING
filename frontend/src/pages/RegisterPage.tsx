@@ -33,8 +33,7 @@ export function RegisterPage() {
     });
   }, []);
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterFormData>({
-    mode: 'onBlur',
+  const { register, handleSubmit, watch, formState: { errors }, trigger } = useForm<RegisterFormData>({
     defaultValues: {
       email: '',
       password: '',
@@ -48,6 +47,12 @@ export function RegisterPage() {
   const password = watch('password');
 
   const onSubmit = async (data: RegisterFormData) => {
+    // Manually trigger validation to ensure errors are shown
+    const isValid = await trigger();
+    if (!isValid) {
+      return;
+    }
+
     if (data.password !== data.confirmPassword) {
       toast.error('Passwords do not match');
       return;
