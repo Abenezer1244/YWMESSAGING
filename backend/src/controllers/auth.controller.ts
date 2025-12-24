@@ -28,10 +28,10 @@ export async function register(req: Request, res: Response): Promise<void> {
     const { email, password, firstName, lastName, churchName } = validationResult.data as any;
     const result = await registerChurch({ email, password, firstName, lastName, churchName });
 
-    // ✅ SECURITY: Determine cookie domain and sameSite based on hostname (not NODE_ENV)
-    // Production: .koinoniasms.com with sameSite: 'none' for cross-subdomain requests
-    // Development: undefined domain with sameSite: 'Lax' for localhost
-    const hostname = req.hostname || '';
+    // ✅ SECURITY: Determine cookie domain and sameSite based on actual request origin
+    // Check hostname from request, supporting reverse proxy scenarios (X-Forwarded-Host header)
+    const xForwardedHost = req.get('x-forwarded-host');
+    const hostname = xForwardedHost || req.hostname || req.get('host') || '';
     const isProduction = hostname.includes('koinoniasms.com');
     const cookieDomain = isProduction ? '.koinoniasms.com' : undefined;
     const sameSite = isProduction ? 'none' : 'lax'; // 'none' requires secure: true; 'lax' is safe for localhost
@@ -109,8 +109,10 @@ export async function loginHandler(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    // ✅ SECURITY: Determine cookie domain and sameSite based on hostname (not NODE_ENV)
-    const hostname = req.hostname || '';
+    // ✅ SECURITY: Determine cookie domain and sameSite based on actual request origin
+    // Check hostname from request, supporting reverse proxy scenarios (X-Forwarded-Host header)
+    const xForwardedHost = req.get('x-forwarded-host');
+    const hostname = xForwardedHost || req.hostname || req.get('host') || '';
     const isProduction = hostname.includes('koinoniasms.com');
     const cookieDomain = isProduction ? '.koinoniasms.com' : undefined;
     const sameSite = isProduction ? 'none' : 'lax'; // 'none' requires secure: true; 'lax' is safe for localhost
@@ -174,8 +176,10 @@ export async function refreshToken(req: Request, res: Response): Promise<void> {
 
     const result = await refreshAccessToken(payload.adminId);
 
-    // ✅ SECURITY: Determine cookie domain and sameSite based on hostname (not NODE_ENV)
-    const hostname = req.hostname || '';
+    // ✅ SECURITY: Determine cookie domain and sameSite based on actual request origin
+    // Check hostname from request, supporting reverse proxy scenarios (X-Forwarded-Host header)
+    const xForwardedHost = req.get('x-forwarded-host');
+    const hostname = xForwardedHost || req.hostname || req.get('host') || '';
     const isProduction = hostname.includes('koinoniasms.com');
     const cookieDomain = isProduction ? '.koinoniasms.com' : undefined;
     const sameSite = isProduction ? 'none' : 'lax'; // 'none' requires secure: true; 'lax' is safe for localhost
