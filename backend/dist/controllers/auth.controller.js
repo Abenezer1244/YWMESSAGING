@@ -24,22 +24,24 @@ export async function register(req, res) {
         }
         const { email, password, firstName, lastName, churchName } = validationResult.data;
         const result = await registerChurch({ email, password, firstName, lastName, churchName });
-        // ✅ SECURITY: Determine cookie domain based on environment
-        // Production: .koinoniasms.com (shared across subdomains)
-        // Development: undefined (localhost only)
-        const cookieDomain = process.env.NODE_ENV === 'production' ? '.koinoniasms.com' : undefined;
+        // ✅ SECURITY: Determine cookie domain and sameSite based on environment
+        // Production: .koinoniasms.com with sameSite: 'none' for cross-domain
+        // Development: undefined domain with sameSite: 'Lax' for localhost
+        const isProduction = process.env.NODE_ENV === 'production';
+        const cookieDomain = isProduction ? '.koinoniasms.com' : undefined;
+        const sameSite = isProduction ? 'none' : 'lax'; // 'none' requires secure: true; 'lax' is safe for localhost
         // Set httpOnly cookies for tokens (secure, cannot be accessed via JavaScript)
         res.cookie('accessToken', result.accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-            sameSite: 'none', // Allow cross-origin cookie sending
+            secure: isProduction, // HTTPS only in production
+            sameSite: sameSite, // 'none' for cross-domain (production), 'lax' for localhost (development)
             domain: cookieDomain,
             maxAge: 15 * 60 * 1000, // 15 minutes
         });
         res.cookie('refreshToken', result.refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-            sameSite: 'none', // Allow cross-origin cookie sending
+            secure: isProduction, // HTTPS only in production
+            sameSite: sameSite, // 'none' for cross-domain (production), 'lax' for localhost (development)
             domain: cookieDomain,
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
@@ -94,20 +96,22 @@ export async function loginHandler(req, res) {
             });
             return;
         }
-        // ✅ SECURITY: Determine cookie domain based on environment
-        const cookieDomain = process.env.NODE_ENV === 'production' ? '.koinoniasms.com' : undefined;
+        // ✅ SECURITY: Determine cookie domain and sameSite based on environment
+        const isProduction = process.env.NODE_ENV === 'production';
+        const cookieDomain = isProduction ? '.koinoniasms.com' : undefined;
+        const sameSite = isProduction ? 'none' : 'lax'; // 'none' requires secure: true; 'lax' is safe for localhost
         // Set httpOnly cookies for tokens
         res.cookie('accessToken', result.accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-            sameSite: 'none', // Allow cross-origin cookie sending
+            secure: isProduction, // HTTPS only in production
+            sameSite: sameSite, // 'none' for cross-domain (production), 'lax' for localhost (development)
             domain: cookieDomain,
             maxAge: 15 * 60 * 1000, // 15 minutes
         });
         res.cookie('refreshToken', result.refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-            sameSite: 'none', // Allow cross-origin cookie sending
+            secure: isProduction, // HTTPS only in production
+            sameSite: sameSite, // 'none' for cross-domain (production), 'lax' for localhost (development)
             domain: cookieDomain,
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
@@ -148,20 +152,22 @@ export async function refreshToken(req, res) {
             return;
         }
         const result = await refreshAccessToken(payload.adminId);
-        // ✅ SECURITY: Determine cookie domain based on environment
-        const cookieDomain = process.env.NODE_ENV === 'production' ? '.koinoniasms.com' : undefined;
+        // ✅ SECURITY: Determine cookie domain and sameSite based on environment
+        const isProduction = process.env.NODE_ENV === 'production';
+        const cookieDomain = isProduction ? '.koinoniasms.com' : undefined;
+        const sameSite = isProduction ? 'none' : 'lax'; // 'none' requires secure: true; 'lax' is safe for localhost
         // Set new httpOnly cookies for tokens
         res.cookie('accessToken', result.accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-            sameSite: 'none', // Allow cross-origin cookie sending
+            secure: isProduction, // HTTPS only in production
+            sameSite: sameSite, // 'none' for cross-domain (production), 'lax' for localhost (development)
             domain: cookieDomain,
             maxAge: 15 * 60 * 1000, // 15 minutes
         });
         res.cookie('refreshToken', result.refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-            sameSite: 'none', // Allow cross-origin cookie sending
+            secure: isProduction, // HTTPS only in production
+            sameSite: sameSite, // 'none' for cross-domain (production), 'lax' for localhost (development)
             domain: cookieDomain,
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
@@ -291,20 +297,22 @@ export async function verifyMFAHandler(req, res) {
         const { generateAccessToken, generateRefreshToken } = await import('../utils/jwt.utils.js');
         const accessToken = generateAccessToken(adminId, churchId, admin.role);
         const refreshToken = generateRefreshToken(adminId);
-        // ✅ SECURITY: Determine cookie domain based on environment
-        const cookieDomain = process.env.NODE_ENV === 'production' ? '.koinoniasms.com' : undefined;
+        // ✅ SECURITY: Determine cookie domain and sameSite based on environment
+        const isProduction = process.env.NODE_ENV === 'production';
+        const cookieDomain = isProduction ? '.koinoniasms.com' : undefined;
+        const sameSite = isProduction ? 'none' : 'lax'; // 'none' requires secure: true; 'lax' is safe for localhost
         // Set httpOnly cookies for tokens
         res.cookie('accessToken', accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-            sameSite: 'none', // Allow cross-origin cookie sending
+            secure: isProduction, // HTTPS only in production
+            sameSite: sameSite, // 'none' for cross-domain (production), 'lax' for localhost (development)
             domain: cookieDomain,
             maxAge: 15 * 60 * 1000, // 15 minutes
         });
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-            sameSite: 'none', // Allow cross-origin cookie sending
+            secure: isProduction, // HTTPS only in production
+            sameSite: sameSite, // 'none' for cross-domain (production), 'lax' for localhost (development)
             domain: cookieDomain,
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
