@@ -1,0 +1,48 @@
+{
+  "timestamp": "2025-12-23T23:07:51.167Z",
+  "testEmail": "testuser.prod.1766531271@koinoniasms.dev",
+  "steps": [
+    {
+      "step": "Navigate to Registration Page",
+      "status": "SUCCESS",
+      "url": "http://localhost:5173/register",
+      "screenshot": "01-registration-page.png"
+    },
+    {
+      "step": "Submit Registration Form",
+      "status": "SUCCESS",
+      "url": "http://localhost:5173/register",
+      "screenshot": "03-post-registration.png"
+    },
+    {
+      "step": "Dashboard Page",
+      "status": "SUCCESS",
+      "url": "http://localhost:5173/login",
+      "screenshot": "04-dashboard.png"
+    },
+    {
+      "step": "Groups Page",
+      "status": "SUCCESS",
+      "url": "http://localhost:5173/groups",
+      "screenshot": "05-groups.png"
+    },
+    {
+      "step": "Send Message Page",
+      "status": "SUCCESS",
+      "url": "http://localhost:5173/send",
+      "screenshot": "06-send-message.png"
+    },
+    {
+      "step": "Settings Page",
+      "status": "SUCCESS",
+      "url": "http://localhost:5173/settings",
+      "screenshot": "07-settings.png"
+    },
+    {
+      "step": "Login Page",
+      "status": "SUCCESS",
+      "url": "http://localhost:5173/login",
+      "screenshot": "08-login-page.png"
+    }
+  ]
+}

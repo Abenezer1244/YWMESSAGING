@@ -44,12 +44,12 @@ app.use(getSentryRequestHandler());
 // Trust proxy - required for rate limiting and IP detection on Render
 app.set('trust proxy', 1);
 // Rate Limiting Middleware Configurations
-// Auth endpoints: strict limits to prevent brute-force attacks
-// Development: more lenient, Production: strict
-const authMaxRequests = process.env.NODE_ENV === 'production' ? 5 : 50;
+// Auth endpoints: reasonable limits to prevent brute-force attacks while allowing legitimate users
+// Development: lenient, Production: moderate (20 attempts allows for 4 form corrections)
+const authMaxRequests = process.env.NODE_ENV === 'production' ? 20 : 100;
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: authMaxRequests, // 5 in production, 50 in development
+    max: authMaxRequests, // 20 in production, 100 in development
     message: 'Too many login/signup attempts. Please try again later.',
     standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
     legacyHeaders: false, // Disable `X-RateLimit-*` headers

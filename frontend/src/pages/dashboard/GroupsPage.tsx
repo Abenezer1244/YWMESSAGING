@@ -4,12 +4,16 @@ import { motion } from 'framer-motion';
 import { Users, Loader, Trash2, Edit2, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useGroupStore, Group } from '../../stores/groupStore';
+import { useBranchStore } from '../../stores/branchStore';
 import { getGroups, deleteGroup } from '../../api/groups';
 import { GroupFormModal } from '../../components/groups/GroupFormModal';
 import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
 
 export function GroupsPage() {
-  const { branchId = '' } = useParams();
+  const { branchId: paramBranchId } = useParams();
+  const { currentBranchId } = useBranchStore();
+  // Use branchId from params if available, otherwise from store
+  const branchId = paramBranchId || currentBranchId || '';
   const { groups, setGroups, isLoading, setLoading } = useGroupStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<Group | undefined>();

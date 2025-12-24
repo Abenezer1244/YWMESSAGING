@@ -103,9 +103,23 @@
       "Bash(timeout 120 npm test:*)",
       "Bash(timeout 90 npm test:*)",
       "Bash(timeout 30 npx prisma migrate:*)",
-      "Bash(npm view:*)"
+      "Bash(npm view:*)",
+      "Bash(mcp__playwright__browser_navigate https://koinoniasms.com)",
+      "WebFetch(domain:koinoniasms.com)",
+      "Bash(mcp__playwright__browser_navigate https://koinoniasms.com/register)",
+      "Bash(timeout 5 npm run build:*)",
+      "Bash(powershell -Command \"Get-Process node -ErrorAction SilentlyContinue | Select-Object Id, ProcessName, StartTime\")",
+      "Bash(powershell -Command \"Get-NetTCPConnection -State Listen | Where-Object {$_LocalPort -in @(3000,5000)} | Select-Object LocalPort, OwningProcess\")",
+      "Bash(findstr:*)",
+      "Bash(if [ -f \"C:\\Users\\Windows\\OneDrive - Seattle Colleges\\Desktop\\YWMESSAGING\\PRODUCTION-TEST-REPORT.md\" ])",
+      "Bash(then cat \"C:\\Users\\Windows\\OneDrive - Seattle Colleges\\Desktop\\YWMESSAGING\\PRODUCTION-TEST-REPORT.md\")",
+      "Bash(else echo \"File does not exist\")"
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "shadcn"
+  ]
 }

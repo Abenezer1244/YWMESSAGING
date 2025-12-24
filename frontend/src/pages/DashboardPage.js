@@ -11,6 +11,7 @@ import { getMembers } from '../api/members';
 import { getGroups } from '../api/groups';
 import { getCurrentNumber } from '../api/numbers';
 import { getProfile } from '../api/admin';
+import { getBranches } from '../api/branches';
 import { SoftLayout, SoftCard, SoftStat } from '../components/SoftUI';
 import { DeliveryStatusBadge } from '../components/DeliveryStatusBadge';
 import TrialBanner from '../components/TrialBanner';
@@ -40,7 +41,7 @@ const getThemeColors = () => {
 const COLORS = ['#4A9FBF', '#FFB81C', '#98C26E', '#505050']; // Theme-based hex colors
 export function DashboardPage() {
     const { user, church } = useAuthStore();
-    const { branches, currentBranchId } = useBranchStore();
+    const { branches, currentBranchId, setBranches, setLoading: setBranchLoading } = useBranchStore();
     const [loading, setLoading] = useState(true);
     const [totalMembers, setTotalMembers] = useState(0);
     const [totalGroups, setTotalGroups] = useState(0);
@@ -50,6 +51,28 @@ export function DashboardPage() {
     const [showPhoneNumberModal, setShowPhoneNumberModal] = useState(false);
     const [hasPhoneNumber, setHasPhoneNumber] = useState(false);
     const [profile, setProfile] = useState(null);
+    const [branchesLoaded, setBranchesLoaded] = useState(false);
+    // Load branches on component mount (required for dashboard to work)
+    useEffect(() => {
+        const loadBranches = async () => {
+            if (!church?.id || branches.length > 0)
+                return;
+            setBranchLoading(true);
+            try {
+                const branchesData = await getBranches(church.id);
+                setBranches(branchesData);
+            }
+            catch (error) {
+                console.error('Failed to load branches:', error);
+                // Continue anyway - don't block dashboard
+            }
+            finally {
+                setBranchLoading(false);
+                setBranchesLoaded(true);
+            }
+        };
+        loadBranches();
+    }, [church?.id, branches.length, setBranches, setBranchLoading]);
     // Check if user should see welcome modal based on auth data
     useEffect(() => {
         // Check if user has completed welcome (from API data)
@@ -91,8 +114,10 @@ export function DashboardPage() {
         }
     }, [user]);
     useEffect(() => {
-        loadDashboardData();
-    }, [currentBranchId]);
+        if (branchesLoaded) {
+            loadDashboardData();
+        }
+    }, [branchesLoaded]);
     const loadDashboardData = async () => {
         try {
             setLoading(true);

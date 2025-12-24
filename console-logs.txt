@@ -1,0 +1,126 @@
+debug: [vite] connecting...
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: [vite] connected.
+log: ⚠️  PostHog API key not configured
+log: ⚠️  PostHog API key not configured
+error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+debug: getMe() failed, attempting token refresh... 401
+error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+debug: getMe() failed, attempting token refresh... 401
+error: Failed to load resource: the server responded with a status of 400 (Bad Request)
+debug: Session restoration failed, user not authenticated AxiosError
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+error: Failed to load resource: the server responded with a status of 400 (Bad Request)
+debug: Session restoration failed, user not authenticated AxiosError
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: [vite] connecting...
+debug: [vite] connected.
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+log: ⚠️  PostHog API key not configured
+log: ⚠️  PostHog API key not configured
+error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+debug: getMe() failed, attempting token refresh... 401
+error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+debug: getMe() failed, attempting token refresh... 401
+error: Failed to load resource: the server responded with a status of 400 (Bad Request)
+debug: Session restoration failed, user not authenticated AxiosError
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+error: Failed to load resource: the server responded with a status of 400 (Bad Request)
+debug: Session restoration failed, user not authenticated AxiosError
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: [vite] connecting...
+debug: [vite] connected.
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+warning: No routes matched location "/groups" 
+warning: No routes matched location "/groups" 
+log: ⚠️  PostHog API key not configured
+log: ⚠️  PostHog API key not configured
+warning: No routes matched location "/groups" 
+warning: No routes matched location "/groups" 
+error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+debug: getMe() failed, attempting token refresh... 401
+error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+debug: getMe() failed, attempting token refresh... 401
+error: Failed to load resource: the server responded with a status of 400 (Bad Request)
+debug: Session restoration failed, user not authenticated AxiosError
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+warning: No routes matched location "/groups" 
+warning: No routes matched location "/groups" 
+error: Failed to load resource: the server responded with a status of 400 (Bad Request)
+debug: Session restoration failed, user not authenticated AxiosError
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: [vite] connecting...
+debug: [vite] connected.
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+warning: No routes matched location "/send" 
+warning: No routes matched location "/send" 
+log: ⚠️  PostHog API key not configured
+log: ⚠️  PostHog API key not configured
+warning: No routes matched location "/send" 
+warning: No routes matched location "/send" 
+error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+debug: getMe() failed, attempting token refresh... 401
+error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+debug: getMe() failed, attempting token refresh... 401
+error: Failed to load resource: the server responded with a status of 400 (Bad Request)
+debug: Session restoration failed, user not authenticated AxiosError
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+warning: No routes matched location "/send" 
+warning: No routes matched location "/send" 
+error: Failed to load resource: the server responded with a status of 400 (Bad Request)
+debug: Session restoration failed, user not authenticated AxiosError
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: [vite] connecting...
+debug: [vite] connected.
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+warning: No routes matched location "/settings" 
+warning: No routes matched location "/settings" 
+log: ⚠️  PostHog API key not configured
+log: ⚠️  PostHog API key not configured
+warning: No routes matched location "/settings" 
+warning: No routes matched location "/settings" 
+error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+debug: getMe() failed, attempting token refresh... 401
+error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+debug: getMe() failed, attempting token refresh... 401
+error: Failed to load resource: the server responded with a status of 400 (Bad Request)
+debug: Session restoration failed, user not authenticated AxiosError
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+warning: No routes matched location "/settings" 
+warning: No routes matched location "/settings" 
+error: Failed to load resource: the server responded with a status of 400 (Bad Request)
+debug: Session restoration failed, user not authenticated AxiosError
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: [vite] connecting...
+debug: [vite] connected.
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+log: ⚠️  PostHog API key not configured
+log: ⚠️  PostHog API key not configured
+error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+debug: getMe() failed, attempting token refresh... 401
+error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+debug: getMe() failed, attempting token refresh... 401
+error: Failed to load resource: the server responded with a status of 400 (Bad Request)
+debug: Session restoration failed, user not authenticated AxiosError
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+error: Failed to load resource: the server responded with a status of 400 (Bad Request)
+debug: Session restoration failed, user not authenticated AxiosError
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}
+debug: App initialized, auth state: {isAuthenticated: false, churchId: undefined}

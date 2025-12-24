@@ -4,23 +4,44 @@ import { motion } from 'framer-motion';
 import { Loader, Send, FileText, Users, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useGroupStore } from '../../stores/groupStore';
+import { useBranchStore } from '../../stores/branchStore';
 import { useMessageStore } from '../../stores/messageStore';
 import { sendMessage } from '../../api/messages';
+import { getGroups } from '../../api/groups';
 import { getTemplates } from '../../api/templates';
 import TemplateFormModal from '../../components/templates/TemplateFormModal';
 import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
 export function SendMessagePage() {
-    const { groups } = useGroupStore();
+    const { groups, setGroups } = useGroupStore();
+    const { currentBranchId } = useBranchStore();
     const { addMessage } = useMessageStore();
     const [content, setContent] = useState('');
     const [targetType, setTargetType] = useState('groups');
     const [selectedGroupIds, setSelectedGroupIds] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [isPageLoading, setIsPageLoading] = useState(false);
     const [templates, setTemplates] = useState([]);
     const [showSaveModal, setShowSaveModal] = useState(false);
     useEffect(() => {
-        loadTemplates();
-    }, []);
+        loadGroupsAndTemplates();
+    }, [currentBranchId]);
+    const loadGroupsAndTemplates = async () => {
+        setIsPageLoading(true);
+        try {
+            if (currentBranchId && groups.length === 0) {
+                const groupsData = await getGroups(currentBranchId);
+                setGroups(groupsData);
+            }
+            await loadTemplates();
+        }
+        catch (error) {
+            console.error('Failed to load data:', error);
+            toast.error('Failed to load page data');
+        }
+        finally {
+            setIsPageLoading(false);
+        }
+    };
     const loadTemplates = async () => {
         try {
             const data = await getTemplates();
