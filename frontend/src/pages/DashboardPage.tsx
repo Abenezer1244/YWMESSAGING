@@ -68,7 +68,10 @@ export function DashboardPage() {
   // Load branches on component mount (required for dashboard to work)
   useEffect(() => {
     const loadBranches = async () => {
-      if (!church?.id) return;
+      if (!church?.id) {
+        setBranchesLoaded(true);
+        return;
+      }
 
       // If branches already loaded, mark as ready and skip loading
       if (branches.length > 0) {
