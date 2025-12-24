@@ -182,7 +182,7 @@ export function RegisterPage() {
               label="Password"
               type="password"
               placeholder="••••••••"
-              helperText="Must be at least 8 characters"
+              helperText="At least 8 characters, 1 uppercase letter, 1 number"
               disabled={isLoading}
               error={errors.password?.message}
               autoComplete="new-password"
@@ -192,6 +192,10 @@ export function RegisterPage() {
                 minLength: {
                   value: 8,
                   message: 'Password must be at least 8 characters',
+                },
+                validate: {
+                  hasUppercase: (value) => /[A-Z]/.test(value) || 'Password must contain at least one uppercase letter',
+                  hasNumber: (value) => /[0-9]/.test(value) || 'Password must contain at least one number',
                 },
               })}
             />
