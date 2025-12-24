@@ -134,7 +134,13 @@ export function RegisterPage() {
                 error={errors.firstName?.message}
                 autoComplete="given-name"
                 className="bg-muted border-border text-foreground"
-                {...register('firstName', { required: 'First name is required' })}
+                {...register('firstName', {
+                  required: 'First name is required',
+                  maxLength: {
+                    value: 100,
+                    message: 'First name is too long (max 100 characters)',
+                  },
+                })}
               />
 
               <Input
@@ -144,7 +150,13 @@ export function RegisterPage() {
                 error={errors.lastName?.message}
                 autoComplete="family-name"
                 className="bg-muted border-border text-foreground"
-                {...register('lastName', { required: 'Last name is required' })}
+                {...register('lastName', {
+                  required: 'Last name is required',
+                  maxLength: {
+                    value: 100,
+                    message: 'Last name is too long (max 100 characters)',
+                  },
+                })}
               />
             </div>
 
@@ -156,7 +168,13 @@ export function RegisterPage() {
               error={errors.churchName?.message}
               autoComplete="organization"
               className="bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white"
-              {...register('churchName', { required: 'Church name is required' })}
+              {...register('churchName', {
+                required: 'Church name is required',
+                maxLength: {
+                  value: 255,
+                  message: 'Church name is too long (max 255 characters)',
+                },
+              })}
             />
 
             {/* Email Address */}
@@ -173,6 +191,10 @@ export function RegisterPage() {
                 pattern: {
                   value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                   message: 'Invalid email format',
+                },
+                maxLength: {
+                  value: 255,
+                  message: 'Email is too long (max 255 characters)',
                 },
               })}
             />
