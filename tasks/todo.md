@@ -137,3 +137,76 @@ navigate('/dashboard', { replace: true });
 - ✅ Backward compatible with existing components
 - ✅ No breaking changes to API or component props
 - ✅ Performance improvements without feature removal
+
+---
+
+# Registration Form Validation Fix
+
+## Task: Fix 400 Bad Request error on registration
+
+### Problem Analysis
+User received HTTP 400 (Bad Request) error when attempting to register. Root cause was **validation mismatch** between frontend and backend:
+
+**Backend Requirements** (registerSchema in validation/schemas.ts, lines 19-22):
+- Password must be at least 8 characters
+- Password must contain at least one **uppercase letter**
+- Password must contain at least one **number**
+
+**Frontend Validation** (RegisterPage.tsx):
+- Only checked minimum 8 characters
+- Did NOT check for uppercase letter requirement
+- Did NOT check for number requirement
+
+Result: Users could submit invalid passwords, backend rejected them with 400 error, frontend didn't explain why.
+
+### Root Cause
+- Frontend validation was incomplete compared to backend schema
+- No real-time feedback to user about password requirements
+- Mismatch between client and server validation rules
+
+### Solution Implemented
+
+**File: `frontend/src/pages/RegisterPage.tsx`**
+
+Updated password field validation (lines 190-200):
+
+**Before**:
+```typescript
+{
+  required: 'Password is required',
+  minLength: {
+    value: 8,
+    message: 'Password must be at least 8 characters',
+  },
+}
+```
+
+**After**:
+```typescript
+{
+  required: 'Password is required',
+  minLength: {
+    value: 8,
+    message: 'Password must be at least 8 characters',
+  },
+  validate: {
+    hasUppercase: (value) => /[A-Z]/.test(value) || 'Password must contain at least one uppercase letter',
+    hasNumber: (value) => /[0-9]/.test(value) || 'Password must contain at least one number',
+  },
+}
+```
+
+Also updated helper text from "Must be at least 8 characters" to "At least 8 characters, 1 uppercase letter, 1 number".
+
+### Impact
+- ✅ Frontend now validates all password requirements BEFORE submission
+- ✅ Real-time error messages guide user to create valid password
+- ✅ Eliminates 400 errors from invalid passwords
+- ✅ Better user experience (clear requirements shown upfront)
+- ✅ Frontend/backend validation now aligned
+
+### Testing
+- Password "password" → Rejected (no uppercase, no number)
+- Password "Password1" → Accepted (has uppercase, has number)
+- Password "ABCDEFGH" → Rejected (has uppercase but no number)
+- Password "abcdefgh1" → Rejected (has number but no uppercase)
