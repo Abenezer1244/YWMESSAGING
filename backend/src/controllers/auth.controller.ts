@@ -32,9 +32,19 @@ export async function register(req: Request, res: Response): Promise<void> {
     // Check hostname from request, supporting reverse proxy scenarios (X-Forwarded-Host header)
     const xForwardedHost = req.get('x-forwarded-host');
     const hostname = xForwardedHost || req.hostname || req.get('host') || '';
-    const isProduction = hostname.includes('koinoniasms.com');
+    const isProduction = hostname.includes('koinoniasms.com') || process.env.NODE_ENV === 'production';
     const cookieDomain = isProduction ? '.koinoniasms.com' : undefined;
     const sameSite = isProduction ? 'none' : 'lax'; // 'none' requires secure: true; 'lax' is safe for localhost
+
+    // DEBUG: Log cookie settings for register
+    console.log('🔍 REGISTER - Cookie Configuration:', {
+      xForwardedHost,
+      hostname,
+      isProduction,
+      cookieDomain,
+      sameSite,
+      NODE_ENV: process.env.NODE_ENV,
+    });
 
     // Set httpOnly cookies for tokens (secure, cannot be accessed via JavaScript)
     res.cookie('accessToken', result.accessToken, {
@@ -113,9 +123,21 @@ export async function loginHandler(req: Request, res: Response): Promise<void> {
     // Check hostname from request, supporting reverse proxy scenarios (X-Forwarded-Host header)
     const xForwardedHost = req.get('x-forwarded-host');
     const hostname = xForwardedHost || req.hostname || req.get('host') || '';
-    const isProduction = hostname.includes('koinoniasms.com');
+    const isProduction = hostname.includes('koinoniasms.com') || process.env.NODE_ENV === 'production';
     const cookieDomain = isProduction ? '.koinoniasms.com' : undefined;
     const sameSite = isProduction ? 'none' : 'lax'; // 'none' requires secure: true; 'lax' is safe for localhost
+
+    // DEBUG: Log cookie settings
+    console.log('🔍 LOGIN - Cookie Configuration:', {
+      xForwardedHost,
+      hostname,
+      isProduction,
+      cookieDomain,
+      sameSite,
+      NODE_ENV: process.env.NODE_ENV,
+      nodeHost: req.hostname,
+      hostHeader: req.get('host'),
+    });
 
     // Set httpOnly cookies for tokens
     res.cookie('accessToken', result.accessToken, {
@@ -180,9 +202,19 @@ export async function refreshToken(req: Request, res: Response): Promise<void> {
     // Check hostname from request, supporting reverse proxy scenarios (X-Forwarded-Host header)
     const xForwardedHost = req.get('x-forwarded-host');
     const hostname = xForwardedHost || req.hostname || req.get('host') || '';
-    const isProduction = hostname.includes('koinoniasms.com');
+    const isProduction = hostname.includes('koinoniasms.com') || process.env.NODE_ENV === 'production';
     const cookieDomain = isProduction ? '.koinoniasms.com' : undefined;
     const sameSite = isProduction ? 'none' : 'lax'; // 'none' requires secure: true; 'lax' is safe for localhost
+
+    // DEBUG: Log cookie settings
+    console.log('🔍 REFRESH - Cookie Configuration:', {
+      xForwardedHost,
+      hostname,
+      isProduction,
+      cookieDomain,
+      sameSite,
+      NODE_ENV: process.env.NODE_ENV,
+    });
 
     // Set new httpOnly cookies for tokens
     res.cookie('accessToken', result.accessToken, {
@@ -345,9 +377,21 @@ export async function verifyMFAHandler(req: Request, res: Response): Promise<voi
     const refreshToken = generateRefreshToken(adminId);
 
     // ✅ SECURITY: Determine cookie domain and sameSite based on environment
-    const isProduction = process.env.NODE_ENV === 'production';
+    const xForwardedHost = req.get('x-forwarded-host');
+    const hostname = xForwardedHost || req.hostname || req.get('host') || '';
+    const isProduction = hostname.includes('koinoniasms.com') || process.env.NODE_ENV === 'production';
     const cookieDomain = isProduction ? '.koinoniasms.com' : undefined;
     const sameSite = isProduction ? 'none' : 'lax'; // 'none' requires secure: true; 'lax' is safe for localhost
+
+    // DEBUG: Log cookie settings
+    console.log('🔍 VERIFY_MFA - Cookie Configuration:', {
+      xForwardedHost,
+      hostname,
+      isProduction,
+      cookieDomain,
+      sameSite,
+      NODE_ENV: process.env.NODE_ENV,
+    });
 
     // Set httpOnly cookies for tokens
     res.cookie('accessToken', accessToken, {
