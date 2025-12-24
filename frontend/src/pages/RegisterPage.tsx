@@ -33,7 +33,8 @@ export function RegisterPage() {
     });
   }, []);
 
-  const { register, handleSubmit, watch, formState: { errors }, trigger } = useForm<RegisterFormData>({
+  const { register, handleSubmit, watch, formState, trigger } = useForm<RegisterFormData>({
+    mode: 'onChange',
     defaultValues: {
       email: '',
       password: '',
@@ -44,12 +45,30 @@ export function RegisterPage() {
     },
   });
 
-  const password = watch('password');
+  const { errors } = formState;
+  const watchedValues = watch();
 
   const onSubmit = async (data: RegisterFormData) => {
-    // Manually trigger validation to ensure errors are shown
+    // Trigger validation to populate errors
     const isValid = await trigger();
+
     if (!isValid) {
+      // Build error message from validation errors
+      const errorMessages: string[] = [];
+
+      if (errors.firstName) errorMessages.push(`First name: ${errors.firstName.message}`);
+      if (errors.lastName) errorMessages.push(`Last name: ${errors.lastName.message}`);
+      if (errors.churchName) errorMessages.push(`Church name: ${errors.churchName.message}`);
+      if (errors.email) errorMessages.push(`Email: ${errors.email.message}`);
+      if (errors.password) errorMessages.push(`Password: ${errors.password.message}`);
+      if (errors.confirmPassword) errorMessages.push(`Confirm password: ${errors.confirmPassword.message}`);
+
+      // Show errors as toast
+      const errorText = errorMessages.length > 0
+        ? errorMessages.join('\n')
+        : 'Please check your form for errors';
+
+      toast.error(errorText);
       return;
     }
 
@@ -107,6 +126,7 @@ export function RegisterPage() {
       <AnimatedBlobs variant="minimal" />
       {/* Subtle background accent */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-primary opacity-10 rounded-full blur-3xl pointer-events-none"></div>
+
 
       <div className="w-full max-w-2xl relative z-10 animate-fadeIn">
         <div className="mb-6">
