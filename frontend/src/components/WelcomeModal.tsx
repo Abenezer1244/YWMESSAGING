@@ -90,19 +90,42 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: Wel
   const [selectedRole, setSelectedRole] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Handle Escape key to close modal (WCAG 2.1.2 compliance)
+  // Mark welcome as completed without selecting a role
+  // Used for Skip button, close button, and Escape key
+  const handleSkip = async () => {
+    setIsLoading(true);
+    try {
+      const response = await client.post('/auth/complete-welcome', {
+        userRole: 'skipped',
+      });
+
+      if (response.data.success) {
+        if (onWelcomeComplete) {
+          onWelcomeComplete('skipped', true);
+        }
+        onClose();
+      }
+    } catch (error: any) {
+      console.error('Failed to skip welcome:', error);
+      onClose();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle Escape key (WCAG 2.1.2 compliance)
   useEffect(() => {
     if (!isOpen) return;
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose();
+        handleSkip();
       }
     };
 
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose]);
+  }, [isOpen, handleSkip]);
 
   const roles = [
     {
@@ -216,7 +239,7 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: Wel
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={onClose}
+                onClick={handleSkip}
                 className="w-11 h-11 flex items-center justify-center hover:bg-muted rounded-lg transition-colors duration-200"
                 aria-label="Close modal (Escape key also works)"
               >
@@ -357,7 +380,7 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: Wel
                   </Button>
 
                   <button
-                    onClick={onClose}
+                    onClick={handleSkip}
                     disabled={isLoading}
                     className="w-full py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted/50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
