@@ -64,8 +64,10 @@ export const getSessionConfig = (): SessionOptions => {
       // Sessions expire after 24 hours of inactivity
       maxAge: 24 * 60 * 60 * 1000, // milliseconds
 
-      // Domain restriction (optional, set if needed)
-      // domain: process.env.COOKIE_DOMAIN,
+      // ✅ Domain restriction for cross-subdomain cookie sharing
+      // In production, set domain to .koinoniasms.com so cookies are sent to all subdomains
+      // In development, leave undefined so cookies work on localhost
+      domain: isProduction ? '.koinoniasms.com' : undefined,
 
       // Path restriction
       path: '/',

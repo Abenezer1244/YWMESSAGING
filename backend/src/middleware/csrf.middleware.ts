@@ -9,6 +9,9 @@ export const csrfProtection = csrf({
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
+    // ✅ CRITICAL: Set domain for cross-subdomain cookie sharing
+    // This allows the _csrf cookie to be sent to both koinoniasms.com and api.koinoniasms.com
+    domain: process.env.NODE_ENV === 'production' ? '.koinoniasms.com' : undefined,
   },
 });
 
