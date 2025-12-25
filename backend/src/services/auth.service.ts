@@ -128,33 +128,45 @@ export async function registerChurch(input: RegisterInput): Promise<RegisterResp
  * Login with email and password
  */
 export async function login(input: LoginInput): Promise<LoginResponse> {
+  console.log('[LOGIN] Starting login process for:', input.email);
+
+  console.log('[LOGIN] Finding admin by email...');
   const admin = await prisma.admin.findUnique({
     where: { email: input.email },
     include: { church: true },
   });
 
   if (!admin) {
+    console.log('[LOGIN] Admin not found:', input.email);
     throw new Error('Invalid email or password');
   }
 
+  console.log('[LOGIN] Admin found, comparing password...');
   // Verify password
   const passwordMatch = await comparePassword(input.password, admin.passwordHash);
   if (!passwordMatch) {
+    console.log('[LOGIN] Password does not match');
     throw new Error('Invalid email or password');
   }
 
+  console.log('[LOGIN] Password matched, generating tokens...');
   // Generate tokens
   const accessToken = generateAccessToken(admin.id, admin.churchId, admin.role);
   const refreshToken = generateRefreshToken(admin.id);
 
+  console.log('[LOGIN] Updating lastLoginAt...');
   // Update lastLoginAt
   await prisma.admin.update({
     where: { id: admin.id },
     data: { lastLoginAt: new Date() },
   });
 
-  // Invalidate admin cache to refresh permissions
-  await invalidateCache(CACHE_KEYS.adminRole(admin.id));
+  console.log('[LOGIN] Invalidating cache (non-blocking)...');
+  // Invalidate admin cache to refresh permissions (non-blocking - don't await)
+  // Cache invalidation is not critical to login success, just an optimization
+  invalidateCache(CACHE_KEYS.adminRole(admin.id)).catch((err) => {
+    console.error('[LOGIN] Cache invalidation failed:', err.message);
+  });
 
   return {
     adminId: admin.id,
