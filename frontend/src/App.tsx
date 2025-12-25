@@ -67,27 +67,9 @@ function App() {
 
   // Initialize analytics, fetch CSRF token, and restore auth session on app load
   useEffect(() => {
-    // Initialize Google Analytics 4
-    const gaId = import.meta.env.VITE_GA_ID;
-    const isProduction = import.meta.env.PROD;
-    if (gaId && isProduction) {
-      ReactGA.initialize(gaId);
-      if (import.meta.env.DEV) {
-        console.debug('GA4 initialized with ID:', gaId);
-      }
-    }
+    // ✅ PERF: Defer non-critical initializations to not block critical rendering path
 
-    // Initialize PostHog
-    initializePostHog();
-
-    // Fetch CSRF token
-    fetchCsrfToken().catch(() => {
-      // CSRF token initialization failed - non-critical
-      if (import.meta.env.DEV) {
-        console.debug('CSRF token initialization failed');
-      }
-    });
-
+    // Initialize auth FIRST (critical path)
     // Restore authentication from session
     // First, try to restore from sessionStorage (survives page refresh)
     setIsCheckingAuth(true);
@@ -108,9 +90,15 @@ function App() {
       console.warn('Failed to restore auth state from sessionStorage');
     }
 
+    // ✅ PERF: Add timeout to getMe() so slow responses don't block rendering
+    // If getMe() takes > 5 seconds, treat as not authenticated and continue
+    const getMeController = new AbortController();
+    const getMeTimeout = setTimeout(() => getMeController.abort(), 5000);
+
     // If not in sessionStorage, try to get current user from backend
     getMe()
       .then((response) => {
+        clearTimeout(getMeTimeout);
         // User has valid session, restore auth state
         if (response.success && response.data) {
           const admin = {
@@ -126,6 +114,7 @@ function App() {
         }
       })
       .catch(async (error) => {
+        clearTimeout(getMeTimeout);
         // getMe() failed - try refreshing token to extend session
         // This handles case where access token expired but refresh token is valid
         try {
@@ -133,16 +122,23 @@ function App() {
             console.debug('getMe() failed, attempting token refresh...', error.response?.status);
           }
 
-          // Try to refresh the token
+          // Try to refresh the token (with 3 second timeout)
+          const refreshController = new AbortController();
+          const refreshTimeout = setTimeout(() => refreshController.abort(), 3000);
           const refreshResponse = await refreshToken();
+          clearTimeout(refreshTimeout);
 
           if (!refreshResponse.success) {
             throw new Error('Token refresh failed');
           }
 
           // Refresh succeeded - tokens now updated in cookies + Zustand store (by interceptor)
-          // Now retry getMe() with fresh token
+          // Now retry getMe() with fresh token (with 3 second timeout)
+          const retryController = new AbortController();
+          const retryTimeout = setTimeout(() => retryController.abort(), 3000);
           const retryResponse = await getMe();
+          clearTimeout(retryTimeout);
+
           if (retryResponse.success && retryResponse.data) {
             const admin = {
               id: retryResponse.data.id,
@@ -178,6 +174,48 @@ function App() {
         });
     }
   }, [isAuthenticated, church?.id, setBranches]);
+
+  // ✅ PERF: Defer non-critical initialization until after critical rendering
+  // These don't block page load, so run them separately
+  useEffect(() => {
+    // Initialize Google Analytics 4 (non-blocking)
+    const gaId = import.meta.env.VITE_GA_ID;
+    const isProduction = import.meta.env.PROD;
+    if (gaId && isProduction) {
+      // Delay GA4 init to not block rendering
+      const timer = setTimeout(() => {
+        ReactGA.initialize(gaId);
+        if (import.meta.env.DEV) {
+          console.debug('GA4 initialized with ID:', gaId);
+        }
+      }, 2000); // Init after 2 seconds
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  // ✅ PERF: Initialize PostHog after auth is established
+  useEffect(() => {
+    if (!isCheckingAuth) {
+      // Only init PostHog after we know auth status
+      const timer = setTimeout(() => {
+        initializePostHog();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isCheckingAuth]);
+
+  // ✅ PERF: Fetch CSRF token in background (not critical path)
+  useEffect(() => {
+    // Fetch CSRF token for POST requests (async, non-blocking)
+    const timer = setTimeout(() => {
+      fetchCsrfToken().catch(() => {
+        if (import.meta.env.DEV) {
+          console.debug('CSRF token initialization failed');
+        }
+      });
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <ThemeProvider>
