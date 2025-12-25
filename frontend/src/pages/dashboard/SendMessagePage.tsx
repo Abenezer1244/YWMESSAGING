@@ -31,25 +31,41 @@ export function SendMessagePage() {
   const loadGroupsAndTemplates = async () => {
     setIsPageLoading(true);
     try {
+      // ✅ PERFORMANCE: Load groups and templates in parallel (independent calls)
+      const promises: Promise<any>[] = [
+        getTemplates().catch(error => {
+          console.error('Failed to load templates:', error);
+          return [];
+        }),
+      ];
+
+      let groupsPromiseIndex = -1;
+
+      // Groups loading depends on currentBranchId
       if (currentBranchId && groups.length === 0) {
-        const groupsData = await getGroups(currentBranchId);
-        setGroups(groupsData);
+        groupsPromiseIndex = 0;
+        promises.unshift(
+          getGroups(currentBranchId).catch(error => {
+            console.error('Failed to load groups:', error);
+            return [];
+          })
+        );
       }
-      await loadTemplates();
+
+      const results = await Promise.all(promises);
+
+      // Set results in correct order
+      if (groupsPromiseIndex === 0) {
+        setGroups(results[0]);
+        setTemplates(results[1]);
+      } else {
+        setTemplates(results[0]);
+      }
     } catch (error) {
       console.error('Failed to load data:', error);
       toast.error('Failed to load page data');
     } finally {
       setIsPageLoading(false);
-    }
-  };
-
-  const loadTemplates = async () => {
-    try {
-      const data = await getTemplates();
-      setTemplates(data);
-    } catch (error) {
-      console.error('Failed to load templates:', error);
     }
   };
 
