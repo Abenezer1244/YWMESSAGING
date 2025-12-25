@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, Suspense, lazy } from 'react';
 import { motion } from 'framer-motion';
 import {
   Users,
@@ -25,7 +25,9 @@ import { DeliveryStatusBadge } from '../components/DeliveryStatusBadge';
 import TrialBanner from '../components/TrialBanner';
 import { ChatWidget } from '../components/ChatWidget';
 import WelcomeModal from '../components/WelcomeModal';
-import PhoneNumberPurchaseModal from '../components/PhoneNumberPurchaseModal';
+// ✅ PERF: Lazy-load PhoneNumberPurchaseModal to prevent Stripe from loading on dashboard mount
+// Stripe takes 35+ seconds to load - only load when modal is actually opened
+const PhoneNumberPurchaseModal = lazy(() => import('../components/PhoneNumberPurchaseModal'));
 import { OnboardingChecklist } from '../components/onboarding/OnboardingChecklist';
 import { DeliveryRateCard } from '../components/dashboard/DeliveryRateCard';
 
@@ -522,11 +524,16 @@ export function DashboardPage() {
         onClose={() => setShowWelcome(false)}
         onWelcomeComplete={handleWelcomeComplete}
       />
-      <PhoneNumberPurchaseModal
-        isOpen={showPhoneNumberModal}
-        onClose={() => setShowPhoneNumberModal(false)}
-        onPurchaseComplete={handlePhoneNumberPurchased}
-      />
+      {/* ✅ PERF: Only render modal when open to lazy-load Stripe on demand */}
+      {showPhoneNumberModal && (
+        <Suspense fallback={null}>
+          <PhoneNumberPurchaseModal
+            isOpen={showPhoneNumberModal}
+            onClose={() => setShowPhoneNumberModal(false)}
+            onPurchaseComplete={handlePhoneNumberPurchased}
+          />
+        </Suspense>
+      )}
     </>
   );
 }

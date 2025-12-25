@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, X, Loader, Check, ChevronDown } from 'lucide-react';
 import { Elements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe, Stripe } from '@stripe/stripe-js';
 import FocusTrap from 'focus-trap-react';
 import toast from 'react-hot-toast';
 import Button from './ui/Button';
@@ -28,9 +28,6 @@ const US_STATES = [
   { code: 'NC', name: 'North Carolina' },
 ];
 
-// Initialize Stripe
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
-
 export default function PhoneNumberPurchaseModal({
   isOpen,
   onClose,
@@ -45,6 +42,14 @@ export default function PhoneNumberPurchaseModal({
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'declined' | 'failed'>('idle');
   const [paymentMessage, setPaymentMessage] = useState('');
+  const stripePromiseRef = useRef<Promise<Stripe | null> | null>(null);
+
+  // ✅ PERF: Lazy-load Stripe library only when payment step is reached
+  useEffect(() => {
+    if (step === 'payment' && !stripePromiseRef.current) {
+      stripePromiseRef.current = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
+    }
+  }, [step]);
 
   // Handle Escape key to close modal (WCAG 2.1.2 compliance)
   useEffect(() => {
@@ -457,7 +462,7 @@ export default function PhoneNumberPurchaseModal({
                 {/* Step 4: Payment */}
                 {step === 'payment' && selectedNumber && paymentIntentId && (
                   <motion.div variants={itemVariants} className="space-y-4">
-                    <Elements stripe={stripePromise}>
+                    <Elements stripe={stripePromiseRef.current}>
                       <StripePaymentForm
                         amount={50} // $0.50 in cents (Stripe minimum)
                         phoneNumber={selectedNumber.phoneNumber}
