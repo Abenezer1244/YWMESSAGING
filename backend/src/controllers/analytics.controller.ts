@@ -12,9 +12,9 @@ export async function getMessageStats(req: Request, res: Response) {
 
     const stats = await statsService.getMessageStats(churchId, days);
     res.json(stats);
-  } catch (error) {
-    console.error('Error fetching message stats:', error);
-    res.status(500).json({ error: 'Failed to fetch message statistics' });
+  } catch (error: any) {
+    console.error('Error fetching message stats:', error.message || error);
+    res.status(500).json({ error: 'Failed to fetch message statistics', details: error.message });
   }
 }
 
@@ -27,9 +27,9 @@ export async function getBranchStats(req: Request, res: Response) {
 
     const stats = await statsService.getBranchStats(churchId);
     res.json(stats);
-  } catch (error) {
-    console.error('Error fetching branch stats:', error);
-    res.status(500).json({ error: 'Failed to fetch branch statistics' });
+  } catch (error: any) {
+    console.error('Error fetching branch stats:', error.message || error);
+    res.status(500).json({ error: 'Failed to fetch branch statistics', details: error.message });
   }
 }
 
@@ -42,8 +42,8 @@ export async function getSummaryStats(req: Request, res: Response) {
 
     const stats = await statsService.getSummaryStats(churchId);
     res.json(stats);
-  } catch (error) {
-    console.error('Error fetching summary stats:', error);
-    res.status(500).json({ error: 'Failed to fetch summary statistics' });
+  } catch (error: any) {
+    console.error('Error fetching summary stats:', error.message || error);
+    res.status(500).json({ error: 'Failed to fetch summary statistics', details: error.message });
   }
 }
