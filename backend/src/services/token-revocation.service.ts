@@ -102,10 +102,13 @@ export async function revokeAllTokens(accessToken: string, refreshToken: string)
  */
 export async function isTokenRevoked(token: string, type: 'access' | 'refresh' = 'access'): Promise<boolean> {
   try {
-    // If Redis is not connected, skip revocation check but log warning
+    // ✅ SECURITY: If Redis is not connected, DENY access (fail-secure, not fail-open)
+    // This ensures tokens are revoked even if Redis has temporary issues
     if (!redisClient.isOpen) {
-      console.warn('⚠️  Redis unavailable - skipping token revocation check (security degraded)');
-      return false; // Allow token through (assume not revoked) - better UX than blocking all auth
+      console.warn('⚠️  Redis unavailable - denying access (security-first approach)');
+      // Return true (token is revoked) to be secure if Redis is down
+      // This prevents users from accessing after logout if Redis fails
+      throw new Error('Redis unavailable - cannot verify token revocation status');
     }
 
     const tokenHash = hashToken(token);
@@ -127,9 +130,10 @@ export async function isTokenRevoked(token: string, type: 'access' | 'refresh' =
     return false;
   } catch (error: any) {
     console.error('❌ Failed to check token revocation:', error.message);
-    // On Redis error, continue (don't block users)
-    // In production, token expiration alone provides security
-    return false;
+    // ✅ SECURITY: On Redis error, assume token is revoked (fail-secure)
+    // This prevents unauthorized access if Redis becomes unavailable
+    // Better to temporarily block users than to allow unauthorized access
+    throw error;
   }
 }
 
