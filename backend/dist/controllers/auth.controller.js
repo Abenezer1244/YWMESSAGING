@@ -257,21 +257,42 @@ export async function getMe(req, res) {
 }
 /**
  * POST /api/auth/logout
+ * ✅ SECURITY: Revoke tokens from BOTH cookies and Authorization header
+ * Frontend may send token in Authorization header instead of cookies
  */
 export async function logout(req, res) {
     try {
         // ✅ SECURITY: Revoke tokens immediately (prevents further use even if cookies somehow persist)
-        const accessToken = req.cookies.accessToken;
-        const refreshToken = req.cookies.refreshToken;
-        if (accessToken && refreshToken) {
+        // Get tokens from cookies first
+        let accessToken = req.cookies.accessToken;
+        let refreshToken = req.cookies.refreshToken;
+        // CRITICAL FIX: Also check Authorization header
+        // Frontend might send token in header instead of cookies
+        if (!accessToken) {
+            const authHeader = req.headers['authorization'];
+            if (authHeader && authHeader.startsWith('Bearer ')) {
+                accessToken = authHeader.substring(7); // Remove "Bearer " prefix
+                console.log('[LOGOUT] Found access token in Authorization header');
+            }
+        }
+        // If we still have the access token and user info, revoke it
+        if (accessToken && req.user?.adminId) {
             try {
-                await revokeAllTokens(accessToken, refreshToken);
+                await revokeAllTokens(accessToken, refreshToken || '');
+                console.log(`✅ [LOGOUT] Tokens revoked for admin ${req.user.adminId}`);
             }
             catch (revocationError) {
                 console.error('⚠️ Failed to revoke tokens:', revocationError);
                 // Continue with logout even if revocation fails
                 // (user cookies will be cleared as fallback)
             }
+        }
+        else {
+            console.warn('[LOGOUT] Could not find tokens to revoke', {
+                hasAccessToken: !!accessToken,
+                hasRefreshToken: !!refreshToken,
+                hasUser: !!req.user,
+            });
         }
         // ✅ SECURITY: Determine cookie domain based on environment
         const cookieDomain = process.env.NODE_ENV === 'production' ? '.koinoniasms.com' : undefined;

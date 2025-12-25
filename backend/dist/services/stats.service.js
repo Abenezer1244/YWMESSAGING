@@ -14,83 +14,89 @@ export async function getMessageStats(churchId, days = 30) {
         key: cacheKey,
         ttl: CACHE_CONFIG.STATS_QUERIES.TTL,
         fetchFn: async () => {
-            const startDate = new Date();
-            startDate.setDate(startDate.getDate() - days);
-            // ✅ Single aggregation query instead of loading all messages + recipients
-            const stats = await prisma.messageRecipient.groupBy({
-                by: ['status'],
-                where: {
-                    message: {
+            try {
+                const startDate = new Date();
+                startDate.setDate(startDate.getDate() - days);
+                // ✅ Single aggregation query instead of loading all messages + recipients
+                const stats = await prisma.messageRecipient.groupBy({
+                    by: ['status'],
+                    where: {
+                        message: {
+                            churchId,
+                            createdAt: { gte: startDate },
+                        },
+                    },
+                    _count: {
+                        id: true,
+                    },
+                });
+                // ✅ Count total messages
+                const totalMessages = await prisma.message.count({
+                    where: {
                         churchId,
                         createdAt: { gte: startDate },
                     },
-                },
-                _count: {
-                    id: true,
-                },
-            });
-            // ✅ Count total messages
-            const totalMessages = await prisma.message.count({
-                where: {
-                    churchId,
-                    createdAt: { gte: startDate },
-                },
-            });
-            // Map aggregation results
-            const statusCounts = new Map();
-            let totalRecipients = 0;
-            for (const stat of stats) {
-                const count = stat._count.id;
-                statusCounts.set(stat.status || 'unknown', count);
-                totalRecipients += count;
-            }
-            const deliveredCount = statusCounts.get('delivered') || 0;
-            const failedCount = statusCounts.get('failed') || 0;
-            const pendingCount = statusCounts.get('pending') || 0;
-            const deliveryRate = totalRecipients > 0
-                ? Math.round((deliveredCount / totalRecipients) * 100)
-                : 0;
-            // ✅ Get daily stats - using raw query for efficiency
-            // Group recipients by message date and status
-            const dailyRecipients = await prisma.$queryRaw `
+                });
+                // Map aggregation results
+                const statusCounts = new Map();
+                let totalRecipients = 0;
+                for (const stat of stats) {
+                    const count = stat._count.id;
+                    statusCounts.set(stat.status || 'unknown', count);
+                    totalRecipients += count;
+                }
+                const deliveredCount = statusCounts.get('delivered') || 0;
+                const failedCount = statusCounts.get('failed') || 0;
+                const pendingCount = statusCounts.get('pending') || 0;
+                const deliveryRate = totalRecipients > 0
+                    ? Math.round((deliveredCount / totalRecipients) * 100)
+                    : 0;
+                // ✅ Get daily stats - using raw query for efficiency
+                // Group recipients by message date and status
+                const dailyRecipients = await prisma.$queryRaw `
         SELECT
-          DATE(m.created_at) as date,
+          DATE(m."createdAt") as date,
           mr.status,
           COUNT(*) as count
-        FROM message_recipient mr
-        JOIN message m ON mr.message_id = m.id
-        WHERE m.church_id = ${churchId}
-          AND m.created_at >= ${startDate}
-        GROUP BY DATE(m.created_at), mr.status
-        ORDER BY DATE(m.created_at)
+        FROM "MessageRecipient" mr
+        JOIN "Message" m ON mr."messageId" = m.id
+        WHERE m."churchId" = ${churchId}
+          AND m."createdAt" >= ${startDate}
+        GROUP BY DATE(m."createdAt"), mr.status
+        ORDER BY DATE(m."createdAt")
       `;
-            // Aggregate by day
-            const byDay = [];
-            const dayMap = new Map();
-            for (const row of dailyRecipients) {
-                if (!dayMap.has(row.date)) {
-                    dayMap.set(row.date, { count: 0, delivered: 0, failed: 0 });
+                // Aggregate by day
+                const byDay = [];
+                const dayMap = new Map();
+                for (const row of dailyRecipients) {
+                    if (!dayMap.has(row.date)) {
+                        dayMap.set(row.date, { count: 0, delivered: 0, failed: 0 });
+                    }
+                    const day = dayMap.get(row.date);
+                    if (row.status === 'delivered') {
+                        day.delivered += row.count;
+                    }
+                    else if (row.status === 'failed') {
+                        day.failed += row.count;
+                    }
+                    day.count += row.count;
                 }
-                const day = dayMap.get(row.date);
-                if (row.status === 'delivered') {
-                    day.delivered += row.count;
+                for (const [date, data] of dayMap.entries()) {
+                    byDay.push({ date, ...data });
                 }
-                else if (row.status === 'failed') {
-                    day.failed += row.count;
-                }
-                day.count += row.count;
+                return {
+                    totalMessages,
+                    deliveredCount,
+                    failedCount,
+                    pendingCount,
+                    deliveryRate,
+                    byDay,
+                };
             }
-            for (const [date, data] of dayMap.entries()) {
-                byDay.push({ date, ...data });
+            catch (error) {
+                console.error('Error in getMessageStats database query:', error);
+                throw error; // Re-throw to be handled by queryCacheMonitor
             }
-            return {
-                totalMessages,
-                deliveredCount,
-                failedCount,
-                pendingCount,
-                deliveryRate,
-                byDay,
-            };
         },
     });
 }
@@ -117,73 +123,79 @@ export async function getBranchStats(churchId) {
  * Called by cached wrapper
  */
 async function getBranchStatsUncached(churchId) {
-    // ✅ Query 1: Get branches with member counts using aggregation
-    const branchesWithCounts = await prisma.branch.findMany({
-        where: { churchId },
-        select: {
-            id: true,
-            name: true,
-            groups: {
-                select: {
-                    id: true,
-                    _count: {
-                        select: { members: true }, // Count members without loading them
+    try {
+        // ✅ Query 1: Get branches with member counts using aggregation
+        const branchesWithCounts = await prisma.branch.findMany({
+            where: { churchId },
+            select: {
+                id: true,
+                name: true,
+                groups: {
+                    select: {
+                        id: true,
+                        _count: {
+                            select: { members: true }, // Count members without loading them
+                        },
                     },
                 },
             },
-        },
-    });
-    // ✅ Query 2: Get message stats for all branches in one query
-    const messageStats = await prisma.$queryRaw `
-    SELECT
-      b.id as branch_id,
-      COUNT(DISTINCT m.id) as message_count,
-      COUNT(CASE WHEN mr.status = 'delivered' THEN 1 END) as delivered_count
-    FROM branch b
-    LEFT JOIN "Group" g ON g.branch_id = b.id
-    LEFT JOIN message m ON m.church_id = b.church_id
-      AND (m.target_type IN ('branches', 'all')
-           OR m.target_ids::jsonb @> json_build_array(b.id)::jsonb)
-    LEFT JOIN message_recipient mr ON mr.message_id = m.id
-      AND mr.member_id IN (
-        SELECT member_id FROM group_member
-        WHERE group_id IN (SELECT id FROM "Group" WHERE branch_id = b.id)
-      )
-    WHERE b.church_id = ${churchId}
-    GROUP BY b.id
-  `;
-    // Merge results
-    const messageStatsMap = new Map();
-    for (const stat of messageStats) {
-        messageStatsMap.set(stat.branch_id, {
-            messageCount: Number(stat.message_count) || 0,
-            deliveredCount: Number(stat.delivered_count) || 0,
         });
-    }
-    const stats = [];
-    for (const branch of branchesWithCounts) {
-        // Calculate total member count
-        let memberCount = 0;
-        for (const group of branch.groups) {
-            memberCount += group._count.members;
+        // ✅ Query 2: Get message stats for all branches in one query
+        // Simplified query to avoid JSONB issues - just count messages by target type
+        const messageStats = await prisma.$queryRaw `
+      SELECT
+        b.id as branch_id,
+        COUNT(DISTINCT m.id) as message_count,
+        COUNT(CASE WHEN mr.status = 'delivered' THEN 1 END) as delivered_count
+      FROM "Branch" b
+      LEFT JOIN "Group" g ON g."branchId" = b.id
+      LEFT JOIN "Message" m ON m."churchId" = b."churchId"
+        AND (m."targetType" IN ('branches', 'all') OR m."targetType" IS NULL)
+      LEFT JOIN "MessageRecipient" mr ON mr."messageId" = m.id
+        AND mr."memberId" IN (
+          SELECT "memberId" FROM "GroupMember"
+          WHERE "groupId" IN (SELECT id FROM "Group" WHERE "branchId" = b.id)
+        )
+      WHERE b."churchId" = ${churchId}
+      GROUP BY b.id
+    `;
+        // Merge results
+        const messageStatsMap = new Map();
+        for (const stat of messageStats) {
+            messageStatsMap.set(stat.branch_id, {
+                messageCount: Number(stat.message_count) || 0,
+                deliveredCount: Number(stat.delivered_count) || 0,
+            });
         }
-        const messageStat = messageStatsMap.get(branch.id) || {
-            messageCount: 0,
-            deliveredCount: 0,
-        };
-        const deliveryRate = messageStat.messageCount > 0 && memberCount > 0
-            ? Math.round((messageStat.deliveredCount / (messageStat.messageCount * memberCount)) * 100)
-            : 0;
-        stats.push({
-            id: branch.id,
-            name: branch.name,
-            memberCount,
-            messageCount: messageStat.messageCount,
-            deliveryRate: Math.min(Math.max(deliveryRate, 0), 100),
-            groupCount: branch.groups.length,
-        });
+        const stats = [];
+        for (const branch of branchesWithCounts) {
+            // Calculate total member count
+            let memberCount = 0;
+            for (const group of branch.groups) {
+                memberCount += group._count.members;
+            }
+            const messageStat = messageStatsMap.get(branch.id) || {
+                messageCount: 0,
+                deliveredCount: 0,
+            };
+            const deliveryRate = messageStat.messageCount > 0 && memberCount > 0
+                ? Math.round((messageStat.deliveredCount / (messageStat.messageCount * memberCount)) * 100)
+                : 0;
+            stats.push({
+                id: branch.id,
+                name: branch.name,
+                memberCount,
+                messageCount: messageStat.messageCount,
+                deliveryRate: Math.min(Math.max(deliveryRate, 0), 100),
+                groupCount: branch.groups.length,
+            });
+        }
+        return stats;
     }
-    return stats;
+    catch (error) {
+        console.error('Error in getBranchStatsUncached database query:', error);
+        throw error; // Re-throw to be handled by queryCacheMonitor
+    }
 }
 /**
  * Get summary statistics

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { registerChurch, login, refreshAccessToken, getAdmin } from '../services/auth.service.js';
-import { verifyRefreshToken, generateMFASessionToken, verifyMFASessionToken } from '../utils/jwt.utils.js';
+import { verifyRefreshToken, generateMFASessionToken, verifyMFASessionToken, verifyAccessToken } from '../utils/jwt.utils.js';
 import { logFailedLogin } from '../utils/security-logger.js';
 import { registerSchema, loginSchema, completeWelcomeSchema } from '../lib/validation/schemas.js';
 import { safeValidate } from '../lib/validation/schemas.js';
@@ -307,21 +307,27 @@ export async function logout(req: Request, res: Response): Promise<void> {
       }
     }
 
-    // If we still have the access token and user info, revoke it
-    if (accessToken && req.user?.adminId) {
+    // If we have the access token, revoke it
+    if (accessToken) {
       try {
-        await revokeAllTokens(accessToken, refreshToken || '');
-        console.log(`✅ [LOGOUT] Tokens revoked for admin ${req.user.adminId}`);
+        // Verify the token and extract adminId
+        const payload = verifyAccessToken(accessToken);
+
+        if (payload?.adminId) {
+          await revokeAllTokens(accessToken, refreshToken || '');
+          console.log(`✅ [LOGOUT] Tokens revoked for admin ${payload.adminId}`);
+        } else {
+          console.warn('[LOGOUT] Could not extract adminId from token');
+        }
       } catch (revocationError) {
         console.error('⚠️ Failed to revoke tokens:', revocationError);
         // Continue with logout even if revocation fails
         // (user cookies will be cleared as fallback)
       }
     } else {
-      console.warn('[LOGOUT] Could not find tokens to revoke', {
+      console.warn('[LOGOUT] Could not find access token in cookies or Authorization header', {
         hasAccessToken: !!accessToken,
         hasRefreshToken: !!refreshToken,
-        hasUser: !!req.user,
       });
     }
 

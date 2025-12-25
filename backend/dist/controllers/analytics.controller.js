@@ -10,8 +10,8 @@ export async function getMessageStats(req, res) {
         res.json(stats);
     }
     catch (error) {
-        console.error('Error fetching message stats:', error);
-        res.status(500).json({ error: 'Failed to fetch message statistics' });
+        console.error('Error fetching message stats:', error.message || error);
+        res.status(500).json({ error: 'Failed to fetch message statistics', details: error.message });
     }
 }
 export async function getBranchStats(req, res) {
@@ -24,8 +24,8 @@ export async function getBranchStats(req, res) {
         res.json(stats);
     }
     catch (error) {
-        console.error('Error fetching branch stats:', error);
-        res.status(500).json({ error: 'Failed to fetch branch statistics' });
+        console.error('Error fetching branch stats:', error.message || error);
+        res.status(500).json({ error: 'Failed to fetch branch statistics', details: error.message });
     }
 }
 export async function getSummaryStats(req, res) {
@@ -38,8 +38,8 @@ export async function getSummaryStats(req, res) {
         res.json(stats);
     }
     catch (error) {
-        console.error('Error fetching summary stats:', error);
-        res.status(500).json({ error: 'Failed to fetch summary statistics' });
+        console.error('Error fetching summary stats:', error.message || error);
+        res.status(500).json({ error: 'Failed to fetch summary statistics', details: error.message });
     }
 }
 //# sourceMappingURL=analytics.controller.js.map

@@ -17,6 +17,8 @@ export declare function refreshToken(req: Request, res: Response): Promise<void>
 export declare function getMe(req: Request, res: Response): Promise<void>;
 /**
  * POST /api/auth/logout
+ * ✅ SECURITY: Revoke tokens from BOTH cookies and Authorization header
+ * Frontend may send token in Authorization header instead of cookies
  */
 export declare function logout(req: Request, res: Response): Promise<void>;
 /**

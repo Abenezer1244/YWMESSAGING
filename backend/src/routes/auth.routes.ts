@@ -10,8 +10,10 @@ router.post('/login', loginHandler);
 router.post('/verify-mfa', verifyMFAHandler);
 router.post('/refresh', refreshToken);
 
+// Public routes with manual auth (logout doesn't use middleware to avoid hanging)
+router.post('/logout', logout);
+
 // Protected routes
-router.post('/logout', authenticateToken, logout);
 router.get('/me', authenticateToken, getMe);
 router.post('/complete-welcome', authenticateToken, completeWelcome);
 
