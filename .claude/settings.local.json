@@ -137,7 +137,8 @@
       "Bash(timeout 120 bash:*)",
       "Skill(mcp)",
       "Bash(mcp__playwright__browser_navigate \"https://koinoniasms.com/login\")",
-      "Bash(mcp__playwright__browser_navigate https://koinoniasms.com/login)"
+      "Bash(mcp__playwright__browser_navigate https://koinoniasms.com/login)",
+      "WebFetch(domain:dashboard.render.com)"
     ],
     "deny": [],
     "ask": []

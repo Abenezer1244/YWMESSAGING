@@ -56,9 +56,10 @@ export const getSessionConfig = (): SessionOptions => {
       httpOnly: true,
 
       // SameSite prevents CSRF attacks by limiting cookie to same-site requests
-      // 'strict' is most secure but may break some legitimate use cases
-      // 'lax' is recommended for most applications
-      sameSite: 'lax' as const,
+      // ✅ CRITICAL: Must match auth cookies (SameSite=none in production for cross-subdomain)
+      // 'none' required for cross-subdomain requests (production)
+      // 'lax' is safe for localhost (development)
+      sameSite: isProduction ? 'none' : 'lax',
 
       // Session timeout: 24 hours
       // Sessions expire after 24 hours of inactivity
