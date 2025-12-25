@@ -143,7 +143,8 @@
       "Bash(timeout 300 node:*)",
       "Bash(timeout 45 node:*)",
       "Bash(timeout 360 node:*)",
-      "Bash(timeout 10 curl:*)"
+      "Bash(timeout 10 curl:*)",
+      "Bash(timeout 5 curl:*)"
     ],
     "deny": [],
     "ask": []
