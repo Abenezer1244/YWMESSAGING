@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, Suspense, lazy } from 'react';
 import { motion } from 'framer-motion';
 import { Users, TrendingUp, Loader, Activity, Send, } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
@@ -17,7 +17,9 @@ import { DeliveryStatusBadge } from '../components/DeliveryStatusBadge';
 import TrialBanner from '../components/TrialBanner';
 import { ChatWidget } from '../components/ChatWidget';
 import WelcomeModal from '../components/WelcomeModal';
-import PhoneNumberPurchaseModal from '../components/PhoneNumberPurchaseModal';
+// ✅ PERF: Lazy-load PhoneNumberPurchaseModal to prevent Stripe from loading on dashboard mount
+// Stripe takes 35+ seconds to load - only load when modal is actually opened
+const PhoneNumberPurchaseModal = lazy(() => import('../components/PhoneNumberPurchaseModal'));
 import { OnboardingChecklist } from '../components/onboarding/OnboardingChecklist';
 import { DeliveryRateCard } from '../components/dashboard/DeliveryRateCard';
 // Get CSS variable value and convert oklch to hex approximation
@@ -209,7 +211,7 @@ export function DashboardPage() {
                                                     { label: 'Groups', value: totalGroupsActive },
                                                     { label: 'Members', value: totalMembers },
                                                     { label: 'Messages', value: totalMessagesSent },
-                                                ].map((stat, idx) => (_jsxs(motion.div, { initial: { opacity: 0, scale: 0.9 }, animate: { opacity: 1, scale: 1 }, transition: { delay: idx * 0.1 }, className: "p-4 rounded-xl bg-muted/50 border border-border/40 text-center", children: [_jsx("p", { className: "text-sm text-muted-foreground mb-2 font-medium", children: stat.label }), _jsx("p", { className: "text-2xl font-bold text-foreground", children: stat.value })] }, idx))) })] }) })] }))] }) }), _jsx(ChatWidget, { variant: "floating", position: "bottom-right" }), _jsx(WelcomeModal, { isOpen: showWelcome, onClose: () => setShowWelcome(false), onWelcomeComplete: handleWelcomeComplete }), _jsx(PhoneNumberPurchaseModal, { isOpen: showPhoneNumberModal, onClose: () => setShowPhoneNumberModal(false), onPurchaseComplete: handlePhoneNumberPurchased })] }));
+                                                ].map((stat, idx) => (_jsxs(motion.div, { initial: { opacity: 0, scale: 0.9 }, animate: { opacity: 1, scale: 1 }, transition: { delay: idx * 0.1 }, className: "p-4 rounded-xl bg-muted/50 border border-border/40 text-center", children: [_jsx("p", { className: "text-sm text-muted-foreground mb-2 font-medium", children: stat.label }), _jsx("p", { className: "text-2xl font-bold text-foreground", children: stat.value })] }, idx))) })] }) })] }))] }) }), _jsx(ChatWidget, { variant: "floating", position: "bottom-right" }), _jsx(WelcomeModal, { isOpen: showWelcome, onClose: () => setShowWelcome(false), onWelcomeComplete: handleWelcomeComplete }), showPhoneNumberModal && (_jsx(Suspense, { fallback: null, children: _jsx(PhoneNumberPurchaseModal, { isOpen: showPhoneNumberModal, onClose: () => setShowPhoneNumberModal(false), onPurchaseComplete: handlePhoneNumberPurchased }) }))] }));
 }
 export default DashboardPage;
 //# sourceMappingURL=DashboardPage.js.map

@@ -11,11 +11,13 @@ export interface LoginRequest {
 }
 export interface AuthResponse {
     success: boolean;
+    mfaRequired?: boolean;
+    mfaSessionToken?: string;
     data: {
-        adminId: string;
-        churchId: string;
-        accessToken: string;
-        refreshToken: string;
+        adminId?: string;
+        churchId?: string;
+        accessToken?: string;
+        refreshToken?: string;
         admin: {
             id: string;
             email: string;
@@ -25,12 +27,13 @@ export interface AuthResponse {
             welcomeCompleted: boolean;
             userRole?: string;
         };
-        church: {
+        church?: {
             id: string;
             name: string;
             email: string;
             trialEndsAt: string;
         };
+        message?: string;
     };
 }
 /**

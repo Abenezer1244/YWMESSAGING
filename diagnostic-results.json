@@ -1,0 +1,442 @@
+{
+  "timestamp": "2025-12-25T19:07:24.079Z",
+  "timings": {
+    "STEP_1_END": 3889,
+    "STEP_2_DASHBOARD": 60008
+  },
+  "networkRequests": [
+    {
+      "url": "https://koinoniasms.com/logo.svg",
+      "method": "GET",
+      "startTime": 1766689582323,
+      "timestamp": "2025-12-25T19:06:22.323Z",
+      "status": 200,
+      "endTime": 1766689590520,
+      "duration": 8197
+    },
+    {
+      "url": "https://m.stripe.com/6",
+      "method": "POST",
+      "startTime": 1766689584906,
+      "timestamp": "2025-12-25T19:06:24.906Z",
+      "status": 200,
+      "endTime": 1766689592549,
+      "duration": 7643
+    },
+    {
+      "url": "https://r.stripe.com/b",
+      "method": "POST",
+      "startTime": 1766689582051,
+      "timestamp": "2025-12-25T19:06:22.051Z",
+      "status": 200,
+      "endTime": 1766689586501,
+      "duration": 4450
+    },
+    {
+      "url": "https://koinoniasms.com/assets/js/vendor-utils-C8GUPZyx.js",
+      "method": "GET",
+      "startTime": 1766689582174,
+      "timestamp": "2025-12-25T19:06:22.174Z",
+      "status": 200,
+      "endTime": 1766689582293,
+      "duration": 119
+    },
+    {
+      "url": "https://koinoniasms.com/assets/js/index-PPhdwARx.js",
+      "method": "GET",
+      "startTime": 1766689582169,
+      "timestamp": "2025-12-25T19:06:22.169Z",
+      "status": 200,
+      "endTime": 1766689582278,
+      "duration": 109
+    },
+    {
+      "url": "https://koinoniasms.com/assets/js/vendor-react-DC7Nk3dg.js",
+      "method": "GET",
+      "startTime": 1766689582169,
+      "timestamp": "2025-12-25T19:06:22.169Z",
+      "status": 200,
+      "endTime": 1766689582270,
+      "duration": 101
+    },
+    {
+      "url": "https://koinoniasms.com/assets/js/vendor-charts-B4neLzXX.js",
+      "method": "GET",
+      "startTime": 1766689582318,
+      "timestamp": "2025-12-25T19:06:22.318Z",
+      "status": 200,
+      "endTime": 1766689582417,
+      "duration": 99
+    },
+    {
+      "url": "https://koinoniasms.com/assets/js/vendor-ui-DhbhiCKM.js",
+      "method": "GET",
+      "startTime": 1766689582174,
+      "timestamp": "2025-12-25T19:06:22.174Z",
+      "status": 200,
+      "endTime": 1766689582268,
+      "duration": 94
+    },
+    {
+      "url": "https://koinoniasms.com/assets/js/DashboardPage-DLkhNJfV.js",
+      "method": "GET",
+      "startTime": 1766689582313,
+      "timestamp": "2025-12-25T19:06:22.313Z",
+      "status": 200,
+      "endTime": 1766689582398,
+      "duration": 85
+    },
+    {
+      "url": "https://koinoniasms.com/assets/js/PhoneNumberPurchaseModal-NJMMTpJV.js",
+      "method": "GET",
+      "startTime": 1766689582318,
+      "timestamp": "2025-12-25T19:06:22.318Z",
+      "status": 200,
+      "endTime": 1766689582398,
+      "duration": 80
+    },
+    {
+      "url": "https://koinoniasms.com/assets/js/index-BO2dpB2-.js",
+      "method": "GET",
+      "startTime": 1766689582318,
+      "timestamp": "2025-12-25T19:06:22.318Z",
+      "status": 200,
+      "endTime": 1766689582398,
+      "duration": 80
+    },
+    {
+      "url": "https://koinoniasms.com/assets/js/SoftLayout-BEC3jaCY.js",
+      "method": "GET",
+      "startTime": 1766689582319,
+      "timestamp": "2025-12-25T19:06:22.319Z",
+      "status": 200,
+      "endTime": 1766689582398,
+      "duration": 79
+    },
+    {
+      "url": "https://koinoniasms.com/assets/js/billing-CnoW__R-.js",
+      "method": "GET",
+      "startTime": 1766689582319,
+      "timestamp": "2025-12-25T19:06:22.319Z",
+      "status": 200,
+      "endTime": 1766689582398,
+      "duration": 79
+    },
+    {
+      "url": "https://koinoniasms.com/dashboard",
+      "method": "GET",
+      "startTime": 1766689582050,
+      "timestamp": "2025-12-25T19:06:22.050Z",
+      "status": 200,
+      "endTime": 1766689582120,
+      "duration": 70
+    },
+    {
+      "url": "https://koinoniasms.com/assets/js/members-CDf3G63W.js",
+      "method": "GET",
+      "startTime": 1766689582314,
+      "timestamp": "2025-12-25T19:06:22.314Z",
+      "status": 200,
+      "endTime": 1766689582379,
+      "duration": 65
+    },
+    {
+      "url": "https://koinoniasms.com/assets/js/groups-DiFxMDpB.js",
+      "method": "GET",
+      "startTime": 1766689582317,
+      "timestamp": "2025-12-25T19:06:22.317Z",
+      "status": 200,
+      "endTime": 1766689582379,
+      "duration": 62
+    },
+    {
+      "url": "https://koinoniasms.com/assets/js/index.esm-C8Q_B5eL.js",
+      "method": "GET",
+      "startTime": 1766689590448,
+      "timestamp": "2025-12-25T19:06:30.448Z",
+      "status": 200,
+      "endTime": 1766689590509,
+      "duration": 61
+    },
+    {
+      "url": "https://koinoniasms.com/assets/js/ChatWidget-gWqSxKm0.js",
+      "method": "GET",
+      "startTime": 1766689582319,
+      "timestamp": "2025-12-25T19:06:22.319Z",
+      "status": 200,
+      "endTime": 1766689582379,
+      "duration": 60
+    },
+    {
+      "url": "https://www.google-analytics.com/g/collect?v=2&tid=G-KSZRJHV5V3&gtm=45je5ca1v9236825673za200zd9236825673&_p=1766689584321&gcd=13l3l3l3l1l1&npa=0&dma=0&cid=915775551.1766689580&ul=en-us&sr=1280x720&uaa=x86&uab=64&uafvl=Chromium%3B143.0.7499.4%7CNot%2520A(Brand%3B24.0.0.0&uamb=0&uam=&uap=Windows&uapv=10.0.0&uaw=0&are=1&frm=0&pscdl=noapi&_eu=AEAAAAQ&tag_exp=103116026~103200004~104527907~104528500~104684208~104684211~105391252~115583767~115938465~115938469~115985661~116184927~116184929~116251938~116251940~116744867&sid=1766689579&sct=1&seg=1&dl=https%3A%2F%2Fkoinoniasms.com%2Fdashboard&dt=Koinonia%20-%20Enterprise%20Church%20Communication%20Platform&_s=2&tfd=10559",
+      "method": "POST",
+      "startTime": 1766689592618,
+      "timestamp": "2025-12-25T19:06:32.618Z",
+      "status": 204,
+      "endTime": 1766689592677,
+      "duration": 59
+    },
+    {
+      "url": "https://koinoniasms.com/assets/js/analytics-BTX3pzpe.js",
+      "method": "GET",
+      "startTime": 1766689582314,
+      "timestamp": "2025-12-25T19:06:22.314Z",
+      "status": 200,
+      "endTime": 1766689582371,
+      "duration": 57
+    },
+    {
+      "url": "https://m.stripe.network/out-4.5.45.js",
+      "method": "GET",
+      "startTime": 1766689583592,
+      "timestamp": "2025-12-25T19:06:23.592Z",
+      "status": 200,
+      "endTime": 1766689583647,
+      "duration": 55
+    },
+    {
+      "url": "https://koinoniasms.com/assets/js/BranchesPage-CZgeleU6.js",
+      "method": "GET",
+      "startTime": 1766689590448,
+      "timestamp": "2025-12-25T19:06:30.448Z",
+      "status": 200,
+      "endTime": 1766689590503,
+      "duration": 55
+    },
+    {
+      "url": "https://koinoniasms.com/assets/js/SoftButton-Dr7nJZFM.js",
+      "method": "GET",
+      "startTime": 1766689590448,
+      "timestamp": "2025-12-25T19:06:30.448Z",
+      "status": 200,
+      "endTime": 1766689590503,
+      "duration": 55
+    },
+    {
+      "url": "https://koinoniasms.com/assets/css/index-hA_v7nKd.css",
+      "method": "GET",
+      "startTime": 1766689582174,
+      "timestamp": "2025-12-25T19:06:22.174Z",
+      "status": 200,
+      "endTime": 1766689582221,
+      "duration": 47
+    },
+    {
+      "url": "https://www.google-analytics.com/g/collect?v=2&tid=G-KSZRJHV5V3&gtm=45je5ca1v9236825673za200zd9236825673&_p=1766689584321&gcd=13l3l3l3l1l1&npa=0&dma=0&cid=915775551.1766689580&ul=en-us&sr=1280x720&uaa=x86&uab=64&uafvl=Chromium%3B143.0.7499.4%7CNot%2520A(Brand%3B24.0.0.0&uamb=0&uam=&uap=Windows&uapv=10.0.0&uaw=0&are=1&frm=0&pscdl=noapi&_eu=AAAAAAQ&tag_exp=103116026~103200004~104527907~104528500~104684208~104684211~105391252~115583767~115938465~115938469~115985661~116184927~116184929~116251938~116251940~116744867&sid=1766689579&sct=1&seg=1&dl=https%3A%2F%2Fkoinoniasms.com%2Fdashboard&dt=Koinonia%20-%20Enterprise%20Church%20Communication%20Platform&_s=1&tfd=5547",
+      "method": "POST",
+      "startTime": 1766689587596,
+      "timestamp": "2025-12-25T19:06:27.596Z",
+      "status": 204,
+      "endTime": 1766689587636,
+      "duration": 40
+    },
+    {
+      "url": "https://m.stripe.network/inner.html",
+      "method": "GET",
+      "startTime": 1766689583534,
+      "timestamp": "2025-12-25T19:06:23.534Z",
+      "status": 200,
+      "endTime": 1766689583571,
+      "duration": 37
+    },
+    {
+      "url": "https://api.koinoniasms.com/api/csrf-token",
+      "method": "GET",
+      "startTime": 1766689582821,
+      "timestamp": "2025-12-25T19:06:22.821Z",
+      "status": 200,
+      "endTime": 1766689582853,
+      "duration": 32
+    },
+    {
+      "url": "https://js.stripe.com/v3/fingerprinted/js/trusted-types-checker-efd8cf45ce422659c098993bfc62531b.js",
+      "method": "GET",
+      "startTime": 1766689587735,
+      "timestamp": "2025-12-25T19:06:27.735Z",
+      "status": 200,
+      "endTime": 1766689587758,
+      "duration": 23
+    },
+    {
+      "url": "https://js.stripe.com/v3/.deploy_status_henson.json",
+      "method": "GET",
+      "startTime": 1766689582723,
+      "timestamp": "2025-12-25T19:06:22.723Z",
+      "status": 200,
+      "endTime": 1766689582734,
+      "duration": 11
+    },
+    {
+      "url": "https://js.stripe.com/v3/controller-with-preconnect-300b5a8e68ae0035f26479fcc417b9d0.html",
+      "method": "GET",
+      "startTime": 1766689582509,
+      "timestamp": "2025-12-25T19:06:22.509Z",
+      "status": 200,
+      "endTime": 1766689582514,
+      "duration": 5
+    },
+    {
+      "url": "https://js.stripe.com/v3/m-outer-3437aaddcdf6922d623e172c2d6f9278.html",
+      "method": "GET",
+      "startTime": 1766689583498,
+      "timestamp": "2025-12-25T19:06:23.498Z",
+      "status": 200,
+      "endTime": 1766689583502,
+      "duration": 4
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;300;400;500;600;700;800&display=swap",
+      "method": "GET",
+      "startTime": 1766689582266,
+      "timestamp": "2025-12-25T19:06:22.266Z",
+      "status": 200,
+      "endTime": 1766689582268,
+      "duration": 2
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100;300;400;500;600;700;800;900&display=swap",
+      "method": "GET",
+      "startTime": 1766689582265,
+      "timestamp": "2025-12-25T19:06:22.265Z",
+      "status": 200,
+      "endTime": 1766689582266,
+      "duration": 1
+    },
+    {
+      "url": "https://js.stripe.com/clover/stripe.js",
+      "method": "GET",
+      "startTime": 1766689582420,
+      "timestamp": "2025-12-25T19:06:22.420Z",
+      "status": 200,
+      "endTime": 1766689582421,
+      "duration": 1
+    },
+    {
+      "url": "https://js.stripe.com/v3/fingerprinted/js/controller-with-preconnect-f7fb6650c4cb205014735a5c4e883928.js",
+      "method": "GET",
+      "startTime": 1766689582533,
+      "timestamp": "2025-12-25T19:06:22.533Z",
+      "status": 200,
+      "endTime": 1766689582534,
+      "duration": 1
+    },
+    {
+      "url": "https://js.stripe.com/v3/fingerprinted/js/m-outer-15a2b40a058ddff1cffdb63779fe3de1.js",
+      "method": "GET",
+      "startTime": 1766689583520,
+      "timestamp": "2025-12-25T19:06:23.520Z",
+      "status": 200,
+      "endTime": 1766689583521,
+      "duration": 1
+    },
+    {
+      "url": "https://r.stripe.com/b",
+      "method": "POST",
+      "startTime": 1766689582051,
+      "timestamp": "2025-12-25T19:06:22.051Z"
+    },
+    {
+      "url": "https://www.google-analytics.com/g/collect?v=2&tid=G-KSZRJHV5V3&gtm=45je5ca1v9236825673za200zd9236825673&_p=1766689579405&gcd=13l3l3l3l1l1&npa=0&dma=0&cid=915775551.1766689580&ul=en-us&sr=1280x720&uaa=x86&uab=64&uafvl=Chromium%3B143.0.7499.4%7CNot%2520A(Brand%3B24.0.0.0&uamb=0&uam=&uap=Windows&uapv=10.0.0&uaw=0&are=1&frm=0&pscdl=noapi&_eu=AEAAAAQ&tag_exp=103116026~103200004~104527907~104528501~104684208~104684211~105391252~115583767~115938465~115938468~116184927~116184929~116251938~116251940&sid=1766689579&sct=1&seg=0&dl=https%3A%2F%2Fkoinoniasms.com%2Fregister&dt=Koinonia%20-%20Enterprise%20Church%20Communication%20Platform&_s=3&tfd=5987",
+      "method": "POST",
+      "startTime": 1766689582155,
+      "timestamp": "2025-12-25T19:06:22.155Z"
+    },
+    {
+      "url": "https://www.google-analytics.com/g/collect?v=2&tid=G-KSZRJHV5V3&gtm=45je5ca1v9236825673za200zd9236825673&_p=1766689579405&gcd=13l3l3l3l1l1&npa=0&dma=0&cid=915775551.1766689580&ul=en-us&sr=1280x720&uaa=x86&uab=64&uafvl=Chromium%3B143.0.7499.4%7CNot%2520A(Brand%3B24.0.0.0&uamb=0&uam=&uap=Windows&uapv=10.0.0&uaw=0&are=1&frm=0&pscdl=noapi&_eu=AAAAAAQ&_s=4&tag_exp=103116026~103200004~104527907~104528501~104684208~104684211~105391252~115583767~115938465~115938468~116184927~116184929~116251938~116251940&sid=1766689579&sct=1&seg=1&dl=https%3A%2F%2Fkoinoniasms.com%2Fdashboard&dr=https%3A%2F%2Fkoinoniasms.com%2Fregister&dt=Koinonia%20-%20Enterprise%20Church%20Communication%20Platform&en=user_engagement&_et=1091&tfd=5988",
+      "method": "POST",
+      "startTime": 1766689582161,
+      "timestamp": "2025-12-25T19:06:22.161Z"
+    },
+    {
+      "url": "https://www.google-analytics.com/g/collect?v=2&tid=G-KSZRJHV5V3&gtm=45je5ca1v9236825673za200zd9236825673&_p=1766689579405&gcd=13l3l3l3l1l1&npa=0&dma=0&cid=915775551.1766689580&ul=en-us&sr=1280x720&uaa=x86&uab=64&uafvl=Chromium%3B143.0.7499.4%7CNot%2520A(Brand%3B24.0.0.0&uamb=0&uam=&uap=Windows&uapv=10.0.0&uaw=0&are=1&frm=0&pscdl=noapi&_eu=AAAAAAQ&_s=5&tag_exp=103116026~103200004~104527907~104528501~104684208~104684211~105391252~115583767~115938465~115938468~116184927~116184929~116251938~116251940&sid=1766689579&sct=1&seg=1&dl=https%3A%2F%2Fkoinoniasms.com%2Fdashboard&dr=https%3A%2F%2Fkoinoniasms.com%2Fregister&dt=Koinonia%20-%20Enterprise%20Church%20Communication%20Platform&en=web_vitals_inp&_ee=1&epn.value=96&ep.rating=good&ep.event_category=web_vitals&ep.event_label=INP&tfd=5993",
+      "method": "POST",
+      "startTime": 1766689582161,
+      "timestamp": "2025-12-25T19:06:22.161Z"
+    },
+    {
+      "url": "https://www.google-analytics.com/g/collect?v=2&tid=G-KSZRJHV5V3&gtm=45je5ca1v9236825673za200zd9236825673&_p=1766689579405&gcd=13l3l3l3l1l1&npa=0&dma=0&cid=915775551.1766689580&ul=en-us&sr=1280x720&uaa=x86&uab=64&uafvl=Chromium%3B143.0.7499.4%7CNot%2520A(Brand%3B24.0.0.0&uamb=0&uam=&uap=Windows&uapv=10.0.0&uaw=0&are=1&frm=0&pscdl=noapi&_eu=AAAAAAQ&_s=6&tag_exp=103116026~103200004~104527907~104528501~104684208~104684211~105391252~115583767~115938465~115938468~116184927~116184929~116251938~116251940&sid=1766689579&sct=1&seg=1&dl=https%3A%2F%2Fkoinoniasms.com%2Fdashboard&dr=https%3A%2F%2Fkoinoniasms.com%2Fregister&dt=Koinonia%20-%20Enterprise%20Church%20Communication%20Platform&en=web_vitals_cls&_ee=1&epn.value=0.001&ep.rating=good&ep.event_category=web_vitals&ep.event_label=CLS&tfd=6001",
+      "method": "POST",
+      "startTime": 1766689582161,
+      "timestamp": "2025-12-25T19:06:22.161Z"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/geistmono/v4/or3nQ6H-1_WfwkMZI_qYFrcdmg.woff2",
+      "method": "GET",
+      "startTime": 1766689582277,
+      "timestamp": "2025-12-25T19:06:22.277Z",
+      "status": 200,
+      "endTime": 1766689582277,
+      "duration": 0
+    },
+    {
+      "url": "https://api.koinoniasms.com/api/branches/churches/cmjltd1a9000ayfgyyr8rmyf1/branches",
+      "method": "GET",
+      "startTime": 1766689582319,
+      "timestamp": "2025-12-25T19:06:22.319Z"
+    },
+    {
+      "url": "https://koinoniasms.com/logo.svg",
+      "method": "GET",
+      "startTime": 1766689582326,
+      "timestamp": "2025-12-25T19:06:22.326Z"
+    },
+    {
+      "url": "https://koinoniasms.com/logo.svg",
+      "method": "GET",
+      "startTime": 1766689582329,
+      "timestamp": "2025-12-25T19:06:22.329Z"
+    },
+    {
+      "url": "https://api.koinoniasms.com/api/billing/trial",
+      "method": "GET",
+      "startTime": 1766689582449,
+      "timestamp": "2025-12-25T19:06:22.449Z"
+    },
+    {
+      "url": "https://api.koinoniasms.com/api/branches/churches/cmjltd1a9000ayfgyyr8rmyf1/branches",
+      "method": "GET",
+      "startTime": 1766689582449,
+      "timestamp": "2025-12-25T19:06:22.449Z"
+    },
+    {
+      "url": "https://api.koinoniasms.com/api/numbers/current",
+      "method": "GET",
+      "startTime": 1766689582450,
+      "timestamp": "2025-12-25T19:06:22.450Z"
+    },
+    {
+      "url": "https://js.stripe.com/v3/fingerprinted/js/shared-dee34aba733a06e58a94698c0844992a.js",
+      "method": "GET",
+      "startTime": 1766689582533,
+      "timestamp": "2025-12-25T19:06:22.533Z",
+      "status": 200,
+      "endTime": 1766689582533,
+      "duration": 0
+    },
+    {
+      "url": "https://js.stripe.com/v3/fingerprinted/js/stripe-cookies-0365765a4afa0da4fe353e8fa3bd8a03.js",
+      "method": "GET",
+      "startTime": 1766689582723,
+      "timestamp": "2025-12-25T19:06:22.723Z",
+      "status": 200,
+      "endTime": 1766689582723,
+      "duration": 0
+    }
+  ],
+  "pageState": {
+    "title": "Koinonia - Enterprise Church Communication Platform",
+    "url": "https://koinoniasms.com/branches",
+    "readyState": "complete",
+    "bodyHTML": "\n    <!-- Main Application Root -->\n    <div id=\"root\"><div class=\"min-h-screen bg-background flex\"><button class=\"fixed top-4 left-4 z-50 md:hidden p-2 bg-gradient-to-r from-blue-500 to-cyan-500 roun",
+    "hasLoadingSpinner": true,
+    "hasDashboardContent": true
+  },
+  "errors": [],
+  "summary": {
+    "registrationTime": 3889,
+    "dashboardLoadTime": 60008,
+    "totalRequests": 59,
+    "failedRequests": 0,
+    "pendingRequests": 19
+  }
+}

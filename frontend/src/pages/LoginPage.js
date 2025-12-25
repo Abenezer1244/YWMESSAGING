@@ -29,40 +29,64 @@ export function LoginPage() {
         },
     });
     const onSubmit = async (data) => {
-        setIsLoading(true);
         try {
-            const response = await login(data);
-            const { admin, church } = response.data;
-            // Set auth with tokens and immediately navigate
-            // Zustand setAuth is synchronous, so this updates state right away
-            setAuth(admin, church, response.data.accessToken, response.data.refreshToken);
-            // Navigate immediately without delay
-            navigate('/dashboard', { replace: true });
-            // Show toast after navigation (it will appear on dashboard)
-            toast.success('Login successful!');
-        }
-        catch (error) {
-            console.error('Login error:', error);
-            setIsLoading(false);
-            // Handle rate limit errors (429)
-            if (error.response?.status === 429) {
-                const resetTime = error.response?.headers?.['ratelimit-reset'];
-                if (resetTime) {
-                    const resetMs = parseInt(resetTime) * 1000;
-                    const now = Date.now();
-                    const waitSeconds = Math.ceil((resetMs - now) / 1000);
-                    const waitMinutes = Math.ceil(waitSeconds / 60);
-                    const message = `Too many login attempts. Please try again in ${waitMinutes} minute${waitMinutes > 1 ? 's' : ''}.`;
-                    toast.error(message, { duration: 5000 });
+            setIsLoading(true);
+            try {
+                const response = await login(data);
+                // Check if MFA is required
+                if (response.mfaRequired) {
+                    // MFA is enabled - need to redirect to MFA verification page
+                    // For now, show error. In future, redirect to MFA page with session token
+                    toast.error('MFA verification required. Please contact support for now.');
+                    setIsLoading(false);
+                    return;
+                }
+                const { admin, church, accessToken, refreshToken } = response.data;
+                // Set auth with tokens and immediately navigate
+                // Zustand setAuth is synchronous, so this updates state right away
+                if (!admin || !church || !accessToken || !refreshToken) {
+                    toast.error('Invalid login response. Please try again.');
+                    setIsLoading(false);
+                    return;
+                }
+                setAuth(admin, church, accessToken, refreshToken);
+                // Navigate immediately without delay
+                navigate('/dashboard', { replace: true });
+                // Show toast after navigation (it will appear on dashboard)
+                toast.success('Login successful!');
+            }
+            catch (error) {
+                console.error('[LoginPage] Login error caught:', error);
+                console.error('[LoginPage] Error details:', {
+                    message: error.message,
+                    response: error.response?.data,
+                    status: error.response?.status,
+                });
+                setIsLoading(false);
+                // Handle rate limit errors (429)
+                if (error.response?.status === 429) {
+                    const resetTime = error.response?.headers?.['ratelimit-reset'];
+                    if (resetTime) {
+                        const resetMs = parseInt(resetTime) * 1000;
+                        const now = Date.now();
+                        const waitSeconds = Math.ceil((resetMs - now) / 1000);
+                        const waitMinutes = Math.ceil(waitSeconds / 60);
+                        const message = `Too many login attempts. Please try again in ${waitMinutes} minute${waitMinutes > 1 ? 's' : ''}.`;
+                        toast.error(message, { duration: 5000 });
+                    }
+                    else {
+                        toast.error('Too many login attempts. Please try again in 15 minutes.');
+                    }
                 }
                 else {
-                    toast.error('Too many login attempts. Please try again in 15 minutes.');
+                    const errorMessage = error.response?.data?.error || 'Login failed. Please try again.';
+                    toast.error(errorMessage);
                 }
             }
-            else {
-                const errorMessage = error.response?.data?.error || 'Login failed. Please try again.';
-                toast.error(errorMessage);
-            }
+        }
+        catch (outerError) {
+            console.error('[LoginPage] OUTER ERROR - callback wrapper failed:', outerError);
+            setIsLoading(false);
         }
     };
     // OAuth handlers would go here when implementing Google/Apple sign-in

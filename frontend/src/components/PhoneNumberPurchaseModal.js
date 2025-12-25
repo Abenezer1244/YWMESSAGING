@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, X } from 'lucide-react';
 import { Elements } from '@stripe/react-stripe-js';
@@ -21,8 +21,6 @@ const US_STATES = [
     { code: 'MI', name: 'Michigan' },
     { code: 'NC', name: 'North Carolina' },
 ];
-// Initialize Stripe
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 export default function PhoneNumberPurchaseModal({ isOpen, onClose, onPurchaseComplete, }) {
     const [step, setStep] = useState('search');
     const [areaCode, setAreaCode] = useState('');
@@ -33,6 +31,13 @@ export default function PhoneNumberPurchaseModal({ isOpen, onClose, onPurchaseCo
     const [paymentIntentId, setPaymentIntentId] = useState(null);
     const [paymentStatus, setPaymentStatus] = useState('idle');
     const [paymentMessage, setPaymentMessage] = useState('');
+    const stripePromiseRef = useRef(null);
+    // ✅ PERF: Lazy-load Stripe library only when payment step is reached
+    useEffect(() => {
+        if (step === 'payment' && !stripePromiseRef.current) {
+            stripePromiseRef.current = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
+        }
+    }, [step]);
     // Handle Escape key to close modal (WCAG 2.1.2 compliance)
     useEffect(() => {
         if (!isOpen)
@@ -196,7 +201,7 @@ export default function PhoneNumberPurchaseModal({ isOpen, onClose, onPurchaseCo
                                                 }, className: "mt-4", children: "Back to Search" })] })), step === 'confirm' && selectedNumber && (_jsxs(motion.div, { variants: itemVariants, className: "space-y-4", children: [_jsx("div", { className: "bg-primary/10 border border-primary/20 rounded-lg p-4", children: _jsxs("div", { className: "text-center", children: [_jsx(Phone, { className: "w-8 h-8 text-primary mx-auto mb-3" }), _jsx("div", { className: "text-2xl font-bold text-foreground mb-1", children: selectedNumber.formattedNumber }), _jsx("div", { className: "text-sm text-muted-foreground", children: selectedNumber.region })] }) }), _jsxs("div", { className: "space-y-2 bg-muted/30 rounded-lg p-4", children: [_jsxs("div", { className: "flex justify-between text-sm", children: [_jsx("span", { className: "text-muted-foreground", children: "Per SMS:" }), _jsxs("span", { className: "font-medium text-foreground", children: ["$", selectedNumber.costPerSms.toFixed(4)] })] }), _jsxs("div", { className: "flex justify-between text-sm", children: [_jsx("span", { className: "text-muted-foreground", children: "Per minute:" }), _jsxs("span", { className: "font-medium text-foreground", children: ["$", selectedNumber.costPerMinute.toFixed(4)] })] }), _jsxs("div", { className: "border-t border-border/30 pt-2 mt-2 flex justify-between font-semibold", children: [_jsx("span", { className: "text-foreground", children: "One-time setup:" }), _jsx("span", { className: "text-primary", children: "$0.50" })] })] }), _jsx("div", { className: "text-xs text-muted-foreground bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3", children: "By purchasing, you agree to Telnyx's terms and will be charged the one-time setup fee. Usage charges apply separately." }), _jsxs("div", { className: "space-y-2", children: [_jsx(Button, { variant: "primary", fullWidth: true, size: "lg", onClick: handleConfirmSelection, disabled: isLoading, isLoading: isLoading, className: "bg-primary hover:bg-primary/90 text-background font-medium", children: isLoading ? 'Processing...' : 'Continue to Payment' }), _jsx(Button, { variant: "secondary", fullWidth: true, size: "sm", onClick: () => {
                                                             setStep('select');
                                                             setSelectedNumber(null);
-                                                        }, disabled: isLoading, children: "Choose Different Number" })] })] })), step === 'payment' && selectedNumber && paymentIntentId && (_jsxs(motion.div, { variants: itemVariants, className: "space-y-4", children: [_jsx(Elements, { stripe: stripePromise, children: _jsx(StripePaymentForm, { amount: 50, phoneNumber: selectedNumber.phoneNumber, paymentIntentId: paymentIntentId, onSuccess: handlePaymentSuccess, isLoading: isLoading, paymentStatus: paymentStatus, paymentMessage: paymentMessage }) }), _jsx(Button, { variant: "secondary", fullWidth: true, size: "sm", onClick: () => {
+                                                        }, disabled: isLoading, children: "Choose Different Number" })] })] })), step === 'payment' && selectedNumber && paymentIntentId && (_jsxs(motion.div, { variants: itemVariants, className: "space-y-4", children: [_jsx(Elements, { stripe: stripePromiseRef.current, children: _jsx(StripePaymentForm, { amount: 50, phoneNumber: selectedNumber.phoneNumber, paymentIntentId: paymentIntentId, onSuccess: handlePaymentSuccess, isLoading: isLoading, paymentStatus: paymentStatus, paymentMessage: paymentMessage }) }), _jsx(Button, { variant: "secondary", fullWidth: true, size: "sm", onClick: () => {
                                                     setStep('confirm');
                                                     setPaymentStatus('idle');
                                                     setPaymentMessage('');

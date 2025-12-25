@@ -89,7 +89,12 @@ export function RegisterPage() {
 
       const { admin, church, accessToken, refreshToken } = response.data;
       console.log('Registration successful, setting auth:', { admin, church, accessToken: accessToken ? 'present' : 'missing' });
-      setAuth(admin, church, accessToken, refreshToken);
+      if (!admin || !church || !accessToken || !refreshToken) {
+        toast.error('Invalid registration response. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+      setAuth(admin, church as any, accessToken, refreshToken);
 
       // Navigate immediately - setAuth is synchronous (Zustand)
       navigate('/dashboard', { replace: true });

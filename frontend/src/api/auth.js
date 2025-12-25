@@ -10,8 +10,22 @@ export async function register(data) {
  * Login with email and password
  */
 export async function login(data) {
-    const response = await client.post('/auth/login', data);
-    return response.data;
+    console.log('[auth.login] Called with email:', data.email);
+    console.log('[auth.login] About to make axios POST to /auth/login');
+    try {
+        const response = await client.post('/auth/login', data);
+        console.log('[auth.login] Axios POST returned successfully:', response.status);
+        return response.data;
+    }
+    catch (error) {
+        console.error('[auth.login] Axios POST failed:', {
+            message: error.message,
+            status: error.response?.status,
+            statusText: error.response?.statusText,
+            data: error.response?.data,
+        });
+        throw error;
+    }
 }
 /**
  * Refresh access token via httpOnly cookies

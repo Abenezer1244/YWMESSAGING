@@ -15,11 +15,13 @@ export interface LoginRequest {
 
 export interface AuthResponse {
   success: boolean;
+  mfaRequired?: boolean;
+  mfaSessionToken?: string;
   data: {
-    adminId: string;
-    churchId: string;
-    accessToken: string;
-    refreshToken: string;
+    adminId?: string;
+    churchId?: string;
+    accessToken?: string;
+    refreshToken?: string;
     admin: {
       id: string;
       email: string;
@@ -29,12 +31,13 @@ export interface AuthResponse {
       welcomeCompleted: boolean;
       userRole?: string;
     };
-    church: {
+    church?: {
       id: string;
       name: string;
       email: string;
       trialEndsAt: string;
     };
+    message?: string;
   };
 }
 
@@ -50,8 +53,21 @@ export async function register(data: RegisterRequest): Promise<AuthResponse> {
  * Login with email and password
  */
 export async function login(data: LoginRequest): Promise<AuthResponse> {
-  const response = await client.post<AuthResponse>('/auth/login', data);
-  return response.data;
+  console.log('[auth.login] Called with email:', data.email);
+  console.log('[auth.login] About to make axios POST to /auth/login');
+  try {
+    const response = await client.post<AuthResponse>('/auth/login', data);
+    console.log('[auth.login] Axios POST returned successfully:', response.status);
+    return response.data;
+  } catch (error: any) {
+    console.error('[auth.login] Axios POST failed:', {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+    });
+    throw error;
+  }
 }
 
 /**
