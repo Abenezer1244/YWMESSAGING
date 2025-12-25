@@ -22,7 +22,8 @@ export function RegisterPage() {
             console.warn('Failed to fetch CSRF token, registration may fail');
         });
     }, []);
-    const { register, handleSubmit, watch, formState: { errors } } = useForm({
+    const { register, handleSubmit, watch, formState, trigger } = useForm({
+        mode: 'onChange',
         defaultValues: {
             email: '',
             password: '',
@@ -32,8 +33,33 @@ export function RegisterPage() {
             churchName: '',
         },
     });
-    const password = watch('password');
+    const { errors } = formState;
+    const watchedValues = watch();
     const onSubmit = async (data) => {
+        // Trigger validation to populate errors
+        const isValid = await trigger();
+        if (!isValid) {
+            // Build error message from validation errors
+            const errorMessages = [];
+            if (errors.firstName)
+                errorMessages.push(`First name: ${errors.firstName.message}`);
+            if (errors.lastName)
+                errorMessages.push(`Last name: ${errors.lastName.message}`);
+            if (errors.churchName)
+                errorMessages.push(`Church name: ${errors.churchName.message}`);
+            if (errors.email)
+                errorMessages.push(`Email: ${errors.email.message}`);
+            if (errors.password)
+                errorMessages.push(`Password: ${errors.password.message}`);
+            if (errors.confirmPassword)
+                errorMessages.push(`Confirm password: ${errors.confirmPassword.message}`);
+            // Show errors as toast
+            const errorText = errorMessages.length > 0
+                ? errorMessages.join('\n')
+                : 'Please check your form for errors';
+            toast.error(errorText);
+            return;
+        }
         if (data.password !== data.confirmPassword) {
             toast.error('Passwords do not match');
             return;
@@ -50,13 +76,9 @@ export function RegisterPage() {
             const { admin, church, accessToken, refreshToken } = response.data;
             console.log('Registration successful, setting auth:', { admin, church, accessToken: accessToken ? 'present' : 'missing' });
             setAuth(admin, church, accessToken, refreshToken);
+            // Navigate immediately - setAuth is synchronous (Zustand)
+            navigate('/dashboard', { replace: true });
             toast.success('Registration successful!');
-            // Use replace: true to ensure clean navigation
-            // and add a small delay to allow state to update
-            setTimeout(() => {
-                console.log('Navigating to dashboard');
-                navigate('/dashboard', { replace: true });
-            }, 100);
         }
         catch (error) {
             setIsLoading(false);
@@ -83,17 +105,43 @@ export function RegisterPage() {
     };
     // OAuth handlers would go here when implementing Google/Apple sign-in
     // For now, these are disabled to avoid confusing users with non-functional buttons
-    return (_jsxs("div", { className: "min-h-screen bg-background flex items-center justify-center p-4 py-8 relative overflow-hidden", children: [_jsx(AnimatedBlobs, { variant: "minimal" }), _jsx("div", { className: "absolute top-0 right-0 w-96 h-96 bg-primary opacity-10 rounded-full blur-3xl pointer-events-none" }), _jsxs("div", { className: "w-full max-w-2xl relative z-10 animate-fadeIn", children: [_jsx("div", { className: "mb-6", children: _jsx(BackButton, { variant: "ghost", size: "sm" }) }), _jsxs("div", { className: "text-center mb-12", children: [_jsx("div", { className: "flex items-center justify-center mb-6", children: _jsx("img", { src: "/logo.svg", alt: "Koinonia", className: "w-16 h-16 hover:opacity-80 transition-opacity" }) }), _jsx("h1", { className: "text-4xl font-bold text-foreground mb-3 tracking-tight", children: "Create Your Account" }), _jsx("p", { className: "text-lg text-muted-foreground font-light", children: "Start your 14-day free trial \u2022 No credit card required" })] }), _jsxs(Card, { variant: "default", className: "p-8 border border-border bg-card shadow-lg", children: [_jsxs("form", { onSubmit: handleSubmit(onSubmit), className: "space-y-5", children: [_jsxs("div", { className: "grid grid-cols-2 gap-4", children: [_jsx(Input, { label: "First Name", placeholder: "John", disabled: isLoading, error: errors.firstName?.message, autoComplete: "given-name", className: "bg-muted border-border text-foreground", ...register('firstName', { required: 'First name is required' }) }), _jsx(Input, { label: "Last Name", placeholder: "Doe", disabled: isLoading, error: errors.lastName?.message, autoComplete: "family-name", className: "bg-muted border-border text-foreground", ...register('lastName', { required: 'Last name is required' }) })] }), _jsx(Input, { label: "Church Name", placeholder: "Grace Community Church", disabled: isLoading, error: errors.churchName?.message, autoComplete: "organization", className: "bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white", ...register('churchName', { required: 'Church name is required' }) }), _jsx(Input, { label: "Email Address", type: "email", placeholder: "pastor@church.com", disabled: isLoading, error: errors.email?.message, autoComplete: "email", className: "bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white", ...register('email', {
+    return (_jsxs("div", { className: "min-h-screen bg-background flex items-center justify-center p-4 py-8 relative overflow-hidden", children: [_jsx(AnimatedBlobs, { variant: "minimal" }), _jsx("div", { className: "absolute top-0 right-0 w-96 h-96 bg-primary opacity-10 rounded-full blur-3xl pointer-events-none" }), _jsxs("div", { className: "w-full max-w-2xl relative z-10 animate-fadeIn", children: [_jsx("div", { className: "mb-6", children: _jsx(BackButton, { variant: "ghost", size: "sm" }) }), _jsxs("div", { className: "text-center mb-12", children: [_jsx("div", { className: "flex items-center justify-center mb-6", children: _jsx("img", { src: "/logo.svg", alt: "Koinonia", className: "w-16 h-16 hover:opacity-80 transition-opacity" }) }), _jsx("h1", { className: "text-4xl font-bold text-foreground mb-3 tracking-tight", children: "Create Your Account" }), _jsx("p", { className: "text-lg text-muted-foreground font-light", children: "Start your 14-day free trial \u2022 No credit card required" })] }), _jsxs(Card, { variant: "default", className: "p-8 border border-border bg-card shadow-lg", children: [_jsxs("form", { onSubmit: handleSubmit(onSubmit), className: "space-y-5", children: [_jsxs("div", { className: "grid grid-cols-2 gap-4", children: [_jsx(Input, { label: "First Name", placeholder: "John", disabled: isLoading, error: errors.firstName?.message, autoComplete: "given-name", className: "bg-muted border-border text-foreground", ...register('firstName', {
+                                                    required: 'First name is required',
+                                                    maxLength: {
+                                                        value: 100,
+                                                        message: 'First name is too long (max 100 characters)',
+                                                    },
+                                                }) }), _jsx(Input, { label: "Last Name", placeholder: "Doe", disabled: isLoading, error: errors.lastName?.message, autoComplete: "family-name", className: "bg-muted border-border text-foreground", ...register('lastName', {
+                                                    required: 'Last name is required',
+                                                    maxLength: {
+                                                        value: 100,
+                                                        message: 'Last name is too long (max 100 characters)',
+                                                    },
+                                                }) })] }), _jsx(Input, { label: "Church Name", placeholder: "Grace Community Church", disabled: isLoading, error: errors.churchName?.message, autoComplete: "organization", className: "bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white", ...register('churchName', {
+                                            required: 'Church name is required',
+                                            maxLength: {
+                                                value: 255,
+                                                message: 'Church name is too long (max 255 characters)',
+                                            },
+                                        }) }), _jsx(Input, { label: "Email Address", type: "email", placeholder: "pastor@church.com", disabled: isLoading, error: errors.email?.message, autoComplete: "email", className: "bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white", ...register('email', {
                                             required: 'Email is required',
                                             pattern: {
                                                 value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                                                 message: 'Invalid email format',
                                             },
-                                        }) }), _jsx(Input, { label: "Password", type: "password", placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022", helperText: "Must be at least 8 characters", disabled: isLoading, error: errors.password?.message, autoComplete: "new-password", className: "bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white", ...register('password', {
+                                            maxLength: {
+                                                value: 255,
+                                                message: 'Email is too long (max 255 characters)',
+                                            },
+                                        }) }), _jsx(Input, { label: "Password", type: "password", placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022", helperText: "At least 8 characters, 1 uppercase letter, 1 number", disabled: isLoading, error: errors.password?.message, autoComplete: "new-password", className: "bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white", ...register('password', {
                                             required: 'Password is required',
                                             minLength: {
                                                 value: 8,
                                                 message: 'Password must be at least 8 characters',
+                                            },
+                                            validate: {
+                                                hasUppercase: (value) => /[A-Z]/.test(value) || 'Password must contain at least one uppercase letter',
+                                                hasNumber: (value) => /[0-9]/.test(value) || 'Password must contain at least one number',
                                             },
                                         }) }), _jsx(Input, { label: "Confirm Password", type: "password", placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022", disabled: isLoading, error: errors.confirmPassword?.message, autoComplete: "new-password", className: "bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white", ...register('confirmPassword', {
                                             required: 'Please confirm your password',

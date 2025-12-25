@@ -1,6 +1,7 @@
 /**
  * CSRF protection middleware
  * Uses double-submit cookie pattern combined with token validation
+ * ✅ CRITICAL: SameSite must match auth cookies to allow cross-subdomain requests
  */
 export declare const csrfProtection: import("express-serve-static-core").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>;
 /**

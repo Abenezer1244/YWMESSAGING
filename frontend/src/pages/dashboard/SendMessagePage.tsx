@@ -404,7 +404,8 @@ export function SendMessagePage() {
           template={null}
           onClose={() => {
             setShowSaveModal(false);
-            loadTemplates();
+            // Reload templates after saving new template
+            loadGroupsAndTemplates();
           }}
         />
       )}

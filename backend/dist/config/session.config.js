@@ -46,14 +46,17 @@ export const getSessionConfig = () => {
             // This protects against XSS attacks stealing session cookies
             httpOnly: true,
             // SameSite prevents CSRF attacks by limiting cookie to same-site requests
-            // 'strict' is most secure but may break some legitimate use cases
-            // 'lax' is recommended for most applications
-            sameSite: 'lax',
+            // ✅ CRITICAL: Must match auth cookies (SameSite=none in production for cross-subdomain)
+            // 'none' required for cross-subdomain requests (production)
+            // 'lax' is safe for localhost (development)
+            sameSite: isProduction ? 'none' : 'lax',
             // Session timeout: 24 hours
             // Sessions expire after 24 hours of inactivity
             maxAge: 24 * 60 * 60 * 1000, // milliseconds
-            // Domain restriction (optional, set if needed)
-            // domain: process.env.COOKIE_DOMAIN,
+            // ✅ Domain restriction for cross-subdomain cookie sharing
+            // In production, set domain to .koinoniasms.com so cookies are sent to all subdomains
+            // In development, leave undefined so cookies work on localhost
+            domain: isProduction ? '.koinoniasms.com' : undefined,
             // Path restriction
             path: '/',
         },

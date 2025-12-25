@@ -22,6 +22,7 @@ export function LoginPage() {
         });
     }, []);
     const { register, handleSubmit, formState: { errors } } = useForm({
+        mode: 'onBlur',
         defaultValues: {
             email: '',
             password: '',
@@ -78,7 +79,7 @@ export function LoginPage() {
                                                     value: 8,
                                                     message: 'Password must be at least 8 characters',
                                                 },
-                                            }), className: "bg-muted border-border text-foreground" }) }), _jsx(Button, { type: "submit", variant: "primary", size: "lg", fullWidth: true, isLoading: isLoading, disabled: isLoading, className: "font-semibold mt-6 bg-primary hover:bg-primary/90 text-background", children: isLoading ? 'Logging in...' : 'Login' })] }), _jsx("div", { className: "mt-6 pt-6 border-t border-border", children: _jsxs("p", { className: "text-center text-muted-foreground text-sm", children: ["Don't have an account?", ' ', _jsx(Link, { to: "/register", className: "text-primary hover:text-primary/80 font-semibold transition-colors", children: "Sign up" })] }) })] }), _jsxs("div", { className: "mt-8 flex items-center justify-center gap-2 text-sm text-muted-foreground", children: [_jsx("svg", { className: "w-4 h-4 text-success-500", fill: "currentColor", viewBox: "0 0 20 20", children: _jsx("path", { fillRule: "evenodd", d: "M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 111.414 1.414L7.414 8l3.293 3.293a1 1 0 11-1.414 1.414l-4-4z", clipRule: "evenodd" }) }), _jsx("span", { children: "Secure login \u2022 No password stored" })] })] })] }));
+                                            }), className: "bg-muted border-border text-foreground" }) }), _jsx(Button, { type: "submit", variant: "primary", size: "lg", fullWidth: true, isLoading: isLoading, disabled: isLoading, className: "font-semibold mt-6 bg-primary hover:bg-primary/90 text-background", children: isLoading ? 'Logging in...' : 'Login' })] }), _jsx("div", { className: "mt-6 pt-6 border-t border-border", children: _jsxs("p", { className: "text-center text-muted-foreground text-sm", children: ["Don't have an account?", ' ', _jsx(Link, { to: "/register", "data-testid": "signup-link", className: "text-primary hover:text-primary/80 font-semibold transition-colors", children: "Sign up" })] }) })] }), _jsxs("div", { className: "mt-8 flex items-center justify-center gap-2 text-sm text-muted-foreground", children: [_jsx("svg", { className: "w-4 h-4 text-success-500", fill: "currentColor", viewBox: "0 0 20 20", children: _jsx("path", { fillRule: "evenodd", d: "M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 111.414 1.414L7.414 8l3.293 3.293a1 1 0 11-1.414 1.414l-4-4z", clipRule: "evenodd" }) }), _jsx("span", { children: "Secure login \u2022 No password stored" })] })] })] }));
 }
 export default LoginPage;
 //# sourceMappingURL=LoginPage.js.map

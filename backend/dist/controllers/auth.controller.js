@@ -24,12 +24,26 @@ export async function register(req, res) {
         }
         const { email, password, firstName, lastName, churchName } = validationResult.data;
         const result = await registerChurch({ email, password, firstName, lastName, churchName });
-        // ✅ SECURITY: Determine cookie domain and sameSite based on environment
-        // Production: .koinoniasms.com with sameSite: 'none' for cross-domain
-        // Development: undefined domain with sameSite: 'Lax' for localhost
-        const isProduction = process.env.NODE_ENV === 'production';
+        // ✅ SECURITY: Determine cookie domain and sameSite based on actual request origin
+        // Check hostname from request, supporting reverse proxy scenarios (X-Forwarded-Host header)
+        const xForwardedHost = req.get('x-forwarded-host');
+        const hostname = xForwardedHost || req.hostname || req.get('host') || '';
+        const isProduction = hostname.includes('koinoniasms.com') || process.env.NODE_ENV === 'production';
         const cookieDomain = isProduction ? '.koinoniasms.com' : undefined;
         const sameSite = isProduction ? 'none' : 'lax'; // 'none' requires secure: true; 'lax' is safe for localhost
+        // DEBUG: Log cookie settings for register
+        console.log('🔍 REGISTER - Cookie Configuration:', {
+            xForwardedHost,
+            hostname,
+            isProduction,
+            cookieDomain,
+            sameSite,
+            NODE_ENV: process.env.NODE_ENV,
+            'X-Forwarded-Host header': req.get('x-forwarded-host'),
+            'req.hostname': req.hostname,
+            'req.get(host)': req.get('host'),
+            'hostname.includes(koinoniasms.com)': hostname.includes('koinoniasms.com'),
+        });
         // Set httpOnly cookies for tokens (secure, cannot be accessed via JavaScript)
         res.cookie('accessToken', result.accessToken, {
             httpOnly: true,
@@ -96,10 +110,24 @@ export async function loginHandler(req, res) {
             });
             return;
         }
-        // ✅ SECURITY: Determine cookie domain and sameSite based on environment
-        const isProduction = process.env.NODE_ENV === 'production';
+        // ✅ SECURITY: Determine cookie domain and sameSite based on actual request origin
+        // Check hostname from request, supporting reverse proxy scenarios (X-Forwarded-Host header)
+        const xForwardedHost = req.get('x-forwarded-host');
+        const hostname = xForwardedHost || req.hostname || req.get('host') || '';
+        const isProduction = hostname.includes('koinoniasms.com') || process.env.NODE_ENV === 'production';
         const cookieDomain = isProduction ? '.koinoniasms.com' : undefined;
         const sameSite = isProduction ? 'none' : 'lax'; // 'none' requires secure: true; 'lax' is safe for localhost
+        // DEBUG: Log cookie settings
+        console.log('🔍 LOGIN - Cookie Configuration:', {
+            xForwardedHost,
+            hostname,
+            isProduction,
+            cookieDomain,
+            sameSite,
+            NODE_ENV: process.env.NODE_ENV,
+            nodeHost: req.hostname,
+            hostHeader: req.get('host'),
+        });
         // Set httpOnly cookies for tokens
         res.cookie('accessToken', result.accessToken, {
             httpOnly: true,
@@ -152,10 +180,22 @@ export async function refreshToken(req, res) {
             return;
         }
         const result = await refreshAccessToken(payload.adminId);
-        // ✅ SECURITY: Determine cookie domain and sameSite based on environment
-        const isProduction = process.env.NODE_ENV === 'production';
+        // ✅ SECURITY: Determine cookie domain and sameSite based on actual request origin
+        // Check hostname from request, supporting reverse proxy scenarios (X-Forwarded-Host header)
+        const xForwardedHost = req.get('x-forwarded-host');
+        const hostname = xForwardedHost || req.hostname || req.get('host') || '';
+        const isProduction = hostname.includes('koinoniasms.com') || process.env.NODE_ENV === 'production';
         const cookieDomain = isProduction ? '.koinoniasms.com' : undefined;
         const sameSite = isProduction ? 'none' : 'lax'; // 'none' requires secure: true; 'lax' is safe for localhost
+        // DEBUG: Log cookie settings
+        console.log('🔍 REFRESH - Cookie Configuration:', {
+            xForwardedHost,
+            hostname,
+            isProduction,
+            cookieDomain,
+            sameSite,
+            NODE_ENV: process.env.NODE_ENV,
+        });
         // Set new httpOnly cookies for tokens
         res.cookie('accessToken', result.accessToken, {
             httpOnly: true,
@@ -298,9 +338,20 @@ export async function verifyMFAHandler(req, res) {
         const accessToken = generateAccessToken(adminId, churchId, admin.role);
         const refreshToken = generateRefreshToken(adminId);
         // ✅ SECURITY: Determine cookie domain and sameSite based on environment
-        const isProduction = process.env.NODE_ENV === 'production';
+        const xForwardedHost = req.get('x-forwarded-host');
+        const hostname = xForwardedHost || req.hostname || req.get('host') || '';
+        const isProduction = hostname.includes('koinoniasms.com') || process.env.NODE_ENV === 'production';
         const cookieDomain = isProduction ? '.koinoniasms.com' : undefined;
         const sameSite = isProduction ? 'none' : 'lax'; // 'none' requires secure: true; 'lax' is safe for localhost
+        // DEBUG: Log cookie settings
+        console.log('🔍 VERIFY_MFA - Cookie Configuration:', {
+            xForwardedHost,
+            hostname,
+            isProduction,
+            cookieDomain,
+            sameSite,
+            NODE_ENV: process.env.NODE_ENV,
+        });
         // Set httpOnly cookies for tokens
         res.cookie('accessToken', accessToken, {
             httpOnly: true,

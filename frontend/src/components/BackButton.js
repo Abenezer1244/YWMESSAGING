@@ -11,7 +11,7 @@ const BackButton = ({ to, className = '', variant = 'ghost', size = 'md', }) => 
             navigate(-1);
         }
     };
-    return (_jsxs(Button, { onClick: handleClick, variant: variant, size: size, className: `inline-flex items-center gap-2 ${className}`, children: [_jsx("svg", { className: "w-5 h-5", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24", xmlns: "http://www.w3.org/2000/svg", children: _jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M15 19l-7-7 7-7" }) }), _jsx("span", { children: "Back" })] }));
+    return (_jsxs(Button, { onClick: handleClick, variant: variant, size: size, "data-testid": "back-button", className: `inline-flex items-center gap-2 ${className}`, children: [_jsx("svg", { className: "w-5 h-5", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24", xmlns: "http://www.w3.org/2000/svg", children: _jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M15 19l-7-7 7-7" }) }), _jsx("span", { children: "Back" })] }));
 };
 BackButton.displayName = 'BackButton';
 export default BackButton;
