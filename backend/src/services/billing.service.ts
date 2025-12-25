@@ -111,17 +111,30 @@ export function getSMSPricing() {
  */
 export async function getCurrentPlan(churchId: string): Promise<PlanName | 'trial'> {
   try {
-    // Try cache first
-    const cached = await getCached<string>(CACHE_KEYS.churchPlan(churchId));
-    if (cached) {
-      return cached as PlanName | 'trial';
+    // Try cache first with timeout (prevent hanging on slow Redis)
+    try {
+      const cachePromise = getCached<string>(CACHE_KEYS.churchPlan(churchId));
+      const timeoutPromise = new Promise<null>((_, reject) =>
+        setTimeout(() => reject(new Error('Cache timeout')), 2000) // 2 second timeout
+      );
+      const cached = await Promise.race([cachePromise, timeoutPromise]);
+      if (cached) {
+        return cached as PlanName | 'trial';
+      }
+    } catch (cacheError) {
+      console.warn('Cache lookup timeout for plan, querying database:', cacheError);
+      // Continue - we'll query the database directly
     }
 
-    // Cache miss, query database
-    const church = await prisma.church.findUnique({
+    // Cache miss or timeout, query database with timeout
+    const dbPromise = prisma.church.findUnique({
       where: { id: churchId },
       select: { subscriptionStatus: true },
     });
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Database query timeout')), 3000) // 3 second timeout
+    );
+    const church = (await Promise.race([dbPromise, timeoutPromise])) as any;
     const status = church?.subscriptionStatus as (PlanName | 'trial') | undefined;
     const plan = status || 'trial';
 
@@ -158,19 +171,27 @@ export function getPlanLimits(plan: PlanName | string): PlanLimits | null {
  */
 export async function getUsage(churchId: string): Promise<Record<string, number>> {
   try {
-    // Try cache first
-    const cached = await getCached<Record<string, number>>(CACHE_KEYS.billingUsage(churchId));
-    if (cached) {
-      return cached;
+    // Try cache first with timeout (prevent hanging on slow Redis)
+    let cached: Record<string, number> | null = null;
+    try {
+      const cachePromise = getCached<Record<string, number>>(CACHE_KEYS.billingUsage(churchId));
+      const timeoutPromise = new Promise<null>((_, reject) =>
+        setTimeout(() => reject(new Error('Cache timeout')), 3000) // 3 second timeout
+      );
+      cached = await Promise.race([cachePromise, timeoutPromise]) as Record<string, number>;
+      if (cached) {
+        return cached;
+      }
+    } catch (cacheError) {
+      console.warn('Cache lookup timeout, proceeding with database query:', cacheError);
+      // Continue - we'll query the database directly
     }
 
     const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
-    // Run all count queries in parallel (instead of sequentially)
-    const [branchCount, memberCount, coAdminCount, messageCount] = await Promise.all([
-      prisma.branch.count({
-        where: { churchId },
-      }),
+    // Run all count queries in parallel with timeout protection (prevent hanging on slow database)
+    const countPromises = [
+      prisma.branch.count({ where: { churchId } }),
       prisma.member.count({
         where: {
           groups: {
@@ -180,16 +201,21 @@ export async function getUsage(churchId: string): Promise<Record<string, number>
           },
         },
       }),
-      prisma.admin.count({
-        where: { churchId, role: 'CO_ADMIN' },
-      }),
+      prisma.admin.count({ where: { churchId, role: 'CO_ADMIN' } }),
       prisma.message.count({
         where: {
           churchId,
           createdAt: { gte: startOfMonth },
         },
       }),
-    ]);
+    ];
+
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Query timeout')), 5000) // 5 second timeout
+    );
+
+    const counts = await Promise.race([Promise.all(countPromises), timeoutPromise]) as number[];
+    const [branchCount, memberCount, coAdminCount, messageCount] = counts;
 
     const usage = {
       branches: branchCount,
@@ -198,12 +224,15 @@ export async function getUsage(churchId: string): Promise<Record<string, number>
       coAdmins: coAdminCount,
     };
 
-    // Cache for 30 minutes
-    await setCached(CACHE_KEYS.billingUsage(churchId), usage, CACHE_TTL.MEDIUM);
+    // Cache for 30 minutes (non-blocking fire-and-forget)
+    setCached(CACHE_KEYS.billingUsage(churchId), usage, CACHE_TTL.MEDIUM).catch(err =>
+      console.warn('Failed to cache usage:', err)
+    );
 
     return usage;
   } catch (error) {
     console.error('Failed to get usage:', error);
+    // Return empty usage instead of blocking - user will just have no limits enforced temporarily
     return {
       branches: 0,
       members: 0,
