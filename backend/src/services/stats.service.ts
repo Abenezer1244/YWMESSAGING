@@ -92,15 +92,15 @@ export async function getMessageStats(
       // Group recipients by message date and status
       const dailyRecipients = await prisma.$queryRaw`
         SELECT
-          DATE(m.created_at) as date,
+          DATE(m."createdAt") as date,
           mr.status,
           COUNT(*) as count
-        FROM message_recipient mr
-        JOIN message m ON mr.message_id = m.id
-        WHERE m.church_id = ${churchId}
-          AND m.created_at >= ${startDate}
-        GROUP BY DATE(m.created_at), mr.status
-        ORDER BY DATE(m.created_at)
+        FROM "MessageRecipient" mr
+        JOIN "Message" m ON mr."messageId" = m.id
+        WHERE m."churchId" = ${churchId}
+          AND m."createdAt" >= ${startDate}
+        GROUP BY DATE(m."createdAt"), mr.status
+        ORDER BY DATE(m."createdAt")
       ` as Array<{ date: string; status: string; count: number }>;
 
       // Aggregate by day
@@ -199,16 +199,16 @@ async function getBranchStatsUncached(churchId: string): Promise<BranchStat[]> {
         b.id as branch_id,
         COUNT(DISTINCT m.id) as message_count,
         COUNT(CASE WHEN mr.status = 'delivered' THEN 1 END) as delivered_count
-      FROM branch b
-      LEFT JOIN "Group" g ON g.branch_id = b.id
-      LEFT JOIN message m ON m.church_id = b.church_id
-        AND (m.target_type IN ('branches', 'all') OR m.target_type IS NULL)
-      LEFT JOIN message_recipient mr ON mr.message_id = m.id
-        AND mr.member_id IN (
-          SELECT member_id FROM group_member
-          WHERE group_id IN (SELECT id FROM "Group" WHERE branch_id = b.id)
+      FROM "Branch" b
+      LEFT JOIN "Group" g ON g."branchId" = b.id
+      LEFT JOIN "Message" m ON m."churchId" = b."churchId"
+        AND (m."targetType" IN ('branches', 'all') OR m."targetType" IS NULL)
+      LEFT JOIN "MessageRecipient" mr ON mr."messageId" = m.id
+        AND mr."memberId" IN (
+          SELECT "memberId" FROM "GroupMember"
+          WHERE "groupId" IN (SELECT id FROM "Group" WHERE "branchId" = b.id)
         )
-      WHERE b.church_id = ${churchId}
+      WHERE b."churchId" = ${churchId}
       GROUP BY b.id
     `;
 
