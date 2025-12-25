@@ -4,7 +4,7 @@ import { verifyRefreshToken, generateMFASessionToken, verifyMFASessionToken, ver
 import { logFailedLogin } from '../utils/security-logger.js';
 import { registerSchema, loginSchema, completeWelcomeSchema } from '../lib/validation/schemas.js';
 import { safeValidate } from '../lib/validation/schemas.js';
-import { revokeAllTokens } from '../services/token-revocation.service.js';
+import { revokeAccessToken, revokeRefreshToken } from '../services/token-revocation.service.js';
 import * as mfaService from '../services/mfa.service.js';
 import { prisma } from '../lib/prisma.js';
 
@@ -314,7 +314,14 @@ export async function logout(req: Request, res: Response): Promise<void> {
         const payload = verifyAccessToken(accessToken);
 
         if (payload?.adminId) {
-          await revokeAllTokens(accessToken, refreshToken || '');
+          // Revoke access token
+          await revokeAccessToken(accessToken);
+
+          // Revoke refresh token if available
+          if (refreshToken) {
+            await revokeRefreshToken(refreshToken);
+          }
+
           console.log(`✅ [LOGOUT] Tokens revoked for admin ${payload.adminId}`);
         } else {
           console.warn('[LOGOUT] Could not extract adminId from token');
