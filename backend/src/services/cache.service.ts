@@ -73,25 +73,41 @@ export async function getCachedWithFallback<T>(
       return fetchFn();
     }
 
-    // Try to get from cache
-    const cached = await redisClient.get(key);
-    if (cached) {
-      try {
-        cacheMetrics.recordHit();
-        return JSON.parse(cached) as T;
-      } catch (parseError) {
-        console.warn(`[Cache] Failed to parse JSON for key ${key}, deleting corrupt data`);
-        await invalidateCache(key);
+    // Try to get from cache WITH 2-SECOND TIMEOUT
+    try {
+      const cachePromise = redisClient.get(key);
+      const timeoutPromise = new Promise<string | null>((_, reject) =>
+        setTimeout(() => reject(new Error('Redis cache read timeout')), 2000)
+      );
+
+      const cached = await Promise.race([cachePromise, timeoutPromise]);
+      if (cached) {
+        try {
+          cacheMetrics.recordHit();
+          return JSON.parse(cached) as T;
+        } catch (parseError) {
+          console.warn(`[Cache] Failed to parse JSON for key ${key}, deleting corrupt data`);
+          // Fire-and-forget cache invalidation
+          invalidateCache(key).catch(() => {});
+        }
       }
+    } catch (cacheError) {
+      console.warn(`[Cache] Cache read failed/timeout for ${key}:`, (cacheError as Error).message);
+      // Fall through to fetch from source
     }
 
     // Cache miss - fetch from source
     cacheMetrics.recordMiss();
     const data = await fetchFn();
 
-    // Store in cache with TTL jitter to prevent thundering herd
+    // Store in cache WITH TIMEOUT (fire-and-forget, non-blocking)
     const jitteredTtl = ttl + Math.floor(Math.random() * 120 - 60);
-    await redisClient.setEx(key, Math.max(jitteredTtl, 60), JSON.stringify(data));
+    redisClient
+      .setEx(key, Math.max(jitteredTtl, 60), JSON.stringify(data))
+      .catch((error) => {
+        console.warn(`[Cache] Cache write failed for ${key}:`, (error as Error).message);
+        // Ignore cache write failures - data still returned
+      });
 
     return data;
   } catch (error) {
