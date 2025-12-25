@@ -59,24 +59,38 @@ export async function getCachedWithFallback(key, fetchFn, ttl = 300) {
             // Redis not connected, fetch from source directly
             return fetchFn();
         }
-        // Try to get from cache
-        const cached = await redisClient.get(key);
-        if (cached) {
-            try {
-                cacheMetrics.recordHit();
-                return JSON.parse(cached);
+        // Try to get from cache WITH 2-SECOND TIMEOUT
+        try {
+            const cachePromise = redisClient.get(key);
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Redis cache read timeout')), 2000));
+            const cached = await Promise.race([cachePromise, timeoutPromise]);
+            if (cached) {
+                try {
+                    cacheMetrics.recordHit();
+                    return JSON.parse(cached);
+                }
+                catch (parseError) {
+                    console.warn(`[Cache] Failed to parse JSON for key ${key}, deleting corrupt data`);
+                    // Fire-and-forget cache invalidation
+                    invalidateCache(key).catch(() => { });
+                }
             }
-            catch (parseError) {
-                console.warn(`[Cache] Failed to parse JSON for key ${key}, deleting corrupt data`);
-                await invalidateCache(key);
-            }
+        }
+        catch (cacheError) {
+            console.warn(`[Cache] Cache read failed/timeout for ${key}:`, cacheError.message);
+            // Fall through to fetch from source
         }
         // Cache miss - fetch from source
         cacheMetrics.recordMiss();
         const data = await fetchFn();
-        // Store in cache with TTL jitter to prevent thundering herd
+        // Store in cache WITH TIMEOUT (fire-and-forget, non-blocking)
         const jitteredTtl = ttl + Math.floor(Math.random() * 120 - 60);
-        await redisClient.setEx(key, Math.max(jitteredTtl, 60), JSON.stringify(data));
+        redisClient
+            .setEx(key, Math.max(jitteredTtl, 60), JSON.stringify(data))
+            .catch((error) => {
+            console.warn(`[Cache] Cache write failed for ${key}:`, error.message);
+            // Ignore cache write failures - data still returned
+        });
         return data;
     }
     catch (error) {
@@ -87,7 +101,7 @@ export async function getCachedWithFallback(key, fetchFn, ttl = 300) {
     }
 }
 /**
- * Get value from cache
+ * Get value from cache with timeout protection
  * Returns null if key not found or Redis unavailable
  * @deprecated Use getCachedWithFallback instead for automatic source fetch
  */
@@ -96,7 +110,10 @@ export async function getCached(key) {
         if (!redisClient.isOpen) {
             return null; // Redis not connected, bypass cache
         }
-        const cached = await redisClient.get(key);
+        // Get with 1-second timeout to prevent hanging
+        const cachePromise = redisClient.get(key);
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Cache read timeout')), 1000));
+        const cached = await Promise.race([cachePromise, timeoutPromise]);
         if (!cached) {
             cacheMetrics.recordMiss();
             return null;
@@ -107,7 +124,8 @@ export async function getCached(key) {
         }
         catch (parseError) {
             console.warn(`[Cache] Failed to parse JSON for key ${key}, deleting corrupt data`);
-            await invalidateCache(key);
+            // Fire-and-forget invalidation
+            invalidateCache(key).catch(() => { });
             return null;
         }
     }
@@ -119,7 +137,7 @@ export async function getCached(key) {
 }
 /**
  * Set value in cache with TTL
- * Returns success status
+ * Returns success status (fire-and-forget, non-blocking)
  */
 export async function setCached(key, data, ttlSeconds = 3600 // Default 1 hour
 ) {
@@ -128,8 +146,15 @@ export async function setCached(key, data, ttlSeconds = 3600 // Default 1 hour
             return false; // Redis not connected, skip caching
         }
         const serialized = JSON.stringify(data);
-        await redisClient.setEx(key, ttlSeconds, serialized);
-        return true;
+        // Fire-and-forget: Don't await Redis write, return immediately
+        // This prevents blocking on slow/unresponsive Redis
+        redisClient
+            .setEx(key, ttlSeconds, serialized)
+            .catch((error) => {
+            console.warn(`[Cache] Cache write failed for ${key}:`, error.message);
+            // Ignore cache write failures - data still returned to caller
+        });
+        return true; // Return immediately without awaiting Redis
     }
     catch (error) {
         console.error(`[Cache] Failed to set ${key}:`, error.message);

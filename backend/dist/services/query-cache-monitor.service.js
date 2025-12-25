@@ -26,21 +26,27 @@ class QueryCacheMonitor {
         this.CRITICAL_THRESHOLD = 1000; // milliseconds
     }
     /**
-     * Get or fetch data with Redis caching
+     * Get or fetch data with Redis caching with timeout protection
      * ✅ Reduces database hits by caching query results
+     * ✅ Timeout on Redis operations prevents hanging when Redis is unavailable
      */
     async getOrFetch(options) {
+        // Try to get from Redis cache WITH TIMEOUT (2 seconds max)
         try {
-            // Try to get from Redis cache
-            const cached = await redisClient.get(options.key);
-            if (cached) {
-                console.log(`✅ Cache HIT: ${options.key}`);
-                return JSON.parse(cached);
+            // Only attempt cache read if Redis is connected
+            if (redisClient.isOpen) {
+                const cachePromise = redisClient.get(options.key);
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Redis cache read timeout')), 2000));
+                const cached = await Promise.race([cachePromise, timeoutPromise]);
+                if (cached) {
+                    console.log(`✅ Cache HIT: ${options.key}`);
+                    return JSON.parse(cached);
+                }
             }
         }
         catch (error) {
-            console.warn(`⚠️ Cache read failed for ${options.key}:`, error);
-            // Fall through to fetch from database
+            console.warn(`⚠️ Cache read failed/timeout for ${options.key}:`, error.message);
+            // Fall through to fetch from database - don't block on cache
         }
         // Fetch from database with timing
         const startTime = Date.now();
@@ -48,14 +54,17 @@ class QueryCacheMonitor {
         const duration = Date.now() - startTime;
         // Log slow queries
         this.logSlowQueryIfNeeded(`fetch:${options.key}`, duration);
-        // Cache the result
-        try {
-            await redisClient.setEx(options.key, options.ttl, JSON.stringify(data));
-            console.log(`💾 Cached: ${options.key} (TTL: ${options.ttl}s, Query: ${duration}ms)`);
-        }
-        catch (error) {
-            console.warn(`⚠️ Cache write failed for ${options.key}:`, error);
-            // Still return data even if caching fails
+        // Cache the result WITH TIMEOUT (2 seconds max, fire-and-forget)
+        if (redisClient.isOpen) {
+            redisClient
+                .setEx(options.key, options.ttl, JSON.stringify(data))
+                .then(() => {
+                console.log(`💾 Cached: ${options.key} (TTL: ${options.ttl}s, Query: ${duration}ms)`);
+            })
+                .catch((error) => {
+                console.warn(`⚠️ Cache write failed for ${options.key}:`, error.message);
+                // Still return data even if caching fails - non-blocking
+            });
         }
         return data;
     }

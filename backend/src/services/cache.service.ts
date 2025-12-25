@@ -119,7 +119,7 @@ export async function getCachedWithFallback<T>(
 }
 
 /**
- * Get value from cache
+ * Get value from cache with timeout protection
  * Returns null if key not found or Redis unavailable
  * @deprecated Use getCachedWithFallback instead for automatic source fetch
  */
@@ -129,7 +129,13 @@ export async function getCached<T>(key: string): Promise<T | null> {
       return null; // Redis not connected, bypass cache
     }
 
-    const cached = await redisClient.get(key);
+    // Get with 1-second timeout to prevent hanging
+    const cachePromise = redisClient.get(key);
+    const timeoutPromise = new Promise<string | null>((_, reject) =>
+      setTimeout(() => reject(new Error('Cache read timeout')), 1000)
+    );
+
+    const cached = await Promise.race([cachePromise, timeoutPromise]);
     if (!cached) {
       cacheMetrics.recordMiss();
       return null;
@@ -140,7 +146,8 @@ export async function getCached<T>(key: string): Promise<T | null> {
       return JSON.parse(cached) as T;
     } catch (parseError) {
       console.warn(`[Cache] Failed to parse JSON for key ${key}, deleting corrupt data`);
-      await invalidateCache(key);
+      // Fire-and-forget invalidation
+      invalidateCache(key).catch(() => {});
       return null;
     }
   } catch (error) {
@@ -152,7 +159,7 @@ export async function getCached<T>(key: string): Promise<T | null> {
 
 /**
  * Set value in cache with TTL
- * Returns success status
+ * Returns success status (fire-and-forget, non-blocking)
  */
 export async function setCached<T>(
   key: string,
@@ -165,8 +172,17 @@ export async function setCached<T>(
     }
 
     const serialized = JSON.stringify(data);
-    await redisClient.setEx(key, ttlSeconds, serialized);
-    return true;
+
+    // Fire-and-forget: Don't await Redis write, return immediately
+    // This prevents blocking on slow/unresponsive Redis
+    redisClient
+      .setEx(key, ttlSeconds, serialized)
+      .catch((error) => {
+        console.warn(`[Cache] Cache write failed for ${key}:`, (error as Error).message);
+        // Ignore cache write failures - data still returned to caller
+      });
+
+    return true; // Return immediately without awaiting Redis
   } catch (error) {
     console.error(`[Cache] Failed to set ${key}:`, (error as Error).message);
     return false; // Graceful fallback, don't fail request

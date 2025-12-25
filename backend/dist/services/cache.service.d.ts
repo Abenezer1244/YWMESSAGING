@@ -38,14 +38,14 @@ export declare const cacheMetrics: {
  */
 export declare function getCachedWithFallback<T>(key: string, fetchFn: () => Promise<T>, ttl?: number): Promise<T>;
 /**
- * Get value from cache
+ * Get value from cache with timeout protection
  * Returns null if key not found or Redis unavailable
  * @deprecated Use getCachedWithFallback instead for automatic source fetch
  */
 export declare function getCached<T>(key: string): Promise<T | null>;
 /**
  * Set value in cache with TTL
- * Returns success status
+ * Returns success status (fire-and-forget, non-blocking)
  */
 export declare function setCached<T>(key: string, data: T, ttlSeconds?: number): Promise<boolean>;
 /**

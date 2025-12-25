@@ -85,6 +85,7 @@ export async function revokeAllTokens(accessToken, refreshToken) {
 /**
  * Check if a token is revoked
  * Called before allowing access to protected endpoints
+ * ✅ Includes timeout to prevent hanging when Redis is unavailable
  *
  * @param token The token to check
  * @param type 'access' or 'refresh'
@@ -99,8 +100,10 @@ export async function isTokenRevoked(token, type = 'access') {
         }
         const tokenHash = hashToken(token);
         const key = `${REVOKED_TOKEN_PREFIX}${type}:${tokenHash}`;
-        // Check if token exists in Redis blacklist
-        const exists = await redisClient.exists(key);
+        // Check if token exists in Redis blacklist WITH 1-SECOND TIMEOUT
+        const redisPromise = redisClient.exists(key);
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Token revocation check timeout')), 1000));
+        const exists = await Promise.race([redisPromise, timeoutPromise]);
         if (exists > 0) {
             console.log(`⛔ Token revoked: ${type}`);
             return true;

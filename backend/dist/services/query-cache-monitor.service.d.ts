@@ -45,8 +45,9 @@ declare class QueryCacheMonitor {
     private readonly SLOW_QUERY_THRESHOLD;
     private readonly CRITICAL_THRESHOLD;
     /**
-     * Get or fetch data with Redis caching
+     * Get or fetch data with Redis caching with timeout protection
      * ✅ Reduces database hits by caching query results
+     * ✅ Timeout on Redis operations prevents hanging when Redis is unavailable
      */
     getOrFetch<T>(options: CacheOptions): Promise<T>;
     /**

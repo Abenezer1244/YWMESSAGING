@@ -42,6 +42,7 @@ export declare function revokeAllTokens(accessToken: string, refreshToken: strin
 /**
  * Check if a token is revoked
  * Called before allowing access to protected endpoints
+ * ✅ Includes timeout to prevent hanging when Redis is unavailable
  *
  * @param token The token to check
  * @param type 'access' or 'refresh'
