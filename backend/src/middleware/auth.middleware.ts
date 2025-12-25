@@ -21,6 +21,18 @@ export async function authenticateToken(req: Request, res: Response, next: NextF
   // Try to get token from httpOnly cookie first
   let token = req.cookies.accessToken;
 
+  // DEBUG: Log cookie situation
+  if (!token) {
+    console.log('🔍 AUTH_MIDDLEWARE - No token in cookies', {
+      cookiesReceived: req.cookies,
+      cookieHeader: req.headers['cookie'],
+      allCookies: Object.keys(req.cookies),
+      origin: req.get('origin'),
+      referer: req.get('referer'),
+      host: req.get('host'),
+    });
+  }
+
   // Fall back to Authorization header
   if (!token) {
     const authHeader = req.headers['authorization'];

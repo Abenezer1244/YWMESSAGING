@@ -122,7 +122,22 @@
       "Bash(mcp__playwright__browser_navigate http://localhost:5173/register)",
       "Bash(timeout 180 node:*)",
       "Bash(ls:*)",
-      "Bash(timeout 10 bash:*)"
+      "Bash(timeout 10 bash:*)",
+      "Bash(timeout 120 node:*)",
+      "Bash(timeout 30 bash -c \"sleep 8 && curl -s http://localhost:5173 > /dev/null && echo ''Server is ready''\")",
+      "Bash(timeout 30 bash:*)",
+      "Bash(powershell -Command \"Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; echo ''All Node processes stopped''\")",
+      "Bash(timeout 20 bash -c \"sleep 8 && curl -s http://localhost:5000 > /dev/null && echo ''Backend API is ready''\")",
+      "Bash(timeout 90 node:*)",
+      "Bash(timeout 20 bash:*)",
+      "Bash(mcp__playwright__browser_navigate http://localhost:5173/dashboard)",
+      "Bash(timeout 60 bash -c \"sleep 12 && curl -s http://localhost:5173 > /dev/null && echo ''Server is ready'' || echo ''Server not ready yet''\")",
+      "Bash(timeout 90 bash:*)",
+      "Bash(timeout 60 bash:*)",
+      "Bash(timeout 120 bash:*)",
+      "Skill(mcp)",
+      "Bash(mcp__playwright__browser_navigate \"https://koinoniasms.com/login\")",
+      "Bash(mcp__playwright__browser_navigate https://koinoniasms.com/login)"
     ],
     "deny": [],
     "ask": []

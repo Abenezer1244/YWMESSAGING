@@ -1,0 +1,71 @@
+{
+  "timestamp": "2025-12-25T01:07:12.560Z",
+  "email": "test-1766624830509@koinoniasms.com",
+  "steps": [
+    {
+      "name": "Navigating to register page",
+      "success": true,
+      "details": ""
+    },
+    {
+      "name": "Filling registration form",
+      "success": true,
+      "details": "Email: test-1766624830509@koinoniasms.com"
+    },
+    {
+      "name": "Submitting registration form",
+      "success": true,
+      "details": ""
+    },
+    {
+      "name": "Registration & redirect to dashboard",
+      "success": true,
+      "details": "URL: https://koinoniasms.com/dashboard"
+    },
+    {
+      "name": "Dashboard page loaded",
+      "success": true,
+      "details": ""
+    },
+    {
+      "name": "Attempting settings navigation",
+      "success": true,
+      "details": ""
+    },
+    {
+      "name": "Settings page load failed",
+      "success": false,
+      "details": "page.goto: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://koinoniasms.com/dashboard/settings\", waiting until \"networkidle\"\u001b[22m\n"
+    },
+    {
+      "name": "Attempting branches navigation",
+      "success": true,
+      "details": ""
+    },
+    {
+      "name": "Branches page load failed",
+      "success": false,
+      "details": "page.goto: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://koinoniasms.com/dashboard/branches\", waiting until \"networkidle\"\u001b[22m\n"
+    },
+    {
+      "name": "Attempting messages navigation",
+      "success": true,
+      "details": ""
+    },
+    {
+      "name": "Messages page load failed",
+      "success": false,
+      "details": "page.goto: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://koinoniasms.com/dashboard/messages\", waiting until \"networkidle\"\u001b[22m\n"
+    },
+    {
+      "name": "Attempting logout",
+      "success": true,
+      "details": ""
+    },
+    {
+      "name": "Logout test failed",
+      "success": false,
+      "details": "page.goto: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://koinoniasms.com/dashboard\", waiting until \"networkidle\"\u001b[22m\n"
+    }
+  ]
+}
