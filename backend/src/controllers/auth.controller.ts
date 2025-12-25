@@ -44,6 +44,10 @@ export async function register(req: Request, res: Response): Promise<void> {
       cookieDomain,
       sameSite,
       NODE_ENV: process.env.NODE_ENV,
+      'X-Forwarded-Host header': req.get('x-forwarded-host'),
+      'req.hostname': req.hostname,
+      'req.get(host)': req.get('host'),
+      'hostname.includes(koinoniasms.com)': hostname.includes('koinoniasms.com'),
     });
 
     // Set httpOnly cookies for tokens (secure, cannot be accessed via JavaScript)
