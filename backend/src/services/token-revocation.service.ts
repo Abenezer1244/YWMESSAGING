@@ -38,12 +38,19 @@ export async function revokeAccessToken(token: string, ttl: number = ACCESS_TOKE
 
     // Store in Redis with TTL matching token expiry
     const key = `${REVOKED_TOKEN_PREFIX}access:${tokenHash}`;
-    await redisClient.setEx(key, ttl, '1');
 
+    // Add 5-second timeout for Redis write operation (prevent hanging on logout)
+    const setExPromise = redisClient.setEx(key, ttl, '1');
+    const timeoutPromise = new Promise<void>((_, reject) =>
+      setTimeout(() => reject(new Error('Redis operation timeout')), 5000)
+    );
+
+    await Promise.race([setExPromise, timeoutPromise]);
     console.log(`🔐 Access token revoked (expires in ${ttl}s)`);
   } catch (error) {
-    console.error('❌ Failed to revoke access token:', error);
-    throw new Error('Token revocation failed');
+    console.error('⚠️ Failed to revoke access token:', error);
+    // Don't throw - logout should complete even if revocation fails
+    // Token revocation is checked on next request with fail-secure
   }
 }
 
@@ -60,12 +67,19 @@ export async function revokeRefreshToken(token: string, ttl: number = REFRESH_TO
 
     // Store in Redis with TTL matching token expiry
     const key = `${REVOKED_TOKEN_PREFIX}refresh:${tokenHash}`;
-    await redisClient.setEx(key, ttl, '1');
 
+    // Add 5-second timeout for Redis write operation (prevent hanging on logout)
+    const setExPromise = redisClient.setEx(key, ttl, '1');
+    const timeoutPromise = new Promise<void>((_, reject) =>
+      setTimeout(() => reject(new Error('Redis operation timeout')), 5000)
+    );
+
+    await Promise.race([setExPromise, timeoutPromise]);
     console.log(`🔐 Refresh token revoked (expires in ${ttl}s)`);
   } catch (error) {
-    console.error('❌ Failed to revoke refresh token:', error);
-    throw new Error('Token revocation failed');
+    console.error('⚠️ Failed to revoke refresh token:', error);
+    // Don't throw - logout should complete even if revocation fails
+    // Token revocation is checked on next request with fail-secure
   }
 }
 
