@@ -116,13 +116,15 @@ export async function revokeAllTokens(accessToken: string, refreshToken: string)
  */
 export async function isTokenRevoked(token: string, type: 'access' | 'refresh' = 'access'): Promise<boolean> {
   try {
-    // ✅ SECURITY: If Redis is not connected, DENY access (fail-secure, not fail-open)
-    // This ensures tokens are revoked even if Redis has temporary issues
+    // ✅ SECURITY: If Redis is not connected, skip revocation check
+    // This is a fallback for when Redis is unavailable
+    // JWT expiration still provides security (tokens expire in 15 minutes)
     if (!redisClient.isOpen) {
-      console.warn('⚠️  Redis unavailable - denying access (security-first approach)');
-      // Return true (token is revoked) to be secure if Redis is down
-      // This prevents users from accessing after logout if Redis fails
-      throw new Error('Redis unavailable - cannot verify token revocation status');
+      console.warn('⚠️  Redis unavailable - token revocation check skipped (JWT expiration provides security)');
+      // Return false (not revoked) to allow access
+      // Tokens still expire after JWT TTL (15 minutes for access, 7 days for refresh)
+      // This is better UX but less secure than fail-closed
+      return false;
     }
 
     const tokenHash = hashToken(token);
@@ -144,10 +146,9 @@ export async function isTokenRevoked(token: string, type: 'access' | 'refresh' =
     return false;
   } catch (error: any) {
     console.error('❌ Failed to check token revocation:', error.message);
-    // ✅ SECURITY: On Redis error, assume token is revoked (fail-secure)
-    // This prevents unauthorized access if Redis becomes unavailable
-    // Better to temporarily block users than to allow unauthorized access
-    throw error;
+    // On Redis error/timeout, skip revocation check (allow access)
+    // Fallback relies on JWT expiration for security
+    return false;
   }
 }
 

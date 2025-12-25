@@ -51,16 +51,9 @@ export async function authenticateToken(req: Request, res: Response, next: NextF
   }
 
   // ✅ SECURITY: Check if token has been revoked (logged out)
-  try {
-    const revoked = await isTokenRevoked(token, 'access');
-    if (revoked) {
-      res.status(401).json({ error: 'Token has been revoked. Please log in again.' });
-      return;
-    }
-  } catch (revokeError: any) {
-    // If we can't check revocation (Redis error), deny access (fail-secure)
-    console.error('⚠️ Token revocation check failed:', revokeError.message);
-    res.status(401).json({ error: 'Authentication check failed. Please log in again.' });
+  const revoked = await isTokenRevoked(token, 'access');
+  if (revoked) {
+    res.status(401).json({ error: 'Token has been revoked. Please log in again.' });
     return;
   }
 
