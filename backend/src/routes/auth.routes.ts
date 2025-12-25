@@ -9,9 +9,9 @@ router.post('/register', register);
 router.post('/login', loginHandler);
 router.post('/verify-mfa', verifyMFAHandler);
 router.post('/refresh', refreshToken);
-router.post('/logout', logout);
 
 // Protected routes
+router.post('/logout', authenticateToken, logout);
 router.get('/me', authenticateToken, getMe);
 router.post('/complete-welcome', authenticateToken, completeWelcome);
 
