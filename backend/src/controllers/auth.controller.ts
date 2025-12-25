@@ -307,36 +307,9 @@ export async function logout(req: Request, res: Response): Promise<void> {
       }
     }
 
-    // If we have the access token, revoke it
-    if (accessToken) {
-      try {
-        // Verify the token and extract adminId
-        const payload = verifyAccessToken(accessToken);
-
-        if (payload?.adminId) {
-          // Revoke access token
-          await revokeAccessToken(accessToken);
-
-          // Revoke refresh token if available
-          if (refreshToken) {
-            await revokeRefreshToken(refreshToken);
-          }
-
-          console.log(`✅ [LOGOUT] Tokens revoked for admin ${payload.adminId}`);
-        } else {
-          console.warn('[LOGOUT] Could not extract adminId from token');
-        }
-      } catch (revocationError) {
-        console.error('⚠️ Failed to revoke tokens:', revocationError);
-        // Continue with logout even if revocation fails
-        // (user cookies will be cleared as fallback)
-      }
-    } else {
-      console.warn('[LOGOUT] Could not find access token in cookies or Authorization header', {
-        hasAccessToken: !!accessToken,
-        hasRefreshToken: !!refreshToken,
-      });
-    }
+    // TEMP DEBUG: Skip token revocation to test if that's the hang
+    // Just clear cookies immediately
+    console.log('[LOGOUT] Skipping token revocation for debugging purposes');
 
     // ✅ SECURITY: Determine cookie domain based on environment
     const cookieDomain = process.env.NODE_ENV === 'production' ? '.koinoniasms.com' : undefined;
