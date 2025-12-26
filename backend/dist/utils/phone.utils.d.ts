@@ -7,6 +7,7 @@
 export declare function formatToE164(phone: string): string;
 /**
  * Validate if phone number is valid
+ * ✅ LENIENT: Uses same logic as formatToE164 so validation matches formatting
  */
 export declare function validatePhoneNumber(phone: string): boolean;
 //# sourceMappingURL=phone.utils.d.ts.map

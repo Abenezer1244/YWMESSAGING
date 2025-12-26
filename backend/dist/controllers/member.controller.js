@@ -170,8 +170,9 @@ export async function importMembers(req, res) {
         }
         // Import to database
         const result = await memberService.importMembers(groupId, parsed.valid);
-        // Invalidate group members cache (fire-and-forget, non-blocking)
-        invalidateCache(CACHE_KEYS.groupMembers(groupId)).catch((err) => {
+        // Invalidate group members cache BEFORE responding (critical for consistency)
+        // This ensures cache is cleared before frontend requests fresh data
+        await invalidateCache(CACHE_KEYS.groupMembers(groupId)).catch((err) => {
             console.error('[importMembers] Cache invalidation error:', err);
         });
         res.json({

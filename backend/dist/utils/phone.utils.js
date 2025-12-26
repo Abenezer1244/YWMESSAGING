@@ -57,11 +57,14 @@ export function formatToE164(phone) {
 }
 /**
  * Validate if phone number is valid
+ * ✅ LENIENT: Uses same logic as formatToE164 so validation matches formatting
  */
 export function validatePhoneNumber(phone) {
     try {
-        const parsed = parsePhoneNumber(phone, 'US');
-        return parsed !== undefined && parsed.isValid();
+        // Try to format it using the same logic as formatToE164
+        // If it doesn't throw, the phone number is valid
+        formatToE164(phone);
+        return true;
     }
     catch {
         return false;
