@@ -45,7 +45,7 @@ export declare function getMembers(groupId: string, options?: {
 }>;
 /**
  * Add single member to group
- * ✅ PROTECTED: Function-level 5-second timeout to prevent hangs
+ * ✅ PROTECTED: Function-level 4-second timeout to prevent hangs (AGGRESSIVE)
  */
 export declare function addMember(groupId: string, data: CreateMemberData): Promise<any>;
 /**

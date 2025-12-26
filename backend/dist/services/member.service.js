@@ -99,15 +99,15 @@ async function fetchMembersPage(groupId, page, limit, search) {
 }
 /**
  * Add single member to group
- * ✅ PROTECTED: Function-level 5-second timeout to prevent hangs
+ * ✅ PROTECTED: Function-level 4-second timeout to prevent hangs (AGGRESSIVE)
  */
 export async function addMember(groupId, data) {
-    // Wrap entire function in a 5-second timeout
+    // Wrap entire function in a 4-second timeout (AGGRESSIVE - more strict than internal timeouts)
     return new Promise((resolve, reject) => {
         const timeoutId = setTimeout(() => {
-            console.error('[addMember] FUNCTION TIMEOUT - entire operation exceeded 5 seconds');
+            console.error('[addMember] FUNCTION TIMEOUT - entire operation exceeded 4 seconds');
             reject(new Error('Member add operation took too long. Please try again.'));
-        }, 5000);
+        }, 4000); // 4 second timeout (very aggressive)
         // Run the actual member add logic
         addMemberInternal(groupId, data)
             .then((result) => {
@@ -148,9 +148,37 @@ async function addMemberInternal(groupId, data) {
     if (!group) {
         throw new Error('Group not found');
     }
-    // Check plan limits before adding member
-    const usage = await getUsage(group.churchId);
-    const plan = await getCurrentPlan(group.churchId);
+    // Check plan limits before adding member (with AGGRESSIVE timeout)
+    let usage = { branches: 0, members: 0, messagesThisMonth: 0, coAdmins: 0 };
+    let plan = 'trial';
+    try {
+        console.log('[addMember] Getting usage...');
+        const usagePromise = getUsage(group.churchId);
+        const usageTimeout = new Promise((_, reject) => setTimeout(() => {
+            console.error('[addMember] USAGE CALL TIMEOUT - using defaults');
+            reject(new Error('Usage timeout'));
+        }, 2000));
+        usage = await Promise.race([usagePromise, usageTimeout]);
+        console.log('[addMember] Usage retrieved:', usage);
+    }
+    catch (error) {
+        console.error('[addMember] Usage call failed, using defaults:', error);
+        usage = { branches: 0, members: 0, messagesThisMonth: 0, coAdmins: 0 };
+    }
+    try {
+        console.log('[addMember] Getting plan...');
+        const planPromise = getCurrentPlan(group.churchId);
+        const planTimeout = new Promise((_, reject) => setTimeout(() => {
+            console.error('[addMember] PLAN CALL TIMEOUT - using trial');
+            reject(new Error('Plan timeout'));
+        }, 2000));
+        plan = await Promise.race([planPromise, planTimeout]);
+        console.log('[addMember] Plan retrieved:', plan);
+    }
+    catch (error) {
+        console.error('[addMember] Plan call failed, using trial:', error);
+        plan = 'trial';
+    }
     const limits = getPlanLimits(plan);
     if (limits && limits.members && usage.members >= limits.members) {
         throw new Error(`Member limit of ${limits.members} reached for ${plan} plan. Please upgrade your plan to add more members.`);
