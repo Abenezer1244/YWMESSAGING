@@ -144,7 +144,13 @@
       "Bash(timeout 45 node:*)",
       "Bash(timeout 360 node:*)",
       "Bash(timeout 10 curl:*)",
-      "Bash(timeout 5 curl:*)"
+      "Bash(timeout 5 curl:*)",
+      "Bash(timeout 70 bash:*)",
+      "Bash(timeout 60 npx prisma migrate:*)",
+      "Bash(timeout 60 npx prisma db push:*)",
+      "Bash(timeout 120 npm run build:*)",
+      "Bash(timeout 20 node:*)",
+      "Bash(mcp__playwright__browser_navigate:*)"
     ],
     "deny": [],
     "ask": []

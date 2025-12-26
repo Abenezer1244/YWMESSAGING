@@ -101,10 +101,21 @@ async function fetchMembersPage(groupId, page, limit, search) {
  * Add single member to group
  */
 export async function addMember(groupId, data) {
-    const group = await prisma.group.findUnique({
-        where: { id: groupId },
-        select: { id: true, churchId: true }, // Only fetch what we need
-    });
+    // Get group with timeout protection
+    let group;
+    try {
+        const groupPromise = prisma.group.findUnique({
+            where: { id: groupId },
+            select: { id: true, churchId: true }, // Only fetch what we need
+        });
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Database query timeout')), 5000) // 5 second timeout
+        );
+        group = await Promise.race([groupPromise, timeoutPromise]);
+    }
+    catch (error) {
+        console.error('Failed to get group:', error);
+        throw new Error('Failed to load group. Please try again.');
+    }
     if (!group) {
         throw new Error('Group not found');
     }
@@ -118,51 +129,86 @@ export async function addMember(groupId, data) {
     // Format phone to E.164
     const formattedPhone = formatToE164(data.phone);
     const phoneHash = hashForSearch(formattedPhone);
-    // Check if member exists by phone or email in a single query
+    // Check if member exists by phone or email in a single query (with timeout)
     const emailTrim = data.email?.trim();
-    let member = await prisma.member.findFirst({
-        where: {
-            OR: [
-                { phoneHash },
-                ...(emailTrim ? [{ email: emailTrim }] : []),
-            ],
-        },
-    });
-    // Create member if doesn't exist
-    if (!member) {
-        member = await prisma.member.create({
-            data: {
-                firstName: data.firstName.trim(),
-                lastName: data.lastName.trim(),
-                phone: encrypt(formattedPhone),
-                phoneHash,
-                email: data.email?.trim(),
-                optInSms: data.optInSms ?? true,
+    let member;
+    try {
+        const memberPromise = prisma.member.findFirst({
+            where: {
+                OR: [
+                    { phoneHash },
+                    ...(emailTrim ? [{ email: emailTrim }] : []),
+                ],
             },
         });
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Member lookup timeout')), 5000));
+        member = await Promise.race([memberPromise, timeoutPromise]);
     }
-    // Check if already in group
-    const existing = await prisma.groupMember.findUnique({
-        where: {
-            groupId_memberId: {
-                groupId,
-                memberId: member.id,
+    catch (error) {
+        console.error('Failed to lookup member:', error);
+        throw new Error('Failed to process member information. Please try again.');
+    }
+    // Create member if doesn't exist (with timeout)
+    if (!member) {
+        try {
+            const createPromise = prisma.member.create({
+                data: {
+                    firstName: data.firstName.trim(),
+                    lastName: data.lastName.trim(),
+                    phone: encrypt(formattedPhone),
+                    phoneHash,
+                    email: data.email?.trim(),
+                    optInSms: data.optInSms ?? true,
+                },
+            });
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Member creation timeout')), 5000));
+            member = await Promise.race([createPromise, timeoutPromise]);
+        }
+        catch (error) {
+            console.error('Failed to create member:', error);
+            throw new Error('Failed to create member. Please try again.');
+        }
+    }
+    // Check if already in group (with timeout)
+    let existing;
+    try {
+        const existingPromise = prisma.groupMember.findUnique({
+            where: {
+                groupId_memberId: {
+                    groupId,
+                    memberId: member.id,
+                },
             },
-        },
-    });
+        });
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Duplicate check timeout')), 5000));
+        existing = await Promise.race([existingPromise, timeoutPromise]);
+    }
+    catch (error) {
+        console.error('Failed to check existing membership:', error);
+        throw new Error('Failed to process request. Please try again.');
+    }
     if (existing) {
         throw new Error('Member already in this group');
     }
-    // Add to group
-    const groupMember = await prisma.groupMember.create({
-        data: {
-            groupId,
-            memberId: member.id,
-        },
-        include: {
-            member: true,
-        },
-    });
+    // Add to group (with timeout)
+    let groupMember;
+    try {
+        const createPromise = prisma.groupMember.create({
+            data: {
+                groupId,
+                memberId: member.id,
+            },
+            include: {
+                member: true,
+            },
+        });
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Group member creation timeout')), 5000));
+        groupMember = await Promise.race([createPromise, timeoutPromise]);
+    }
+    catch (error) {
+        console.error('Failed to add member to group:', error);
+        throw new Error('Failed to add member to group. Please try again.');
+    }
     // Queue welcome message if enabled
     try {
         queueWelcomeMessage(groupMember.id, groupId, member.id, 60000);

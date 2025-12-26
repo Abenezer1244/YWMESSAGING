@@ -47,13 +47,13 @@ export declare function getMembers(groupId: string, options?: {
  * Add single member to group
  */
 export declare function addMember(groupId: string, data: CreateMemberData): Promise<{
-    id: string;
-    firstName: string;
-    lastName: string;
+    id: any;
+    firstName: any;
+    lastName: any;
     phone: string;
-    email: string | null;
-    optInSms: boolean;
-    createdAt: Date;
+    email: any;
+    optInSms: any;
+    createdAt: any;
 }>;
 /**
  * Bulk import members to group
