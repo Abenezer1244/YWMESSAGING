@@ -48,8 +48,9 @@ app.use((req, res, next) => {
   let timeoutMs = 10000; // Default: 10 seconds for normal requests
 
   // Bulk operations need more time (CSV import, batch operations, etc.)
+  // Increased to 60 seconds to handle 120+ member imports with validation + database operations
   if (req.path?.includes('/import') || req.path?.includes('/batch')) {
-    timeoutMs = 30000; // 30 seconds for import/batch operations
+    timeoutMs = 60000; // 60 seconds for import/batch operations
   }
 
   const requestTimeout = setTimeout(() => {
