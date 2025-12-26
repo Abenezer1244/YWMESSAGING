@@ -41,7 +41,8 @@ export function MembersPage() {
   const currentGroup = groups.find((g) => g.id === groupId);
 
   // Define loadMembers function first (must be before useEffect hooks)
-  const loadMembers = useCallback(async (pageNum: number = 1) => {
+  // CRITICAL: Only update total on first load (page=1) or search, NOT on every page navigation
+  const loadMembers = useCallback(async (pageNum: number = 1, updateTotal: boolean = true) => {
     if (!groupId) return;
 
     try {
@@ -52,7 +53,17 @@ export function MembersPage() {
         search: search || undefined,
       });
       setMembers(data.data);
-      setTotal(data.pagination.total);
+
+      // CRITICAL FIX: Only update total count when explicitly requested
+      // This prevents pagination from showing changing "X of Y" as data modifies
+      // Total is updated only on:
+      // 1. Initial load (page 1)
+      // 2. After search
+      // 3. After add/import/delete (explicit calls)
+      // NOT on page navigation
+      if (updateTotal) {
+        setTotal(data.pagination.total);
+      }
     } catch (error) {
       toast.error((error as Error).message || 'Failed to load members');
     } finally {
@@ -80,17 +91,18 @@ export function MembersPage() {
     }
   }, [auth.church?.id, branches, groups.length, setGroups]);
 
-  // Load members when group changes (initial load)
+  // Load members when group changes (initial load) - UPDATE TOTAL
   useEffect(() => {
     if (groupId) {
-      loadMembers(1);
+      loadMembers(1, true);  // true = update total
     }
   }, [groupId, loadMembers]);
 
-  // Load members when page changes (pagination) - NO DEBOUNCE
+  // Load members when page changes (pagination) - DON'T UPDATE TOTAL
+  // This keeps pagination stable and prevents "X of Y" from changing
   useEffect(() => {
     if (groupId && page > 1) {
-      loadMembers(page);
+      loadMembers(page, false);  // false = don't update total
     }
   }, [page, groupId, loadMembers]);
 
@@ -101,7 +113,7 @@ export function MembersPage() {
     const searchTimer = setTimeout(() => {
       // Reset to page 1 when searching
       setPage(1);
-      loadMembers(1);
+      loadMembers(1, true);  // true = update total for new search results
     }, 500);
 
     return () => clearTimeout(searchTimer);
@@ -113,7 +125,7 @@ export function MembersPage() {
     setPage(1);
     // Small delay to ensure backend has committed the write
     await new Promise(resolve => setTimeout(resolve, 300));
-    await loadMembers(1);
+    await loadMembers(1, true);  // true = update total
     setIsAddModalOpen(false);
   };
 
@@ -121,7 +133,7 @@ export function MembersPage() {
     setPage(1);
     // Small delay to ensure all members have been written to database
     await new Promise(resolve => setTimeout(resolve, 300));
-    await loadMembers(1);
+    await loadMembers(1, true);  // true = update total
     setIsImportModalOpen(false);
   };
 

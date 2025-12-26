@@ -10,9 +10,9 @@ export function SoftButton({ children, variant = 'primary', size = 'md', onClick
     };
     const primaryBgColor = '#527575';
     const sizes = {
-        sm: 'px-4 py-2 text-sm',
-        md: 'px-6 py-3 text-base',
-        lg: 'px-8 py-4 text-lg',
+        sm: 'px-4 py-2 text-sm min-h-10',
+        md: 'px-6 py-3 text-base min-h-11',
+        lg: 'px-8 py-4 text-lg min-h-12',
     };
     return (_jsxs(motion.button, { type: type, whileHover: !disabled ? { scale: 1.02 } : {}, whileTap: !disabled ? { scale: 0.98 } : {}, onClick: onClick, disabled: disabled, style: variant === 'primary' ? { backgroundColor: primaryBgColor } : undefined, className: `${baseClasses} ${variants[variant]} ${sizes[size]} ${fullWidth ? 'w-full' : ''} ${className}`, children: [icon, children] }));
 }
