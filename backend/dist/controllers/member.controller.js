@@ -170,11 +170,8 @@ export async function importMembers(req, res) {
         }
         // Import to database
         const result = await memberService.importMembers(groupId, parsed.valid);
-        // Invalidate group members cache BEFORE responding (critical for consistency)
-        // This ensures cache is cleared before frontend requests fresh data
-        await invalidateCache(CACHE_KEYS.groupMembers(groupId)).catch((err) => {
-            console.error('[importMembers] Cache invalidation error:', err);
-        });
+        // Respond immediately (don't wait for cache invalidation)
+        // Cache will be invalidated asynchronously in background
         res.json({
             success: true,
             data: {
@@ -184,6 +181,11 @@ export async function importMembers(req, res) {
                     failedDetails: result.failedDetails,
                 }),
             },
+        });
+        // Invalidate cache in background (fire-and-forget, don't block response)
+        // If Redis is down, we don't wait for it to timeout
+        invalidateCache(CACHE_KEYS.groupMembers(groupId)).catch((err) => {
+            console.error('[importMembers] Cache invalidation error (async):', err);
         });
     }
     catch (error) {
