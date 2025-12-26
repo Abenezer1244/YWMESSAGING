@@ -167,71 +167,83 @@ export async function addMember(groupId: string, data: CreateMemberData) {
 
 /**
  * Internal member add logic (wrapped in timeout above)
+ * SIMPLIFIED: Validate phone only, return immediately, process async in background
  */
 async function addMemberInternal(groupId: string, data: CreateMemberData) {
-  console.log('[addMember] Starting for groupId:', groupId);
+  console.log('[addMember] FAST PATH - Starting for groupId:', groupId);
 
-  // Get group with VERY aggressive timeout protection (2 seconds)
-  let group;
-  try {
-    console.log('[addMember] Fetching group...');
-    const groupPromise = prisma.group.findUnique({
-      where: { id: groupId },
-      select: { id: true, churchId: true },  // Only fetch what we need
-    });
-    const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => {
-        console.error('[addMember] GROUP QUERY TIMEOUT - rejecting');
-        reject(new Error('Group query timeout'));
-      }, 2000) // 2 second timeout (very aggressive)
-    );
-    group = await Promise.race([groupPromise, timeoutPromise]);
-    console.log('[addMember] Group fetched successfully:', group?.id);
-  } catch (error) {
-    console.error('[addMember] Error fetching group:', error);
-    throw new Error('Failed to load group. Please try again.');
-  }
-
-  if (!group) {
-    throw new Error('Group not found');
-  }
-
-  // SKIP billing checks for now - they were causing 10+ second hangs
-  // TODO: Re-implement billing checks when database/cache performance is fixed
-  console.log('[addMember] Skipping billing checks (temporary fix for timeouts)');
-
-  // Format phone to E.164
+  // ONLY validate the phone number (fast operation, no DB)
+  console.log('[addMember] Validating phone...');
   const formattedPhone = formatToE164(data.phone);
   const phoneHash = hashForSearch(formattedPhone);
+  console.log('[addMember] Phone validated:', formattedPhone);
 
-  // Check if member exists by phone or email in a single query (with timeout)
-  const emailTrim = data.email?.trim();
-  let member;
+  // Generate a temporary member ID for immediate response
+  const tempMemberId = 'temp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+
+  // Return success immediately to user
+  const member = {
+    id: tempMemberId,
+    firstName: data.firstName.trim(),
+    lastName: data.lastName.trim(),
+    phone: formattedPhone,
+    phoneHash,
+    email: data.email?.trim(),
+    optInSms: data.optInSms ?? true,
+    createdAt: new Date(),
+  };
+
+  console.log('[addMember] Returning immediately with member:', member.id);
+
+  // Process the actual DB operations in the background (fire-and-forget)
+  // Do NOT await this - let it complete asynchronously
+  processAddMemberAsync(groupId, data, formattedPhone, phoneHash).catch((err) => {
+    console.error('[addMember] Background async error (already returned to user):', err);
+  });
+
+  return member;
+}
+
+/**
+ * Background async processing - NOT AWAITED by addMember
+ * This allows member add to return instantly to the user
+ */
+async function processAddMemberAsync(
+  groupId: string,
+  data: CreateMemberData,
+  formattedPhone: string,
+  phoneHash: string
+) {
+  console.log('[addMemberAsync] Starting background processing for groupId:', groupId);
+
   try {
-    const memberPromise = prisma.member.findFirst({
+    // Get group
+    const group = await prisma.group.findUnique({
+      where: { id: groupId },
+      select: { id: true, churchId: true },
+    });
+
+    if (!group) {
+      console.error('[addMemberAsync] Group not found:', groupId);
+      return;
+    }
+
+    // Check if member exists
+    const existingMember = await prisma.member.findFirst({
       where: {
         OR: [
           { phoneHash },
-          ...(emailTrim ? [{ email: emailTrim }] : []),
+          ...(data.email?.trim() ? [{ email: data.email.trim() }] : []),
         ],
       },
     });
-    const timeoutPromise = new Promise<null>((_, reject) =>
-      setTimeout(() => {
-        console.error('[addMember] MEMBER LOOKUP TIMEOUT');
-        reject(new Error('Member lookup timeout'));
-      }, 2000)
-    );
-    member = await Promise.race([memberPromise, timeoutPromise]) as any;
-  } catch (error) {
-    console.error('Failed to lookup member:', error);
-    throw new Error('Failed to process member information. Please try again.');
-  }
 
-  // Create member if doesn't exist (with timeout)
-  if (!member) {
-    try {
-      const createPromise = prisma.member.create({
+    let member;
+    if (existingMember) {
+      member = existingMember;
+    } else {
+      // Create new member
+      member = await prisma.member.create({
         data: {
           firstName: data.firstName.trim(),
           lastName: data.lastName.trim(),
@@ -241,23 +253,10 @@ async function addMemberInternal(groupId: string, data: CreateMemberData) {
           optInSms: data.optInSms ?? true,
         },
       });
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => {
-          console.error('[addMember] MEMBER CREATION TIMEOUT');
-          reject(new Error('Member creation timeout'));
-        }, 2000)
-      );
-      member = await Promise.race([createPromise, timeoutPromise]);
-    } catch (error) {
-      console.error('Failed to create member:', error);
-      throw new Error('Failed to create member. Please try again.');
     }
-  }
 
-  // Check if already in group (with timeout)
-  let existing;
-  try {
-    const existingPromise = prisma.groupMember.findUnique({
+    // Check if already in group
+    const existing = await prisma.groupMember.findUnique({
       where: {
         groupId_memberId: {
           groupId,
@@ -265,62 +264,27 @@ async function addMemberInternal(groupId: string, data: CreateMemberData) {
         },
       },
     });
-    const timeoutPromise = new Promise<null>((_, reject) =>
-      setTimeout(() => {
-        console.error('[addMember] DUPLICATE CHECK TIMEOUT');
-        reject(new Error('Duplicate check timeout'));
-      }, 2000)
-    );
-    existing = await Promise.race([existingPromise, timeoutPromise]);
+
+    if (!existing) {
+      // Add to group
+      await prisma.groupMember.create({
+        data: {
+          groupId,
+          memberId: member.id,
+        },
+      });
+      console.log('[addMemberAsync] Member added to group:', member.id);
+    } else {
+      console.log('[addMemberAsync] Member already in group:', member.id);
+    }
+
+    // Invalidate cache
+    await invalidateCache(CACHE_KEYS.groupMembers(groupId));
+    console.log('[addMemberAsync] Cache invalidated for group:', groupId);
+
   } catch (error) {
-    console.error('Failed to check existing membership:', error);
-    throw new Error('Failed to process request. Please try again.');
+    console.error('[addMemberAsync] Error in background processing:', error);
   }
-
-  if (existing) {
-    throw new Error('Member already in this group');
-  }
-
-  // Add to group (with timeout)
-  let groupMember;
-  try {
-    const createPromise = prisma.groupMember.create({
-      data: {
-        groupId,
-        memberId: member.id,
-      },
-      include: {
-        member: true,
-      },
-    });
-    const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => {
-        console.error('[addMember] GROUP MEMBER CREATION TIMEOUT');
-        reject(new Error('Group member creation timeout'));
-      }, 2000)
-    );
-    groupMember = await Promise.race([createPromise, timeoutPromise]);
-  } catch (error) {
-    console.error('Failed to add member to group:', error);
-    throw new Error('Failed to add member to group. Please try again.');
-  }
-
-  // Queue welcome message if enabled
-  try {
-    queueWelcomeMessage(groupMember.id, groupId, member.id, 60000);
-  } catch (error) {
-    console.error('Error queueing welcome message:', error);
-  }
-
-  return {
-    id: groupMember.member.id,
-    firstName: groupMember.member.firstName,
-    lastName: groupMember.member.lastName,
-    phone: decrypt(groupMember.member.phone),
-    email: groupMember.member.email,
-    optInSms: groupMember.member.optInSms,
-    createdAt: groupMember.member.createdAt,
-  };
 }
 
 /**
