@@ -37,18 +37,25 @@ const app = express();
 // Disable Express's built-in ETag generation (we implement our own)
 app.set('etag', false);
 // ✅ CRITICAL: Add request-level timeout middleware
-// Ensures ALL requests complete within 10 seconds maximum
+// Ensures ALL requests complete within timeout maximum
+// Timeout varies by endpoint (bulk operations need more time)
 // This prevents hanging requests from blocking the entire server
 app.use((req, res, next) => {
+    // Determine timeout based on endpoint type
+    let timeoutMs = 10000; // Default: 10 seconds for normal requests
+    // Bulk operations need more time (CSV import, batch operations, etc.)
+    if (req.path?.includes('/import') || req.path?.includes('/batch')) {
+        timeoutMs = 30000; // 30 seconds for import/batch operations
+    }
     const requestTimeout = setTimeout(() => {
         if (!res.headersSent) {
-            console.error('[TIMEOUT]', req.method, req.path, '- Hard timeout after 10 seconds');
+            console.error('[TIMEOUT]', req.method, req.path, `- Hard timeout after ${timeoutMs}ms`);
             res.status(504).json({
                 success: false,
                 error: 'Request timeout - server took too long to respond'
             });
         }
-    }, 10000); // 10 second hard timeout
+    }, timeoutMs);
     // Clear timeout if response completes before timeout
     res.on('finish', () => {
         clearTimeout(requestTimeout);
