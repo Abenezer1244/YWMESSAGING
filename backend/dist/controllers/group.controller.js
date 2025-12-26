@@ -17,13 +17,15 @@ async function verifyBranchOwnership(branchId, churchId) {
 }
 /**
  * SECURITY: Verify group belongs to authenticated user's church
+ * Checks both direct churchId field AND branch relationship for data integrity
  */
 async function verifyGroupOwnership(groupId, churchId) {
     const group = await prisma.group.findFirst({
         where: {
             id: groupId,
+            churchId, // Check direct field
             branch: {
-                churchId,
+                churchId, // Check relationship
             },
         },
     });
