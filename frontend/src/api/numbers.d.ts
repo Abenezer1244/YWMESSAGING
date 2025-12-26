@@ -61,6 +61,16 @@ export declare function confirmPayment(paymentIntentId: string, paymentMethodId:
 export declare function purchaseNumber(phoneNumber: string, paymentIntentId: string, connectionId?: string): Promise<PurchaseResponse>;
 /**
  * Get church's current phone number
+ *
+ * @throws Will throw 404 error if no phone number has been purchased yet
+ * The calling code should handle this with a try-catch block
+ *
+ * Example:
+ *   try {
+ *     const number = await getCurrentNumber();
+ *   } catch (error) {
+ *     // No phone number configured - this is expected for new accounts
+ *   }
  */
 export declare function getCurrentNumber(): Promise<CurrentNumber>;
 /**

@@ -11,18 +11,41 @@ const WelcomeIllustration = () => (_jsxs("svg", { viewBox: "0 0 240 200", classN
 export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }) {
     const [selectedRole, setSelectedRole] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    // Handle Escape key to close modal (WCAG 2.1.2 compliance)
+    // Mark welcome as completed without selecting a role
+    // Used for Skip button, close button, and Escape key
+    const handleSkip = async () => {
+        setIsLoading(true);
+        try {
+            const response = await client.post('/auth/complete-welcome', {
+                userRole: 'skipped',
+            });
+            if (response.data.success) {
+                if (onWelcomeComplete) {
+                    onWelcomeComplete('skipped', true);
+                }
+                onClose();
+            }
+        }
+        catch (error) {
+            console.error('Failed to skip welcome:', error);
+            onClose();
+        }
+        finally {
+            setIsLoading(false);
+        }
+    };
+    // Handle Escape key (WCAG 2.1.2 compliance)
     useEffect(() => {
         if (!isOpen)
             return;
         const handleEscape = (e) => {
             if (e.key === 'Escape') {
-                onClose();
+                handleSkip();
             }
         };
         document.addEventListener('keydown', handleEscape);
         return () => document.removeEventListener('keydown', handleEscape);
-    }, [isOpen, onClose]);
+    }, [isOpen, handleSkip]);
     const roles = [
         {
             id: 'pastor',
@@ -102,10 +125,10 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }) {
     return (_jsx(AnimatePresence, { children: isOpen && (_jsx(motion.div, { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.2 }, className: "fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 backdrop-blur-md", children: _jsx(FocusTrap, { focusTrapOptions: {
                     escapeDeactivates: true,
                     clickOutsideDeactivates: true,
-                }, children: _jsxs(motion.div, { initial: { opacity: 0, scale: 0.92, y: 30 }, animate: { opacity: 1, scale: 1, y: 0 }, exit: { opacity: 0, scale: 0.92, y: 30 }, transition: { duration: 0.4, ease: 'easeOut' }, className: "bg-background border border-border/50 rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden", role: "dialog", "aria-modal": "true", "aria-labelledby": "welcome-modal-title", children: [_jsx("div", { className: "absolute top-6 right-6 z-10", children: _jsx(motion.button, { whileHover: { scale: 1.1 }, whileTap: { scale: 0.95 }, onClick: onClose, className: "w-11 h-11 flex items-center justify-center hover:bg-muted rounded-lg transition-colors duration-200", "aria-label": "Close modal (Escape key also works)", children: _jsx(X, { className: "w-5 h-5 text-muted-foreground" }) }) }), _jsxs("div", { className: "grid grid-cols-1 gap-0", children: [_jsxs(motion.div, { variants: containerVariants, initial: "hidden", animate: "visible", className: "bg-gradient-to-br from-primary/5 to-primary/[0.02] p-6 md:p-8 flex flex-col items-center text-center", children: [_jsx(motion.div, { variants: itemVariants, className: "mb-4", children: _jsx(WelcomeIllustration, {}) }), _jsx(motion.div, { variants: itemVariants, children: _jsxs("h1", { id: "welcome-modal-title", className: "text-2xl md:text-3xl font-bold text-foreground mb-2 leading-tight", children: ["Welcome to", _jsx("br", {}), _jsx("span", { className: "bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent", children: "Koinonia" })] }) }), _jsx(motion.p, { variants: itemVariants, className: "text-sm text-muted-foreground leading-relaxed", children: "Connect with your congregation. Send messages, manage groups, and build community." })] }), _jsxs(motion.div, { variants: containerVariants, initial: "hidden", animate: "visible", className: "p-6 md:p-8 flex flex-col", children: [_jsxs(motion.div, { variants: itemVariants, children: [_jsx("h2", { className: "text-lg font-semibold text-foreground mb-1", children: "How would you describe your role?" }), _jsx("p", { className: "text-xs text-muted-foreground mb-4", children: "We'll personalize your experience based on your position." })] }), _jsx(motion.div, { variants: containerVariants, initial: "hidden", animate: "visible", className: "space-y-2 mb-6", children: roles.map((role) => (_jsxs(motion.label, { variants: itemVariants, whileHover: { scale: 1.02 }, className: `relative flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 group ${selectedRole === role.id
+                }, children: _jsxs(motion.div, { initial: { opacity: 0, scale: 0.92, y: 30 }, animate: { opacity: 1, scale: 1, y: 0 }, exit: { opacity: 0, scale: 0.92, y: 30 }, transition: { duration: 0.4, ease: 'easeOut' }, className: "bg-background border border-border/50 rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden", role: "dialog", "aria-modal": "true", "aria-labelledby": "welcome-modal-title", children: [_jsx("div", { className: "absolute top-6 right-6 z-10", children: _jsx(motion.button, { whileHover: { scale: 1.1 }, whileTap: { scale: 0.95 }, onClick: handleSkip, className: "w-11 h-11 flex items-center justify-center hover:bg-muted rounded-lg transition-colors duration-200", "aria-label": "Close modal (Escape key also works)", children: _jsx(X, { className: "w-5 h-5 text-muted-foreground" }) }) }), _jsxs("div", { className: "grid grid-cols-1 gap-0", children: [_jsxs(motion.div, { variants: containerVariants, initial: "hidden", animate: "visible", className: "bg-gradient-to-br from-primary/5 to-primary/[0.02] p-6 md:p-8 flex flex-col items-center text-center", children: [_jsx(motion.div, { variants: itemVariants, className: "mb-4", children: _jsx(WelcomeIllustration, {}) }), _jsx(motion.div, { variants: itemVariants, children: _jsxs("h1", { id: "welcome-modal-title", className: "text-2xl md:text-3xl font-bold text-foreground mb-2 leading-tight", children: ["Welcome to", _jsx("br", {}), _jsx("span", { className: "bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent", children: "Koinonia" })] }) }), _jsx(motion.p, { variants: itemVariants, className: "text-sm text-muted-foreground leading-relaxed", children: "Connect with your congregation. Send messages, manage groups, and build community." })] }), _jsxs(motion.div, { variants: containerVariants, initial: "hidden", animate: "visible", className: "p-6 md:p-8 flex flex-col", children: [_jsxs(motion.div, { variants: itemVariants, children: [_jsx("h2", { className: "text-lg font-semibold text-foreground mb-1", children: "How would you describe your role?" }), _jsx("p", { className: "text-xs text-muted-foreground mb-4", children: "We'll personalize your experience based on your position." })] }), _jsx(motion.div, { variants: containerVariants, initial: "hidden", animate: "visible", className: "space-y-2 mb-6", children: roles.map((role) => (_jsxs(motion.label, { variants: itemVariants, whileHover: { scale: 1.02 }, className: `relative flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 group ${selectedRole === role.id
                                                     ? 'border-primary bg-primary/8 shadow-md'
                                                     : 'border-border/30 hover:border-primary/40 hover:bg-muted/40 bg-muted/20'}`, children: [_jsx("div", { className: "flex-shrink-0 mt-1", children: _jsx("div", { className: `w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${selectedRole === role.id
                                                                 ? 'border-primary bg-primary'
-                                                                : 'border-border/50 group-hover:border-primary/50'}`, children: selectedRole === role.id && (_jsx(motion.div, { initial: { scale: 0 }, animate: { scale: 1 }, transition: { type: 'spring', stiffness: 200 }, children: _jsx(Check, { className: "w-3 h-3 text-background" }) })) }) }), _jsxs("div", { className: "flex-1 min-w-0", children: [_jsxs("div", { className: "flex items-center gap-1.5 mb-0.5", children: [_jsx("span", { className: "text-base", children: role.icon }), _jsx("span", { className: "font-medium text-foreground text-xs", children: role.label })] }), _jsx("p", { className: "text-[10px] text-muted-foreground leading-tight", children: role.description })] }), _jsx("input", { type: "radio", name: "role", value: role.id, checked: selectedRole === role.id, onChange: (e) => setSelectedRole(e.target.value), className: "hidden" })] }, role.id))) }), _jsxs(motion.div, { variants: itemVariants, className: "space-y-2", children: [_jsx(Button, { variant: "primary", size: "lg", fullWidth: true, onClick: handleNext, disabled: !selectedRole || isLoading, isLoading: isLoading, className: "bg-primary hover:bg-primary/90 text-background disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-lg hover:shadow-xl transition-all", children: isLoading ? 'Saving...' : selectedRole ? 'Continue' : 'Select a role to continue' }), _jsx("button", { onClick: onClose, disabled: isLoading, className: "w-full py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted/50 disabled:opacity-50 disabled:cursor-not-allowed", children: "Skip for now" })] })] })] })] }) }) })) }));
+                                                                : 'border-border/50 group-hover:border-primary/50'}`, children: selectedRole === role.id && (_jsx(motion.div, { initial: { scale: 0 }, animate: { scale: 1 }, transition: { type: 'spring', stiffness: 200 }, children: _jsx(Check, { className: "w-3 h-3 text-background" }) })) }) }), _jsxs("div", { className: "flex-1 min-w-0", children: [_jsxs("div", { className: "flex items-center gap-1.5 mb-0.5", children: [_jsx("span", { className: "text-base", children: role.icon }), _jsx("span", { className: "font-medium text-foreground text-xs", children: role.label })] }), _jsx("p", { className: "text-[10px] text-muted-foreground leading-tight", children: role.description })] }), _jsx("input", { type: "radio", name: "role", value: role.id, checked: selectedRole === role.id, onChange: (e) => setSelectedRole(e.target.value), className: "hidden" })] }, role.id))) }), _jsxs(motion.div, { variants: itemVariants, className: "space-y-2", children: [_jsx(Button, { variant: "primary", size: "lg", fullWidth: true, onClick: handleNext, disabled: !selectedRole || isLoading, isLoading: isLoading, className: "bg-primary hover:bg-primary/90 text-background disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-lg hover:shadow-xl transition-all", children: isLoading ? 'Saving...' : selectedRole ? 'Continue' : 'Select a role to continue' }), _jsx("button", { onClick: handleSkip, disabled: isLoading, className: "w-full py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted/50 disabled:opacity-50 disabled:cursor-not-allowed", children: "Skip for now" })] })] })] })] }) }) })) }));
 }
 //# sourceMappingURL=WelcomeModal.js.map

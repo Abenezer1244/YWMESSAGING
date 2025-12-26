@@ -97,7 +97,10 @@ export async function addMember(req: Request, res: Response) {
     const churchId = req.user?.churchId;
     const { firstName, lastName, phone, email, optInSms } = req.body;
 
+    console.log('[addMember] Starting - groupId:', groupId, 'phone:', phone);
+
     if (!churchId) {
+      console.error('[addMember] No churchId in request');
       return res.status(401).json({
         success: false,
         error: 'Unauthorized',
@@ -107,6 +110,7 @@ export async function addMember(req: Request, res: Response) {
     // SECURITY: Verify group ownership
     const hasAccess = await verifyGroupOwnership(groupId, churchId);
     if (!hasAccess) {
+      console.error('[addMember] Access denied for groupId:', groupId);
       return res.status(403).json({
         success: false,
         error: 'Access denied',
@@ -115,12 +119,14 @@ export async function addMember(req: Request, res: Response) {
 
     // Validate input
     if (!firstName || !lastName || !phone) {
+      console.error('[addMember] Missing required fields - firstName:', firstName, 'lastName:', lastName, 'phone:', phone);
       return res.status(400).json({
         success: false,
         error: 'firstName, lastName, and phone are required',
       });
     }
 
+    console.log('[addMember] Input validated, calling service');
     const member = await memberService.addMember(groupId, {
       firstName,
       lastName,
@@ -137,6 +143,7 @@ export async function addMember(req: Request, res: Response) {
       data: member,
     });
   } catch (error) {
+    console.error('[addMember] ERROR:', (error as Error).message);
     res.status(400).json({
       success: false,
       error: (error as Error).message,
