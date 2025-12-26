@@ -234,6 +234,8 @@ async function completeGroupAdditionAsync(groupId, memberId) {
  * After: 5 queries (1 for fetch existing, 1 for create members, 1 for check existing groupMembers, 1 for create groupMembers, multiple queueWelcomeMessage)
  */
 export async function importMembers(groupId, membersData) {
+    const importStartTime = Date.now();
+    console.log(`[importMembers] STARTING import of ${membersData.length} members`);
     const group = await prisma.group.findUnique({
         where: { id: groupId },
     });
@@ -241,10 +243,13 @@ export async function importMembers(groupId, membersData) {
         throw new Error('Group not found');
     }
     // Check plan limits before importing
+    console.log(`[importMembers] Checking usage and plan limits...`);
+    const usageStart = Date.now();
     const usage = await getUsage(group.churchId);
     const plan = await getCurrentPlan(group.churchId);
     const limits = getPlanLimits(plan);
     const remainingCapacity = limits ? limits.members - usage.members : 999999;
+    console.log(`[importMembers] Usage/plan check took ${Date.now() - usageStart}ms`);
     if (remainingCapacity <= 0) {
         throw new Error(`Member limit of ${limits?.members || "unlimited"} reached for ${plan} plan. Please upgrade your plan to add more members.`);
     }
@@ -252,13 +257,18 @@ export async function importMembers(groupId, membersData) {
         throw new Error(`Import would exceed member limit. You have ${remainingCapacity} member slot(s) remaining, but are trying to import ${membersData.length} members.`);
     }
     // ✅ Query 1: Format all phone numbers and emails
+    console.log(`[importMembers] Formatting phone numbers and emails...`);
+    const formatStart = Date.now();
     const formattedData = membersData.map((data) => ({
         ...data,
         formattedPhone: formatToE164(data.phone),
         phoneHash: hashForSearch(formatToE164(data.phone)),
         email: data.email?.trim(),
     }));
+    console.log(`[importMembers] Phone formatting took ${Date.now() - formatStart}ms`);
     // ✅ Query 2: Fetch ALL existing members by phone or email in ONE query
+    console.log(`[importMembers] Fetching existing members from database...`);
+    const fetchExistingStart = Date.now();
     const existingMembers = await prisma.member.findMany({
         where: {
             OR: [
@@ -275,6 +285,7 @@ export async function importMembers(groupId, membersData) {
             phoneHash: true,
         },
     });
+    console.log(`[importMembers] Fetch existing members took ${Date.now() - fetchExistingStart}ms, found ${existingMembers.length} existing`);
     // Create lookup maps for O(1) access
     const membersByPhoneHash = new Map(existingMembers.map((m) => [m.phoneHash, m]));
     const membersByEmail = new Map(existingMembers.filter((m) => m.email).map((m) => [m.email, m]));
@@ -315,13 +326,18 @@ export async function importMembers(groupId, membersData) {
         }
     }
     // ✅ Query 3: Batch create all new members
+    console.log(`[importMembers] Creating ${newMembersToCreate.length} new members...`);
+    const createStart = Date.now();
     const createdMembers = [];
     if (newMembersToCreate.length > 0) {
         const createResult = await prisma.member.createMany({
             data: newMembersToCreate,
             skipDuplicates: true,
         });
+        console.log(`[importMembers] Batch member creation took ${Date.now() - createStart}ms`);
         // Fetch the newly created members to get IDs
+        console.log(`[importMembers] Fetching newly created members...`);
+        const fetchNewStart = Date.now();
         const newMembersFetch = await prisma.member.findMany({
             where: {
                 phoneHash: { in: newMembersToCreate.map((m) => m.phoneHash) },
@@ -335,6 +351,7 @@ export async function importMembers(groupId, membersData) {
                 phoneHash: true,
             },
         });
+        console.log(`[importMembers] Fetch newly created took ${Date.now() - fetchNewStart}ms`);
         createdMembers.push(...newMembersFetch);
         // Update membersByIndex to point to created members instead of markers
         const createdByPhoneHash = new Map(newMembersFetch.map((m) => [m.phoneHash, m]));
@@ -348,6 +365,8 @@ export async function importMembers(groupId, membersData) {
         }
     }
     // ✅ Query 4: Fetch ALL existing groupMembers in ONE query
+    console.log(`[importMembers] Checking existing groupMembers...`);
+    const checkGroupMembersStart = Date.now();
     const memberIds = Array.from(membersByIndex.values())
         .filter((m) => m && m.id)
         .map((m) => m.id);
@@ -360,6 +379,7 @@ export async function importMembers(groupId, membersData) {
             memberId: true,
         },
     });
+    console.log(`[importMembers] Check existing groupMembers took ${Date.now() - checkGroupMembersStart}ms`);
     const existingGroupMemberIds = new Set(existingGroupMembers.map((gm) => gm.memberId));
     // Separate members into: addToGroup, alreadyInGroup
     const groupMembersToCreate = [];
@@ -389,27 +409,30 @@ export async function importMembers(groupId, membersData) {
         }
     }
     // ✅ Query 5: Batch create groupMembers
+    console.log(`[importMembers] Creating ${groupMembersToCreate.length} groupMembers...`);
+    const createGroupMembersStart = Date.now();
     if (groupMembersToCreate.length > 0) {
         const createdGroupMembers = await prisma.groupMember.createMany({
             data: groupMembersToCreate,
             skipDuplicates: true,
         });
-        // Queue welcome messages for newly added members
-        const newGroupMembers = await prisma.groupMember.findMany({
-            where: {
-                groupId,
-                memberId: { in: groupMembersToCreate.map((gm) => gm.memberId) },
-            },
-        });
-        for (const groupMember of newGroupMembers) {
+        console.log(`[importMembers] Create groupMembers took ${Date.now() - createGroupMembersStart}ms`);
+        // Queue welcome messages for newly added members (fire-and-forget, don't await)
+        console.log(`[importMembers] Queueing ${groupMembersToCreate.length} welcome messages...`);
+        const queueStart = Date.now();
+        // Don't fetch, just use the data we already have to avoid another DB query
+        for (const gm of groupMembersToCreate) {
             try {
-                queueWelcomeMessage(groupMember.id, groupId, groupMember.memberId, 60000);
+                queueWelcomeMessage(gm.groupId + ':' + gm.memberId, gm.groupId, gm.memberId, 60000);
             }
             catch (error) {
                 console.error('Error queueing welcome message:', error);
             }
         }
+        console.log(`[importMembers] Queueing took ${Date.now() - queueStart}ms`);
     }
+    const totalTime = Date.now() - importStartTime;
+    console.log(`[importMembers] COMPLETE - Total time: ${totalTime}ms, Imported: ${imported.length}, Failed: ${failed.length}`);
     return {
         imported: imported.length,
         failed: failed.length,
