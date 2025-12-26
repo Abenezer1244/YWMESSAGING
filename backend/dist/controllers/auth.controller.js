@@ -1,9 +1,9 @@
 import { registerChurch, login, refreshAccessToken, getAdmin } from '../services/auth.service.js';
-import { verifyRefreshToken, generateMFASessionToken, verifyMFASessionToken } from '../utils/jwt.utils.js';
+import { verifyRefreshToken, generateMFASessionToken, verifyMFASessionToken, verifyAccessToken } from '../utils/jwt.utils.js';
 import { logFailedLogin } from '../utils/security-logger.js';
 import { registerSchema, loginSchema, completeWelcomeSchema } from '../lib/validation/schemas.js';
 import { safeValidate } from '../lib/validation/schemas.js';
-import { revokeAllTokens } from '../services/token-revocation.service.js';
+import { revokeAccessToken, revokeRefreshToken } from '../services/token-revocation.service.js';
 import * as mfaService from '../services/mfa.service.js';
 import { prisma } from '../lib/prisma.js';
 /**
@@ -275,11 +275,23 @@ export async function logout(req, res) {
                 console.log('[LOGOUT] Found access token in Authorization header');
             }
         }
-        // If we still have the access token and user info, revoke it
-        if (accessToken && req.user?.adminId) {
+        // If we have the access token, revoke it
+        if (accessToken) {
             try {
-                await revokeAllTokens(accessToken, refreshToken || '');
-                console.log(`✅ [LOGOUT] Tokens revoked for admin ${req.user.adminId}`);
+                // Verify the token and extract adminId
+                const payload = verifyAccessToken(accessToken);
+                if (payload?.adminId) {
+                    // Revoke access token
+                    await revokeAccessToken(accessToken);
+                    // Revoke refresh token if available
+                    if (refreshToken) {
+                        await revokeRefreshToken(refreshToken);
+                    }
+                    console.log(`✅ [LOGOUT] Tokens revoked for admin ${payload.adminId}`);
+                }
+                else {
+                    console.warn('[LOGOUT] Could not extract adminId from token');
+                }
             }
             catch (revocationError) {
                 console.error('⚠️ Failed to revoke tokens:', revocationError);
@@ -288,10 +300,9 @@ export async function logout(req, res) {
             }
         }
         else {
-            console.warn('[LOGOUT] Could not find tokens to revoke', {
+            console.warn('[LOGOUT] Could not find access token in cookies or Authorization header', {
                 hasAccessToken: !!accessToken,
                 hasRefreshToken: !!refreshToken,
-                hasUser: !!req.user,
             });
         }
         // ✅ SECURITY: Determine cookie domain based on environment

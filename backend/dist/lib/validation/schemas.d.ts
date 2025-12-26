@@ -415,14 +415,11 @@ export declare const ConversationParamSchema: z.ZodObject<{
     conversationId: string;
 }>;
 export declare const completeWelcomeSchema: z.ZodObject<{
-    firstName: z.ZodString;
-    lastName: z.ZodString;
+    userRole: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    firstName: string;
-    lastName: string;
+    userRole: string;
 }, {
-    firstName: string;
-    lastName: string;
+    userRole: string;
 }>;
 export declare const getMessageHistorySchema: z.ZodObject<{
     status: z.ZodOptional<z.ZodEnum<["draft", "scheduled", "sending", "sent", "failed"]>>;

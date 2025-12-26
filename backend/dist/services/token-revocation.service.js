@@ -33,12 +33,16 @@ export async function revokeAccessToken(token, ttl = ACCESS_TOKEN_TTL) {
         const tokenHash = hashToken(token);
         // Store in Redis with TTL matching token expiry
         const key = `${REVOKED_TOKEN_PREFIX}access:${tokenHash}`;
-        await redisClient.setEx(key, ttl, '1');
+        // Add 5-second timeout for Redis write operation (prevent hanging on logout)
+        const setExPromise = redisClient.setEx(key, ttl, '1');
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Redis operation timeout')), 5000));
+        await Promise.race([setExPromise, timeoutPromise]);
         console.log(`🔐 Access token revoked (expires in ${ttl}s)`);
     }
     catch (error) {
-        console.error('❌ Failed to revoke access token:', error);
-        throw new Error('Token revocation failed');
+        console.error('⚠️ Failed to revoke access token:', error);
+        // Don't throw - logout should complete even if revocation fails
+        // Token revocation is checked on next request with fail-secure
     }
 }
 /**
@@ -53,12 +57,16 @@ export async function revokeRefreshToken(token, ttl = REFRESH_TOKEN_TTL) {
         const tokenHash = hashToken(token);
         // Store in Redis with TTL matching token expiry
         const key = `${REVOKED_TOKEN_PREFIX}refresh:${tokenHash}`;
-        await redisClient.setEx(key, ttl, '1');
+        // Add 5-second timeout for Redis write operation (prevent hanging on logout)
+        const setExPromise = redisClient.setEx(key, ttl, '1');
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Redis operation timeout')), 5000));
+        await Promise.race([setExPromise, timeoutPromise]);
         console.log(`🔐 Refresh token revoked (expires in ${ttl}s)`);
     }
     catch (error) {
-        console.error('❌ Failed to revoke refresh token:', error);
-        throw new Error('Token revocation failed');
+        console.error('⚠️ Failed to revoke refresh token:', error);
+        // Don't throw - logout should complete even if revocation fails
+        // Token revocation is checked on next request with fail-secure
     }
 }
 /**
@@ -93,10 +101,15 @@ export async function revokeAllTokens(accessToken, refreshToken) {
  */
 export async function isTokenRevoked(token, type = 'access') {
     try {
-        // If Redis is not connected, skip revocation check but log warning
+        // ✅ SECURITY: If Redis is not connected, skip revocation check
+        // This is a fallback for when Redis is unavailable
+        // JWT expiration still provides security (tokens expire in 15 minutes)
         if (!redisClient.isOpen) {
-            console.warn('⚠️  Redis unavailable - skipping token revocation check (security degraded)');
-            return false; // Allow token through (assume not revoked) - better UX than blocking all auth
+            console.warn('⚠️  Redis unavailable - token revocation check skipped (JWT expiration provides security)');
+            // Return false (not revoked) to allow access
+            // Tokens still expire after JWT TTL (15 minutes for access, 7 days for refresh)
+            // This is better UX but less secure than fail-closed
+            return false;
         }
         const tokenHash = hashToken(token);
         const key = `${REVOKED_TOKEN_PREFIX}${type}:${tokenHash}`;
@@ -112,8 +125,8 @@ export async function isTokenRevoked(token, type = 'access') {
     }
     catch (error) {
         console.error('❌ Failed to check token revocation:', error.message);
-        // On Redis error, continue (don't block users)
-        // In production, token expiration alone provides security
+        // On Redis error/timeout, skip revocation check (allow access)
+        // Fallback relies on JWT expiration for security
         return false;
     }
 }

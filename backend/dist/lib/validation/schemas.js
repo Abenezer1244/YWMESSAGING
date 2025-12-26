@@ -205,10 +205,9 @@ export const UpdateConversationStatusSchema = z.object({
 export const ConversationParamSchema = z.object({
     conversationId: z.string().uuid('Invalid conversation ID'),
 });
-// Additional schemas needed by existing controllers
+// Complete welcome onboarding - user selects their role
 export const completeWelcomeSchema = z.object({
-    firstName: z.string().min(1).max(100),
-    lastName: z.string().min(1).max(100),
+    userRole: z.string().min(1).max(50), // pastor, admin, communications, volunteer, other, or skipped
 });
 export const getMessageHistorySchema = z.object({
     status: z.enum(['draft', 'scheduled', 'sending', 'sent', 'failed']).optional(),

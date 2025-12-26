@@ -1,6 +1,7 @@
 /**
  * Format phone number to E.164 format (+12025550173)
  * Default region: US
+ * Handles various formats: (202) 555-0173, 202-555-0173, 2025550173, +1 202 555 0173, etc.
  */
 export declare function formatToE164(phone: string): string;
 /**
