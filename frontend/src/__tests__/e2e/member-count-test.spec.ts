@@ -20,8 +20,8 @@ test.describe('Member Count & Pagination - Direct Navigation', () => {
     const pageUrl = page.url();
 
     console.log(`URL: ${pageUrl}`);
-    console.log(`Page has "members": ${pageContent.includes('members') ? '✅' : '❌'}`);
-    console.log(`Page has "Add Member": ${pageContent.includes('Add Member') ? '✅' : '❌'}`);
+    console.log(`Page has "members": ${pageContent?.includes('members') ? '✅' : '❌'}`);
+    console.log(`Page has "Add Member": ${pageContent?.includes('Add Member') ? '✅' : '❌'}`);
 
     // Take screenshot
     console.log('\n[2] 📸 Taking screenshot of members page...');
@@ -32,7 +32,7 @@ test.describe('Member Count & Pagination - Direct Navigation', () => {
     console.log('\n[3] 🔍 Looking for member count...');
 
     // Look for all elements with text containing numbers and "members"
-    const allText = pageContent;
+    const allText = pageContent || '';
     const memberCountMatch = allText.match(/(\d+)\s+members?/);
 
     if (memberCountMatch) {
@@ -44,9 +44,9 @@ test.describe('Member Count & Pagination - Direct Navigation', () => {
 
     // Check for pagination
     console.log('\n[4] 📄 Checking for pagination...');
-    const hasPagination = pageContent.includes('Page');
-    const hasNext = pageContent.includes('Next');
-    const hasPrev = pageContent.includes('Previous');
+    const hasPagination = allText.includes('Page');
+    const hasNext = allText.includes('Next');
+    const hasPrev = allText.includes('Previous');
 
     console.log(`Has pagination: ${hasPagination ? '✅' : '❌'}`);
     console.log(`Has Next button: ${hasNext ? '✅' : '❌'}`);
@@ -54,8 +54,8 @@ test.describe('Member Count & Pagination - Direct Navigation', () => {
 
     // Try to find table or cards
     console.log('\n[5] 📊 Checking for member list display...');
-    const hasTable = pageContent.includes('<table') || await page.locator('table').isVisible().catch(() => false);
-    const hasCards = pageContent.includes('SoftCard') || await page.locator('[class*="Card"]').isVisible().catch(() => false);
+    const hasTable = allText.includes('<table') || await page.locator('table').isVisible().catch(() => false);
+    const hasCards = allText.includes('SoftCard') || await page.locator('[class*="Card"]').isVisible().catch(() => false);
 
     console.log(`Has table: ${hasTable ? '✅' : '❌'}`);
     console.log(`Has cards: ${hasCards ? '✅' : '❌'}`);
