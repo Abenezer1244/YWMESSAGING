@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Users, Trash2, Loader } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -20,9 +20,10 @@ export function MembersPage() {
   const { branches } = useBranchStore();
   const { groups, setGroups } = useGroupStore();
   const [searchParams] = useSearchParams();
+  const { groupId: urlGroupId } = useParams<{ groupId?: string }>();
   const [isInitialLoading, setIsInitialLoading] = useState(!groups.length);
 
-  const groupId = searchParams.get('groupId') || groups[0]?.id || '';
+  const groupId = urlGroupId || searchParams.get('groupId') || groups[0]?.id || '';
 
   const [members, setMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(false);
