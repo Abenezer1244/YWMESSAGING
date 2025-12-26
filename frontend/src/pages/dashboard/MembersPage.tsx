@@ -99,9 +99,9 @@ export function MembersPage() {
     setIsAddModalOpen(false);
   };
 
-  const handleImportSuccess = () => {
+  const handleImportSuccess = async () => {
     setPage(1);
-    loadMembers();
+    await loadMembers(1);
     setIsImportModalOpen(false);
   };
 

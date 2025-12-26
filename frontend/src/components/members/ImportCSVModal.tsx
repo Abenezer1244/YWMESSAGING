@@ -40,6 +40,9 @@ export function ImportCSVModal({ isOpen, groupId, onClose, onSuccess }: ImportCS
       if (importResult.imported > 0) {
         toast.success(`${importResult.imported} members imported successfully`);
         onSuccess();
+        // Reset file and result state for next import
+        setFile(null);
+        setResult(null);
       }
 
       if (importResult.failed > 0) {
