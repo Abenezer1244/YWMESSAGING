@@ -250,6 +250,15 @@ function App() {
           <Route path="/careers" element={<CareersPage />} />
 
           {/* Protected Routes */}
+          {/* NOTE: More specific routes must come before general routes */}
+          <Route
+            path="/dashboard/groups/:groupId/members"
+            element={
+              <ProtectedRoute>
+                <MembersPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/dashboard"
             element={
@@ -271,14 +280,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <GroupsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/groups/:groupId/members"
-            element={
-              <ProtectedRoute>
-                <MembersPage />
               </ProtectedRoute>
             }
           />
