@@ -107,8 +107,25 @@ export async function addMember(req: Request, res: Response) {
       });
     }
 
-    // SECURITY: Verify group ownership
-    const hasAccess = await verifyGroupOwnership(groupId, churchId);
+    // SECURITY: Verify group ownership (with timeout to prevent hanging)
+    let hasAccess;
+    try {
+      const verifyPromise = verifyGroupOwnership(groupId, churchId);
+      const timeoutPromise = new Promise<boolean>((_, reject) =>
+        setTimeout(() => {
+          console.error('[addMember] Group ownership verification timeout');
+          reject(new Error('Verification timeout'));
+        }, 2000)
+      );
+      hasAccess = await Promise.race([verifyPromise, timeoutPromise]);
+    } catch (error) {
+      console.error('[addMember] Access verification error:', error);
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied',
+      });
+    }
+
     if (!hasAccess) {
       console.error('[addMember] Access denied for groupId:', groupId);
       return res.status(403).json({
@@ -135,8 +152,10 @@ export async function addMember(req: Request, res: Response) {
       optInSms,
     });
 
-    // Invalidate group members cache
-    await invalidateCache(CACHE_KEYS.groupMembers(groupId));
+    // Invalidate group members cache (fire-and-forget, don't await)
+    invalidateCache(CACHE_KEYS.groupMembers(groupId)).catch((err) => {
+      console.error('[addMember] Cache invalidation error:', err);
+    });
 
     res.status(201).json({
       success: true,
