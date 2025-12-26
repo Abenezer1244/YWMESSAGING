@@ -86,8 +86,10 @@ export function MembersPage() {
   };
 
   const handleAddSuccess = (newMember: Member) => {
-    setMembers([newMember, ...members]);
-    setTotal(total + 1);
+    // Refetch from backend to ensure cache is fresh and we have latest data
+    // This handles cases where member already exists or other conflicts
+    setPage(1);
+    loadMembers();
     setIsAddModalOpen(false);
   };
 
