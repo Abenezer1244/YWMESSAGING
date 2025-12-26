@@ -250,20 +250,22 @@ function App() {
           <Route path="/careers" element={<CareersPage />} />
 
           {/* Protected Routes */}
-          {/* NOTE: More specific routes must come before general routes */}
+          {/* Dashboard routes - use /* to enable nested routing */}
           <Route
-            path="/dashboard/groups/:groupId/members"
-            element={
-              <ProtectedRoute>
-                <MembersPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard"
+            path="/dashboard/*"
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Alternative simple routes (without nested structure) */}
+          <Route
+            path="/groups/:groupId/members"
+            element={
+              <ProtectedRoute>
+                <MembersPage />
               </ProtectedRoute>
             }
           />
