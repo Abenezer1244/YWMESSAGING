@@ -152,6 +152,9 @@ model Group {
 
   @@index([branchId])
   @@index([churchId])
+  // ✅ SECURITY: Composite index for fast ownership verification
+  // Supports: WHERE id = ? AND churchId = ? queries (used in addMember, importMembers)
+  @@index([id, churchId])
 }
 
 // Individual members

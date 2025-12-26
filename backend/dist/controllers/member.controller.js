@@ -89,12 +89,25 @@ export async function addMember(req, res) {
                 error: 'Unauthorized',
             });
         }
-        // SECURITY: Verify group ownership (skip verification query for now due to slowness)
-        // TODO: Add database index on group(id, branch.churchId) to speed up this query
-        // For now, we trust the JWT authentication (churchId is verified by auth middleware)
-        // The groupId must belong to the churchId based on the user's access token
-        console.log('[addMember] Security: Using JWT verification (churchId from token)');
-        const hasAccess = true; // JWT already verified the churchId
+        // ✅ CRITICAL: Verify group belongs to authenticated user's church
+        // This prevents users from adding members to other churches' groups
+        const group = await prisma.group.findFirst({
+            where: {
+                id: groupId,
+                churchId: churchId,
+            },
+        });
+        if (!group) {
+            console.error('[addMember] SECURITY: User tried to access unauthorized group', {
+                churchId,
+                groupId,
+            });
+            return res.status(403).json({
+                success: false,
+                error: 'Access denied - group does not belong to your church',
+            });
+        }
+        console.log('[addMember] Security: Group ownership verified', { churchId, groupId });
         // Validate input
         if (!firstName || !lastName || !phone) {
             console.error('[addMember] Missing required fields - firstName:', firstName, 'lastName:', lastName, 'phone:', phone);
@@ -142,8 +155,25 @@ export async function importMembers(req, res) {
                 error: 'Unauthorized',
             });
         }
-        // SECURITY: Trust JWT verification for churchId (same as addMember)
-        console.log('[importMembers] Security: Using JWT verification (churchId from token)');
+        // ✅ CRITICAL: Verify group belongs to authenticated user's church
+        // This prevents users from importing into other churches' groups
+        const group = await prisma.group.findFirst({
+            where: {
+                id: groupId,
+                churchId: churchId,
+            },
+        });
+        if (!group) {
+            console.error('[importMembers] SECURITY: User tried to access unauthorized group', {
+                churchId,
+                groupId,
+            });
+            return res.status(403).json({
+                success: false,
+                error: 'Access denied - group does not belong to your church',
+            });
+        }
+        console.log('[importMembers] Security: Group ownership verified', { churchId, groupId });
         if (!req.file) {
             return res.status(400).json({
                 success: false,
