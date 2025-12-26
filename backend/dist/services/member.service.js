@@ -101,19 +101,25 @@ async function fetchMembersPage(groupId, page, limit, search) {
  * Add single member to group
  */
 export async function addMember(groupId, data) {
-    // Get group with timeout protection
+    console.log('[addMember] Starting for groupId:', groupId);
+    // Get group with VERY aggressive timeout protection (2 seconds)
     let group;
     try {
+        console.log('[addMember] Fetching group...');
         const groupPromise = prisma.group.findUnique({
             where: { id: groupId },
             select: { id: true, churchId: true }, // Only fetch what we need
         });
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Database query timeout')), 5000) // 5 second timeout
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => {
+            console.error('[addMember] GROUP QUERY TIMEOUT - rejecting');
+            reject(new Error('Group query timeout'));
+        }, 2000) // 2 second timeout (very aggressive)
         );
         group = await Promise.race([groupPromise, timeoutPromise]);
+        console.log('[addMember] Group fetched successfully:', group?.id);
     }
     catch (error) {
-        console.error('Failed to get group:', error);
+        console.error('[addMember] Error fetching group:', error);
         throw new Error('Failed to load group. Please try again.');
     }
     if (!group) {
@@ -141,7 +147,10 @@ export async function addMember(groupId, data) {
                 ],
             },
         });
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Member lookup timeout')), 5000));
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => {
+            console.error('[addMember] MEMBER LOOKUP TIMEOUT');
+            reject(new Error('Member lookup timeout'));
+        }, 2000));
         member = await Promise.race([memberPromise, timeoutPromise]);
     }
     catch (error) {
@@ -161,7 +170,10 @@ export async function addMember(groupId, data) {
                     optInSms: data.optInSms ?? true,
                 },
             });
-            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Member creation timeout')), 5000));
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => {
+                console.error('[addMember] MEMBER CREATION TIMEOUT');
+                reject(new Error('Member creation timeout'));
+            }, 2000));
             member = await Promise.race([createPromise, timeoutPromise]);
         }
         catch (error) {
@@ -180,7 +192,10 @@ export async function addMember(groupId, data) {
                 },
             },
         });
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Duplicate check timeout')), 5000));
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => {
+            console.error('[addMember] DUPLICATE CHECK TIMEOUT');
+            reject(new Error('Duplicate check timeout'));
+        }, 2000));
         existing = await Promise.race([existingPromise, timeoutPromise]);
     }
     catch (error) {
@@ -202,7 +217,10 @@ export async function addMember(groupId, data) {
                 member: true,
             },
         });
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Group member creation timeout')), 5000));
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => {
+            console.error('[addMember] GROUP MEMBER CREATION TIMEOUT');
+            reject(new Error('Group member creation timeout'));
+        }, 2000));
         groupMember = await Promise.race([createPromise, timeoutPromise]);
     }
     catch (error) {
