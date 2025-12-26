@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { CheckCircle2, Circle, ChevronRight, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import client from '../../api/client';
 
 interface OnboardingStep {
   id: string;
@@ -59,38 +61,73 @@ export function OnboardingChecklist() {
   ]);
 
   const [isVisible, setIsVisible] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const completedCount = steps.filter((s) => s.completed).length;
   const progress = (completedCount / steps.length) * 100;
 
-  // Load completion state from localStorage and restore action functions
+  // Load completion state from backend API on mount
   useEffect(() => {
-    const saved = localStorage.getItem('onboarding_progress');
-    if (saved) {
+    const loadProgress = async () => {
       try {
-        const savedData = JSON.parse(saved);
-        // Restore action functions since JSON.parse can't preserve them
-        const stepsWithActions = savedData.map((step: any) => ({
-          ...step,
-          action: stepActions[step.id as keyof typeof stepActions] || (() => {}),
-        }));
-        setSteps(stepsWithActions);
+        const response = await client.get('/onboarding/progress');
+        if (response.data.success && response.data.data) {
+          const apiProgress = response.data.data;
+          // Map API progress to steps, restoring action functions
+          const stepsWithActions = steps.map((step) => {
+            const apiTask = apiProgress.find((p: any) => p.taskId === step.id);
+            return {
+              ...step,
+              completed: apiTask?.completed ?? false,
+            };
+          });
+          setSteps(stepsWithActions);
+        }
       } catch (error) {
-        console.error('Failed to parse onboarding progress:', error);
+        console.error('Failed to load onboarding progress:', error);
+        // Silently fail - use localStorage as fallback
+        const saved = localStorage.getItem('onboarding_progress');
+        if (saved) {
+          try {
+            const savedData = JSON.parse(saved);
+            const stepsWithActions = savedData.map((step: any) => ({
+              ...step,
+              action: stepActions[step.id as keyof typeof stepActions] || (() => {}),
+            }));
+            setSteps(stepsWithActions);
+          } catch (err) {
+            console.error('Failed to parse localStorage:', err);
+          }
+        }
+      } finally {
+        setIsLoading(false);
       }
-    }
+    };
+
+    loadProgress();
   }, []);
 
-  // Save completion state
-  useEffect(() => {
-    localStorage.setItem('onboarding_progress', JSON.stringify(steps));
-  }, [steps]);
+  const handleStepComplete = async (stepId: string) => {
+    try {
+      // Call backend API to mark task as completed
+      // API will verify the task was actually completed before marking it
+      const response = await client.post(`/onboarding/complete/${stepId}`);
 
-  const handleStepComplete = (stepId: string) => {
-    setSteps((prev) =>
-      prev.map((step) =>
-        step.id === stepId ? { ...step, completed: true } : step
-      )
-    );
+      if (response.data.success) {
+        // Update local state to reflect completion
+        setSteps((prev) =>
+          prev.map((step) =>
+            step.id === stepId ? { ...step, completed: true } : step
+          )
+        );
+        toast.success('Task completed! 🎉');
+      } else {
+        // Task verification failed - show error message
+        toast.error(response.data.error || 'Failed to verify task completion');
+      }
+    } catch (error: any) {
+      console.error('Failed to complete task:', error);
+      toast.error('Failed to mark task as complete. Please try again.');
+    }
   };
 
   // Hide checklist once all steps are completed or dismissed
@@ -207,7 +244,7 @@ export function OnboardingChecklist() {
                     step.action();
                     handleStepComplete(step.id);
                   }}
-                  className="flex-shrink-0 flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium text-sm px-3 py-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors whitespace-nowrap"
+                  className="flex-shrink-0 flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium text-sm px-3 py-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors whitespace-nowrap active:opacity-70"
                 >
                   Start
                   <ChevronRight className="w-4 h-4" />

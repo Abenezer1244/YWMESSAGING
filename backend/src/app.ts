@@ -26,6 +26,7 @@ import schedulerRoutes from './routes/scheduler.routes.js';
 import securityRoutes from './routes/security.routes.js';
 import gdprRoutes from './routes/gdpr.routes.js';
 import mfaRoutes from './routes/mfa.routes.js';
+import onboardingRoutes from './routes/onboarding.routes.js';
 import healthRoutes from './routes/health.routes.js';
 import { compressionMiddleware } from './middleware/compression.middleware.js';
 import { etagMiddleware } from './middleware/etag.middleware.js';
@@ -342,6 +343,10 @@ app.use('/api/gdpr', apiLimiter, gdprRoutes);
 // MFA routes - multi-factor authentication setup and management
 // Rate limited to prevent brute force attacks
 app.use('/api/mfa', apiLimiter, mfaRoutes);
+
+// Onboarding routes - track and verify onboarding task completion
+// Rate limited to prevent abuse
+app.use('/api/onboarding', apiLimiter, onboardingRoutes);
 
 // ✅ SECURITY: Add Sentry error handler middleware
 // Must be after routes but before the final error handler

@@ -101,6 +101,7 @@ model Church {
   conversations         Conversation[]
   planningCenterIntegration PlanningCenterIntegration?
   npsSurveys            NPSSurvey[]
+  onboardingProgress    OnboardingProgress[]
 
   @@index([subscriptionStatus])
   @@index([trialEndsAt])
@@ -662,4 +663,22 @@ model DeadLetterQueue {
   @@index([externalId])
   @@index([createdAt])
   @@index([retryCount])
+}
+
+// Onboarding Progress: Tracks completion of onboarding tasks
+model OnboardingProgress {
+  id        String   @id @default(cuid())
+  churchId  String
+  taskId    String   // create_branch, create_group, add_members, send_message
+  completed Boolean  @default(false)
+  completedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  church    Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+
+  @@unique([churchId, taskId])
+  @@index([churchId])
+  @@index([completed])
+  @@index([completedAt])
 }
