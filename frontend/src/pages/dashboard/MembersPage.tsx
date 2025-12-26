@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Users, Trash2, Loader } from 'lucide-react';
@@ -40,6 +40,26 @@ export function MembersPage() {
   const pages = Math.ceil(total / limit);
   const currentGroup = groups.find((g) => g.id === groupId);
 
+  // Define loadMembers function first (must be before useEffect hooks)
+  const loadMembers = useCallback(async (pageNum: number = 1) => {
+    if (!groupId) return;
+
+    try {
+      setIsLoading(true);
+      const data = await getMembers(groupId, {
+        page: pageNum,
+        limit,
+        search: search || undefined,
+      });
+      setMembers(data.data);
+      setTotal(data.pagination.total);
+    } catch (error) {
+      toast.error((error as Error).message || 'Failed to load members');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [groupId, search]);
+
   // Load branches and groups on mount if not already loaded
   useEffect(() => {
     if (!groups.length && auth.church?.id && branches.length > 0) {
@@ -60,35 +80,32 @@ export function MembersPage() {
     }
   }, [auth.church?.id, branches, groups.length, setGroups]);
 
+  // Load members when group changes (initial load)
+  useEffect(() => {
+    if (groupId) {
+      loadMembers(1);
+    }
+  }, [groupId, loadMembers]);
+
+  // Load members when page changes (pagination) - NO DEBOUNCE
+  useEffect(() => {
+    if (groupId && page > 1) {
+      loadMembers(page);
+    }
+  }, [page, groupId, loadMembers]);
+
   // Debounce search - wait 500ms after user stops typing before searching
   useEffect(() => {
+    if (!groupId) return;
+
     const searchTimer = setTimeout(() => {
-      if (groupId) {
-        loadMembers(page);
-      }
+      // Reset to page 1 when searching
+      setPage(1);
+      loadMembers(1);
     }, 500);
 
     return () => clearTimeout(searchTimer);
-  }, [groupId, page, search]);
-
-  const loadMembers = async (pageNum: number = 1) => {
-    if (!groupId) return;
-
-    try {
-      setIsLoading(true);
-      const data = await getMembers(groupId, {
-        page: pageNum,
-        limit,
-        search: search || undefined,
-      });
-      setMembers(data.data);
-      setTotal(data.pagination.total);
-    } catch (error) {
-      toast.error((error as Error).message || 'Failed to load members');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [search, groupId, loadMembers]);
 
   const handleAddSuccess = async (newMember: Member) => {
     // Refetch members list after successful add
