@@ -45,16 +45,9 @@ export declare function getMembers(groupId: string, options?: {
 }>;
 /**
  * Add single member to group
+ * ✅ PROTECTED: Function-level 5-second timeout to prevent hangs
  */
-export declare function addMember(groupId: string, data: CreateMemberData): Promise<{
-    id: any;
-    firstName: any;
-    lastName: any;
-    phone: string;
-    email: any;
-    optInSms: any;
-    createdAt: any;
-}>;
+export declare function addMember(groupId: string, data: CreateMemberData): Promise<any>;
 /**
  * Bulk import members to group
  * ✅ OPTIMIZED: Batch operations instead of per-member queries

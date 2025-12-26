@@ -111,39 +111,48 @@ export function getSMSPricing() {
  */
 export async function getCurrentPlan(churchId: string): Promise<PlanName | 'trial'> {
   try {
-    // Try cache first with timeout (prevent hanging on slow Redis)
+    // Try cache first with AGGRESSIVE timeout (1 second)
     try {
       const cachePromise = getCached<string>(CACHE_KEYS.churchPlan(churchId));
       const timeoutPromise = new Promise<null>((_, reject) =>
-        setTimeout(() => reject(new Error('Cache timeout')), 2000) // 2 second timeout
+        setTimeout(() => {
+          console.error('[BILLING] getCurrentPlan cache timeout');
+          reject(new Error('Cache timeout'));
+        }, 1000) // 1 second timeout (AGGRESSIVE)
       );
       const cached = await Promise.race([cachePromise, timeoutPromise]);
       if (cached) {
         return cached as PlanName | 'trial';
       }
     } catch (cacheError) {
-      console.warn('Cache lookup timeout for plan, querying database:', cacheError);
-      // Continue - we'll query the database directly
+      console.error('[BILLING] Cache error in getCurrentPlan, returning trial immediately:', cacheError);
+      // Return trial immediately - don't try database
+      return 'trial';
     }
 
-    // Cache miss or timeout, query database with timeout
+    // Cache miss or timeout, query database with AGGRESSIVE timeout (2 seconds)
     const dbPromise = prisma.church.findUnique({
       where: { id: churchId },
       select: { subscriptionStatus: true },
     });
     const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('Database query timeout')), 3000) // 3 second timeout
+      setTimeout(() => {
+        console.error('[BILLING] getCurrentPlan database query timeout');
+        reject(new Error('Database query timeout'));
+      }, 2000) // 2 second timeout (AGGRESSIVE)
     );
     const church = (await Promise.race([dbPromise, timeoutPromise])) as any;
     const status = church?.subscriptionStatus as (PlanName | 'trial') | undefined;
     const plan = status || 'trial';
 
-    // Store in cache (1 hour TTL)
-    await setCached(CACHE_KEYS.churchPlan(churchId), plan, CACHE_TTL.LONG);
+    // Store in cache (1 hour TTL) - non-blocking
+    setCached(CACHE_KEYS.churchPlan(churchId), plan, CACHE_TTL.LONG).catch(err =>
+      console.warn('[BILLING] Failed to cache plan:', err)
+    );
 
     return plan;
   } catch (error) {
-    console.error('Failed to get current plan:', error);
+    console.error('[BILLING] getCurrentPlan failed, returning trial:', error);
     return 'trial';
   }
 }
@@ -171,25 +180,34 @@ export function getPlanLimits(plan: PlanName | string): PlanLimits | null {
  */
 export async function getUsage(churchId: string): Promise<Record<string, number>> {
   try {
-    // Try cache first with timeout (prevent hanging on slow Redis)
+    // Try cache first with AGGRESSIVE timeout (1 second)
     let cached: Record<string, number> | null = null;
     try {
       const cachePromise = getCached<Record<string, number>>(CACHE_KEYS.billingUsage(churchId));
       const timeoutPromise = new Promise<null>((_, reject) =>
-        setTimeout(() => reject(new Error('Cache timeout')), 3000) // 3 second timeout
+        setTimeout(() => {
+          console.error('[BILLING] getUsage cache timeout');
+          reject(new Error('Cache timeout'));
+        }, 1000) // 1 second timeout (AGGRESSIVE)
       );
       cached = await Promise.race([cachePromise, timeoutPromise]) as Record<string, number>;
       if (cached) {
         return cached;
       }
     } catch (cacheError) {
-      console.warn('Cache lookup timeout, proceeding with database query:', cacheError);
-      // Continue - we'll query the database directly
+      console.error('[BILLING] Cache error in getUsage, returning defaults immediately:', cacheError);
+      // Return defaults immediately - don't try database
+      return {
+        branches: 0,
+        members: 0,
+        messagesThisMonth: 0,
+        coAdmins: 0,
+      };
     }
 
     const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
-    // Run all count queries in parallel with timeout protection (prevent hanging on slow database)
+    // Run all count queries in parallel with AGGRESSIVE timeout (2 seconds)
     const countPromises = [
       prisma.branch.count({ where: { churchId } }),
       prisma.member.count({
@@ -211,7 +229,10 @@ export async function getUsage(churchId: string): Promise<Record<string, number>
     ];
 
     const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('Query timeout')), 5000) // 5 second timeout
+      setTimeout(() => {
+        console.error('[BILLING] getUsage database query timeout');
+        reject(new Error('Query timeout'));
+      }, 2000) // 2 second timeout (AGGRESSIVE)
     );
 
     const counts = await Promise.race([Promise.all(countPromises), timeoutPromise]) as number[];
@@ -231,8 +252,8 @@ export async function getUsage(churchId: string): Promise<Record<string, number>
 
     return usage;
   } catch (error) {
-    console.error('Failed to get usage:', error);
-    // Return empty usage instead of blocking - user will just have no limits enforced temporarily
+    console.error('[BILLING] getUsage failed, returning defaults:', error);
+    // Return empty usage instead of blocking - plan limits won't be enforced, but member add will work
     return {
       branches: 0,
       members: 0,

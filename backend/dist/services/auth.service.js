@@ -84,6 +84,24 @@ export async function registerChurch(input) {
  * Login with email and password
  */
 export async function login(input) {
+    // Wrap entire login in a 5-second timeout
+    return new Promise((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+            console.error('[LOGIN] FUNCTION TIMEOUT - login exceeded 5 seconds');
+            reject(new Error('Login took too long. Please try again.'));
+        }, 5000);
+        loginInternal(input)
+            .then((result) => {
+            clearTimeout(timeoutId);
+            resolve(result);
+        })
+            .catch((error) => {
+            clearTimeout(timeoutId);
+            reject(error);
+        });
+    });
+}
+async function loginInternal(input) {
     console.log('[LOGIN] Starting login process for:', input.email);
     console.log('[LOGIN] Finding admin by email...');
     const admin = await prisma.admin.findUnique({

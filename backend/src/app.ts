@@ -39,6 +39,32 @@ const app = express();
 // Disable Express's built-in ETag generation (we implement our own)
 app.set('etag', false);
 
+// ✅ CRITICAL: Add request-level timeout middleware
+// Ensures ALL requests complete within 10 seconds maximum
+// This prevents hanging requests from blocking the entire server
+app.use((req, res, next) => {
+  const requestTimeout = setTimeout(() => {
+    if (!res.headersSent) {
+      console.error('[TIMEOUT]', req.method, req.path, '- Hard timeout after 10 seconds');
+      res.status(504).json({
+        success: false,
+        error: 'Request timeout - server took too long to respond'
+      });
+    }
+  }, 10000); // 10 second hard timeout
+
+  // Clear timeout if response completes before timeout
+  res.on('finish', () => {
+    clearTimeout(requestTimeout);
+  });
+
+  res.on('close', () => {
+    clearTimeout(requestTimeout);
+  });
+
+  next();
+});
+
 // ✅ SECURITY: Initialize Sentry for error tracking and monitoring
 // Must be done as early as possible in the application lifecycle
 initSentry();

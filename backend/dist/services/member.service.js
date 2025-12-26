@@ -99,8 +99,31 @@ async function fetchMembersPage(groupId, page, limit, search) {
 }
 /**
  * Add single member to group
+ * ✅ PROTECTED: Function-level 5-second timeout to prevent hangs
  */
 export async function addMember(groupId, data) {
+    // Wrap entire function in a 5-second timeout
+    return new Promise((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+            console.error('[addMember] FUNCTION TIMEOUT - entire operation exceeded 5 seconds');
+            reject(new Error('Member add operation took too long. Please try again.'));
+        }, 5000);
+        // Run the actual member add logic
+        addMemberInternal(groupId, data)
+            .then((result) => {
+            clearTimeout(timeoutId);
+            resolve(result);
+        })
+            .catch((error) => {
+            clearTimeout(timeoutId);
+            reject(error);
+        });
+    });
+}
+/**
+ * Internal member add logic (wrapped in timeout above)
+ */
+async function addMemberInternal(groupId, data) {
     console.log('[addMember] Starting for groupId:', groupId);
     // Get group with VERY aggressive timeout protection (2 seconds)
     let group;
