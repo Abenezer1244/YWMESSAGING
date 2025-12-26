@@ -122,21 +122,28 @@ export function MembersPage() {
   };
 
   // Show loading spinner while initially loading groups
-  if (isInitialLoading || !currentGroup) {
+  if (isInitialLoading) {
     return (
       <SoftLayout>
         <div className="min-h-screen bg-background flex items-center justify-center p-6">
-          {isInitialLoading ? (
-            <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity }}>
-              <Loader className="w-8 h-8 text-primary" />
-            </motion.div>
-          ) : (
-            <SoftCard className="text-center max-w-md">
-              <p className="text-foreground/80 text-lg">
-                No group selected. Create or select a group first.
-              </p>
-            </SoftCard>
-          )}
+          <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity }}>
+            <Loader className="w-8 h-8 text-primary" />
+          </motion.div>
+        </div>
+      </SoftLayout>
+    );
+  }
+
+  // Show error if no group selected and no groupId in URL
+  if (!groupId) {
+    return (
+      <SoftLayout>
+        <div className="min-h-screen bg-background flex items-center justify-center p-6">
+          <SoftCard className="text-center max-w-md">
+            <p className="text-foreground/80 text-lg">
+              No group selected. Create or select a group first.
+            </p>
+          </SoftCard>
         </div>
       </SoftLayout>
     );
@@ -158,7 +165,7 @@ export function MembersPage() {
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Members</span>
               </h1>
               <p className="text-muted-foreground">
-                {currentGroup.name} • {total} members
+                {currentGroup?.name || 'Group'} • {total} members
               </p>
             </div>
             <SoftButton
