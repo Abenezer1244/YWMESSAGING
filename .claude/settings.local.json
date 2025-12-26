@@ -151,7 +151,8 @@
       "Bash(timeout 120 npm run build:*)",
       "Bash(timeout 20 node:*)",
       "Bash(mcp__playwright__browser_navigate:*)",
-      "Bash(timeout 10 node:*)"
+      "Bash(timeout 10 node:*)",
+      "Bash(xargs cat:*)"
     ],
     "deny": [],
     "ask": []

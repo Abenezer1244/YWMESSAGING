@@ -120,9 +120,20 @@ export async function deleteGroup(groupId) {
     }
     const memberCount = group.members.length;
     // Delete group (Prisma will cascade delete GroupMembers)
-    await prisma.group.delete({
+    const deleteResult = await prisma.group.delete({
         where: { id: groupId },
     });
+    // Verify deletion actually occurred
+    if (!deleteResult || !deleteResult.id) {
+        throw new Error('Failed to delete group - database operation failed');
+    }
+    // Double-check group is actually deleted
+    const stillExists = await prisma.group.findUnique({
+        where: { id: groupId },
+    });
+    if (stillExists) {
+        throw new Error('Group deletion failed - group still exists in database after delete operation');
+    }
     return {
         success: true,
         deletedMembersCount: memberCount,
