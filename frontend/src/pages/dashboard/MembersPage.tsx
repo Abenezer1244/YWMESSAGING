@@ -60,20 +60,21 @@ export function MembersPage() {
   // Debounce search - wait 500ms after user stops typing before searching
   useEffect(() => {
     const searchTimer = setTimeout(() => {
-      loadMembers();
+      if (groupId) {
+        loadMembers(page);
+      }
     }, 500);
 
     return () => clearTimeout(searchTimer);
   }, [groupId, page, search]);
 
-  const loadMembers = async (pageNum?: number) => {
+  const loadMembers = async (pageNum: number = 1) => {
     if (!groupId) return;
 
     try {
       setIsLoading(true);
-      const pageToUse = pageNum ?? page;
       const data = await getMembers(groupId, {
-        page: pageToUse,
+        page: pageNum,
         limit,
         search: search || undefined,
       });
@@ -86,11 +87,12 @@ export function MembersPage() {
     }
   };
 
-  const handleAddSuccess = (newMember: Member) => {
-    // Refetch from backend to ensure cache is fresh and have latest data
-    // Load page 1 directly without waiting for setPage state update
+  const handleAddSuccess = async (newMember: Member) => {
+    // Refetch members list after successful add
+    // Reset to page 1 and load fresh data
     setPage(1);
-    loadMembers(1);
+    // Call loadMembers with page 1 explicitly
+    await loadMembers(1);
     setIsAddModalOpen(false);
   };
 
