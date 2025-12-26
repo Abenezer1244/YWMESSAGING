@@ -275,6 +275,14 @@ function App() {
             }
           />
           <Route
+            path="/dashboard/groups/:groupId/members"
+            element={
+              <ProtectedRoute>
+                <MembersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/members"
             element={
               <ProtectedRoute>
