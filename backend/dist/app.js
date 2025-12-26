@@ -220,8 +220,10 @@ app.use(helmet({
 const corsOrigin = process.env.NODE_ENV === 'production'
     ? // Production: strict - only allow configured frontend URLs
         [
-            process.env.FRONTEND_URL, // Primary frontend URL from env
-            process.env.FRONTEND_URL?.replace('https://', 'https://www.'), // www variant
+            'https://koinoniasms.com', // Primary production domain
+            'https://www.koinoniasms.com', // www variant
+            process.env.FRONTEND_URL, // Also allow env-configured URL
+            process.env.FRONTEND_URL?.replace('https://', 'https://www.'), // www variant of env URL
         ].filter(Boolean)
     : // Development: allow localhost variants for development/testing
         [
@@ -231,6 +233,7 @@ const corsOrigin = process.env.NODE_ENV === 'production'
             'http://localhost:5175',
             'http://127.0.0.1:3000',
             'http://127.0.0.1:5173',
+            'https://koinoniasms.com', // Also allow production domain in dev
             process.env.FRONTEND_URL,
         ];
 app.use(cors({
