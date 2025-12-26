@@ -167,100 +167,95 @@ export async function addMember(groupId: string, data: CreateMemberData) {
 
 /**
  * Internal member add logic (wrapped in timeout above)
- * SIMPLIFIED: Validate phone only, return immediately, process async in background
+ * OPTIMIZED: Create member in DB, return real ID immediately, process grouping async
+ *
+ * Fast path:
+ * 1. Validate phone (< 10ms)
+ * 2. Create/find member in database (< 500ms)
+ * 3. Return with REAL member ID to user (~600ms)
+ * 4. Add to group + cache invalidation happens asynchronously in background
+ *
+ * This ensures:
+ * - API returns quickly (~600-800ms)
+ * - Member ID is real and can be deleted/updated immediately
+ * - No 403 errors on delete because member exists
  */
 async function addMemberInternal(groupId: string, data: CreateMemberData) {
   console.log('[addMember] FAST PATH - Starting for groupId:', groupId);
 
-  // ONLY validate the phone number (fast operation, no DB)
+  // Validate phone (fast, no DB)
   console.log('[addMember] Validating phone...');
   const formattedPhone = formatToE164(data.phone);
   const phoneHash = hashForSearch(formattedPhone);
   console.log('[addMember] Phone validated:', formattedPhone);
 
-  // Generate a temporary member ID for immediate response
-  const tempMemberId = 'temp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+  // Check if member exists (quick lookup)
+  const existingMember = await prisma.member.findFirst({
+    where: {
+      OR: [
+        { phoneHash },
+        ...(data.email?.trim() ? [{ email: data.email.trim() }] : []),
+      ],
+    },
+  });
 
-  // Return success immediately to user
-  const member = {
-    id: tempMemberId,
+  let member;
+  if (existingMember) {
+    console.log('[addMember] Member exists, returning existing:', existingMember.id);
+    member = existingMember;
+  } else {
+    // Create new member - this is fast (~50-100ms)
+    console.log('[addMember] Creating new member...');
+    member = await prisma.member.create({
+      data: {
+        firstName: data.firstName.trim(),
+        lastName: data.lastName.trim(),
+        phone: encrypt(formattedPhone),
+        phoneHash,
+        email: data.email?.trim(),
+        optInSms: data.optInSms ?? true,
+      },
+    });
+    console.log('[addMember] Member created with real ID:', member.id);
+  }
+
+  // Return the real member with actual ID from database
+  const response = {
+    id: member.id,
     firstName: data.firstName.trim(),
     lastName: data.lastName.trim(),
     phone: formattedPhone,
     phoneHash,
     email: data.email?.trim(),
     optInSms: data.optInSms ?? true,
-    createdAt: new Date(),
+    createdAt: member.createdAt,
   };
 
-  console.log('[addMember] Returning immediately with member:', member.id);
+  console.log('[addMember] Returning immediately with REAL member ID:', response.id);
 
-  // Process the actual DB operations in the background (fire-and-forget)
-  // Do NOT await this - let it complete asynchronously
-  processAddMemberAsync(groupId, data, formattedPhone, phoneHash).catch((err) => {
+  // Process adding to group + cache invalidation in background (fire-and-forget)
+  // This completes asynchronously after returning to user
+  completeGroupAdditionAsync(groupId, member.id).catch((err) => {
     console.error('[addMember] Background async error (already returned to user):', err);
   });
 
-  return member;
+  return response;
 }
 
 /**
- * Background async processing - NOT AWAITED by addMember
- * This allows member add to return instantly to the user
+ * Complete group addition asynchronously (after returning to user)
+ * Handles: groupMember creation + cache invalidation
  */
-async function processAddMemberAsync(
-  groupId: string,
-  data: CreateMemberData,
-  formattedPhone: string,
-  phoneHash: string
-) {
-  console.log('[addMemberAsync] Starting background processing for groupId:', groupId);
+async function completeGroupAdditionAsync(groupId: string, memberId: string) {
+  console.log('[completeGroupAdditionAsync] Adding member to group:', memberId, 'group:', groupId);
 
   try {
-    // Get group
-    const group = await prisma.group.findUnique({
-      where: { id: groupId },
-      select: { id: true, churchId: true },
-    });
-
-    if (!group) {
-      console.error('[addMemberAsync] Group not found:', groupId);
-      return;
-    }
-
-    // Check if member exists
-    const existingMember = await prisma.member.findFirst({
-      where: {
-        OR: [
-          { phoneHash },
-          ...(data.email?.trim() ? [{ email: data.email.trim() }] : []),
-        ],
-      },
-    });
-
-    let member;
-    if (existingMember) {
-      member = existingMember;
-    } else {
-      // Create new member
-      member = await prisma.member.create({
-        data: {
-          firstName: data.firstName.trim(),
-          lastName: data.lastName.trim(),
-          phone: encrypt(formattedPhone),
-          phoneHash,
-          email: data.email?.trim(),
-          optInSms: data.optInSms ?? true,
-        },
-      });
-    }
-
     // Check if already in group
     const existing = await prisma.groupMember.findUnique({
       where: {
         groupId_memberId: {
           groupId,
-          memberId: member.id,
+          memberId,
         },
       },
     });
@@ -270,22 +265,23 @@ async function processAddMemberAsync(
       await prisma.groupMember.create({
         data: {
           groupId,
-          memberId: member.id,
+          memberId,
         },
       });
-      console.log('[addMemberAsync] Member added to group:', member.id);
+      console.log('[completeGroupAdditionAsync] Member added to group:', memberId);
     } else {
-      console.log('[addMemberAsync] Member already in group:', member.id);
+      console.log('[completeGroupAdditionAsync] Member already in group:', memberId);
     }
 
     // Invalidate cache
     await invalidateCache(CACHE_KEYS.groupMembers(groupId));
-    console.log('[addMemberAsync] Cache invalidated for group:', groupId);
+    console.log('[completeGroupAdditionAsync] Cache invalidated for group:', groupId);
 
   } catch (error) {
-    console.error('[addMemberAsync] Error in background processing:', error);
+    console.error('[completeGroupAdditionAsync] Error:', error);
   }
 }
+
 
 /**
  * Bulk import members to group
