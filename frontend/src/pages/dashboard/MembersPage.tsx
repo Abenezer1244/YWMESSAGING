@@ -66,13 +66,14 @@ export function MembersPage() {
     return () => clearTimeout(searchTimer);
   }, [groupId, page, search]);
 
-  const loadMembers = async () => {
+  const loadMembers = async (pageNum?: number) => {
     if (!groupId) return;
 
     try {
       setIsLoading(true);
+      const pageToUse = pageNum ?? page;
       const data = await getMembers(groupId, {
-        page,
+        page: pageToUse,
         limit,
         search: search || undefined,
       });
@@ -86,10 +87,10 @@ export function MembersPage() {
   };
 
   const handleAddSuccess = (newMember: Member) => {
-    // Refetch from backend to ensure cache is fresh and we have latest data
-    // This handles cases where member already exists or other conflicts
+    // Refetch from backend to ensure cache is fresh and have latest data
+    // Load page 1 directly without waiting for setPage state update
     setPage(1);
-    loadMembers();
+    loadMembers(1);
     setIsAddModalOpen(false);
   };
 
