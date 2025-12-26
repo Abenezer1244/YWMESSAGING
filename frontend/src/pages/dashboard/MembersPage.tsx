@@ -94,13 +94,16 @@ export function MembersPage() {
     // Refetch members list after successful add
     // Reset to page 1 and load fresh data
     setPage(1);
-    // Call loadMembers with page 1 explicitly
+    // Small delay to ensure backend has committed the write
+    await new Promise(resolve => setTimeout(resolve, 300));
     await loadMembers(1);
     setIsAddModalOpen(false);
   };
 
   const handleImportSuccess = async () => {
     setPage(1);
+    // Small delay to ensure all members have been written to database
+    await new Promise(resolve => setTimeout(resolve, 300));
     await loadMembers(1);
     setIsImportModalOpen(false);
   };
