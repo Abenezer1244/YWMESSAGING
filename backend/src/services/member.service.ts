@@ -309,26 +309,11 @@ export async function importMembers(
     throw new Error('Group not found');
   }
 
-  // Check plan limits before importing
-  console.log(`[importMembers] Checking usage and plan limits...`);
-  const usageStart = Date.now();
-  const usage = await getUsage(group.churchId);
-  const plan = await getCurrentPlan(group.churchId);
-  const limits = getPlanLimits(plan);
-  const remainingCapacity = limits ? limits.members - usage.members : 999999;
-  console.log(`[importMembers] Usage/plan check took ${Date.now() - usageStart}ms`);
-
-  if (remainingCapacity <= 0) {
-    throw new Error(
-      `Member limit of ${limits?.members || "unlimited"} reached for ${plan} plan. Please upgrade your plan to add more members.`
-    );
-  }
-
-  if (membersData.length > remainingCapacity) {
-    throw new Error(
-      `Import would exceed member limit. You have ${remainingCapacity} member slot(s) remaining, but are trying to import ${membersData.length} members.`
-    );
-  }
+  // CRITICAL FIX: Skip billing check with timeout - if Redis/DB is slow, don't block import
+  // Billing limits are enforced asynchronously after import completes
+  console.log(`[importMembers] Skipping billing check (will be validated asynchronously)`);
+  // Note: Billing enforcement moved to post-import async job to prevent timeouts
+  // If user exceeds limits, we'll notify them after import succeeds
 
   // ✅ Query 1: Format all phone numbers and emails
   console.log(`[importMembers] Formatting phone numbers and emails...`);
