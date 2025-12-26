@@ -69,6 +69,16 @@ export default defineConfig({
       name: 'Mobile Chrome',
       use: { ...devices['Pixel 5'] },
     },
+
+    {
+      name: 'iPhone 13',
+      use: { ...devices['iPhone 13'] },
+    },
+
+    {
+      name: 'iPad Pro',
+      use: { ...devices['iPad Pro'] },
+    },
   ],
 
   /* Run your local dev server before starting the tests */

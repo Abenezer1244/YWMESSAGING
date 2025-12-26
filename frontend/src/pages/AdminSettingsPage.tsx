@@ -10,6 +10,7 @@ import { PhoneNumberManager } from '../components/admin/PhoneNumberManager';
 import PhoneNumberPurchaseModal from '../components/PhoneNumberPurchaseModal';
 import { SoftLayout, SoftCard, SoftButton } from '../components/SoftUI';
 import Input from '../components/ui/Input';
+import { MobileTabs, Tab } from '../components/responsive';
 
 // Email validation regex (RFC 5322 simplified)
 const isValidEmail = (email: string): boolean => {
@@ -230,29 +231,18 @@ export function AdminSettingsPage() {
           className="mb-8"
         >
           <SoftCard>
-            <div className="border-b border-border/40">
-              <div className="flex flex-wrap">
-                {(['profile', 'coadmins', 'numbers', 'logs'] as const).map((tab, idx) => (
-                  <motion.button
-                    key={tab}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                    onClick={() => setActiveTab(tab)}
-                    className={`flex-1 min-w-[120px] px-4 py-4 text-center font-medium border-b-2 transition ${
-                      activeTab === tab
-                        ? 'border-primary text-primary'
-                        : 'border-transparent text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    {tab === 'profile' && 'Church Profile'}
-                    {tab === 'coadmins' && 'Co-Admins'}
-                    {tab === 'numbers' && 'Phone Numbers'}
-                    {tab === 'logs' && 'Activity Logs'}
-                  </motion.button>
-                ))}
-              </div>
-            </div>
+            <MobileTabs
+              tabs={[
+                { label: 'Church Profile', value: 'profile' },
+                { label: 'Co-Admins', value: 'coadmins' },
+                { label: 'Phone Numbers', value: 'numbers' },
+                { label: 'Activity Logs', value: 'logs' },
+              ] as Tab[]}
+              value={activeTab}
+              onChange={(value) => setActiveTab(value as 'profile' | 'coadmins' | 'logs' | 'numbers')}
+              variant="auto"
+              className="p-0"
+            />
 
             {/* Tab Content */}
             <div className="p-8">

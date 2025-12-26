@@ -38,9 +38,9 @@ export function SoftButton({
   const primaryBgColor = '#527575';
 
   const sizes = {
-    sm: 'px-4 py-2 text-sm',
-    md: 'px-6 py-3 text-base',
-    lg: 'px-8 py-4 text-lg',
+    sm: 'px-4 py-2 text-sm min-h-10',
+    md: 'px-6 py-3 text-base min-h-11',
+    lg: 'px-8 py-4 text-lg min-h-12',
   };
 
   return (

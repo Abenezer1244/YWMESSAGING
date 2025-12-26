@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { MessageSquare, Phone, Search, Loader } from 'lucide-react';
+import { MessageSquare, Phone, Search, Loader, ChevronLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../stores/authStore';
 import {
@@ -16,9 +16,12 @@ import Input from '../../components/ui/Input';
 import { ConversationsList } from '../../components/conversations/ConversationsList';
 import { MessageThread } from '../../components/conversations/MessageThread';
 import { ReplyComposer } from '../../components/conversations/ReplyComposer';
+import { useBreakpoint } from '../../hooks/useBreakpoint';
+import { designTokens } from '../../utils/designTokens';
 
 export function ConversationsPage() {
   const auth = useAuthStore();
+  const { isMobile } = useBreakpoint();
 
   // List state
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -34,6 +37,9 @@ export function ConversationsPage() {
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [messagesPage, setMessagesPage] = useState(1);
   const [messagesPages, setMessagesPages] = useState(1);
+
+  // Mobile navigation state - on mobile, show either list or messages
+  const [showMessages, setShowMessages] = useState(false);
 
   // Load conversations on mount and when page/search changes
   useEffect(() => {
@@ -80,6 +86,11 @@ export function ConversationsPage() {
       setSelectedConversation(data.conversation);
       setMessages(data.messages.reverse()); // Reverse to show newest at bottom
       setMessagesPages(data.pagination.pages);
+
+      // On mobile, show messages instead of list
+      if (isMobile) {
+        setShowMessages(true);
+      }
 
       // Mark as read
       await markConversationAsRead(conversationId);
@@ -193,14 +204,15 @@ export function ConversationsPage() {
 
         {/* Main Content */}
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0">
-          {/* Conversations List */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            className="lg:col-span-1 flex flex-col min-h-0"
-          >
-            <SoftCard className="flex-1 overflow-hidden flex flex-col">
+          {/* Conversations List - Hidden on mobile when showing messages */}
+          {!isMobile || !showMessages ? (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              className="lg:col-span-1 flex flex-col min-h-0"
+            >
+              <SoftCard className="flex-1 overflow-hidden flex flex-col">
               <div className="p-4 border-b border-border/40">
                 <h2 className="font-semibold text-foreground">
                   {conversations.length} Conversations
@@ -254,21 +266,37 @@ export function ConversationsPage() {
                   </SoftButton>
                 </div>
               )}
-            </SoftCard>
-          </motion.div>
+              </SoftCard>
+            </motion.div>
+          ) : null}
 
-          {/* Message Thread */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="lg:col-span-2 flex flex-col min-h-0"
-          >
-            {selectedConversation ? (
-              <SoftCard className="flex-1 flex flex-col overflow-hidden">
-                {/* Thread Header */}
-                <div className="p-4 border-b border-border/40">
-                  <div className="flex items-center justify-between">
+          {/* Message Thread - Hidden on mobile when showing list */}
+          {!isMobile || showMessages ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="lg:col-span-2 flex flex-col min-h-0"
+            >
+              {selectedConversation ? (
+                <SoftCard className="flex-1 flex flex-col overflow-hidden">
+                  {/* Thread Header with Back Button on Mobile */}
+                  <div className="p-4 border-b border-border/40">
+                    <div className="flex items-center justify-between">
+                      {/* Back Button on Mobile */}
+                      {isMobile && (
+                        <motion.button
+                          onClick={() => setShowMessages(false)}
+                          style={{
+                            minHeight: designTokens.touchTarget.enhanced,
+                            minWidth: designTokens.touchTarget.enhanced,
+                          }}
+                          className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors mr-4"
+                          title="Back to conversation list"
+                        >
+                          <ChevronLeft className="w-5 h-5" />
+                        </motion.button>
+                      )}
                     <div>
                       <h2 className="font-semibold text-foreground">
                         {selectedConversation.member.firstName} {selectedConversation.member.lastName}
@@ -307,20 +335,21 @@ export function ConversationsPage() {
                   onReply={handleReply}
                 />
               </SoftCard>
-            ) : (
-              <SoftCard className="flex-1 flex items-center justify-center">
-                <div className="text-center">
-                  <MessageSquare className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    Select a Conversation
-                  </h3>
-                  <p className="text-muted-foreground">
-                    Choose a conversation from the list to view and reply to messages
-                  </p>
-                </div>
-              </SoftCard>
-            )}
-          </motion.div>
+              ) : (
+                <SoftCard className="flex-1 flex items-center justify-center">
+                  <div className="text-center">
+                    <MessageSquare className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      Select a Conversation
+                    </h3>
+                    <p className="text-muted-foreground">
+                      Choose a conversation from the list to view and reply to messages
+                    </p>
+                  </div>
+                </SoftCard>
+              )}
+            </motion.div>
+          ) : null}
         </div>
       </div>
     </SoftLayout>

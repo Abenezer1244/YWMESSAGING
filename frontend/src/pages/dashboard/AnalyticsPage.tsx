@@ -14,6 +14,7 @@ import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
 import { DynamicLineChart, DynamicBarChart } from '../../components/charts';
 import { themeColors } from '../../utils/themeColors';
 import { designTokens } from '../../utils/designTokens';
+import { MobileTable, Column } from '../../components/responsive';
 
 // Reusable tooltip style configuration
 const tooltipStyle = {
@@ -185,9 +186,9 @@ export function AnalyticsPage() {
           </div>
         ) : (
           <div className="space-y-8">
-            {/* Summary Cards */}
+            {/* Summary Cards - Responsive Grid */}
             {summaryStats && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 {summaryStatsDisplay.map((stat, idx) => (
                   <motion.div
                     key={idx}
@@ -258,68 +259,47 @@ export function AnalyticsPage() {
               >
                 <SoftCard className="overflow-hidden">
                   <h2 className="text-lg font-semibold text-foreground mb-4">Branch Details</h2>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full">
-                      <thead className="border-b border-border/40">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                            Branch
-                          </th>
-                          <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                            Members
-                          </th>
-                          <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                            Groups
-                          </th>
-                          <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                            Messages
-                          </th>
-                          <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                            Delivery Rate
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border/40">
-                        {branchChartData.map((branch, idx) => (
-                          <motion.tr
-                            key={branch.id}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: idx * 0.02 }}
-                            className="hover:bg-muted/30 transition-colors duration-normal"
-                          >
-                            <td className="px-6 py-4 text-sm font-medium text-foreground">
-                              {branch.name}
-                            </td>
-                            <td className="px-6 py-4 text-sm text-muted-foreground">
-                              {branch.memberCount}
-                            </td>
-                            <td className="px-6 py-4 text-sm text-muted-foreground">
-                              {branch.groupCount}
-                            </td>
-                            <td className="px-6 py-4 text-sm text-muted-foreground">
-                              {branch.messageCount}
-                            </td>
-                            <td className="px-6 py-4 text-sm">
-                              <div className="flex items-center gap-2">
-                                <div className="w-32 bg-muted rounded-full h-2">
-                                  <div
-                                    className="bg-green-500 h-2 rounded-full"
-                                    style={{
-                                      width: `${branch.deliveryRate}%`,
-                                    }}
-                                  />
-                                </div>
-                                <span className="font-medium text-foreground">
-                                  {branch.deliveryRate}%
-                                </span>
-                              </div>
-                            </td>
-                          </motion.tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <MobileTable
+                    data={branchChartData}
+                    columns={[
+                      {
+                        label: 'Branch',
+                        key: 'name',
+                      },
+                      {
+                        label: 'Members',
+                        key: 'memberCount',
+                      },
+                      {
+                        label: 'Groups',
+                        key: 'groupCount',
+                      },
+                      {
+                        label: 'Messages',
+                        key: 'messageCount',
+                      },
+                      {
+                        label: 'Delivery Rate',
+                        key: 'deliveryRate',
+                        render: (branch: BranchStats) => (
+                          <div className="flex items-center gap-2">
+                            <div className="w-24 bg-muted rounded-full h-2">
+                              <div
+                                className="bg-green-500 h-2 rounded-full"
+                                style={{
+                                  width: `${branch.deliveryRate}%`,
+                                }}
+                              />
+                            </div>
+                            <span className="font-medium text-foreground">
+                              {branch.deliveryRate}%
+                            </span>
+                          </div>
+                        ),
+                      },
+                    ] as Column<BranchStats>[]}
+                    keyField="id"
+                  />
                 </SoftCard>
               </motion.div>
             )}
@@ -333,7 +313,7 @@ export function AnalyticsPage() {
               >
                 <SoftCard>
                   <h2 className="text-lg font-semibold text-foreground mb-4">Message Statistics</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                     {messageStatsDisplay.map((stat, idx) => (
                       <div key={idx}>
                         <p className="text-muted-foreground text-sm mb-1">{stat.label}</p>

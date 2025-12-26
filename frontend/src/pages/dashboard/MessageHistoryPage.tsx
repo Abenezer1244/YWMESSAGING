@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { useMessageStore, SentMessage } from '../../stores/messageStore';
 import { getMessageHistory } from '../../api/messages';
 import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
+import { MobileTable, Column } from '../../components/responsive';
 
 export function MessageHistoryPage() {
   const { messages, setMessages, isLoading, setLoading } = useMessageStore();
@@ -125,32 +126,15 @@ export function MessageHistoryPage() {
               transition={{ delay: 0.15 }}
             >
               <SoftCard className="overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="min-w-full">
-                    <thead className="border-b border-border/40">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                        Message
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                        Recipients
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                        Delivery
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                        Sent
-                      </th>
-                    </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border/40">
-                      {messages.map((message: SentMessage) => (
-                        <tr key={message.id} className="hover:bg-muted/30 transition-colors duration-normal">
-                        <td className="px-6 py-4">
-                          <p className="text-sm text-foreground font-medium truncate max-w-xs">
+                <MobileTable
+                  data={messages}
+                  columns={[
+                    {
+                      label: 'Message',
+                      key: 'content',
+                      render: (message: SentMessage) => (
+                        <div>
+                          <p className="text-sm text-foreground font-medium">
                             {message.content.slice(0, 50)}
                             {message.content.length > 50 ? '...' : ''}
                           </p>
@@ -163,41 +147,59 @@ export function MessageHistoryPage() {
                               ? 'Branches'
                               : 'All Members'}
                           </p>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-foreground font-medium">
-                            {message.totalRecipients}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm">
-                            <p className="text-foreground font-medium">
-                              {message.deliveredCount}/{message.totalRecipients}
-                            </p>
-                            <p className="text-muted-foreground text-xs">
-                              {message.deliveryRate || 0}%
-                            </p>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span
-                            className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${getStatusBadgeColor(
-                              message.status
-                            )}`}
-                          >
-                            {message.status.charAt(0).toUpperCase() + message.status.slice(1)}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                        </div>
+                      ),
+                    },
+                    {
+                      label: 'Recipients',
+                      key: 'totalRecipients',
+                      render: (message: SentMessage) => (
+                        <div className="text-sm text-foreground font-medium">
+                          {message.totalRecipients}
+                        </div>
+                      ),
+                    },
+                    {
+                      label: 'Delivery',
+                      key: 'deliveredCount',
+                      render: (message: SentMessage) => (
+                        <div className="text-sm">
+                          <p className="text-foreground font-medium">
+                            {message.deliveredCount}/{message.totalRecipients}
+                          </p>
+                          <p className="text-muted-foreground text-xs">
+                            {message.deliveryRate || 0}%
+                          </p>
+                        </div>
+                      ),
+                    },
+                    {
+                      label: 'Status',
+                      key: 'status',
+                      render: (message: SentMessage) => (
+                        <span
+                          className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${getStatusBadgeColor(
+                            message.status
+                          )}`}
+                        >
+                          {message.status.charAt(0).toUpperCase() + message.status.slice(1)}
+                        </span>
+                      ),
+                    },
+                    {
+                      label: 'Sent',
+                      key: 'createdAt',
+                      render: (message: SentMessage) => (
+                        <div className="text-sm text-muted-foreground">
                           {new Date(message.createdAt).toLocaleDateString()}
                           <br />
                           {new Date(message.createdAt).toLocaleTimeString()}
-                        </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                        </div>
+                      ),
+                    },
+                  ] as Column<SentMessage>[]}
+                  keyField="id"
+                />
               </SoftCard>
             </motion.div>
 

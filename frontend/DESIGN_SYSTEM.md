@@ -700,6 +700,249 @@ function Button({ children, variant = 'primary', disabled, ...props }) {
 
 ---
 
+## Responsive Hooks
+
+Responsive design utilities for adapting components based on viewport size.
+
+### useMediaQuery Hook
+
+Detect if a media query matches the current viewport.
+
+```typescript
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+
+function MyComponent() {
+  const isSmall = useMediaQuery('(max-width: 768px)');
+  const isDark = useMediaQuery('(prefers-color-scheme: dark)');
+
+  return (
+    <div>
+      {isSmall ? <MobileLayout /> : <DesktopLayout />}
+    </div>
+  );
+}
+```
+
+**Common Media Queries:**
+- `(max-width: 640px)` - Mobile
+- `(min-width: 641px)` - Tablet+
+- `(min-width: 768px)` - Tablet
+- `(min-width: 1024px)` - Desktop
+- `(min-width: 1440px)` - Large desktop
+- `(prefers-reduced-motion: reduce)` - Accessibility
+- `(prefers-color-scheme: dark)` - Dark mode
+
+### useBreakpoint Hook
+
+Semantic breakpoint detection aligned with design tokens.
+
+```typescript
+import { useBreakpoint } from '@/hooks/useBreakpoint';
+
+function MyComponent() {
+  const { current, isMobile, isTablet, isDesktop } = useBreakpoint();
+
+  return (
+    <div>
+      {isMobile && <MobileLayout />}
+      {isTablet && <TabletLayout />}
+      {isDesktop && <DesktopLayout />}
+      Current: {current} {/* 'mobile', 'tablet', 'desktop', 'wide', 'ultraWide' */}
+    </div>
+  );
+}
+```
+
+**Breakpoints:**
+- `mobile`: < 768px
+- `tablet`: 768px - 1024px
+- `desktop`: 1024px - 1440px
+- `wide`: 1440px - 1920px
+- `ultraWide`: ≥ 1920px
+
+### useDevice Hook
+
+Detect device capabilities (touch support, orientation).
+
+```typescript
+import { useDevice } from '@/hooks/useDevice';
+
+function MyComponent() {
+  const { hasTouch, isPortrait, isLandscape } = useDevice();
+
+  return (
+    <div>
+      {hasTouch ? <TouchOptimized /> : <MouseOptimized />}
+      {isPortrait && <PortraitLayout />}
+      {isLandscape && <LandscapeLayout />}
+    </div>
+  );
+}
+```
+
+---
+
+## Responsive Components
+
+Pre-built components that adapt to viewport size.
+
+### MobileTable Component
+
+Transforms data tables into mobile-friendly card layouts.
+
+**Desktop (≥ 768px):** Standard HTML table with overflow-x-auto
+**Mobile (< 768px):** Card layout with label/value pairs
+
+```typescript
+import { MobileTable, Column } from '@/components/responsive';
+
+const columns: Column<Member>[] = [
+  { label: 'Name', key: 'firstName', render: (m) => `${m.firstName} ${m.lastName}` },
+  { label: 'Phone', key: 'phone' },
+  { label: 'Email', key: 'email' },
+];
+
+<MobileTable
+  data={members}
+  columns={columns}
+  keyField="id"
+  renderActions={(member) => (
+    <button onClick={() => delete(member.id)}>Delete</button>
+  )}
+/>
+```
+
+**Props:**
+- `data` - Array of items to display
+- `columns` - Column definitions with label, key, and optional render function
+- `keyField` - Unique field for React keys
+- `renderActions` - Optional actions renderer (buttons, links, etc.)
+- `emptyMessage` - Message when no data available
+
+### MobileTabs Component
+
+Responsive tab navigation that adapts to viewport.
+
+**Mobile (< 768px):** Dropdown select
+**Tablet (768px - 1024px):** Horizontal scroll
+**Desktop (≥ 1024px):** Horizontal buttons
+
+```typescript
+import { MobileTabs, Tab } from '@/components/responsive';
+
+const tabs: Tab[] = [
+  { label: 'Profile', value: 'profile' },
+  { label: 'Settings', value: 'settings' },
+  { label: 'Billing', value: 'billing' },
+];
+
+const [active, setActive] = useState('profile');
+
+<MobileTabs
+  tabs={tabs}
+  value={active}
+  onChange={setActive}
+  variant="auto" // 'auto', 'scroll', 'dropdown'
+/>
+```
+
+**Props:**
+- `tabs` - Array of tab definitions
+- `value` - Currently active tab value
+- `onChange` - Callback when tab changes
+- `variant` - 'auto' (responsive), 'scroll', or 'dropdown'
+
+---
+
+## Responsive Patterns
+
+### Mobile-First Grid
+
+```tsx
+<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+  {/* Mobile: 1 column, Tablet: 2, Desktop: 3, Large: 4 */}
+</div>
+```
+
+### Stack to Horizontal
+
+```tsx
+<div className="flex flex-col md:flex-row gap-4">
+  {/* Mobile: Stack vertically, Desktop: Horizontal */}
+</div>
+```
+
+### Full Width Mobile, Auto Desktop
+
+```tsx
+<button className="w-full md:w-auto px-4 py-2">
+  {/* Mobile: Full width, Desktop: Auto width */}
+</button>
+```
+
+### Hide on Mobile
+
+```tsx
+<div className="hidden md:block">
+  {/* Only visible on tablet and larger */}
+</div>
+```
+
+### Show Only on Mobile
+
+```tsx
+<div className="md:hidden">
+  {/* Only visible on mobile */}
+</div>
+```
+
+### Responsive Text Size
+
+```tsx
+<h1 className="text-2xl md:text-3xl lg:text-4xl">
+  {/* Mobile: 24px, Tablet: 30px, Desktop: 36px */}
+</h1>
+```
+
+---
+
+## Touch Target Guidelines
+
+All interactive elements must meet WCAG AAA standards (44px minimum).
+
+### Implementation
+
+```typescript
+import { designTokens } from '@/utils/designTokens';
+
+<button
+  style={{
+    minHeight: designTokens.touchTarget.enhanced, // 44px
+    minWidth: designTokens.touchTarget.enhanced,
+    padding: designTokens.spacing.sm,
+  }}
+>
+  Touch-friendly button
+</button>
+```
+
+### Tailwind Classes
+
+```tsx
+{/* Tailwind approach */}
+<button className="min-h-[44px] min-w-[44px] px-3 py-2">
+  Touch-friendly button
+</button>
+```
+
+### Spacing Around Touch Targets
+
+- Minimum 8px (sm) gap between touch targets
+- Larger gaps (md/lg) preferred for crowded interfaces
+- Avoid placing targets too close to edges
+
+---
+
 ## Accessibility Standards
 
 This design system maintains the following accessibility standards:

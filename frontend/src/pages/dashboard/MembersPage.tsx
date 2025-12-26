@@ -14,6 +14,8 @@ import { ImportCSVModal } from '../../components/members/ImportCSVModal';
 import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
 import Input from '../../components/ui/Input';
 import { Spinner } from '../../components/ui';
+import { MobileTable, Column } from '../../components/responsive';
+import { designTokens } from '../../utils/designTokens';
 
 export function MembersPage() {
   const auth = useAuthStore();
@@ -227,89 +229,65 @@ export function MembersPage() {
           </SoftCard>
         ) : (
           <>
-            {/* Table */}
+            {/* Table - Responsive */}
             <SoftCard variant="default" className="overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="min-w-full">
-                  <thead className="border-b border-border/40">
-                    <tr>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
-                        Name
-                      </th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
-                        Phone
-                      </th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
-                        Email
-                      </th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
-                        Status
-                      </th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
-                        Added
-                      </th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/40">
-                    {members.map((member, idx) => (
-                      <motion.tr
-                        key={member.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: idx * 0.05 }}
-                        className="hover:bg-muted/30 transition-colors duration-normal"
+              <MobileTable
+                data={members}
+                columns={[
+                  {
+                    label: 'Name',
+                    key: 'firstName',
+                    render: (member) => `${member.firstName} ${member.lastName}`,
+                  },
+                  {
+                    label: 'Phone',
+                    key: 'phone',
+                  },
+                  {
+                    label: 'Email',
+                    key: 'email',
+                    hideOnMobile: false,
+                  },
+                  {
+                    label: 'Status',
+                    key: 'optInSms',
+                    render: (member) => (
+                      <span
+                        className={`inline-block px-3 py-1 text-xs font-semibold rounded-lg ${
+                          member.optInSms
+                            ? 'bg-green-500/20 text-green-400'
+                            : 'bg-red-500/20 text-red-400'
+                        }`}
                       >
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-foreground">
-                            {member.firstName} {member.lastName}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-muted-foreground">{member.phone}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-muted-foreground">
-                            {member.email || '—'}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span
-                            className={`inline-block px-3 py-1 text-xs font-semibold rounded-lg ${
-                              member.optInSms
-                                ? 'bg-green-500/20 text-green-400'
-                                : 'bg-red-500/20 text-red-400'
-                            }`}
-                          >
-                            {member.optInSms ? 'Opted In' : 'Opted Out'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                          {new Date(member.createdAt).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            onClick={() =>
-                              handleDeleteMember(
-                                member.id,
-                                `${member.firstName} ${member.lastName}`
-                              )
-                            }
-                            disabled={deletingMemberId === member.id}
-                            className="text-red-400 hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors flex items-center gap-2"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                            {deletingMemberId === member.id ? 'Removing...' : 'Remove'}
-                          </motion.button>
-                        </td>
-                      </motion.tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                        {member.optInSms ? 'Opted In' : 'Opted Out'}
+                      </span>
+                    ),
+                  },
+                  {
+                    label: 'Added',
+                    key: 'createdAt',
+                    render: (member) => new Date(member.createdAt).toLocaleDateString(),
+                  },
+                ] as Column<Member>[]}
+                keyField="id"
+                renderActions={(member) => (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    onClick={() =>
+                      handleDeleteMember(member.id, `${member.firstName} ${member.lastName}`)
+                    }
+                    disabled={deletingMemberId === member.id}
+                    style={{
+                      minHeight: designTokens.touchTarget.enhanced,
+                      minWidth: designTokens.touchTarget.enhanced,
+                    }}
+                    className="text-red-400 hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors flex items-center gap-2 px-3 py-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    {deletingMemberId === member.id ? 'Removing...' : 'Remove'}
+                  </motion.button>
+                )}
+              />
             </SoftCard>
 
             {/* Pagination */}
