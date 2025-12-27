@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { X } from 'lucide-react';
 import FocusTrap from 'focus-trap-react';
 import Button from './ui/Button';
 import client from '../api/client';
@@ -87,26 +86,25 @@ const WelcomeIllustration = () => (
 );
 
 export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: WelcomeModalProps) {
-  const [selectedRole, setSelectedRole] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Mark welcome as completed without selecting a role
-  // Used for Skip button, close button, and Escape key
-  const handleSkip = async () => {
+  // Complete welcome with default role
+  const handleNext = async () => {
     setIsLoading(true);
     try {
       const response = await client.post('/auth/complete-welcome', {
-        userRole: 'skipped',
+        userRole: 'user',
       });
 
       if (response.data.success) {
         if (onWelcomeComplete) {
-          onWelcomeComplete('skipped', true);
+          onWelcomeComplete('user', true);
         }
         onClose();
       }
     } catch (error: any) {
-      console.error('Failed to skip welcome:', error);
+      console.error('Failed to complete welcome:', error);
+      // Close modal even if there's an error - don't block the user
       onClose();
     } finally {
       setIsLoading(false);
@@ -119,74 +117,14 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: Wel
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        handleSkip();
+        handleNext();
       }
     };
 
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen, handleSkip]);
+  }, [isOpen, handleNext]);
 
-  const roles = [
-    {
-      id: 'pastor',
-      label: 'Pastor / Lead Minister',
-      description: 'Lead your congregation spiritually',
-      icon: '⛪',
-    },
-    {
-      id: 'admin',
-      label: 'Church Administrator',
-      description: 'Manage operations and logistics',
-      icon: '📋',
-    },
-    {
-      id: 'communications',
-      label: 'Communications Lead',
-      description: 'Handle messaging and outreach',
-      icon: '📢',
-    },
-    {
-      id: 'volunteer',
-      label: 'Volunteer Coordinator',
-      description: 'Coordinate volunteer activities',
-      icon: '👥',
-    },
-    {
-      id: 'other',
-      label: 'Other',
-      description: 'Something else',
-      icon: '⭐',
-    },
-  ];
-
-  const handleNext = async () => {
-    if (!selectedRole) return;
-
-    setIsLoading(true);
-    try {
-      // Call backend to complete welcome
-      const response = await client.post('/auth/complete-welcome', {
-        userRole: selectedRole,
-      });
-
-      if (response.data.success) {
-        toast.success('Welcome complete! Let\'s get started.');
-
-        // Notify parent component to update auth state
-        if (onWelcomeComplete) {
-          onWelcomeComplete(selectedRole, true);
-        }
-
-        onClose();
-      }
-    } catch (error: any) {
-      console.error('Failed to complete welcome:', error);
-      toast.error('Failed to save your preferences. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -239,9 +177,9 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: Wel
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={handleSkip}
+                onClick={handleNext}
                 className="w-11 h-11 flex items-center justify-center hover:bg-muted rounded-lg transition-colors duration-200"
-                aria-label="Close modal (Escape key also works)"
+                aria-label="Close modal and proceed (Escape key also works)"
               >
                 <X className="w-5 h-5 text-muted-foreground" />
               </motion.button>
@@ -249,7 +187,7 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: Wel
 
             {/* Content Grid */}
             <div className="grid grid-cols-1 gap-0">
-              {/* Welcome Section - Illustration & Message */}
+              {/* Welcome Section */}
               <motion.div
                 variants={containerVariants}
                 initial="hidden"
@@ -274,118 +212,33 @@ export default function WelcomeModal({ isOpen, onClose, onWelcomeComplete }: Wel
 
                 <motion.p
                   variants={itemVariants}
-                  className="text-sm text-muted-foreground leading-relaxed"
+                  className="text-sm text-muted-foreground leading-relaxed mb-6"
                 >
                   Connect with your congregation. Send messages, manage groups, and build community.
                 </motion.p>
-              </motion.div>
 
-              {/* Role Selection Section */}
-              <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                className="p-6 md:p-8 flex flex-col"
-              >
-                {/* Header */}
-                <motion.div variants={itemVariants}>
-                  <h2 className="text-lg font-semibold text-foreground mb-1">
-                    How would you describe your role?
-                  </h2>
-                  <p className="text-xs text-muted-foreground mb-4">
-                    We'll personalize your experience based on your position.
+                {/* Get Started Message */}
+                <motion.div
+                  variants={itemVariants}
+                  className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-6 max-w-sm"
+                >
+                  <p className="text-sm text-foreground">
+                    You're all set! Let's get you started with Koinonia and connect with your congregation.
                   </p>
                 </motion.div>
 
-                {/* Role Options */}
-                <motion.div
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="space-y-2 mb-6"
-                >
-                  {roles.map((role) => (
-                    <motion.label
-                      key={role.id}
-                      variants={itemVariants}
-                      whileHover={{ scale: 1.02 }}
-                      className={`relative flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 group ${
-                        selectedRole === role.id
-                          ? 'border-primary bg-primary/8 shadow-md'
-                          : 'border-border/30 hover:border-primary/40 hover:bg-muted/40 bg-muted/20'
-                      }`}
-                    >
-                      {/* Custom Radio */}
-                      <div className="flex-shrink-0 mt-1">
-                        <div
-                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                            selectedRole === role.id
-                              ? 'border-primary bg-primary'
-                              : 'border-border/50 group-hover:border-primary/50'
-                          }`}
-                        >
-                          {selectedRole === role.id && (
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              transition={{ type: 'spring', stiffness: 200 }}
-                            >
-                              <Check className="w-3 h-3 text-background" />
-                            </motion.div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 mb-0.5">
-                          <span className="text-base">{role.icon}</span>
-                          <span className="font-medium text-foreground text-xs">
-                            {role.label}
-                          </span>
-                        </div>
-                        <p className="text-[10px] text-muted-foreground leading-tight">
-                          {role.description}
-                        </p>
-                      </div>
-
-                      {/* Hidden Radio Input */}
-                      <input
-                        type="radio"
-                        name="role"
-                        value={role.id}
-                        checked={selectedRole === role.id}
-                        onChange={(e) => setSelectedRole(e.target.value)}
-                        className="hidden"
-                      />
-                    </motion.label>
-                  ))}
-                </motion.div>
-
-                {/* Action Buttons */}
-                <motion.div
-                  variants={itemVariants}
-                  className="space-y-2"
-                >
+                {/* Next Button */}
+                <motion.div variants={itemVariants}>
                   <Button
                     variant="primary"
                     size="lg"
-                    fullWidth
                     onClick={handleNext}
-                    disabled={!selectedRole || isLoading}
-                    isLoading={isLoading}
-                    className="bg-primary hover:bg-primary/90 text-background disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-lg hover:shadow-xl transition-all"
-                  >
-                    {isLoading ? 'Saving...' : selectedRole ? 'Continue' : 'Select a role to continue'}
-                  </Button>
-
-                  <button
-                    onClick={handleSkip}
                     disabled={isLoading}
-                    className="w-full py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    isLoading={isLoading}
+                    className="bg-primary hover:bg-primary/90 text-background font-medium shadow-lg hover:shadow-xl transition-all px-8"
                   >
-                    Skip for now
-                  </button>
+                    {isLoading ? 'Getting started...' : 'Next'}
+                  </Button>
                 </motion.div>
               </motion.div>
             </div>

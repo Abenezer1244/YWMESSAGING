@@ -141,10 +141,15 @@ export async function addMember(req: Request, res: Response) {
       optInSms,
     });
 
-    // Invalidate group members cache (fire-and-forget, don't await)
-    invalidateCache(CACHE_KEYS.groupMembers(groupId)).catch((err) => {
-      console.error('[addMember] Cache invalidation error:', err);
-    });
+    // ✅ CRITICAL: Invalidate cache BEFORE responding
+    // Ensures subsequent member list queries reflect the new member
+    try {
+      await invalidateCache(CACHE_KEYS.groupMembers(groupId));
+      console.log('[addMember] Cache invalidated successfully');
+    } catch (err) {
+      console.error('[addMember] Cache invalidation error (non-blocking):', err);
+      // Continue anyway - cache invalidation failure shouldn't block member creation
+    }
 
     res.status(201).json({
       success: true,
@@ -229,8 +234,16 @@ export async function importMembers(req: Request, res: Response) {
     // Import to database
     const result = await memberService.importMembers(groupId, parsed.valid);
 
-    // Respond immediately (don't wait for cache invalidation)
-    // Cache will be invalidated asynchronously in background
+    // ✅ CRITICAL: Invalidate cache BEFORE responding
+    // Ensures subsequent member list queries get fresh data
+    try {
+      await invalidateCache(CACHE_KEYS.groupMembers(groupId));
+      console.log('[importMembers] Cache invalidated successfully');
+    } catch (err) {
+      console.error('[importMembers] Cache invalidation error:', err);
+      // Continue anyway - cache invalidation failure shouldn't block import response
+    }
+
     res.json({
       success: true,
       data: {
@@ -240,12 +253,6 @@ export async function importMembers(req: Request, res: Response) {
           failedDetails: result.failedDetails,
         }),
       },
-    });
-
-    // Invalidate cache in background (fire-and-forget, don't block response)
-    // If Redis is down, we don't wait for it to timeout
-    invalidateCache(CACHE_KEYS.groupMembers(groupId)).catch((err) => {
-      console.error('[importMembers] Cache invalidation error (async):', err);
     });
   } catch (error) {
     res.status(400).json({
@@ -283,10 +290,15 @@ export async function updateMember(req: Request, res: Response) {
       optInSms,
     });
 
-    // Invalidate member caches (fire-and-forget, non-blocking)
-    invalidateCache(CACHE_KEYS.memberAll(memberId)).catch((err) => {
-      console.error('[updateMember] Cache invalidation error:', err);
-    });
+    // ✅ CRITICAL: Invalidate cache BEFORE responding
+    // Ensures subsequent member queries get updated data
+    try {
+      await invalidateCache(CACHE_KEYS.memberAll(memberId));
+      console.log('[updateMember] Cache invalidated successfully');
+    } catch (err) {
+      console.error('[updateMember] Cache invalidation error (non-blocking):', err);
+      // Continue anyway - cache invalidation failure shouldn't block member update
+    }
 
     res.json({
       success: true,
@@ -322,13 +334,18 @@ export async function removeMember(req: Request, res: Response) {
 
     const result = await memberService.removeMemberFromGroup(groupId, memberId);
 
-    // Invalidate group members and member caches (fire-and-forget, non-blocking)
-    invalidateCache(CACHE_KEYS.groupMembers(groupId)).catch((err) => {
-      console.error('[removeMember] Cache invalidation error:', err);
-    });
-    invalidateCache(CACHE_KEYS.memberAll(memberId)).catch((err) => {
-      console.error('[removeMember] Cache invalidation error:', err);
-    });
+    // ✅ CRITICAL: Invalidate cache BEFORE responding (wait for completion)
+    // Ensures clients get fresh data immediately after deletion
+    try {
+      await Promise.all([
+        invalidateCache(CACHE_KEYS.groupMembers(groupId)),
+        invalidateCache(CACHE_KEYS.memberAll(memberId)),
+      ]);
+      console.log('[removeMember] Cache invalidated successfully');
+    } catch (err) {
+      console.error('[removeMember] Cache invalidation error (non-blocking):', err);
+      // Continue anyway - cache invalidation failure shouldn't block member deletion
+    }
 
     res.json({
       success: true,
