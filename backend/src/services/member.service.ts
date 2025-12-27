@@ -53,13 +53,24 @@ export async function getMembers(
 
   // Only cache first page without search (typical use case)
   if (page === 1 && !search) {
-    return getCachedWithFallback(
+    const cached = await getCachedWithFallback(
       CACHE_KEYS.groupMembers(groupId),
       async () => {
         return fetchMembersPage(groupId, page, limit, search);
       },
       CACHE_TTL.MEDIUM // 30 minutes
     );
+
+    // CRITICAL FIX: Ensure pagination.limit matches the requested limit
+    // Don't return stale cached pagination with old limit values
+    return {
+      ...cached,
+      pagination: {
+        ...cached.pagination,
+        limit: limit,  // Override with actual requested limit
+        pages: Math.ceil(cached.pagination.total / limit)  // Recalculate pages with correct limit
+      }
+    };
   }
 
   // For other pages or search results, fetch directly without caching
