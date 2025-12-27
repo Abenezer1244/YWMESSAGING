@@ -579,5 +579,11 @@ export async function removeMemberFromGroup(groupId: string, memberId: string) {
   });
   console.log(`[removeMemberFromGroup] Deleted successfully:`, deleteResult);
 
+  // Verify deletion worked by counting remaining members
+  const remainingCount = await prisma.groupMember.count({
+    where: { groupId },
+  });
+  console.log(`[removeMemberFromGroup] Remaining groupMembers in group: ${remainingCount}`);
+
   return { success: true };
 }
