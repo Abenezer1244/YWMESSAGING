@@ -78,9 +78,20 @@ export function LoginPage() {
                         toast.error('Too many login attempts. Please try again in 15 minutes.');
                     }
                 }
+                else if (error.response?.status === 401) {
+                    // 401 - Authentication failed
+                    toast.error('Invalid email or password. Please check your credentials and try again.');
+                }
                 else {
-                    const errorMessage = error.response?.data?.error || 'Login failed. Please try again.';
-                    toast.error(errorMessage);
+                    // Generic error handling - show user-friendly message
+                    const errorMessage = error.response?.data?.error;
+                    // Check if error is technical/database error - show friendly message instead
+                    if (errorMessage && (errorMessage.includes('Invalid') || errorMessage.includes('prisma') || errorMessage.includes('database'))) {
+                        toast.error('An error occurred. Please try again in a moment.');
+                    }
+                    else {
+                        toast.error(errorMessage || 'Login failed. Please try again.');
+                    }
                 }
             }
         }
