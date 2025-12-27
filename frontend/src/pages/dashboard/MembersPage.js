@@ -134,9 +134,13 @@ export function MembersPage() {
         try {
             setDeletingMemberId(memberId);
             await removeMember(groupId, memberId);
-            setMembers(members.filter((m) => m.id !== memberId));
-            setTotal(total - 1);
             toast.success('Member removed successfully');
+            // CRITICAL FIX: Refresh the member list from backend to ensure deletion is reflected
+            // Don't rely on optimistic updates that can fail silently
+            // Reset to page 1 and reload with updated count
+            setPage(1);
+            await new Promise(resolve => setTimeout(resolve, 300));
+            await loadMembers(1, true); // true = update total count
         }
         catch (error) {
             toast.error(error.message || 'Failed to remove member');
