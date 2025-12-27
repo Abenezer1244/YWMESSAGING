@@ -167,17 +167,17 @@ async function addMemberInternal(groupId, data) {
         optInSms: data.optInSms ?? true,
         createdAt: member.createdAt,
     };
-    console.log('[addMember] Returning immediately with REAL member ID:', response.id);
-    // Process adding to group + cache invalidation in background (fire-and-forget)
-    // This completes asynchronously after returning to user
-    completeGroupAdditionAsync(groupId, member.id).catch((err) => {
-        console.error('[addMember] Background async error (already returned to user):', err);
-    });
+    console.log('[addMember] Adding member to group BEFORE returning...');
+    // CRITICAL: Wait for group addition to complete BEFORE returning
+    // This ensures the member is actually linked to the group when frontend refreshes
+    await completeGroupAdditionAsync(groupId, member.id);
+    console.log('[addMember] Returning with member linked to group:', response.id);
     return response;
 }
 /**
  * Complete group addition asynchronously (after returning to user)
  * Handles: groupMember creation + cache invalidation
+ * CRITICAL: Verify creation succeeded before returning
  */
 async function completeGroupAdditionAsync(groupId, memberId) {
     console.log('[completeGroupAdditionAsync] Adding member to group:', memberId, 'group:', groupId);
@@ -193,23 +193,47 @@ async function completeGroupAdditionAsync(groupId, memberId) {
         });
         if (!existing) {
             // Add to group
-            await prisma.groupMember.create({
-                data: {
+            try {
+                const created = await prisma.groupMember.create({
+                    data: {
+                        groupId,
+                        memberId,
+                    },
+                });
+                console.log('[completeGroupAdditionAsync] ✅ Member added to group - verified creation:', { groupId, memberId, joinedAt: created.joinedAt });
+            }
+            catch (createError) {
+                console.error('[completeGroupAdditionAsync] ❌ FAILED to create groupMember:', {
+                    error: createError.message,
+                    code: createError.code,
                     groupId,
-                    memberId,
-                },
-            });
-            console.log('[completeGroupAdditionAsync] Member added to group:', memberId);
+                    memberId
+                });
+                throw createError;
+            }
         }
         else {
             console.log('[completeGroupAdditionAsync] Member already in group:', memberId);
         }
         // Invalidate cache
-        await invalidateCache(CACHE_KEYS.groupMembers(groupId));
-        console.log('[completeGroupAdditionAsync] Cache invalidated for group:', groupId);
+        try {
+            await invalidateCache(CACHE_KEYS.groupMembers(groupId));
+            console.log('[completeGroupAdditionAsync] ✅ Cache invalidated for group:', groupId);
+        }
+        catch (cacheError) {
+            console.error('[completeGroupAdditionAsync] ⚠️ Cache invalidation failed (non-blocking):', cacheError.message);
+            // Continue anyway - cache is secondary to data persistence
+        }
     }
     catch (error) {
-        console.error('[completeGroupAdditionAsync] Error:', error);
+        console.error('[completeGroupAdditionAsync] 🔴 FATAL ERROR:', {
+            error: error.message,
+            groupId,
+            memberId,
+            stack: error.stack?.substring(0, 200)
+        });
+        // Re-throw so caller knows something failed
+        throw error;
     }
 }
 /**

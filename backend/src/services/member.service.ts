@@ -230,6 +230,7 @@ async function addMemberInternal(groupId: string, data: CreateMemberData) {
 /**
  * Complete group addition asynchronously (after returning to user)
  * Handles: groupMember creation + cache invalidation
+ * CRITICAL: Verify creation succeeded before returning
  */
 async function completeGroupAdditionAsync(groupId: string, memberId: string) {
   console.log('[completeGroupAdditionAsync] Adding member to group:', memberId, 'group:', groupId);
@@ -247,23 +248,45 @@ async function completeGroupAdditionAsync(groupId: string, memberId: string) {
 
     if (!existing) {
       // Add to group
-      await prisma.groupMember.create({
-        data: {
+      try {
+        const created = await prisma.groupMember.create({
+          data: {
+            groupId,
+            memberId,
+          },
+        });
+        console.log('[completeGroupAdditionAsync] ✅ Member added to group - verified creation:', { groupId, memberId, joinedAt: created.joinedAt });
+      } catch (createError) {
+        console.error('[completeGroupAdditionAsync] ❌ FAILED to create groupMember:', {
+          error: (createError as Error).message,
+          code: (createError as any).code,
           groupId,
-          memberId,
-        },
-      });
-      console.log('[completeGroupAdditionAsync] Member added to group:', memberId);
+          memberId
+        });
+        throw createError;
+      }
     } else {
       console.log('[completeGroupAdditionAsync] Member already in group:', memberId);
     }
 
     // Invalidate cache
-    await invalidateCache(CACHE_KEYS.groupMembers(groupId));
-    console.log('[completeGroupAdditionAsync] Cache invalidated for group:', groupId);
+    try {
+      await invalidateCache(CACHE_KEYS.groupMembers(groupId));
+      console.log('[completeGroupAdditionAsync] ✅ Cache invalidated for group:', groupId);
+    } catch (cacheError) {
+      console.error('[completeGroupAdditionAsync] ⚠️ Cache invalidation failed (non-blocking):', (cacheError as Error).message);
+      // Continue anyway - cache is secondary to data persistence
+    }
 
   } catch (error) {
-    console.error('[completeGroupAdditionAsync] Error:', error);
+    console.error('[completeGroupAdditionAsync] 🔴 FATAL ERROR:', {
+      error: (error as Error).message,
+      groupId,
+      memberId,
+      stack: (error as Error).stack?.substring(0, 200)
+    });
+    // Re-throw so caller knows something failed
+    throw error;
   }
 }
 
