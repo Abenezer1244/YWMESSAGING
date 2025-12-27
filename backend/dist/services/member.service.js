@@ -3,7 +3,7 @@ import { formatToE164 } from '../utils/phone.utils.js';
 import { encrypt, decrypt, hashForSearch } from '../utils/encryption.utils.js';
 import { queueWelcomeMessage } from '../jobs/welcomeMessage.job.js';
 import { addMemberToGroup } from '../jobs/addMemberToGroup.job.js';
-import { getCachedWithFallback, CACHE_KEYS, CACHE_TTL } from './cache.service.js';
+import { invalidateCache, getCachedWithFallback, CACHE_KEYS, CACHE_TTL } from './cache.service.js';
 /**
  * Get members for a group with pagination and search
  * ✅ CACHED: First page (no search) is cached for 30 minutes
@@ -25,10 +25,30 @@ export async function getMembers(groupId, options = {}) {
     }
     // Only cache first page without search (typical use case)
     if (page === 1 && !search) {
-        return getCachedWithFallback(CACHE_KEYS.groupMembers(groupId), async () => {
+        // CRITICAL: Always fetch fresh data, don't use cache with wrong limit
+        // The cache may contain data fetched with limit=1 or other incorrect limits
+        // We need to invalidate and refetch if the cache has fewer items than requested
+        const cached = await getCachedWithFallback(CACHE_KEYS.groupMembers(groupId), async () => {
             return fetchMembersPage(groupId, page, limit, search);
         }, CACHE_TTL.MEDIUM // 30 minutes
         );
+        // CRITICAL FIX: If cached data has fewer items than limit, it means
+        // the cache was populated with wrong limit value. Refetch fresh data.
+        if (cached.data.length < limit) {
+            console.log(`[getMembers] Cache has ${cached.data.length} items but limit is ${limit}, fetching fresh`);
+            // Invalidate stale cache and fetch fresh
+            await invalidateCache(CACHE_KEYS.groupMembers(groupId));
+            return fetchMembersPage(groupId, page, limit, search);
+        }
+        // Ensure pagination.limit matches the requested limit
+        return {
+            ...cached,
+            pagination: {
+                ...cached.pagination,
+                limit: limit, // Override with actual requested limit
+                pages: Math.ceil(cached.pagination.total / limit) // Recalculate pages with correct limit
+            }
+        };
     }
     // For other pages or search results, fetch directly without caching
     return fetchMembersPage(groupId, page, limit, search);

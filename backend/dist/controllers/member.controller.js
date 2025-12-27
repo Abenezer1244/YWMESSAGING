@@ -47,6 +47,8 @@ export async function listMembers(req, res) {
         const limit = Math.min(10000, req.query.limit ? parseInt(req.query.limit) : 50);
         const search = req.query.search;
         console.log(`[listMembers] GET REQUEST: groupId=${groupId}, page=${page}, limit=${limit}`);
+        console.log(`[listMembers] Query params: page=${req.query.page}, limit=${req.query.limit}`);
+        console.log(`[listMembers] Parsed: page=${page}, limit=${limit}, parseInt result=${req.query.limit ? parseInt(req.query.limit) : 'N/A'}`);
         if (!churchId) {
             return res.status(401).json({
                 success: false,
@@ -130,6 +132,10 @@ export async function addMember(req, res) {
             email,
             optInSms,
         });
+        // ✅ CRITICAL: Ensure database transaction is committed
+        // Add 5ms delay to ensure PostgreSQL COMMIT completes before we invalidate cache
+        // This prevents race condition where refetch happens before write is committed
+        await new Promise(resolve => setTimeout(resolve, 5));
         // ✅ CRITICAL: Invalidate cache BEFORE responding
         // Ensures subsequent member list queries reflect the new member
         try {
