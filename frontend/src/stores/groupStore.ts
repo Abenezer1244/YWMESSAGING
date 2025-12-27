@@ -25,6 +25,7 @@ interface GroupState {
   addGroup: (group: Group) => void;
   updateGroup: (groupId: string, updates: Partial<Group>) => void;
   removeGroup: (groupId: string) => void;
+  reset: () => void;
 }
 
 const useGroupStoreBase = create<GroupState>()((set, get) => ({
@@ -77,6 +78,15 @@ const useGroupStoreBase = create<GroupState>()((set, get) => ({
           ? state.groups[0]?.id || null
           : state.currentGroupId,
     }));
+  },
+
+  // ✅ Reset all group data (used on logout to prevent data leakage)
+  reset: () => {
+    set({
+      groups: [],
+      currentGroupId: null,
+      isLoading: false,
+    });
   },
 }));
 

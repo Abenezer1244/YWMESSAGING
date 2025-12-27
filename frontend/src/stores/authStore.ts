@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { logout as logoutApi } from '../api/auth';
 import { createSelectors } from '../hooks/createSelectors';
+import { useBranchStore } from './branchStore';
+import { useGroupStore } from './groupStore';
 
 export interface Admin {
   id: string;
@@ -105,6 +107,16 @@ const useAuthStoreBase = create<AuthState>()((set, get) => ({
     } catch (error) {
       console.warn('Failed to call logout endpoint', error);
       // Continue with local logout even if API call fails
+    }
+
+    // ✅ CRITICAL: Clear all data stores to prevent data leakage
+    // When user logs out, ALL previous user's data must be cleared
+    // This prevents a new user from seeing the previous user's branches/groups/data
+    try {
+      useBranchStore.getState().reset();
+      useGroupStore.getState().reset();
+    } catch (e) {
+      console.warn('Failed to clear store data:', e);
     }
 
     // Clear local state

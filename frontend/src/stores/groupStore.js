@@ -42,6 +42,14 @@ const useGroupStoreBase = create()((set, get) => ({
                 : state.currentGroupId,
         }));
     },
+    // ✅ Reset all group data (used on logout to prevent data leakage)
+    reset: () => {
+        set({
+            groups: [],
+            currentGroupId: null,
+            isLoading: false,
+        });
+    },
 }));
 export const useGroupStore = createSelectors(useGroupStoreBase);
 //# sourceMappingURL=groupStore.js.map

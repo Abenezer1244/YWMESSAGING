@@ -18,6 +18,7 @@ interface GroupState {
     addGroup: (group: Group) => void;
     updateGroup: (groupId: string, updates: Partial<Group>) => void;
     removeGroup: (groupId: string) => void;
+    reset: () => void;
 }
 export declare const useGroupStore: {
     (): GroupState;
@@ -34,6 +35,7 @@ export declare const useGroupStore: {
         addGroup: () => (group: Group) => void;
         updateGroup: () => (groupId: string, updates: Partial<Group>) => void;
         removeGroup: () => (groupId: string) => void;
+        reset: () => () => void;
     };
 };
 export {};

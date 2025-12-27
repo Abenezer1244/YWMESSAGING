@@ -30,6 +30,7 @@ interface BranchState {
   addBranch: (branch: Branch) => void;
   updateBranch: (branchId: string, updates: Partial<Branch>) => void;
   removeBranch: (branchId: string) => void;
+  reset: () => void;
 }
 
 const useBranchStoreBase = create<BranchState>()((set, get) => ({
@@ -83,6 +84,16 @@ const useBranchStoreBase = create<BranchState>()((set, get) => ({
           ? state.branches[0]?.id || null
           : state.currentBranchId,
     }));
+  },
+
+  // ✅ Reset all branch data (used on logout to prevent data leakage)
+  reset: () => {
+    set({
+      branches: [],
+      currentBranchId: null,
+      allBranchesMode: false,
+      isLoading: false,
+    });
   },
 }));
 

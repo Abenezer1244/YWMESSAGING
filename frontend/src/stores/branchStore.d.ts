@@ -23,6 +23,7 @@ interface BranchState {
     addBranch: (branch: Branch) => void;
     updateBranch: (branchId: string, updates: Partial<Branch>) => void;
     removeBranch: (branchId: string) => void;
+    reset: () => void;
 }
 /**
  * Branch Store with Auto-Generated Selectors
@@ -49,6 +50,7 @@ export declare const useBranchStore: {
         addBranch: () => (branch: Branch) => void;
         updateBranch: () => (branchId: string, updates: Partial<Branch>) => void;
         removeBranch: () => (branchId: string) => void;
+        reset: () => () => void;
     };
 };
 export {};

@@ -42,6 +42,15 @@ const useBranchStoreBase = create()((set, get) => ({
                 : state.currentBranchId,
         }));
     },
+    // ✅ Reset all branch data (used on logout to prevent data leakage)
+    reset: () => {
+        set({
+            branches: [],
+            currentBranchId: null,
+            allBranchesMode: false,
+            isLoading: false,
+        });
+    },
 }));
 /**
  * Branch Store with Auto-Generated Selectors
