@@ -52,10 +52,13 @@ export async function authenticateToken(req: Request, res: Response, next: NextF
 
   // ✅ SECURITY: Check if token has been revoked (logged out)
   const revoked = await isTokenRevoked(token, 'access');
+  console.log(`[AUTH] Token revocation check - token: ${token.substring(0, 20)}..., revoked: ${revoked}`);
   if (revoked) {
+    console.error(`[AUTH] ❌ TOKEN REVOKED - User: ${payload?.adminId}, Token hash: ${token.substring(0, 20)}`);
     res.status(401).json({ error: 'Token has been revoked. Please log in again.' });
     return;
   }
+  console.log(`[AUTH] ✅ Token revocation check passed for user: ${payload?.adminId}`);
 
   req.user = payload;
   next();
