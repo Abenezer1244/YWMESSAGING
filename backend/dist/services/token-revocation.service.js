@@ -113,12 +113,33 @@ export async function isTokenRevoked(token, type = 'access') {
         }
         const tokenHash = hashToken(token);
         const key = `${REVOKED_TOKEN_PREFIX}${type}:${tokenHash}`;
-        console.log(`[TOKEN_REVOCATION] Checking key: ${key}, Redis open: ${redisClient.isOpen}`);
+        console.log(`[TOKEN_REVOCATION] Checking key: ${key}, Redis open: ${redisClient.isOpen}, Token first 20: ${token.substring(0, 20)}`);
         // Check if token exists in Redis blacklist WITH 1-SECOND TIMEOUT
-        const redisPromise = redisClient.exists(key);
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Token revocation check timeout')), 1000));
-        const exists = await Promise.race([redisPromise, timeoutPromise]);
-        console.log(`[TOKEN_REVOCATION] Key exists: ${exists > 0}, key: ${key}`);
+        let exists;
+        try {
+            // DIAGNOSTIC: Check if Redis connection is actually working
+            // Attempt a simple ping to verify Redis is responsive
+            try {
+                await Promise.race([
+                    redisClient.ping(),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('Ping timeout')), 500))
+                ]);
+                console.log(`[TOKEN_REVOCATION] Redis ping successful`);
+            }
+            catch (pingError) {
+                console.error(`[TOKEN_REVOCATION] Redis ping failed:`, pingError.message);
+                return false; // Fail-open if Redis is unresponsive
+            }
+            const redisPromise = redisClient.exists(key);
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Token revocation check timeout')), 1000));
+            exists = await Promise.race([redisPromise, timeoutPromise]);
+        }
+        catch (redisError) {
+            console.error('[TOKEN_REVOCATION] Redis operation failed:', redisError.message);
+            // If Redis call fails, allow access (fail-open)
+            return false;
+        }
+        console.log(`[TOKEN_REVOCATION] Key exists result: ${exists}, type: ${typeof exists}, key: ${key}`);
         if (exists > 0) {
             console.log(`⛔ Token revoked: ${type}`);
             return true;
@@ -127,7 +148,7 @@ export async function isTokenRevoked(token, type = 'access') {
         return false;
     }
     catch (error) {
-        console.error('❌ Failed to check token revocation:', error.message);
+        console.error('❌ Failed to check token revocation (outer catch):', error.message);
         // On Redis error/timeout, skip revocation check (allow access)
         // Fallback relies on JWT expiration for security
         console.error('[TOKEN_REVOCATION] ⚠️ Returning false (allowing access) due to Redis error');
