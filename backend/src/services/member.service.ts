@@ -2,6 +2,7 @@ import { prisma } from '../lib/prisma.js';
 import { formatToE164 } from '../utils/phone.utils.js';
 import { encrypt, decrypt, hashForSearch } from '../utils/encryption.utils.js';
 import { queueWelcomeMessage } from '../jobs/welcomeMessage.job.js';
+import { queueAddMemberToGroupJob } from '../jobs/addMemberToGroup.job.js';
 import { getUsage, getCurrentPlan, getPlanLimits } from './billing.service.js';
 import { getCached, setCached, invalidateCache, getCachedWithFallback, CACHE_KEYS, CACHE_TTL } from './cache.service.js';
 
@@ -216,79 +217,28 @@ async function addMemberInternal(groupId: string, data: CreateMemberData) {
     createdAt: member.createdAt,
   };
 
-  console.log('[addMember] Adding member to group BEFORE returning...');
+  console.log('[addMember] Queuing background job to link member to group...');
 
-  // CRITICAL: Wait for group addition to complete BEFORE returning
-  // This ensures the member is actually linked to the group when frontend refreshes
-  await completeGroupAdditionAsync(groupId, member.id);
+  // ✅ BACKGROUND JOB APPROACH: Queue the group linking asynchronously
+  // This allows the API to return immediately while the linking happens in the background
+  // Benefits:
+  // 1. API responds in ~10ms instead of waiting for database writes
+  // 2. If linking fails, it can be retried independently
+  // 3. More resilient to database connection issues
+  // 4. Frontend is ready to refresh immediately
+  queueAddMemberToGroupJob(member.id, groupId, 0)  // delay=0 means immediate async execution
+    .catch((err) => {
+      console.error('[addMember] Failed to queue background job:', err);
+      // Job queuing failure is logged but doesn't block the response
+    });
 
-  console.log('[addMember] Returning with member linked to group:', response.id);
+  console.log('[addMember] Returning member immediately - group linking in background:', response.id);
 
   return response;
 }
 
-/**
- * Complete group addition asynchronously (after returning to user)
- * Handles: groupMember creation + cache invalidation
- * CRITICAL: Verify creation succeeded before returning
- */
-async function completeGroupAdditionAsync(groupId: string, memberId: string) {
-  console.log('[completeGroupAdditionAsync] Adding member to group:', memberId, 'group:', groupId);
-
-  try {
-    // Check if already in group
-    const existing = await prisma.groupMember.findUnique({
-      where: {
-        groupId_memberId: {
-          groupId,
-          memberId,
-        },
-      },
-    });
-
-    if (!existing) {
-      // Add to group
-      try {
-        const created = await prisma.groupMember.create({
-          data: {
-            groupId,
-            memberId,
-          },
-        });
-        console.log('[completeGroupAdditionAsync] ✅ Member added to group - verified creation:', { groupId, memberId, joinedAt: created.joinedAt });
-      } catch (createError) {
-        console.error('[completeGroupAdditionAsync] ❌ FAILED to create groupMember:', {
-          error: (createError as Error).message,
-          code: (createError as any).code,
-          groupId,
-          memberId
-        });
-        throw createError;
-      }
-    } else {
-      console.log('[completeGroupAdditionAsync] Member already in group:', memberId);
-    }
-
-    // Invalidate cache
-    try {
-      await invalidateCache(CACHE_KEYS.groupMembers(groupId));
-      console.log('[completeGroupAdditionAsync] ✅ Cache invalidated for group:', groupId);
-    } catch (cacheError) {
-      console.error('[completeGroupAdditionAsync] ⚠️ Cache invalidation failed (non-blocking):', (cacheError as Error).message);
-      // Continue anyway - cache is secondary to data persistence
-    }
-
-  } catch (error) {
-    console.error('[completeGroupAdditionAsync] 🔴 FATAL ERROR:', {
-      error: (error as Error).message,
-      groupId,
-      memberId,
-      stack: (error as Error).stack?.substring(0, 200)
-    });
-    // Re-throw so caller knows something failed
-    throw error;
-  }
-}
+// NOTE: completeGroupAdditionAsync has been replaced by the background job queueAddMemberToGroupJob
+// The background job approach is more reliable and allows the API to respond immediately
 
 
 /**

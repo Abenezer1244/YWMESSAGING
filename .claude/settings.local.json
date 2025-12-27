@@ -158,7 +158,10 @@
       "Bash(timeout 400 node:*)",
       "Bash(timeout 500 node:*)",
       "Bash(pm2 list:*)",
-      "Bash(lsof:*)"
+      "Bash(lsof:*)",
+      "Bash(timeout 900 node:*)",
+      "Bash(timeout 95 bash:*)",
+      "Bash(timeout 125 bash:*)"
     ],
     "deny": [],
     "ask": []
