@@ -47,6 +47,7 @@ export async function addMemberToGroup(
     console.log(`[addMemberToGroup] ✅ Validated - Member: ${member.firstName} ${member.lastName}, Group: ${group.name}`);
 
     // Check if already in group
+    console.log(`[addMemberToGroup] Checking if member already linked...`);
     const existing = await prisma.groupMember.findUnique({
       where: {
         groupId_memberId: {
@@ -57,9 +58,11 @@ export async function addMemberToGroup(
     });
 
     if (existing) {
-      console.log(`[addMemberToGroup] ⚠️ Member already in group, skipping`);
+      console.log(`[addMemberToGroup] ⚠️ Member already in group (ID: ${existing.id}), skipping`);
       return;
     }
+
+    console.log(`[addMemberToGroup] Member not yet linked, creating GroupMember record...`);
 
     // Create group membership
     const groupMember = await prisma.groupMember.create({
@@ -68,6 +71,8 @@ export async function addMemberToGroup(
         memberId,
       },
     });
+
+    console.log(`[addMemberToGroup] ✅ GroupMember created successfully with ID: ${groupMember.id}`);
 
     console.log(`[addMemberToGroup] ✅ Group membership created:`, {
       groupId,

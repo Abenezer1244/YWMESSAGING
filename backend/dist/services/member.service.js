@@ -168,21 +168,25 @@ async function addMemberInternal(groupId, data) {
         optInSms: data.optInSms ?? true,
         createdAt: member.createdAt,
     };
-    console.log('[addMember] Linking member to group synchronously...');
+    console.log('[addMember] ⏳ Linking member to group synchronously...');
+    console.log('[addMember] Member ID:', member.id, 'Group ID:', groupId);
     // ✅ SYNCHRONOUS APPROACH: Link member to group immediately
     // This ensures the GroupMember record exists before we return the API response
     // The members list fetch that happens immediately after will include the new member
     try {
+        const startLink = Date.now();
+        console.log('[addMember] Calling addMemberToGroup...');
         await addMemberToGroup(member.id, groupId);
-        console.log('[addMember] ✅ Group linking completed synchronously:', response.id);
+        const linkDuration = Date.now() - startLink;
+        console.log('[addMember] ✅ Group linking completed synchronously in ' + linkDuration + 'ms:', response.id);
     }
     catch (error) {
-        // Log the error but DON'T throw - let the client know the issue
         console.error('[addMember] ❌ Group linking failed:', {
             memberId: member.id,
             groupId,
             error: error.message,
             code: error.code,
+            stack: error.stack?.substring(0, 300)
         });
         // Re-throw so client sees the error
         throw error;
