@@ -30,7 +30,6 @@ export function AddMemberModal({ isOpen, groupId, onClose, onSuccess }) {
                 phone,
                 email: data.email?.trim() || undefined,
             });
-            toast.success('Member added successfully');
             onSuccess(member);
             reset();
             onClose();

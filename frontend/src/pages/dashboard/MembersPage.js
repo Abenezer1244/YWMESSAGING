@@ -124,31 +124,20 @@ export function MembersPage() {
         setTotal(prevTotal => prevTotal + 1);
         setIsAddModalOpen(false);
         toast.success('Member added successfully');
-        // 🔄 ASYNC: Refetch in background to verify consistency
-        setPage(1);
-        setTimeout(async () => {
-            try {
-                await loadMembers(1, true);
-            }
-            catch (error) {
-                console.error('Failed to refetch members after add:', error);
-            }
-        }, 1000);
+        // No refetch needed - optimistic update is sufficient
+        // The member is now in the UI and the backend has persisted it
     };
-    const handleImportSuccess = async () => {
-        // ✅ INSTANT: Close modal immediately (optimistic)
+    const handleImportSuccess = () => {
+        // ✅ INSTANT: Close modal immediately
         setIsImportModalOpen(false);
         toast.success('Members imported successfully');
-        // 🔄 ASYNC: Refetch in background to load imported members
+        // 🔄 REFETCH: Reload members list since import adds multiple members
+        // Reset to page 1 and refresh the member list
         setPage(1);
-        setTimeout(async () => {
-            try {
-                await loadMembers(1, true);
-            }
-            catch (error) {
-                console.error('Failed to refetch members after import:', error);
-            }
-        }, 1500);
+        // Allow state update to batch before refetch
+        setTimeout(() => {
+            loadMembers(1, true);
+        }, 50);
     };
     const handleDeleteMember = async (memberId, memberName) => {
         if (!window.confirm(`Are you sure you want to remove ${memberName} from this group?`)) {
