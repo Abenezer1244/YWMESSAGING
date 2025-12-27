@@ -217,44 +217,25 @@ async function addMemberInternal(groupId: string, data: CreateMemberData) {
     createdAt: member.createdAt,
   };
 
-  console.log('[addMember] Linking member to group...');
+  console.log('[addMember] Linking member to group synchronously...');
 
-  // ✅ HYBRID APPROACH: Try to link synchronously with a timeout
-  // This uses Promise.race() to attempt synchronous linking but not block if slow
-  //
-  // Why this works better than pure setTimeout:
-  // 1. If the linking completes quickly (<500ms), the GroupMember record exists before we return
-  // 2. This ensures the members list fetch immediately after will include the new member
-  // 3. If linking takes longer, we don't block the API response (race timeout wins)
-  // 4. More reliable in production environments (Render, AWS, etc.)
-  //
-  // If linking doesn't complete before timeout, queue it as background job
-  const SYNC_TIMEOUT_MS = 500;  // Try for 500ms, then give up and return
-
+  // ✅ SYNCHRONOUS APPROACH: Link member to group immediately
+  // This ensures the GroupMember record exists before we return the API response
+  // The members list fetch that happens immediately after will include the new member
   try {
-    // Race between: addMemberToGroup completion vs timeout
-    const result = await Promise.race([
-      addMemberToGroup(member.id, groupId),  // Actual linking operation
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('timeout')), SYNC_TIMEOUT_MS)
-      )
-    ]);
-
+    await addMemberToGroup(member.id, groupId);
     console.log('[addMember] ✅ Group linking completed synchronously:', response.id);
   } catch (error) {
-    if ((error as Error).message === 'timeout') {
-      // Timeout occurred - queue as background job and continue
-      console.log('[addMember] ⏱️ Group linking timeout - queuing as background job');
-      queueAddMemberToGroupJob(member.id, groupId, 0)  // No delay since we already waited
-        .catch((err) => {
-          console.error('[addMember] Failed to queue background job:', err);
-        });
-    } else {
-      // Actual error occurred during linking
-      console.error('[addMember] ⚠️ Group linking failed:', (error as Error).message);
-      // Continue anyway - member exists, just not linked yet
-      // Client can retry or group linking might succeed later
-    }
+    // Log the error but DON'T throw - let the client know the issue
+    console.error('[addMember] ❌ Group linking failed:', {
+      memberId: member.id,
+      groupId,
+      error: (error as Error).message,
+      code: (error as any).code,
+    });
+
+    // Re-throw so client sees the error
+    throw error;
   }
 
   console.log('[addMember] Returning member:', response.id);
