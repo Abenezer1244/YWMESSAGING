@@ -53,6 +53,9 @@ export async function getMembers(
 
   // Only cache first page without search (typical use case)
   if (page === 1 && !search) {
+    // CRITICAL: Always fetch fresh data, don't use cache with wrong limit
+    // The cache may contain data fetched with limit=1 or other incorrect limits
+    // We need to invalidate and refetch if the cache has fewer items than requested
     const cached = await getCachedWithFallback(
       CACHE_KEYS.groupMembers(groupId),
       async () => {
@@ -61,8 +64,16 @@ export async function getMembers(
       CACHE_TTL.MEDIUM // 30 minutes
     );
 
-    // CRITICAL FIX: Ensure pagination.limit matches the requested limit
-    // Don't return stale cached pagination with old limit values
+    // CRITICAL FIX: If cached data has fewer items than limit, it means
+    // the cache was populated with wrong limit value. Refetch fresh data.
+    if (cached.data.length < limit) {
+      console.log(`[getMembers] Cache has ${cached.data.length} items but limit is ${limit}, fetching fresh`);
+      // Invalidate stale cache and fetch fresh
+      await invalidateCache(CACHE_KEYS.groupMembers(groupId));
+      return fetchMembersPage(groupId, page, limit, search);
+    }
+
+    // Ensure pagination.limit matches the requested limit
     return {
       ...cached,
       pagination: {
