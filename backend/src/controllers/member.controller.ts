@@ -95,6 +95,11 @@ export async function addMember(req: Request, res: Response) {
     const churchId = req.user?.churchId;
     const { firstName, lastName, phone, email, optInSms } = req.body;
 
+    // 🔍 UNIQUE TEST IDENTIFIER - If you see this, the new code IS deployed!
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('🚀 DEPLOYMENT_VERIFICATION_49062c3: addMember endpoint called');
+    console.log('═══════════════════════════════════════════════════════════');
+
     console.log('[addMember] Starting - groupId:', groupId, 'phone:', phone);
 
     if (!churchId) {
