@@ -220,8 +220,27 @@ export async function importMembers(req: Request, res: Response) {
     // Parse CSV
     const rows = parseCSV(req.file.buffer);
 
+    // Diagnostic logging
+    console.log(`[importMembers] CSV parsing complete: ${rows.length} rows`);
+    if (rows.length > 0) {
+      console.log(`[importMembers] First CSV row: ${JSON.stringify(rows[0])}`);
+      console.log(`[importMembers] Second CSV row: ${JSON.stringify(rows[1])}`);
+      if (rows.length > 2) {
+        console.log(`[importMembers] Last CSV row: ${JSON.stringify(rows[rows.length - 1])}`);
+      }
+    }
+
     // Validate and format
     const parsed = formatAndValidate(rows);
+
+    // More diagnostic logging
+    console.log(`[importMembers] After validation: ${parsed.valid.length} valid, ${parsed.invalid.length} invalid`);
+    if (parsed.valid.length > 0) {
+      console.log(`[importMembers] First validated member: ${JSON.stringify(parsed.valid[0])}`);
+      if (parsed.valid.length > 1) {
+        console.log(`[importMembers] Second validated member: ${JSON.stringify(parsed.valid[1])}`);
+      }
+    }
 
     if (parsed.valid.length === 0) {
       return res.status(400).json({
