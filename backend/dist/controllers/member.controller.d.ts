@@ -21,7 +21,7 @@ export declare function importMembers(req: Request, res: Response): Promise<Resp
 export declare function updateMember(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**
  * DELETE /api/groups/:groupId/members/:memberId
- * SECURITY: Verifies member belongs to authenticated user's church
+ * SECURITY: Verifies group and member belong to authenticated user's church
  */
 export declare function removeMember(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 //# sourceMappingURL=member.controller.d.ts.map

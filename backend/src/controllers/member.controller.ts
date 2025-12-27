@@ -63,8 +63,27 @@ export async function listMembers(req: Request, res: Response) {
       });
     }
 
-    // SECURITY: Trust JWT verification for churchId (same as addMember)
-    console.log('[listMembers] Security: Using JWT verification (churchId from token)');
+    // ✅ CRITICAL: Verify group belongs to authenticated user's church
+    // This prevents data leakage between accounts
+    const group = await prisma.group.findFirst({
+      where: {
+        id: groupId,
+        branch: {
+          churchId,
+        },
+      },
+    });
+
+    if (!group) {
+      console.error('[listMembers] SECURITY: User tried to access unauthorized group', {
+        churchId,
+        groupId,
+      });
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied - group does not belong to your church',
+      });
+    }
 
     const result = await memberService.getMembers(groupId, {
       page,
@@ -314,8 +333,19 @@ export async function updateMember(req: Request, res: Response) {
       });
     }
 
-    // SECURITY: Trust JWT verification for churchId (same as addMember)
-    console.log('[updateMember] Security: Using JWT verification (churchId from token)');
+    // ✅ CRITICAL: Verify member belongs to authenticated user's church
+    // This prevents users from updating members in other churches
+    const hasMembership = await verifyMemberOwnership(memberId, churchId);
+    if (!hasMembership) {
+      console.error('[updateMember] SECURITY: User tried to update unauthorized member', {
+        churchId,
+        memberId,
+      });
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied - member does not belong to your church',
+      });
+    }
 
     const member = await memberService.updateMember(memberId, {
       firstName,
@@ -349,7 +379,7 @@ export async function updateMember(req: Request, res: Response) {
 
 /**
  * DELETE /api/groups/:groupId/members/:memberId
- * SECURITY: Verifies member belongs to authenticated user's church
+ * SECURITY: Verifies group and member belong to authenticated user's church
  */
 export async function removeMember(req: Request, res: Response) {
   try {
@@ -365,9 +395,27 @@ export async function removeMember(req: Request, res: Response) {
       });
     }
 
-    // SECURITY: Trust JWT verification for churchId (same as addMember)
-    // The groupId parameter and churchId from JWT are sufficient authorization
-    console.log('[removeMember] Security: Using JWT verification (churchId from token)');
+    // ✅ CRITICAL: Verify group belongs to authenticated user's church
+    // This prevents users from removing members from other churches' groups
+    const group = await prisma.group.findFirst({
+      where: {
+        id: groupId,
+        branch: {
+          churchId,
+        },
+      },
+    });
+
+    if (!group) {
+      console.error('[removeMember] SECURITY: User tried to access unauthorized group', {
+        churchId,
+        groupId,
+      });
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied - group does not belong to your church',
+      });
+    }
 
     const result = await memberService.removeMemberFromGroup(groupId, memberId);
     console.log(`[removeMember] Member successfully deleted: ${memberId}`);
