@@ -330,17 +330,27 @@ async function main() {
 
     if (testData.groupId) {
       log('[4.1] Create CSV and import via API');
+      log(`[4.1] GROUP ID FOR IMPORT: ${testData.groupId}`);
 
       try {
         // Create CSV content - VALID US phone numbers in E.164 format (+1 followed by 10 digits)
+        // Use timestamp to ensure unique phone numbers per test run (avoid deduplication)
+        const timestamp = Date.now();
         let csvContent = 'firstName,lastName,phone\n';
         for (let i = 1; i <= 100; i++) {
-          // Generate valid phone: +1 + 10 digits (area code 200, exchange 000, base 0001)
-          const phone = `+1200000${String(i).padStart(4, '0')}`;
+          // Generate unique phone using timestamp: +1 + timestamp last 6 digits + i padded to 4
+          // This ensures different phone numbers for each test run
+          const phoneNum = Math.abs(timestamp + i);
+          const phone = `+1${String(phoneNum).slice(-10)}`;
           csvContent += `MemberTest,Import${i},${phone}\n`;
         }
 
-        log(`[4.1] CSV content lines: ${csvContent.split('\n').length}`);
+        const csvLines = csvContent.split('\n');
+        log(`[4.1] CSV content lines: ${csvLines.length}`);
+        log(`[4.1] CSV sample - Header: ${csvLines[0]}`);
+        log(`[4.1] CSV sample - Row 1: ${csvLines[1]}`);
+        log(`[4.1] CSV sample - Row 2: ${csvLines[2]}`);
+        log(`[4.1] CSV sample - Row 100: ${csvLines[100]}`);
 
         // Create FormData
         const FormData = require('form-data');
@@ -379,7 +389,24 @@ async function main() {
           timeout: 5000,
         });
         const afterCount = countAfter.data?.data?.length || 0;
+        const afterMembers = countAfter.data?.data || [];
+
         log(`[4.1] Members after import: ${afterCount}, imported: ${afterCount - beforeCount}`);
+
+        // Diagnostic: Show first 3 and last 3 members to verify import worked
+        if (afterMembers.length > 0) {
+          log(`[4.1] First imported member: ${afterMembers[0].firstName} ${afterMembers[0].lastName} (ID: ${afterMembers[0].id})`);
+          if (afterMembers.length > 1) {
+            log(`[4.1] Second imported member: ${afterMembers[1].firstName} ${afterMembers[1].lastName}`);
+          }
+          if (afterMembers.length > 2) {
+            log(`[4.1] Third imported member: ${afterMembers[2].firstName} ${afterMembers[2].lastName}`);
+          }
+          if (afterMembers.length > 3) {
+            log(`[4.1] Last -2 member: ${afterMembers[afterMembers.length - 2].firstName} ${afterMembers[afterMembers.length - 2].lastName}`);
+          }
+          log(`[4.1] Last imported member: ${afterMembers[afterMembers.length - 1].firstName} ${afterMembers[afterMembers.length - 1].lastName}`);
+        }
 
         result('4', 'CSV created', true, '100 members');
         // API reports 100 imported, but member count shows 99 new (possibly 1 duplicate)
@@ -414,8 +441,12 @@ async function main() {
         const members = membersRes.data?.data || [];
         if (members.length > 0) {
           const countBefore = members.length;
-          const memberId = members[0].id;
+          // Delete the LAST member (most recently created = newly imported)
+          const lastMemberIndex = members.length - 1;
+          const memberId = members[lastMemberIndex].id;
 
+          log(`[5.1] Member list count: ${members.length}`);
+          log(`[5.1] Last member (newly imported): ${JSON.stringify({id: memberId, firstName: members[lastMemberIndex].firstName, lastName: members[lastMemberIndex].lastName})}`);
           log(`[5.1] Deleting member: ${memberId}`);
 
           // Delete member

@@ -44,8 +44,9 @@ export async function listMembers(req, res) {
         const { groupId } = req.params;
         const churchId = req.user?.churchId;
         const page = Math.max(1, req.query.page ? parseInt(req.query.page) : 1);
-        const limit = Math.min(100, req.query.limit ? parseInt(req.query.limit) : 50);
+        const limit = Math.min(10000, req.query.limit ? parseInt(req.query.limit) : 50);
         const search = req.query.search;
+        console.log(`[listMembers] GET REQUEST: groupId=${groupId}, page=${page}, limit=${limit}`);
         if (!churchId) {
             return res.status(401).json({
                 success: false,
@@ -59,6 +60,7 @@ export async function listMembers(req, res) {
             limit,
             search,
         });
+        console.log(`[listMembers] Returning ${result.data.length} members for group ${groupId}`);
         res.json({
             success: true,
             data: result.data,
@@ -195,8 +197,25 @@ export async function importMembers(req, res) {
         }
         // Parse CSV
         const rows = parseCSV(req.file.buffer);
+        // Diagnostic logging
+        console.log(`[importMembers] CSV parsing complete: ${rows.length} rows`);
+        if (rows.length > 0) {
+            console.log(`[importMembers] First CSV row: ${JSON.stringify(rows[0])}`);
+            console.log(`[importMembers] Second CSV row: ${JSON.stringify(rows[1])}`);
+            if (rows.length > 2) {
+                console.log(`[importMembers] Last CSV row: ${JSON.stringify(rows[rows.length - 1])}`);
+            }
+        }
         // Validate and format
         const parsed = formatAndValidate(rows);
+        // More diagnostic logging
+        console.log(`[importMembers] After validation: ${parsed.valid.length} valid, ${parsed.invalid.length} invalid`);
+        if (parsed.valid.length > 0) {
+            console.log(`[importMembers] First validated member: ${JSON.stringify(parsed.valid[0])}`);
+            if (parsed.valid.length > 1) {
+                console.log(`[importMembers] Second validated member: ${JSON.stringify(parsed.valid[1])}`);
+            }
+        }
         if (parsed.valid.length === 0) {
             return res.status(400).json({
                 success: false,
@@ -288,6 +307,7 @@ export async function removeMember(req, res) {
     try {
         const { groupId, memberId } = req.params;
         const churchId = req.user?.churchId;
+        console.log(`[removeMember] DELETE REQUEST: groupId=${groupId}, memberId=${memberId}`);
         if (!churchId) {
             return res.status(401).json({
                 success: false,
@@ -298,6 +318,7 @@ export async function removeMember(req, res) {
         // The groupId parameter and churchId from JWT are sufficient authorization
         console.log('[removeMember] Security: Using JWT verification (churchId from token)');
         const result = await memberService.removeMemberFromGroup(groupId, memberId);
+        console.log(`[removeMember] Member successfully deleted: ${memberId}`);
         // ✅ CRITICAL: Invalidate cache BEFORE responding (wait for completion)
         // Ensures clients get fresh data immediately after deletion
         try {
