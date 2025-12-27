@@ -216,13 +216,13 @@ async function addMemberInternal(groupId: string, data: CreateMemberData) {
     createdAt: member.createdAt,
   };
 
-  console.log('[addMember] Returning immediately with REAL member ID:', response.id);
+  console.log('[addMember] Adding member to group BEFORE returning...');
 
-  // Process adding to group + cache invalidation in background (fire-and-forget)
-  // This completes asynchronously after returning to user
-  completeGroupAdditionAsync(groupId, member.id).catch((err) => {
-    console.error('[addMember] Background async error (already returned to user):', err);
-  });
+  // CRITICAL: Wait for group addition to complete BEFORE returning
+  // This ensures the member is actually linked to the group when frontend refreshes
+  await completeGroupAdditionAsync(groupId, member.id);
+
+  console.log('[addMember] Returning with member linked to group:', response.id);
 
   return response;
 }
