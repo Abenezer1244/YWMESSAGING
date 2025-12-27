@@ -101,23 +101,9 @@ async function fetchMembersPage(groupId, page, limit, search) {
  * ✅ PROTECTED: Function-level 4-second timeout to prevent hangs (AGGRESSIVE)
  */
 export async function addMember(groupId, data) {
-    // Wrap entire function in a 4-second timeout (AGGRESSIVE - more strict than internal timeouts)
-    return new Promise((resolve, reject) => {
-        const timeoutId = setTimeout(() => {
-            console.error('[addMember] FUNCTION TIMEOUT - entire operation exceeded 4 seconds');
-            reject(new Error('Member add operation took too long. Please try again.'));
-        }, 4000); // 4 second timeout (very aggressive)
-        // Run the actual member add logic
-        addMemberInternal(groupId, data)
-            .then((result) => {
-            clearTimeout(timeoutId);
-            resolve(result);
-        })
-            .catch((error) => {
-            clearTimeout(timeoutId);
-            reject(error);
-        });
-    });
+    // Direct call without aggressive timeout - let axios/controller timeout handle it
+    // The 4-second timeout was too aggressive for production databases
+    return addMemberInternal(groupId, data);
 }
 /**
  * Internal member add logic (wrapped in timeout above)

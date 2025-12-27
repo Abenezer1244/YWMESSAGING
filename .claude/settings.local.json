@@ -156,7 +156,9 @@
       "Bash(powershell -Command \"Remove-Item -Path ''.prisma'' -Recurse -Force -ErrorAction SilentlyContinue; npm run build 2>&1 | tail -30\")",
       "Bash(powershell:*)",
       "Bash(timeout 400 node:*)",
-      "Bash(timeout 500 node:*)"
+      "Bash(timeout 500 node:*)",
+      "Bash(pm2 list:*)",
+      "Bash(lsof:*)"
     ],
     "deny": [],
     "ask": []
