@@ -123,16 +123,18 @@ export function MembersPage() {
     // Refetch members list after successful add
     // Reset to page 1 and load fresh data
     setPage(1);
-    // Small delay to ensure backend has committed the write
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // Wait for backend cache invalidation and ensure data is fresh
+    // Redis cache invalidation takes ~50ms, API call ~200ms, so wait longer to be safe
+    await new Promise(resolve => setTimeout(resolve, 800));
     await loadMembers(1, true);  // true = update total
     setIsAddModalOpen(false);
   };
 
   const handleImportSuccess = async () => {
     setPage(1);
-    // Small delay to ensure all members have been written to database
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // Wait for backend cache invalidation and ensure data is fresh
+    // Bulk import may take longer, so wait 1.5s to be safe
+    await new Promise(resolve => setTimeout(resolve, 1500));
     await loadMembers(1, true);  // true = update total
     setIsImportModalOpen(false);
   };
