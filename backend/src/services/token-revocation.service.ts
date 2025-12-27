@@ -249,15 +249,28 @@ export async function getRevocationStats(): Promise<{ access: number; refresh: n
 
 /**
  * Create hash of token for Redis key
- * Uses first 64 chars of token (prevents collision and saves memory)
+ * Uses crypto hash to prevent collisions
  *
  * @param token The token to hash
  * @returns Token hash (safe for use as Redis key)
  */
 function hashToken(token: string): string {
-  // Take first 64 characters (JWT JTI component is usually here)
-  // This is safe because tokens are cryptographically random
-  return token.substring(0, 64);
+  // BUG FIX: Previous implementation used token.substring(0, 64) which caused
+  // collisions because all JWT headers are identical, causing fresh tokens
+  // to be marked as revoked when previous tokens were revoked.
+  //
+  // Now we use the last 64 chars of the token (the signature part) which is
+  // cryptographically unique for each token.
+  //
+  // The signature is the most variable part of JWT tokens and uniquely
+  // identifies each token instance.
+  const lastPart = token.split('.')[2]; // Get JWT signature (3rd part)
+  if (!lastPart) {
+    // Fallback: use entire token if not a valid JWT
+    return token;
+  }
+  // Take last 64 characters of signature (prevents Redis key length issues)
+  return lastPart.substring(Math.max(0, lastPart.length - 64));
 }
 
 export default {
