@@ -49,7 +49,6 @@ export function AddMemberModal({ isOpen, groupId, onClose, onSuccess }: AddMembe
         email: data.email?.trim() || undefined,
       });
 
-      toast.success('Member added successfully');
       onSuccess(member);
       reset();
       onClose();
