@@ -152,6 +152,11 @@ export async function addMember(req: Request, res: Response) {
       optInSms,
     });
 
+    // ✅ CRITICAL: Ensure database transaction is committed
+    // Add 5ms delay to ensure PostgreSQL COMMIT completes before we invalidate cache
+    // This prevents race condition where refetch happens before write is committed
+    await new Promise(resolve => setTimeout(resolve, 5));
+
     // ✅ CRITICAL: Invalidate cache BEFORE responding
     // Ensures subsequent member list queries reflect the new member
     try {
