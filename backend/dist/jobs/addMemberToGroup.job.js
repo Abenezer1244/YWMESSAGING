@@ -52,13 +52,26 @@ export async function addMemberToGroup(memberId, groupId) {
         }
         console.log(`[addMemberToGroup] Member not yet linked, creating GroupMember record...`);
         // Create group membership
-        const groupMember = await prisma.groupMember.create({
-            data: {
+        console.log(`[addMemberToGroup] Creating GroupMember with groupId="${groupId}" memberId="${memberId}"`);
+        let groupMember;
+        try {
+            groupMember = await prisma.groupMember.create({
+                data: {
+                    groupId,
+                    memberId,
+                },
+            });
+            console.log(`[addMemberToGroup] ✅ GroupMember created successfully with ID: ${groupMember.id}`);
+        }
+        catch (createError) {
+            console.error(`[addMemberToGroup] ❌ FAILED to create GroupMember:`, {
+                error: createError.message,
+                code: createError.code,
                 groupId,
                 memberId,
-            },
-        });
-        console.log(`[addMemberToGroup] ✅ GroupMember created successfully with ID: ${groupMember.id}`);
+            });
+            throw createError;
+        }
         console.log(`[addMemberToGroup] ✅ Group membership created:`, {
             groupId,
             memberId,
