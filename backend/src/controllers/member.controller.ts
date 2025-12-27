@@ -52,6 +52,8 @@ export async function listMembers(req: Request, res: Response) {
     const limit = Math.min(100, req.query.limit ? parseInt(req.query.limit as string) : 50);
     const search = req.query.search as string | undefined;
 
+    console.log(`[listMembers] GET REQUEST: groupId=${groupId}, page=${page}, limit=${limit}`);
+
     if (!churchId) {
       return res.status(401).json({
         success: false,
@@ -67,6 +69,8 @@ export async function listMembers(req: Request, res: Response) {
       limit,
       search,
     });
+
+    console.log(`[listMembers] Returning ${result.data.length} members for group ${groupId}`);
 
     res.json({
       success: true,
@@ -340,6 +344,8 @@ export async function removeMember(req: Request, res: Response) {
     const { groupId, memberId } = req.params;
     const churchId = req.user?.churchId;
 
+    console.log(`[removeMember] DELETE REQUEST: groupId=${groupId}, memberId=${memberId}`);
+
     if (!churchId) {
       return res.status(401).json({
         success: false,
@@ -352,6 +358,7 @@ export async function removeMember(req: Request, res: Response) {
     console.log('[removeMember] Security: Using JWT verification (churchId from token)');
 
     const result = await memberService.removeMemberFromGroup(groupId, memberId);
+    console.log(`[removeMember] Member successfully deleted: ${memberId}`);
 
     // ✅ CRITICAL: Invalidate cache BEFORE responding (wait for completion)
     // Ensures clients get fresh data immediately after deletion

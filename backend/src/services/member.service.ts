@@ -551,6 +551,8 @@ export async function updateMember(memberId: string, data: UpdateMemberData) {
  * Remove member from group
  */
 export async function removeMemberFromGroup(groupId: string, memberId: string) {
+  console.log(`[removeMemberFromGroup] Looking up groupMember: groupId=${groupId}, memberId=${memberId}`);
+
   const groupMember = await prisma.groupMember.findUnique({
     where: {
       groupId_memberId: {
@@ -560,11 +562,14 @@ export async function removeMemberFromGroup(groupId: string, memberId: string) {
     },
   });
 
+  console.log(`[removeMemberFromGroup] GroupMember found: ${!!groupMember}`);
+
   if (!groupMember) {
     throw new Error('Member not in this group');
   }
 
-  await prisma.groupMember.delete({
+  console.log(`[removeMemberFromGroup] Deleting groupMember...`);
+  const deleteResult = await prisma.groupMember.delete({
     where: {
       groupId_memberId: {
         groupId,
@@ -572,6 +577,7 @@ export async function removeMemberFromGroup(groupId: string, memberId: string) {
       },
     },
   });
+  console.log(`[removeMemberFromGroup] Deleted successfully:`, deleteResult);
 
   return { success: true };
 }
