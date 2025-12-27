@@ -25,7 +25,15 @@ export function MembersPage() {
   const { groupId: urlGroupId } = useParams<{ groupId?: string }>();
   const [isInitialLoading, setIsInitialLoading] = useState(!groups.length);
 
-  const groupId = urlGroupId || searchParams.get('groupId') || groups[0]?.id || '';
+  let groupId = urlGroupId || searchParams.get('groupId') || groups[0]?.id || '';
+
+  // ✅ FIX: Ensure search params are always prioritized over fallback
+  // This prevents the Members page from always showing the first group
+  // when navigating via ?groupId=xxx query parameter
+  const queryGroupId = searchParams.get('groupId');
+  if (queryGroupId) {
+    groupId = queryGroupId;
+  }
 
   const [members, setMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(false);
