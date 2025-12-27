@@ -553,6 +553,12 @@ export async function updateMember(memberId: string, data: UpdateMemberData) {
 export async function removeMemberFromGroup(groupId: string, memberId: string) {
   console.log(`[removeMemberFromGroup] Looking up groupMember: groupId=${groupId}, memberId=${memberId}`);
 
+  // First, count total groupMembers BEFORE delete
+  const countBefore = await prisma.groupMember.count({
+    where: { groupId },
+  });
+  console.log(`[removeMemberFromGroup] Total groupMembers BEFORE delete: ${countBefore}`);
+
   const groupMember = await prisma.groupMember.findUnique({
     where: {
       groupId_memberId: {
@@ -562,28 +568,31 @@ export async function removeMemberFromGroup(groupId: string, memberId: string) {
     },
   });
 
-  console.log(`[removeMemberFromGroup] GroupMember found: ${!!groupMember}`);
+  console.log(`[removeMemberFromGroup] GroupMember found: ${!!groupMember}`, groupMember ? { id: groupMember.id } : 'null');
 
   if (!groupMember) {
     throw new Error('Member not in this group');
   }
 
-  console.log(`[removeMemberFromGroup] Deleting groupMember...`);
+  console.log(`[removeMemberFromGroup] Deleting groupMember with ID: ${groupMember.id}`);
   const deleteResult = await prisma.groupMember.delete({
     where: {
-      groupId_memberId: {
-        groupId,
-        memberId,
-      },
+      id: groupMember.id,  // Delete by ID instead of composite key
     },
   });
-  console.log(`[removeMemberFromGroup] Deleted successfully:`, deleteResult);
+  console.log(`[removeMemberFromGroup] Deleted successfully:`, { id: deleteResult.id, groupId: deleteResult.groupId, memberId: deleteResult.memberId });
 
   // Verify deletion worked by counting remaining members
   const remainingCount = await prisma.groupMember.count({
     where: { groupId },
   });
-  console.log(`[removeMemberFromGroup] Remaining groupMembers in group: ${remainingCount}`);
+  console.log(`[removeMemberFromGroup] Remaining groupMembers in group AFTER delete: ${remainingCount}`);
+
+  if (remainingCount === countBefore - 1) {
+    console.log(`[removeMemberFromGroup] ✅ DELETE CONFIRMED: Count decreased from ${countBefore} to ${remainingCount}`);
+  } else {
+    console.error(`[removeMemberFromGroup] ❌ DELETE FAILED: Count was ${countBefore}, now ${remainingCount} (expected ${countBefore - 1})`);
+  }
 
   return { success: true };
 }
