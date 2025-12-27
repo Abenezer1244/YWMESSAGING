@@ -128,23 +128,37 @@ export function MembersPage() {
   }, [search, groupId, loadMembers]);
 
   const handleAddSuccess = async (newMember: Member) => {
-    // Refetch members list after successful add
-    // Reset to page 1 and load fresh data
-    setPage(1);
-    // Wait for backend cache invalidation and ensure data is fresh
-    // Redis cache invalidation takes ~50ms, API call ~200ms, so wait longer to be safe
-    await new Promise(resolve => setTimeout(resolve, 800));
-    await loadMembers(1, true);  // true = update total
+    // ✅ INSTANT: Add to UI immediately (optimistic update)
+    setMembers(prevMembers => [newMember, ...prevMembers]);
+    setTotal(prevTotal => prevTotal + 1);
     setIsAddModalOpen(false);
+    toast.success('Member added successfully');
+
+    // 🔄 ASYNC: Refetch in background to verify consistency
+    setPage(1);
+    setTimeout(async () => {
+      try {
+        await loadMembers(1, true);
+      } catch (error) {
+        console.error('Failed to refetch members after add:', error);
+      }
+    }, 1000);
   };
 
   const handleImportSuccess = async () => {
-    setPage(1);
-    // Wait for backend cache invalidation and ensure data is fresh
-    // Bulk import may take longer, so wait 1.5s to be safe
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    await loadMembers(1, true);  // true = update total
+    // ✅ INSTANT: Close modal immediately (optimistic)
     setIsImportModalOpen(false);
+    toast.success('Members imported successfully');
+
+    // 🔄 ASYNC: Refetch in background to load imported members
+    setPage(1);
+    setTimeout(async () => {
+      try {
+        await loadMembers(1, true);
+      } catch (error) {
+        console.error('Failed to refetch members after import:', error);
+      }
+    }, 1500);
   };
 
   const handleDeleteMember = async (memberId: string, memberName: string) => {
@@ -154,16 +168,18 @@ export function MembersPage() {
 
     try {
       setDeletingMemberId(memberId);
+
+      // ✅ INSTANT: Remove from UI immediately (optimistic update)
+      setMembers(prevMembers => prevMembers.filter(m => m.id !== memberId));
+      setTotal(prevTotal => Math.max(0, prevTotal - 1));
+
+      // 🔄 ASYNC: Call API to persist the deletion
       await removeMember(groupId, memberId);
       toast.success('Member removed successfully');
-      // CRITICAL FIX: Refresh the member list from backend to ensure deletion is reflected
-      // Don't rely on optimistic updates that can fail silently
-      // Reset to page 1 and reload with updated count
-      setPage(1);
-      await new Promise(resolve => setTimeout(resolve, 300));
-      await loadMembers(1, true);  // true = update total count
     } catch (error) {
       toast.error((error as Error).message || 'Failed to remove member');
+      // Refetch to restore the member if deletion failed
+      await loadMembers(page, true);
     } finally {
       setDeletingMemberId(null);
     }

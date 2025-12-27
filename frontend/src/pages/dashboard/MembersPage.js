@@ -22,7 +22,14 @@ export function MembersPage() {
     const [searchParams] = useSearchParams();
     const { groupId: urlGroupId } = useParams();
     const [isInitialLoading, setIsInitialLoading] = useState(!groups.length);
-    const groupId = urlGroupId || searchParams.get('groupId') || groups[0]?.id || '';
+    let groupId = urlGroupId || searchParams.get('groupId') || groups[0]?.id || '';
+    // ✅ FIX: Ensure search params are always prioritized over fallback
+    // This prevents the Members page from always showing the first group
+    // when navigating via ?groupId=xxx query parameter
+    const queryGroupId = searchParams.get('groupId');
+    if (queryGroupId) {
+        groupId = queryGroupId;
+    }
     const [members, setMembers] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [search, setSearch] = useState('');
@@ -112,20 +119,36 @@ export function MembersPage() {
         return () => clearTimeout(searchTimer);
     }, [search, groupId, loadMembers]);
     const handleAddSuccess = async (newMember) => {
-        // Refetch members list after successful add
-        // Reset to page 1 and load fresh data
-        setPage(1);
-        // Small delay to ensure backend has committed the write
-        await new Promise(resolve => setTimeout(resolve, 300));
-        await loadMembers(1, true); // true = update total
+        // ✅ INSTANT: Add to UI immediately (optimistic update)
+        setMembers(prevMembers => [newMember, ...prevMembers]);
+        setTotal(prevTotal => prevTotal + 1);
         setIsAddModalOpen(false);
+        toast.success('Member added successfully');
+        // 🔄 ASYNC: Refetch in background to verify consistency
+        setPage(1);
+        setTimeout(async () => {
+            try {
+                await loadMembers(1, true);
+            }
+            catch (error) {
+                console.error('Failed to refetch members after add:', error);
+            }
+        }, 1000);
     };
     const handleImportSuccess = async () => {
-        setPage(1);
-        // Small delay to ensure all members have been written to database
-        await new Promise(resolve => setTimeout(resolve, 300));
-        await loadMembers(1, true); // true = update total
+        // ✅ INSTANT: Close modal immediately (optimistic)
         setIsImportModalOpen(false);
+        toast.success('Members imported successfully');
+        // 🔄 ASYNC: Refetch in background to load imported members
+        setPage(1);
+        setTimeout(async () => {
+            try {
+                await loadMembers(1, true);
+            }
+            catch (error) {
+                console.error('Failed to refetch members after import:', error);
+            }
+        }, 1500);
     };
     const handleDeleteMember = async (memberId, memberName) => {
         if (!window.confirm(`Are you sure you want to remove ${memberName} from this group?`)) {
@@ -133,17 +156,17 @@ export function MembersPage() {
         }
         try {
             setDeletingMemberId(memberId);
+            // ✅ INSTANT: Remove from UI immediately (optimistic update)
+            setMembers(prevMembers => prevMembers.filter(m => m.id !== memberId));
+            setTotal(prevTotal => Math.max(0, prevTotal - 1));
+            // 🔄 ASYNC: Call API to persist the deletion
             await removeMember(groupId, memberId);
             toast.success('Member removed successfully');
-            // CRITICAL FIX: Refresh the member list from backend to ensure deletion is reflected
-            // Don't rely on optimistic updates that can fail silently
-            // Reset to page 1 and reload with updated count
-            setPage(1);
-            await new Promise(resolve => setTimeout(resolve, 300));
-            await loadMembers(1, true); // true = update total count
         }
         catch (error) {
             toast.error(error.message || 'Failed to remove member');
+            // Refetch to restore the member if deletion failed
+            await loadMembers(page, true);
         }
         finally {
             setDeletingMemberId(null);
