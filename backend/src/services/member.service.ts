@@ -2,7 +2,7 @@ import { prisma } from '../lib/prisma.js';
 import { formatToE164 } from '../utils/phone.utils.js';
 import { encrypt, decrypt, hashForSearch } from '../utils/encryption.utils.js';
 import { queueWelcomeMessage } from '../jobs/welcomeMessage.job.js';
-import { queueAddMemberToGroupJob } from '../jobs/addMemberToGroup.job.js';
+import { addMemberToGroup, queueAddMemberToGroupJob } from '../jobs/addMemberToGroup.job.js';
 import { getUsage, getCurrentPlan, getPlanLimits } from './billing.service.js';
 import { getCached, setCached, invalidateCache, getCachedWithFallback, CACHE_KEYS, CACHE_TTL } from './cache.service.js';
 
@@ -217,22 +217,47 @@ async function addMemberInternal(groupId: string, data: CreateMemberData) {
     createdAt: member.createdAt,
   };
 
-  console.log('[addMember] Queuing background job to link member to group...');
+  console.log('[addMember] Linking member to group...');
 
-  // ✅ BACKGROUND JOB APPROACH: Queue the group linking asynchronously
-  // This allows the API to return immediately while the linking happens in the background
-  // Benefits:
-  // 1. API responds in ~10ms instead of waiting for database writes
-  // 2. If linking fails, it can be retried independently
-  // 3. More resilient to database connection issues
-  // 4. Frontend is ready to refresh immediately
-  queueAddMemberToGroupJob(member.id, groupId, 0)  // delay=0 means immediate async execution
-    .catch((err) => {
-      console.error('[addMember] Failed to queue background job:', err);
-      // Job queuing failure is logged but doesn't block the response
-    });
+  // ✅ HYBRID APPROACH: Try to link synchronously with a timeout
+  // This uses Promise.race() to attempt synchronous linking but not block if slow
+  //
+  // Why this works better than pure setTimeout:
+  // 1. If the linking completes quickly (<500ms), the GroupMember record exists before we return
+  // 2. This ensures the members list fetch immediately after will include the new member
+  // 3. If linking takes longer, we don't block the API response (race timeout wins)
+  // 4. More reliable in production environments (Render, AWS, etc.)
+  //
+  // If linking doesn't complete before timeout, queue it as background job
+  const SYNC_TIMEOUT_MS = 500;  // Try for 500ms, then give up and return
 
-  console.log('[addMember] Returning member immediately - group linking in background:', response.id);
+  try {
+    // Race between: addMemberToGroup completion vs timeout
+    const result = await Promise.race([
+      addMemberToGroup(member.id, groupId),  // Actual linking operation
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('timeout')), SYNC_TIMEOUT_MS)
+      )
+    ]);
+
+    console.log('[addMember] ✅ Group linking completed synchronously:', response.id);
+  } catch (error) {
+    if ((error as Error).message === 'timeout') {
+      // Timeout occurred - queue as background job and continue
+      console.log('[addMember] ⏱️ Group linking timeout - queuing as background job');
+      queueAddMemberToGroupJob(member.id, groupId, 0)  // No delay since we already waited
+        .catch((err) => {
+          console.error('[addMember] Failed to queue background job:', err);
+        });
+    } else {
+      // Actual error occurred during linking
+      console.error('[addMember] ⚠️ Group linking failed:', (error as Error).message);
+      // Continue anyway - member exists, just not linked yet
+      // Client can retry or group linking might succeed later
+    }
+  }
+
+  console.log('[addMember] Returning member:', response.id);
 
   return response;
 }
