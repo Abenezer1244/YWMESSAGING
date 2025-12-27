@@ -53,6 +53,8 @@ export async function listMembers(req: Request, res: Response) {
     const search = req.query.search as string | undefined;
 
     console.log(`[listMembers] GET REQUEST: groupId=${groupId}, page=${page}, limit=${limit}`);
+    console.log(`[listMembers] Query params: page=${req.query.page}, limit=${req.query.limit}`);
+    console.log(`[listMembers] Parsed: page=${page}, limit=${limit}, parseInt result=${req.query.limit ? parseInt(req.query.limit as string) : 'N/A'}`);
 
     if (!churchId) {
       return res.status(401).json({
