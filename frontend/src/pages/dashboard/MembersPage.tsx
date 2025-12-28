@@ -26,7 +26,17 @@ export function MembersPage() {
   const [branchesLoaded, setBranchesLoaded] = useState(branches.length > 0);
   const [isInitialLoading, setIsInitialLoading] = useState(!groups.length);
 
+  // Determine group ID with fallback to previously selected group
   let groupId = urlGroupId || searchParams.get('groupId') || groups[0]?.id || '';
+
+  // ✅ FIX: Restore previously selected group from sessionStorage if available
+  // This ensures members page shows the same group after navigation
+  if (!groupId && typeof window !== 'undefined') {
+    const savedGroupId = sessionStorage.getItem('selectedGroupId');
+    if (savedGroupId && groups.some(g => g.id === savedGroupId)) {
+      groupId = savedGroupId;
+    }
+  }
 
   // ✅ FIX: Ensure search params are always prioritized over fallback
   // This prevents the Members page from always showing the first group
@@ -109,25 +119,45 @@ export function MembersPage() {
     loadBranches();
   }, [auth.church?.id, branches.length, setBranches, setBranchLoading]);
 
-  // Load groups and groups on mount if not already loaded
+  // Load groups from ALL branches if not already loaded
   useEffect(() => {
     if (!groups.length && auth.church?.id && branches.length > 0) {
-      const loadGroupsForFirstBranch = async () => {
+      const loadAllGroups = async () => {
         try {
-          const firstBranch = branches[0];
-          const branchGroups = await getGroups(firstBranch.id);
-          setGroups(branchGroups);
+          let allGroups: typeof groups = [];
+
+          // Load groups from each branch
+          for (const branch of branches) {
+            try {
+              const branchGroups = await getGroups(branch.id);
+              allGroups = [...allGroups, ...branchGroups];
+            } catch (error) {
+              console.error(`Failed to load groups for branch ${branch.id}:`, error);
+            }
+          }
+
+          // Set all groups, which will auto-select the first one
+          if (allGroups.length > 0) {
+            setGroups(allGroups);
+          }
         } catch (error) {
           console.error('Failed to load groups:', error);
         } finally {
           setIsInitialLoading(false);
         }
       };
-      loadGroupsForFirstBranch();
+      loadAllGroups();
     } else {
       setIsInitialLoading(false);
     }
   }, [auth.church?.id, branches, groups.length, setGroups]);
+
+  // Save selected group ID to sessionStorage for persistence across navigation
+  useEffect(() => {
+    if (groupId && typeof window !== 'undefined') {
+      sessionStorage.setItem('selectedGroupId', groupId);
+    }
+  }, [groupId]);
 
   // Load members when group changes (initial load) - UPDATE TOTAL
   useEffect(() => {
