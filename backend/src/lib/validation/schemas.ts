@@ -226,7 +226,6 @@ export const completeWelcomeSchema = z.object({
 
 export const getMessageHistorySchema = z.object({
   status: z.enum(['draft', 'scheduled', 'sending', 'sent', 'failed']).optional(),
-  groupId: z.string().uuid().optional(),
   dateFrom: z.string().datetime().optional(),
   dateTo: z.string().datetime().optional(),
   limit: z.number().int().min(1).max(100).default(20),

@@ -346,7 +346,6 @@ export declare const completeWelcomeSchema: z.ZodObject<{
 }>;
 export declare const getMessageHistorySchema: z.ZodObject<{
     status: z.ZodOptional<z.ZodEnum<["draft", "scheduled", "sending", "sent", "failed"]>>;
-    groupId: z.ZodOptional<z.ZodString>;
     dateFrom: z.ZodOptional<z.ZodString>;
     dateTo: z.ZodOptional<z.ZodString>;
     limit: z.ZodDefault<z.ZodNumber>;
@@ -357,14 +356,12 @@ export declare const getMessageHistorySchema: z.ZodObject<{
     status?: "draft" | "scheduled" | "sending" | "sent" | "failed" | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
-    groupId?: string | undefined;
 }, {
     limit?: number | undefined;
     status?: "draft" | "scheduled" | "sending" | "sent" | "failed" | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
     offset?: number | undefined;
-    groupId?: string | undefined;
 }>;
 export declare const MFAInitiateSchema: z.ZodObject<{
     email: z.ZodString;

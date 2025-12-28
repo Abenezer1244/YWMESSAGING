@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { createSelectors } from '../hooks/createSelectors';
 
 export interface MessageRecipient {
-  type: 'individual' | 'groups' | 'branches' | 'all';
+  type: 'individual' | 'branches' | 'all';
   ids: string[];
 }
 

@@ -3,7 +3,7 @@ import { prisma } from '../lib/prisma.js';
 export interface CreateRecurringMessageData {
   name: string;
   content: string;
-  targetType: 'individual' | 'groups' | 'branches' | 'all';
+  targetType: 'branches' | 'all';
   targetIds?: string[]; // JSON array as string
   frequency: 'daily' | 'weekly' | 'monthly';
   dayOfWeek?: number; // 0-6 for weekly

@@ -1,7 +1,7 @@
 export interface CreateRecurringMessageData {
     name: string;
     content: string;
-    targetType: 'individual' | 'groups' | 'branches' | 'all';
+    targetType: 'branches' | 'all';
     targetIds?: string[];
     frequency: 'daily' | 'weekly' | 'monthly';
     dayOfWeek?: number;

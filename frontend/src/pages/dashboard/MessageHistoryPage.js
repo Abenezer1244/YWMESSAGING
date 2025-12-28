@@ -56,11 +56,9 @@ export function MessageHistoryPage() {
                                             key: 'content',
                                             render: (message) => (_jsxs("div", { children: [_jsxs("p", { className: "text-sm text-foreground font-medium", children: [message.content.slice(0, 50), message.content.length > 50 ? '...' : ''] }), _jsx("p", { className: "text-xs text-muted-foreground mt-1", children: message.targetType === 'individual'
                                                             ? 'Individual'
-                                                            : message.targetType === 'groups'
-                                                                ? 'Groups'
-                                                                : message.targetType === 'branches'
-                                                                    ? 'Branches'
-                                                                    : 'All Members' })] })),
+                                                            : message.targetType === 'branches'
+                                                                ? 'Branches'
+                                                                : 'All Members' })] })),
                                         },
                                         {
                                             label: 'Recipients',

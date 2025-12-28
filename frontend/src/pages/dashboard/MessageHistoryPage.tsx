@@ -141,8 +141,6 @@ export function MessageHistoryPage() {
                           <p className="text-xs text-muted-foreground mt-1">
                             {message.targetType === 'individual'
                               ? 'Individual'
-                              : message.targetType === 'groups'
-                              ? 'Groups'
                               : message.targetType === 'branches'
                               ? 'Branches'
                               : 'All Members'}

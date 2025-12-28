@@ -3,7 +3,7 @@ import { SentMessage } from '../stores/messageStore';
 
 export interface SendMessageData {
   content: string;
-  targetType: 'individual' | 'groups' | 'branches' | 'all';
+  targetType: 'individual' | 'branches' | 'all';
   targetIds?: string[];
 }
 

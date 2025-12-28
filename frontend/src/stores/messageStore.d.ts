@@ -1,5 +1,5 @@
 export interface MessageRecipient {
-    type: 'individual' | 'groups' | 'branches' | 'all';
+    type: 'individual' | 'branches' | 'all';
     ids: string[];
 }
 export interface SentMessage {
