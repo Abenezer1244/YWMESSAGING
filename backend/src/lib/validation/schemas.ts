@@ -75,14 +75,10 @@ export const SendMessageSchema = z.object({
   scheduleTime: z.string()
     .datetime('Invalid schedule time format')
     .optional(),
-  groupId: z.string()
-    .uuid('Invalid group ID')
-    .optional(),
 });
 
 export const MessageFilterSchema = z.object({
   status: z.enum(['draft', 'scheduled', 'sending', 'sent', 'failed']).optional(),
-  groupId: z.string().uuid('Invalid group ID').optional(),
   dateFrom: z.string().datetime('Invalid date format').optional(),
   dateTo: z.string().datetime('Invalid date format').optional(),
   limit: z.number().int().min(1).max(100).default(20),
@@ -108,29 +104,9 @@ export const CreateContactSchema = z.object({
   email: z.string()
     .email('Invalid email address')
     .optional(),
-  groupIds: z.array(z.string().uuid()).optional(),
 });
 
 export const UpdateContactSchema = CreateContactSchema.partial();
-
-// ============================================
-// GROUP SCHEMAS
-// ============================================
-
-export const CreateGroupSchema = z.object({
-  name: z.string()
-    .min(1, 'Group name is required')
-    .max(255, 'Group name is too long')
-    .trim(),
-  description: z.string()
-    .max(1000, 'Description is too long')
-    .optional(),
-  color: z.string()
-    .regex(/^#[0-9A-F]{6}$/i, 'Invalid color format (use hex: #RRGGBB)')
-    .optional(),
-});
-
-export const UpdateGroupSchema = CreateGroupSchema.partial();
 
 // ============================================
 // BILLING SCHEMAS
@@ -162,7 +138,6 @@ export type RegisterInput = z.infer<typeof RegisterSchema>;
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type SendMessageInput = z.infer<typeof SendMessageSchema>;
 export type CreateContactInput = z.infer<typeof CreateContactSchema>;
-export type CreateGroupInput = z.infer<typeof CreateGroupSchema>;
 export type SubscribeInput = z.infer<typeof SubscribeSchema>;
 
 export function formatValidationErrors(error: z.ZodError) {
@@ -185,8 +160,6 @@ export const sendMessageSchema = SendMessageSchema;
 export const messageFilterSchema = MessageFilterSchema;
 export const createContactSchema = CreateContactSchema;
 export const updateContactSchema = UpdateContactSchema;
-export const createGroupSchema = CreateGroupSchema;
-export const updateGroupSchema = UpdateGroupSchema;
 export const subscribeSchema = SubscribeSchema;
 export const updateBillingSchema = UpdateBillingSchema;
 

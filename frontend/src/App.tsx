@@ -261,14 +261,6 @@ function App() {
 
           {/* Alternative simple routes (without nested structure) */}
           <Route
-            path="/groups/:groupId/members"
-            element={
-              <ProtectedRoute>
-                <MembersPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/branches"
             element={
               <ProtectedRoute>

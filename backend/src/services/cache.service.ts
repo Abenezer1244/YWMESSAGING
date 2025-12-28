@@ -281,8 +281,6 @@ export const CACHE_KEYS = {
   adminRole: (adminId: string) => `admin:${adminId}:role`,
 
   // Contact/Member data (30 minutes TTL)
-  contactGroups: (churchId: string) => `church:${churchId}:groups`,
-  groupMembers: (groupId: string) => `group:${groupId}:members`,
   memberDetails: (memberId: string) => `member:${memberId}:details`,
 
   // Billing data (24 hours TTL)
@@ -297,7 +295,6 @@ export const CACHE_KEYS = {
   // Wildcard patterns for invalidation
   churchAll: (churchId: string) => `church:${churchId}:*`,
   adminAll: (adminId: string) => `admin:${adminId}:*`,
-  groupAll: (groupId: string) => `group:${groupId}:*`,
   memberAll: (memberId: string) => `member:${memberId}:*`,
 };
 

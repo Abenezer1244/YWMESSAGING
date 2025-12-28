@@ -58,21 +58,17 @@ export declare const SendMessageSchema: z.ZodObject<{
     content: z.ZodString;
     recipientIds: z.ZodArray<z.ZodString, "many">;
     scheduleTime: z.ZodOptional<z.ZodString>;
-    groupId: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     content: string;
     recipientIds: string[];
     scheduleTime?: string | undefined;
-    groupId?: string | undefined;
 }, {
     content: string;
     recipientIds: string[];
     scheduleTime?: string | undefined;
-    groupId?: string | undefined;
 }>;
 export declare const MessageFilterSchema: z.ZodObject<{
     status: z.ZodOptional<z.ZodEnum<["draft", "scheduled", "sending", "sent", "failed"]>>;
-    groupId: z.ZodOptional<z.ZodString>;
     dateFrom: z.ZodOptional<z.ZodString>;
     dateTo: z.ZodOptional<z.ZodString>;
     limit: z.ZodDefault<z.ZodNumber>;
@@ -81,13 +77,11 @@ export declare const MessageFilterSchema: z.ZodObject<{
     limit: number;
     offset: number;
     status?: "draft" | "scheduled" | "sending" | "sent" | "failed" | undefined;
-    groupId?: string | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
 }, {
     limit?: number | undefined;
     status?: "draft" | "scheduled" | "sending" | "sent" | "failed" | undefined;
-    groupId?: string | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
     offset?: number | undefined;
@@ -97,64 +91,32 @@ export declare const CreateContactSchema: z.ZodObject<{
     lastName: z.ZodString;
     phone: z.ZodString;
     email: z.ZodOptional<z.ZodString>;
-    groupIds: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
     phone: string;
     firstName: string;
     lastName: string;
     email?: string | undefined;
-    groupIds?: string[] | undefined;
 }, {
     phone: string;
     firstName: string;
     lastName: string;
     email?: string | undefined;
-    groupIds?: string[] | undefined;
 }>;
 export declare const UpdateContactSchema: z.ZodObject<{
     firstName: z.ZodOptional<z.ZodString>;
     lastName: z.ZodOptional<z.ZodString>;
     phone: z.ZodOptional<z.ZodString>;
     email: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-    groupIds: z.ZodOptional<z.ZodOptional<z.ZodArray<z.ZodString, "many">>>;
 }, "strip", z.ZodTypeAny, {
     email?: string | undefined;
     phone?: string | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
-    groupIds?: string[] | undefined;
 }, {
     email?: string | undefined;
     phone?: string | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
-    groupIds?: string[] | undefined;
-}>;
-export declare const CreateGroupSchema: z.ZodObject<{
-    name: z.ZodString;
-    description: z.ZodOptional<z.ZodString>;
-    color: z.ZodOptional<z.ZodString>;
-}, "strip", z.ZodTypeAny, {
-    name: string;
-    description?: string | undefined;
-    color?: string | undefined;
-}, {
-    name: string;
-    description?: string | undefined;
-    color?: string | undefined;
-}>;
-export declare const UpdateGroupSchema: z.ZodObject<{
-    name: z.ZodOptional<z.ZodString>;
-    description: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-    color: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-}, "strip", z.ZodTypeAny, {
-    name?: string | undefined;
-    description?: string | undefined;
-    color?: string | undefined;
-}, {
-    name?: string | undefined;
-    description?: string | undefined;
-    color?: string | undefined;
 }>;
 export declare const SubscribeSchema: z.ZodObject<{
     planId: z.ZodEnum<["starter", "professional", "enterprise"]>;
@@ -183,7 +145,6 @@ export type RegisterInput = z.infer<typeof RegisterSchema>;
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type SendMessageInput = z.infer<typeof SendMessageSchema>;
 export type CreateContactInput = z.infer<typeof CreateContactSchema>;
-export type CreateGroupInput = z.infer<typeof CreateGroupSchema>;
 export type SubscribeInput = z.infer<typeof SubscribeSchema>;
 export declare function formatValidationErrors(error: z.ZodError): {
     field: string;
@@ -243,21 +204,17 @@ export declare const sendMessageSchema: z.ZodObject<{
     content: z.ZodString;
     recipientIds: z.ZodArray<z.ZodString, "many">;
     scheduleTime: z.ZodOptional<z.ZodString>;
-    groupId: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     content: string;
     recipientIds: string[];
     scheduleTime?: string | undefined;
-    groupId?: string | undefined;
 }, {
     content: string;
     recipientIds: string[];
     scheduleTime?: string | undefined;
-    groupId?: string | undefined;
 }>;
 export declare const messageFilterSchema: z.ZodObject<{
     status: z.ZodOptional<z.ZodEnum<["draft", "scheduled", "sending", "sent", "failed"]>>;
-    groupId: z.ZodOptional<z.ZodString>;
     dateFrom: z.ZodOptional<z.ZodString>;
     dateTo: z.ZodOptional<z.ZodString>;
     limit: z.ZodDefault<z.ZodNumber>;
@@ -266,13 +223,11 @@ export declare const messageFilterSchema: z.ZodObject<{
     limit: number;
     offset: number;
     status?: "draft" | "scheduled" | "sending" | "sent" | "failed" | undefined;
-    groupId?: string | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
 }, {
     limit?: number | undefined;
     status?: "draft" | "scheduled" | "sending" | "sent" | "failed" | undefined;
-    groupId?: string | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
     offset?: number | undefined;
@@ -282,64 +237,32 @@ export declare const createContactSchema: z.ZodObject<{
     lastName: z.ZodString;
     phone: z.ZodString;
     email: z.ZodOptional<z.ZodString>;
-    groupIds: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
     phone: string;
     firstName: string;
     lastName: string;
     email?: string | undefined;
-    groupIds?: string[] | undefined;
 }, {
     phone: string;
     firstName: string;
     lastName: string;
     email?: string | undefined;
-    groupIds?: string[] | undefined;
 }>;
 export declare const updateContactSchema: z.ZodObject<{
     firstName: z.ZodOptional<z.ZodString>;
     lastName: z.ZodOptional<z.ZodString>;
     phone: z.ZodOptional<z.ZodString>;
     email: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-    groupIds: z.ZodOptional<z.ZodOptional<z.ZodArray<z.ZodString, "many">>>;
 }, "strip", z.ZodTypeAny, {
     email?: string | undefined;
     phone?: string | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
-    groupIds?: string[] | undefined;
 }, {
     email?: string | undefined;
     phone?: string | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
-    groupIds?: string[] | undefined;
-}>;
-export declare const createGroupSchema: z.ZodObject<{
-    name: z.ZodString;
-    description: z.ZodOptional<z.ZodString>;
-    color: z.ZodOptional<z.ZodString>;
-}, "strip", z.ZodTypeAny, {
-    name: string;
-    description?: string | undefined;
-    color?: string | undefined;
-}, {
-    name: string;
-    description?: string | undefined;
-    color?: string | undefined;
-}>;
-export declare const updateGroupSchema: z.ZodObject<{
-    name: z.ZodOptional<z.ZodString>;
-    description: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-    color: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-}, "strip", z.ZodTypeAny, {
-    name?: string | undefined;
-    description?: string | undefined;
-    color?: string | undefined;
-}, {
-    name?: string | undefined;
-    description?: string | undefined;
-    color?: string | undefined;
 }>;
 export declare const subscribeSchema: z.ZodObject<{
     planId: z.ZodEnum<["starter", "professional", "enterprise"]>;
@@ -432,16 +355,16 @@ export declare const getMessageHistorySchema: z.ZodObject<{
     limit: number;
     offset: number;
     status?: "draft" | "scheduled" | "sending" | "sent" | "failed" | undefined;
-    groupId?: string | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
+    groupId?: string | undefined;
 }, {
     limit?: number | undefined;
     status?: "draft" | "scheduled" | "sending" | "sent" | "failed" | undefined;
-    groupId?: string | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
     offset?: number | undefined;
+    groupId?: string | undefined;
 }>;
 export declare const MFAInitiateSchema: z.ZodObject<{
     email: z.ZodString;

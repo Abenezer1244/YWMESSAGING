@@ -76,7 +76,7 @@ class AnalyticsService {
     /**
      * Track member events
      */
-    async trackMemberEvent(userId, eventType, churchId, groupId, count) {
+    async trackMemberEvent(userId, eventType, churchId, count) {
         const eventMap = {
             added: 'member_added',
             imported: 'member_bulk_imported',
@@ -85,23 +85,7 @@ class AnalyticsService {
         };
         await this.track(userId, eventMap[eventType], {
             churchId,
-            groupId,
             count,
-        });
-    }
-    /**
-     * Track group events
-     */
-    async trackGroupEvent(userId, eventType, churchId, branchId, properties) {
-        const eventMap = {
-            created: 'group_created',
-            updated: 'group_updated',
-            deleted: 'group_deleted',
-        };
-        await this.track(userId, eventMap[eventType], {
-            churchId,
-            branchId,
-            ...properties,
         });
     }
     /**

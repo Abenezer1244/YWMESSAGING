@@ -74,8 +74,6 @@ export declare const CACHE_KEYS: {
     churchStats: (churchId: string) => string;
     adminPermissions: (adminId: string) => string;
     adminRole: (adminId: string) => string;
-    contactGroups: (churchId: string) => string;
-    groupMembers: (groupId: string) => string;
     memberDetails: (memberId: string) => string;
     billingPlan: (churchId: string) => string;
     billingUsage: (churchId: string) => string;
@@ -84,7 +82,6 @@ export declare const CACHE_KEYS: {
     planningCenterSync: (churchId: string) => string;
     churchAll: (churchId: string) => string;
     adminAll: (adminId: string) => string;
-    groupAll: (groupId: string) => string;
     memberAll: (memberId: string) => string;
 };
 /**

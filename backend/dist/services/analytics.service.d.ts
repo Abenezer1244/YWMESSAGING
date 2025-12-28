@@ -24,11 +24,7 @@ declare class AnalyticsService {
     /**
      * Track member events
      */
-    trackMemberEvent(userId: string, eventType: 'added' | 'imported' | 'updated' | 'removed', churchId: string, groupId?: string, count?: number): Promise<void>;
-    /**
-     * Track group events
-     */
-    trackGroupEvent(userId: string, eventType: 'created' | 'updated' | 'deleted', churchId: string, branchId: string, properties?: Record<string, any>): Promise<void>;
+    trackMemberEvent(userId: string, eventType: 'added' | 'imported' | 'updated' | 'removed', churchId: string, count?: number): Promise<void>;
     /**
      * Track branch events
      */
