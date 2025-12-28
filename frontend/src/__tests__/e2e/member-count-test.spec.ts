@@ -10,7 +10,7 @@ test.describe('Member Count & Pagination - Direct Navigation', () => {
 
     // Navigate directly to members page (user may have existing session)
     console.log('[1] 📋 Navigating to members page...');
-    await page.goto(`${baseUrl}/dashboard/branches/*/groups`);
+    await page.goto(`${baseUrl}/members`);
 
     // Wait a bit for content to load
     await page.waitForTimeout(3000);

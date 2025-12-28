@@ -28,12 +28,6 @@ export function SoftSidebar() {
             path: '/branches',
         },
         {
-            label: 'Groups',
-            icon: _jsx(Users, { className: "w-5 h-5" }),
-            path: `/branches/${currentBranchId}/groups`,
-            conditional: true,
-        },
-        {
             label: 'Members',
             icon: _jsx(Users, { className: "w-5 h-5" }),
             path: '/members',

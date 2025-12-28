@@ -33,7 +33,7 @@ test.describe('Member Count & Pagination', () => {
         console.log('✅ Logged in');
         // Navigate to members page
         console.log('\n[2] 📋 Navigating to members page...');
-        await page.goto(`${testUrl}/dashboard/branches/*/groups`);
+        await page.goto(`${testUrl}/members`);
         await page.waitForLoadState('networkidle');
         console.log('✅ Members page loaded');
         // Get initial member count
@@ -118,7 +118,7 @@ test.describe('Member Count & Pagination', () => {
         console.log('✅ Logged in');
         // Navigate to members page
         console.log('\n[2] 📋 Navigating to members page...');
-        await page.goto(`${testUrl}/dashboard/branches/*/groups`);
+        await page.goto(`${testUrl}/members`);
         await page.waitForLoadState('networkidle');
         console.log('✅ Members page loaded');
         // Check if pagination exists
@@ -181,7 +181,7 @@ test.describe('Member Count & Pagination', () => {
         console.log(`Dashboard shows members: ${dashboardHasMembers ? '✅' : '⚠️'}`);
         // Navigate to members page
         console.log('\n[3] 📋 Navigating to members page...');
-        await page.goto(`${testUrl}/dashboard/branches/*/groups`);
+        await page.goto(`${testUrl}/members`);
         await page.waitForLoadState('networkidle');
         const membersCountElement = page.locator('p').filter({ hasText: /members/ }).first();
         const membersCountText = await membersCountElement.textContent();

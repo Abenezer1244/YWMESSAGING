@@ -20,7 +20,6 @@ export function OnboardingChecklist() {
   // Define action handlers that don't depend on state
   const stepActions = {
     create_branch: () => navigate('/branches'),
-    create_group: () => navigate('/groups'),
     add_members: () => navigate('/members'),
     send_message: () => navigate('/send-message'),
   };
@@ -35,14 +34,6 @@ export function OnboardingChecklist() {
       action: stepActions.create_branch,
     },
     {
-      id: 'create_group',
-      title: 'Add a Ministry Group',
-      description: 'Organize members by ministry, department, or team (e.g., "Sunday School", "Worship Team")',
-      completed: false,
-      estimatedTime: '1 min',
-      action: stepActions.create_group,
-    },
-    {
       id: 'add_members',
       title: 'Import Members',
       description: 'Upload your contact list via CSV or add members manually',
@@ -53,7 +44,7 @@ export function OnboardingChecklist() {
     {
       id: 'send_message',
       title: 'Send Your First Message',
-      description: 'Try sending a test message to your first group and see instant delivery',
+      description: 'Try sending a test message to your members and see instant delivery',
       completed: false,
       estimatedTime: '2 mins',
       action: stepActions.send_message,

@@ -25,7 +25,7 @@ test.describe('Mobile Responsiveness', () => {
         test('should show responsive tables as cards', async ({ page }) => {
             await loginUser(page);
             // Navigate to Members page
-            await page.goto(`${testUrl}/dashboard/branches/*/groups`);
+            await page.goto(`${testUrl}/members`);
             await page.waitForLoadState('networkidle');
             // Check that table is not visible
             const table = page.locator('table');
@@ -40,7 +40,7 @@ test.describe('Mobile Responsiveness', () => {
         });
         test('should have no horizontal scroll', async ({ page }) => {
             await loginUser(page);
-            await page.goto(`${testUrl}/dashboard/branches/*/groups`);
+            await page.goto(`${testUrl}/members`);
             await page.waitForLoadState('networkidle');
             const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
             const clientWidth = await page.evaluate(() => document.documentElement.clientWidth);
@@ -49,7 +49,7 @@ test.describe('Mobile Responsiveness', () => {
         });
         test('should show touch-friendly buttons (44px minimum)', async ({ page }) => {
             await loginUser(page);
-            await page.goto(`${testUrl}/dashboard/branches/*/groups`);
+            await page.goto(`${testUrl}/members`);
             await page.waitForLoadState('networkidle');
             // Check button heights
             const buttons = page.locator('button');
@@ -80,7 +80,7 @@ test.describe('Mobile Responsiveness', () => {
         });
         test('should show responsive grids with 2 columns', async ({ page }) => {
             await loginUser(page);
-            await page.goto(`${testUrl}/dashboard/branches/*/groups`);
+            await page.goto(`${testUrl}/members`);
             await page.waitForLoadState('networkidle');
             // Analytics or stats should display in responsive grid
             const statsGrid = page.locator('[class*="grid"]').first();
@@ -106,7 +106,7 @@ test.describe('Mobile Responsiveness', () => {
         });
         test('should show tables with normal layout', async ({ page }) => {
             await loginUser(page);
-            await page.goto(`${testUrl}/dashboard/branches/*/groups`);
+            await page.goto(`${testUrl}/members`);
             await page.waitForLoadState('networkidle');
             // On desktop, table might be visible
             const table = page.locator('table');

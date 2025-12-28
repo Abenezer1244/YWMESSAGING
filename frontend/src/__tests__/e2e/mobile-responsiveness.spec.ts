@@ -31,7 +31,7 @@ test.describe('Mobile Responsiveness', () => {
       await loginUser(page);
 
       // Navigate to Members page
-      await page.goto(`${testUrl}/dashboard/branches/*/groups`);
+      await page.goto(`${testUrl}/members`);
       await page.waitForLoadState('networkidle');
 
       // Check that table is not visible
@@ -50,7 +50,7 @@ test.describe('Mobile Responsiveness', () => {
 
     test('should have no horizontal scroll', async ({ page }) => {
       await loginUser(page);
-      await page.goto(`${testUrl}/dashboard/branches/*/groups`);
+      await page.goto(`${testUrl}/members`);
       await page.waitForLoadState('networkidle');
 
       const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
@@ -62,7 +62,7 @@ test.describe('Mobile Responsiveness', () => {
 
     test('should show touch-friendly buttons (44px minimum)', async ({ page }) => {
       await loginUser(page);
-      await page.goto(`${testUrl}/dashboard/branches/*/groups`);
+      await page.goto(`${testUrl}/members`);
       await page.waitForLoadState('networkidle');
 
       // Check button heights
@@ -101,7 +101,7 @@ test.describe('Mobile Responsiveness', () => {
 
     test('should show responsive grids with 2 columns', async ({ page }) => {
       await loginUser(page);
-      await page.goto(`${testUrl}/dashboard/branches/*/groups`);
+      await page.goto(`${testUrl}/members`);
       await page.waitForLoadState('networkidle');
 
       // Analytics or stats should display in responsive grid
@@ -134,7 +134,7 @@ test.describe('Mobile Responsiveness', () => {
 
     test('should show tables with normal layout', async ({ page }) => {
       await loginUser(page);
-      await page.goto(`${testUrl}/dashboard/branches/*/groups`);
+      await page.goto(`${testUrl}/members`);
       await page.waitForLoadState('networkidle');
 
       // On desktop, table might be visible
