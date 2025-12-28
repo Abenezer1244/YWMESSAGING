@@ -119,38 +119,63 @@ export function MembersPage() {
     loadBranches();
   }, [auth.church?.id, branches.length, setBranches, setBranchLoading]);
 
-  // Load groups from ALL branches if not already loaded
+  // Load groups from ALL branches when needed
+  // CRITICAL: Reload if groupId doesn't exist in store (fixes navigation persistence bug)
   useEffect(() => {
-    if (!groups.length && auth.church?.id && branches.length > 0) {
-      const loadAllGroups = async () => {
-        try {
-          let allGroups: typeof groups = [];
+    const loadGroupsIfNeeded = async () => {
+      if (!auth.church?.id || branches.length === 0) {
+        setIsInitialLoading(false);
+        return;
+      }
 
-          // Load groups from each branch
-          for (const branch of branches) {
-            try {
-              const branchGroups = await getGroups(branch.id);
-              allGroups = [...allGroups, ...branchGroups];
-            } catch (error) {
-              console.error(`Failed to load groups for branch ${branch.id}:`, error);
-            }
-          }
+      // If we have a groupId but it doesn't exist in store, reload from API
+      // This handles the case where user navigates away and back - Zustand has stale data
+      if (groupId && !groups.some(g => g.id === groupId)) {
+        console.log('[MembersPage] Selected groupId not in store, reloading groups from API');
+        let allGroups: typeof groups = [];
 
-          // Set all groups, which will auto-select the first one
-          if (allGroups.length > 0) {
-            setGroups(allGroups);
+        for (const branch of branches) {
+          try {
+            const branchGroups = await getGroups(branch.id);
+            allGroups = [...allGroups, ...branchGroups];
+          } catch (error) {
+            console.error(`Failed to load groups for branch ${branch.id}:`, error);
           }
-        } catch (error) {
-          console.error('Failed to load groups:', error);
-        } finally {
-          setIsInitialLoading(false);
         }
-      };
-      loadAllGroups();
-    } else {
+
+        if (allGroups.length > 0) {
+          setGroups(allGroups);
+          console.log('[MembersPage] Groups reloaded:', allGroups.length);
+        }
+        setIsInitialLoading(false);
+        return;
+      }
+
+      // Otherwise, load if groups is empty
+      if (groups.length === 0) {
+        console.log('[MembersPage] Groups empty, loading from API');
+        let allGroups: typeof groups = [];
+
+        for (const branch of branches) {
+          try {
+            const branchGroups = await getGroups(branch.id);
+            allGroups = [...allGroups, ...branchGroups];
+          } catch (error) {
+            console.error(`Failed to load groups for branch ${branch.id}:`, error);
+          }
+        }
+
+        if (allGroups.length > 0) {
+          setGroups(allGroups);
+          console.log('[MembersPage] Groups loaded:', allGroups.length);
+        }
+      }
+
       setIsInitialLoading(false);
-    }
-  }, [auth.church?.id, branches, groups.length, setGroups]);
+    };
+
+    loadGroupsIfNeeded();
+  }, [auth.church?.id, branches, groupId, groups, setGroups]);
 
   // Save selected group ID to sessionStorage for persistence across navigation
   useEffect(() => {
