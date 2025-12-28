@@ -67,8 +67,7 @@ export function BranchSelector() {
                 <div>
                   <div className="font-medium text-sm">{branch.name}</div>
                   <div className="text-xs text-gray-500">
-                    {branch.groupCount} group{branch.groupCount !== 1 ? 's' : ''} • {branch.memberCount} member
-                    {branch.memberCount !== 1 ? 's' : ''}
+                    {branch.memberCount} member{branch.memberCount !== 1 ? 's' : ''}
                   </div>
                 </div>
               </button>

@@ -18,7 +18,7 @@ export function BranchSelector() {
                                 setIsOpen(false);
                             }, className: `w-full text-left px-4 py-2 rounded-lg transition ${currentBranchId === branch.id && !allBranchesMode
                                 ? 'bg-blue-50 text-blue-600 font-medium'
-                                : 'hover:bg-gray-50'}`, children: _jsxs("div", { children: [_jsx("div", { className: "font-medium text-sm", children: branch.name }), _jsxs("div", { className: "text-xs text-gray-500", children: [branch.groupCount, " group", branch.groupCount !== 1 ? 's' : '', " \u2022 ", branch.memberCount, " member", branch.memberCount !== 1 ? 's' : ''] })] }) }, branch.id)))] }) }))] }));
+                                : 'hover:bg-gray-50'}`, children: _jsxs("div", { children: [_jsx("div", { className: "font-medium text-sm", children: branch.name }), _jsxs("div", { className: "text-xs text-gray-500", children: [branch.memberCount, " member", branch.memberCount !== 1 ? 's' : ''] })] }) }, branch.id)))] }) }))] }));
 }
 export default BranchSelector;
 //# sourceMappingURL=BranchSelector.js.map
