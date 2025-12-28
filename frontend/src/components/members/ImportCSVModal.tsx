@@ -4,12 +4,11 @@ import { importMembers } from '../../api/members';
 
 interface ImportCSVModalProps {
   isOpen: boolean;
-  groupId: string;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export function ImportCSVModal({ isOpen, groupId, onClose, onSuccess }: ImportCSVModalProps) {
+export function ImportCSVModal({ isOpen, onClose, onSuccess }: ImportCSVModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<any>(null);
@@ -34,7 +33,7 @@ export function ImportCSVModal({ isOpen, groupId, onClose, onSuccess }: ImportCS
 
     try {
       setIsLoading(true);
-      const importResult = await importMembers(groupId, file);
+      const importResult = await importMembers(file);
       setResult(importResult);
 
       if (importResult.imported > 0) {

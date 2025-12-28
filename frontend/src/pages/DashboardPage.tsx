@@ -15,8 +15,6 @@ import toast from 'react-hot-toast';
 import { useAuthStore } from '../stores/authStore';
 import { useBranchStore } from '../stores/branchStore';
 import { getMessageStats, getSummaryStats } from '../api/analytics';
-import { getMembers } from '../api/members';
-import { getGroups } from '../api/groups';
 import { getCurrentNumber } from '../api/numbers';
 import { getProfile } from '../api/admin';
 import { getBranches } from '../api/branches';
@@ -177,20 +175,8 @@ export function DashboardPage() {
       if (stats) setSummaryStats(stats);
       if (msgStats) setMessageStats(msgStats);
 
-      // Groups and members are dependent on currentBranchId - load these separately if needed
-      if (currentBranchId) {
-        try {
-          const groupsData = await getGroups(currentBranchId);
-          setTotalGroups(groupsData.length);
-
-          if (groupsData.length > 0) {
-            const membersData = await getMembers(groupsData[0].id, { limit: 1 });
-            setTotalMembers(membersData.pagination.total);
-          }
-        } catch (error) {
-          console.debug('Failed to load groups/members:', error);
-        }
-      }
+      // Members count is available from summary stats
+      // No longer loading groups since they've been removed
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
       toast.error('Failed to load dashboard data');

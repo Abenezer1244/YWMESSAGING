@@ -1,10 +1,10 @@
 export interface ResolveRecipientsOptions {
-    targetType: 'individual' | 'groups' | 'branches' | 'all';
+    targetType: 'individual' | 'all';
     targetIds?: string[];
 }
 export interface CreateMessageData {
     content: string;
-    targetType: 'individual' | 'groups' | 'branches' | 'all';
+    targetType: 'individual' | 'all';
     targetIds?: string[];
 }
 /**

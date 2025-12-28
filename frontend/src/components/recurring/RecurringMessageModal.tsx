@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { useGroupStore } from '../../stores/groupStore';
 import { createRecurringMessage, updateRecurringMessage, RecurringMessage } from '../../api/recurring';
 
 interface RecurringMessageModalProps {
@@ -12,23 +11,18 @@ interface RecurringMessageModalProps {
 interface FormData {
   name: string;
   content: string;
-  targetType: 'groups' | 'all';
-  selectedGroupIds: string[];
   frequency: 'daily' | 'weekly' | 'monthly';
   timeOfDay: string;
   dayOfWeek: number;
 }
 
 export default function RecurringMessageModal({ message, onClose }: RecurringMessageModalProps) {
-  const { groups } = useGroupStore();
   const [isLoading, setIsLoading] = useState(false);
   const { register, handleSubmit, formState: { errors }, watch } = useForm<FormData>({
     defaultValues: message
       ? {
           name: message.name,
           content: message.content,
-          targetType: message.targetType === 'all' ? 'all' : 'groups',
-          selectedGroupIds: message.targetIds ? JSON.parse(message.targetIds) : [],
           frequency: message.frequency as any,
           timeOfDay: message.timeOfDay || '09:00',
           dayOfWeek: message.dayOfWeek || 0,
@@ -36,16 +30,12 @@ export default function RecurringMessageModal({ message, onClose }: RecurringMes
       : {
           name: '',
           content: '',
-          targetType: 'groups',
-          selectedGroupIds: [],
           frequency: 'daily',
           timeOfDay: '09:00',
           dayOfWeek: 0,
         },
   });
 
-  const targetType = watch('targetType');
-  const selectedGroupIds = watch('selectedGroupIds');
   const frequency = watch('frequency');
 
   const onSubmit = async (data: FormData) => {
@@ -55,8 +45,7 @@ export default function RecurringMessageModal({ message, onClose }: RecurringMes
       const payload: any = {
         name: data.name,
         content: data.content,
-        targetType: data.targetType === 'all' ? 'all' : 'groups',
-        targetIds: data.targetType === 'all' ? undefined : data.selectedGroupIds,
+        targetType: 'all',
         frequency: data.frequency,
         timeOfDay: data.timeOfDay,
         dayOfWeek: data.frequency === 'weekly' ? data.dayOfWeek : undefined,
@@ -115,36 +104,10 @@ export default function RecurringMessageModal({ message, onClose }: RecurringMes
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Send To *
-            </label>
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 dark:text-gray-300">
-                <input {...register('targetType')} type="radio" value="groups" />
-                <span className="text-sm">Select Groups</span>
-              </label>
-
-              {targetType === 'groups' && (
-                <div className="ml-6 space-y-1 bg-gray-50 dark:bg-slate-700 p-2 rounded">
-                  {groups.map((group) => (
-                    <label key={group.id} className="flex items-center gap-2 dark:text-gray-300">
-                      <input
-                        type="checkbox"
-                        value={group.id}
-                        {...register('selectedGroupIds')}
-                      />
-                      <span className="text-sm">{group.name}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
-
-              <label className="flex items-center gap-2 dark:text-gray-300">
-                <input {...register('targetType')} type="radio" value="all" />
-                <span className="text-sm">All Members</span>
-              </label>
-            </div>
+          <div className="bg-blue-50 dark:bg-slate-700 p-3 rounded">
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              Messages will be sent to all members
+            </p>
           </div>
 
           <div>

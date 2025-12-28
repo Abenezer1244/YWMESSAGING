@@ -2,7 +2,7 @@ import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-run
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { importMembers } from '../../api/members';
-export function ImportCSVModal({ isOpen, groupId, onClose, onSuccess }) {
+export function ImportCSVModal({ isOpen, onClose, onSuccess }) {
     const [isLoading, setIsLoading] = useState(false);
     const [file, setFile] = useState(null);
     const [result, setResult] = useState(null);
@@ -24,7 +24,7 @@ export function ImportCSVModal({ isOpen, groupId, onClose, onSuccess }) {
         }
         try {
             setIsLoading(true);
-            const importResult = await importMembers(groupId, file);
+            const importResult = await importMembers(file);
             setResult(importResult);
             if (importResult.imported > 0) {
                 toast.success(`${importResult.imported} members imported successfully`);

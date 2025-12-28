@@ -9,7 +9,6 @@ import { originValidationMiddleware } from './middleware/origin-validation.middl
 import { initSentry, getSentryRequestHandler, getSentryErrorHandler } from './config/sentry.config.js';
 import authRoutes from './routes/auth.routes.js';
 import branchRoutes from './routes/branch.routes.js';
-import groupRoutes from './routes/group.routes.js';
 import messageRoutes from './routes/message.routes.js';
 import templateRoutes from './routes/template.routes.js';
 import recurringRoutes from './routes/recurring.routes.js';
@@ -48,12 +47,6 @@ app.use((req, res, next) => {
     // (60 seconds was not enough when database is under load)
     if (req.path?.includes('/import') || req.path?.includes('/batch')) {
         timeoutMs = 90000; // 90 seconds for import/batch operations
-    }
-    // Member operations (add single member) also need reasonable time for DB operations
-    // Adding a member requires: create member record + link to group + cache invalidation
-    // Default 10s is not enough under load, increased to 60s for slow/overloaded databases
-    if (req.path?.includes('/groups/') && req.path?.includes('/members') && req.method === 'POST') {
-        timeoutMs = 60000; // 60 seconds for adding a single member
     }
     const requestTimeout = setTimeout(() => {
         if (!res.headersSent) {
@@ -317,7 +310,6 @@ app.use('/api/auth', authLimiter, authRoutes);
 // Protected API Routes - JWT-based, no CSRF needed
 // Apply moderate rate limiting to general API endpoints
 app.use('/api/branches', apiLimiter, branchRoutes);
-app.use('/api/groups', apiLimiter, groupRoutes);
 // Apply strict per-user rate limiting to messages (prevent SMS spam)
 app.use('/api/messages', messageRateLimiter, messageRoutes);
 app.use('/api/templates', apiLimiter, templateRoutes);

@@ -2,7 +2,6 @@ import { prisma } from '../lib/prisma.js';
 import { formatToE164 } from '../utils/phone.utils.js';
 import { encrypt, decrypt, hashForSearch } from '../utils/encryption.utils.js';
 import { queueWelcomeMessage } from '../jobs/welcomeMessage.job.js';
-import { addMemberToGroup, queueAddMemberToGroupJob } from '../jobs/addMemberToGroup.job.js';
 import { getUsage, getCurrentPlan, getPlanLimits } from './billing.service.js';
 import { getCached, setCached, invalidateCache, getCachedWithFallback, CACHE_KEYS, CACHE_TTL } from './cache.service.js';
 
@@ -23,17 +22,9 @@ export interface UpdateMemberData {
 }
 
 /**
- * Get members for a group with pagination and search
- * ✅ CACHED: First page (no search) is cached for 30 minutes
- * BEFORE: Database query on every member list load
- * AFTER: Redis cache hit returns in <5ms (100+ times faster)
- *
- * Note: Search results are not cached (search is dynamic/unpredictable)
- *
- * Impact: 100 member list views per hour × 30 min TTL = Only 2 DB queries per hour
+ * Get all members with pagination and search
  */
 export async function getMembers(
-  groupId: string,
   options: {
     page?: number;
     limit?: number;
@@ -42,50 +33,8 @@ export async function getMembers(
 ) {
   const { page = 1, limit = 50, search } = options;
 
-  const group = await prisma.group.findUnique({
-    where: { id: groupId },
-    select: { id: true },  // Only fetch what we need for validation
-  });
-
-  if (!group) {
-    throw new Error('Group not found');
-  }
-
-  // Only cache first page without search (typical use case)
-  if (page === 1 && !search) {
-    // CRITICAL: Always fetch fresh data, don't use cache with wrong limit
-    // The cache may contain data fetched with limit=1 or other incorrect limits
-    // We need to invalidate and refetch if the cache has fewer items than requested
-    const cached = await getCachedWithFallback(
-      CACHE_KEYS.groupMembers(groupId),
-      async () => {
-        return fetchMembersPage(groupId, page, limit, search);
-      },
-      CACHE_TTL.MEDIUM // 30 minutes
-    );
-
-    // CRITICAL FIX: If cached data has fewer items than limit, it means
-    // the cache was populated with wrong limit value. Refetch fresh data.
-    if (cached.data.length < limit) {
-      console.log(`[getMembers] Cache has ${cached.data.length} items but limit is ${limit}, fetching fresh`);
-      // Invalidate stale cache and fetch fresh
-      await invalidateCache(CACHE_KEYS.groupMembers(groupId));
-      return fetchMembersPage(groupId, page, limit, search);
-    }
-
-    // Ensure pagination.limit matches the requested limit
-    return {
-      ...cached,
-      pagination: {
-        ...cached.pagination,
-        limit: limit,  // Override with actual requested limit
-        pages: Math.ceil(cached.pagination.total / limit)  // Recalculate pages with correct limit
-      }
-    };
-  }
-
-  // For other pages or search results, fetch directly without caching
-  return fetchMembersPage(groupId, page, limit, search);
+  // Fetch members directly without caching (no longer grouped, simple list)
+  return fetchMembersPage(page, limit, search);
 }
 
 /**
@@ -93,18 +42,13 @@ export async function getMembers(
  * Used by getMembers (which handles caching)
  */
 async function fetchMembersPage(
-  groupId: string,
   page: number,
   limit: number,
   search?: string
 ) {
   const skip = (page - 1) * limit;
 
-  const where: any = {
-    groups: {
-      some: { groupId },
-    },
-  };
+  const where: any = {};
 
   if (search) {
     try {
@@ -164,32 +108,27 @@ async function fetchMembersPage(
 }
 
 /**
- * Add single member to group
- * ✅ PROTECTED: Function-level 4-second timeout to prevent hangs (AGGRESSIVE)
+ * Add single member
  */
-export async function addMember(groupId: string, data: CreateMemberData) {
-  // Direct call without aggressive timeout - let axios/controller timeout handle it
-  // The 4-second timeout was too aggressive for production databases
-  return addMemberInternal(groupId, data);
+export async function addMember(data: CreateMemberData) {
+  return addMemberInternal(data);
 }
 
 /**
- * Internal member add logic (wrapped in timeout above)
- * OPTIMIZED: Create member in DB, return real ID immediately, process grouping async
+ * Internal member add logic
+ * OPTIMIZED: Create or find member in DB and return immediately
  *
  * Fast path:
  * 1. Validate phone (< 10ms)
  * 2. Create/find member in database (< 500ms)
  * 3. Return with REAL member ID to user (~600ms)
- * 4. Add to group + cache invalidation happens asynchronously in background
  *
  * This ensures:
  * - API returns quickly (~600-800ms)
  * - Member ID is real and can be deleted/updated immediately
- * - No 403 errors on delete because member exists
  */
-async function addMemberInternal(groupId: string, data: CreateMemberData) {
-  console.log('[addMember] FAST PATH - Starting for groupId:', groupId);
+async function addMemberInternal(data: CreateMemberData) {
+  console.log('[addMember] Starting member add');
 
   // Validate phone (fast, no DB)
   console.log('[addMember] Validating phone...');
@@ -239,48 +178,19 @@ async function addMemberInternal(groupId: string, data: CreateMemberData) {
     createdAt: member.createdAt,
   };
 
-  console.log('[addMember] ⏳ Linking member to group synchronously...');
-  console.log('[addMember] Member ID:', member.id, 'Group ID:', groupId);
-
-  // ✅ SYNCHRONOUS APPROACH: Link member to group immediately
-  // This ensures the GroupMember record exists before we return the API response
-  // The members list fetch that happens immediately after will include the new member
-  try {
-    const startLink = Date.now();
-    console.log('[addMember] Calling addMemberToGroup...');
-    await addMemberToGroup(member.id, groupId);
-    const linkDuration = Date.now() - startLink;
-    console.log('[addMember] ✅ Group linking completed synchronously in ' + linkDuration + 'ms:', response.id);
-  } catch (error) {
-    console.error('[addMember] ❌ Group linking failed:', {
-      memberId: member.id,
-      groupId,
-      error: (error as Error).message,
-      code: (error as any).code,
-      stack: (error as Error).stack?.substring(0, 300)
-    });
-
-    // Re-throw so client sees the error
-    throw error;
-  }
-
   console.log('[addMember] Returning member:', response.id);
 
   return response;
 }
 
-// NOTE: completeGroupAdditionAsync has been replaced by the background job queueAddMemberToGroupJob
-// The background job approach is more reliable and allows the API to respond immediately
-
 
 /**
- * Bulk import members to group
+ * Bulk import members
  * ✅ OPTIMIZED: Batch operations instead of per-member queries
  * Before: 500 queries (2-5 per member in loop)
- * After: 5 queries (1 for fetch existing, 1 for create members, 1 for check existing groupMembers, 1 for create groupMembers, multiple queueWelcomeMessage)
+ * After: 3 queries (1 for fetch existing, 1 for create members, 1 for success)
  */
 export async function importMembers(
-  groupId: string,
   membersData: Array<{
     firstName: string;
     lastName: string;
@@ -290,14 +200,6 @@ export async function importMembers(
 ) {
   const importStartTime = Date.now();
   console.log(`[importMembers] STARTING import of ${membersData.length} members`);
-
-  const group = await prisma.group.findUnique({
-    where: { id: groupId },
-  });
-
-  if (!group) {
-    throw new Error('Group not found');
-  }
 
   // CRITICAL FIX: Skip billing check with timeout - if Redis/DB is slow, don't block import
   // Billing limits are enforced asynchronously after import completes
@@ -429,44 +331,12 @@ export async function importMembers(
     }
   }
 
-  // ✅ Query 4: Fetch ALL existing groupMembers in ONE query
-  console.log(`[importMembers] Checking existing groupMembers...`);
-  const checkGroupMembersStart = Date.now();
-  const memberIds = Array.from(membersByIndex.values())
-    .filter((m) => m && m.id)
-    .map((m) => m.id);
-
-  const existingGroupMembers = await prisma.groupMember.findMany({
-    where: {
-      groupId,
-      memberId: { in: memberIds },
-    },
-    select: {
-      memberId: true,
-    },
-  });
-  console.log(`[importMembers] Check existing groupMembers took ${Date.now() - checkGroupMembersStart}ms`);
-
-  const existingGroupMemberIds = new Set(existingGroupMembers.map((gm) => gm.memberId));
-
-  // Separate members into: addToGroup, alreadyInGroup
-  const groupMembersToCreate: Array<{ groupId: string; memberId: string }> = [];
+  // ✅ Build imported list from all members (created or existing)
   const imported: any[] = [];
 
   for (let i = 0; i < formattedData.length; i++) {
     const member = membersByIndex.get(i);
-    if (!member) continue;
-
-    if (existingGroupMemberIds.has(member.id)) {
-      failed.push({
-        member: membersData[i],
-        error: 'Already in this group',
-      });
-    } else {
-      groupMembersToCreate.push({
-        groupId,
-        memberId: member.id,
-      });
+    if (member) {
       imported.push({
         id: member.id,
         firstName: member.firstName,
@@ -475,31 +345,6 @@ export async function importMembers(
         email: member.email,
       });
     }
-  }
-
-  // ✅ Query 5: Batch create groupMembers
-  console.log(`[importMembers] Creating ${groupMembersToCreate.length} groupMembers...`);
-  const createGroupMembersStart = Date.now();
-  if (groupMembersToCreate.length > 0) {
-    const createdGroupMembers = await prisma.groupMember.createMany({
-      data: groupMembersToCreate,
-      skipDuplicates: true,
-    });
-    console.log(`[importMembers] Create groupMembers took ${Date.now() - createGroupMembersStart}ms`);
-
-    // Queue welcome messages for newly added members (fire-and-forget, don't await)
-    console.log(`[importMembers] Queueing ${groupMembersToCreate.length} welcome messages...`);
-    const queueStart = Date.now();
-
-    // Don't fetch, just use the data we already have to avoid another DB query
-    for (const gm of groupMembersToCreate) {
-      try {
-        queueWelcomeMessage(gm.groupId + ':' + gm.memberId, gm.groupId, gm.memberId, 60000);
-      } catch (error) {
-        console.error('Error queueing welcome message:', error);
-      }
-    }
-    console.log(`[importMembers] Queueing took ${Date.now() - queueStart}ms`);
   }
 
   const totalTime = Date.now() - importStartTime;
@@ -553,51 +398,15 @@ export async function updateMember(memberId: string, data: UpdateMemberData) {
 }
 
 /**
- * Remove member from group
+ * Delete a member
  */
-export async function removeMemberFromGroup(groupId: string, memberId: string) {
-  console.log(`[removeMemberFromGroup] Looking up groupMember: groupId=${groupId}, memberId=${memberId}`);
+export async function deleteMember(memberId: string) {
+  console.log(`[deleteMember] Deleting member: ${memberId}`);
 
-  // First, count total groupMembers BEFORE delete
-  const countBefore = await prisma.groupMember.count({
-    where: { groupId },
-  });
-  console.log(`[removeMemberFromGroup] Total groupMembers BEFORE delete: ${countBefore}`);
-
-  const groupMember = await prisma.groupMember.findUnique({
-    where: {
-      groupId_memberId: {
-        groupId,
-        memberId,
-      },
-    },
+  const deleteResult = await prisma.member.delete({
+    where: { id: memberId },
   });
 
-  console.log(`[removeMemberFromGroup] GroupMember found: ${!!groupMember}`, groupMember ? { id: groupMember.id } : 'null');
-
-  if (!groupMember) {
-    throw new Error('Member not in this group');
-  }
-
-  console.log(`[removeMemberFromGroup] Deleting groupMember with ID: ${groupMember.id}`);
-  const deleteResult = await prisma.groupMember.delete({
-    where: {
-      id: groupMember.id,  // Delete by ID instead of composite key
-    },
-  });
-  console.log(`[removeMemberFromGroup] Deleted successfully:`, { id: deleteResult.id, groupId: deleteResult.groupId, memberId: deleteResult.memberId });
-
-  // Verify deletion worked by counting remaining members
-  const remainingCount = await prisma.groupMember.count({
-    where: { groupId },
-  });
-  console.log(`[removeMemberFromGroup] Remaining groupMembers in group AFTER delete: ${remainingCount}`);
-
-  if (remainingCount === countBefore - 1) {
-    console.log(`[removeMemberFromGroup] ✅ DELETE CONFIRMED: Count decreased from ${countBefore} to ${remainingCount}`);
-  } else {
-    console.error(`[removeMemberFromGroup] ❌ DELETE FAILED: Count was ${countBefore}, now ${remainingCount} (expected ${countBefore - 1})`);
-  }
-
-  return { success: true };
+  console.log(`[deleteMember] Member deleted successfully`);
+  return deleteResult;
 }

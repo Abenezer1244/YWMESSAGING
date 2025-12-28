@@ -19,8 +19,6 @@ export async function exportChurchData(churchId: string) {
       church,
       admins,
       branches,
-      groups,
-      members,
       messages,
       templates,
       conversations,
@@ -35,19 +33,6 @@ export async function exportChurchData(churchId: string) {
       prisma.branch.findMany({
         where: { churchId },
       }),
-      prisma.group.findMany({
-        where: { branch: { churchId } },
-        include: { members: true },
-      }),
-      prisma.member.findMany({
-        where: {
-          groups: {
-            some: {
-              group: { branch: { churchId } },
-            },
-          },
-        },
-      }),
       prisma.message.findMany({
         where: { churchId },
         include: { recipients: true },
@@ -57,7 +42,10 @@ export async function exportChurchData(churchId: string) {
       }),
       prisma.conversation.findMany({
         where: { churchId },
-        include: { messages: true },
+        include: {
+          messages: true,
+          member: true, // Include member data through conversations
+        },
       }),
       prisma.subscription.findMany({
         where: { churchId },
@@ -69,11 +57,9 @@ export async function exportChurchData(churchId: string) {
       church,
       admins,
       branches,
-      groups,
-      members,
       messages,
       templates,
-      conversations,
+      conversations, // Members are included within conversations
       subscriptions,
     };
   } catch (error) {
@@ -355,28 +341,7 @@ export async function confirmAccountDeletion(
       });
 
       // 5. Delete organizational structure
-      // Get branches first since groups depend on them
-      const branches = await tx.branch.findMany({
-        where: { churchId },
-        select: { id: true },
-      });
-
-      // Delete groups (cascade handles GroupMembers)
-      await tx.groupMember.deleteMany({
-        where: {
-          group: {
-            branchId: { in: branches.map((b) => b.id) },
-          },
-        },
-      });
-
-      await tx.group.deleteMany({
-        where: {
-          branchId: { in: branches.map((b) => b.id) },
-        },
-      });
-
-      // Delete branches
+      // Delete branches (cascade handles members)
       await tx.branch.deleteMany({
         where: { churchId },
       });

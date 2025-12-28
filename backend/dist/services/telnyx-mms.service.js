@@ -42,34 +42,21 @@ export async function findOrCreateMemberByPhone(churchId, phone) {
     }
     const phoneHash = hashForSearch(formattedPhone);
     try {
-        // Try to find existing member with this phone in this church
-        // Include members in groups OR members with conversations
-        const existingMember = await prisma.member.findFirst({
+        // Try to find existing member with this phone (check if conversation exists for this church)
+        const existingConversation = await prisma.conversation.findFirst({
             where: {
-                phoneHash,
-                OR: [
-                    // Members in groups for this church
-                    {
-                        groups: {
-                            some: {
-                                group: { churchId },
-                            },
-                        },
-                    },
-                    // Members who have conversations with this church (texted before)
-                    {
-                        conversations: {
-                            some: {
-                                churchId,
-                            },
-                        },
-                    },
-                ],
+                churchId,
+                member: {
+                    phoneHash,
+                },
+            },
+            include: {
+                member: true,
             },
         });
-        if (existingMember) {
-            console.log(`✅ Found existing member: ${existingMember.firstName} ${existingMember.lastName}`);
-            return existingMember;
+        if (existingConversation) {
+            console.log(`✅ Found existing member: ${existingConversation.member.firstName} ${existingConversation.member.lastName}`);
+            return existingConversation.member;
         }
         // Create new member for unknown caller
         console.log(`📱 Creating new member for phone: ${formattedPhone}`);
@@ -287,36 +274,25 @@ export async function handleInboundMMS(churchId, senderPhone, messageText, media
  */
 export async function broadcastInboundToMembers(churchId, senderMemberId, messageText, mediaType) {
     try {
-        // Get all members of the church who opted in for SMS
-        // Include members who are in groups OR have conversations with this church
-        const members = await prisma.member.findMany({
+        // Get all members through conversations (members don't have churchId anymore)
+        const conversations = await prisma.conversation.findMany({
             where: {
-                optInSms: true,
-                OR: [
-                    // Members in groups for this church
-                    {
-                        groups: {
-                            some: {
-                                group: { churchId },
-                            },
-                        },
-                    },
-                    // Members who have conversations with this church (texted the church number)
-                    {
-                        conversations: {
-                            some: {
-                                churchId,
-                            },
-                        },
-                    },
-                ],
+                churchId,
             },
             select: {
-                id: true,
-                firstName: true,
-                phone: true,
+                member: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        phone: true,
+                        optInSms: true,
+                    },
+                },
             },
         });
+        const members = conversations
+            .map(conv => conv.member)
+            .filter(member => member.optInSms);
         // Get sender info (phone + name)
         const sender = await prisma.member.findUnique({
             where: { id: senderMemberId },
@@ -414,30 +390,19 @@ export async function getMemberByPhone(churchId, phone) {
     }
     const phoneHash = hashForSearch(formattedPhone);
     try {
-        const member = await prisma.member.findFirst({
+        // Find member through conversation (members don't have churchId anymore)
+        const conversation = await prisma.conversation.findFirst({
             where: {
-                phoneHash,
-                OR: [
-                    // Members in groups for this church
-                    {
-                        groups: {
-                            some: {
-                                group: { churchId },
-                            },
-                        },
-                    },
-                    // Members who have conversations with this church
-                    {
-                        conversations: {
-                            some: {
-                                churchId,
-                            },
-                        },
-                    },
-                ],
+                churchId,
+                member: {
+                    phoneHash,
+                },
+            },
+            include: {
+                member: true,
             },
         });
-        return member || null;
+        return conversation?.member || null;
     }
     catch (error) {
         console.error('Error getting member:', error);

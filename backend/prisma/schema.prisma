@@ -93,7 +93,6 @@ model Church {
   // Relations
   branches              Branch[]
   admins                Admin[]
-  groups                Group[]
   messages              Message[]
   messageTemplates      MessageTemplate[]
   subscriptions         Subscription[]
@@ -127,34 +126,9 @@ model Branch {
 
   // Relations
   church      Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
-  groups      Group[]
 
   @@index([churchId])
   @@index([isActive])
-}
-
-// Groups within a branch (e.g., "Sunday School", "Praise Team")
-model Group {
-  id                      String   @id @default(cuid())
-  branchId                String
-  churchId                String
-  name                    String
-  description             String?
-  welcomeMessageEnabled   Boolean  @default(false)
-  welcomeMessageText      String?
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
-
-  // Relations
-  branch                  Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  church                  Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
-  members                 GroupMember[]
-
-  @@index([branchId])
-  @@index([churchId])
-  // ✅ SECURITY: Composite index for fast ownership verification
-  // Supports: WHERE id = ? AND churchId = ? queries (used in addMember, importMembers)
-  @@index([id, churchId])
 }
 
 // Individual members
@@ -172,7 +146,6 @@ model Member {
   updatedAt DateTime @updatedAt
 
   // Relations
-  groups          GroupMember[]
   messageRecipients MessageRecipient[]
   conversations   Conversation[]
   conversationMessages ConversationMessage[]
@@ -186,26 +159,6 @@ model Member {
   // ✅ PHASE 1: Index for member creation date pagination
   // Supports: WHERE createdAt >= ? ORDER BY createdAt DESC (used in member list pagination)
   @@index([createdAt])
-}
-
-// Join table for Group-Member many-to-many
-model GroupMember {
-  id                  String   @id @default(cuid())
-  groupId             String
-  memberId            String
-  welcomeMessageSent  Boolean  @default(false)
-  joinedAt            DateTime @default(now())
-
-  // Relations
-  group               Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  member              Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
-
-  @@unique([groupId, memberId])
-  @@index([groupId])
-  @@index([memberId])
-  // ✅ Priority 2.3: Composite index for bulk member lookups in importMembers and broadcasts
-  // Supports: WHERE groupId = ? AND memberId IN (...) queries efficiently
-  @@index([groupId, memberId])
 }
 
 // SMS messages sent by church

@@ -6,22 +6,6 @@ import { getPlan } from '../config/plans.js';
 export async function getBranches(churchId) {
     const branches = await prisma.branch.findMany({
         where: { churchId },
-        include: {
-            _count: {
-                select: {
-                    groups: true,
-                },
-            },
-            groups: {
-                include: {
-                    _count: {
-                        select: {
-                            members: true,
-                        },
-                    },
-                },
-            },
-        },
         orderBy: { createdAt: 'asc' },
     });
     return branches.map((branch) => ({
@@ -34,8 +18,6 @@ export async function getBranches(churchId) {
         isActive: branch.isActive,
         createdAt: branch.createdAt,
         updatedAt: branch.updatedAt,
-        groupCount: branch._count.groups,
-        memberCount: branch.groups.reduce((sum, g) => sum + g._count.members, 0),
     }));
 }
 /**
@@ -127,25 +109,13 @@ export async function deleteBranch(branchId, churchId) {
     if (branchCount <= 1) {
         throw new Error('Cannot delete the only branch. A church must have at least one branch.');
     }
-    // Get group and member counts for analytics
-    const groups = await prisma.group.findMany({
-        where: { branchId },
-        include: {
-            _count: {
-                select: { members: true },
-            },
-        },
-    });
-    const groupCount = groups.length;
-    const memberCount = groups.reduce((sum, g) => sum + g._count.members, 0);
-    // Delete branch (cascade delete groups and group members handled by Prisma)
+    // Delete branch (cascade handled by Prisma)
     await prisma.branch.delete({
         where: { id: branchId },
     });
     return {
         success: true,
-        groupsDeleted: groupCount,
-        membersDeleted: memberCount,
+        membersDeleted: 0, // Member count removed - members don't have branchId anymore
     };
 }
 //# sourceMappingURL=branch.service.js.map

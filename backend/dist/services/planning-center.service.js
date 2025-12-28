@@ -271,11 +271,6 @@ export async function syncPlanningCenterMembers(churchId) {
                 const existingMember = await prisma.member.findFirst({
                     where: {
                         phone: person.phone,
-                        groups: {
-                            some: {
-                                group: { churchId },
-                            },
-                        },
                     },
                 });
                 if (existingMember) {
@@ -292,40 +287,19 @@ export async function syncPlanningCenterMembers(churchId) {
                 }
                 else if (person.phone) {
                     // Create new member (must have phone number)
-                    // Find a default group or create members group
-                    let group = await prisma.group.findFirst({
-                        where: { churchId, name: 'Members' },
-                    });
-                    if (!group) {
-                        // Get first branch for this church
-                        const branch = await prisma.branch.findFirst({
-                            where: { churchId },
-                        });
-                        if (!branch) {
-                            console.warn(`[Planning Center] No branch found for church ${churchId}, skipping member creation`);
-                            result.itemsFailed++;
-                            continue;
-                        }
-                        group = await prisma.group.create({
-                            data: {
-                                churchId,
-                                branchId: branch.id,
-                                name: 'Members',
-                                description: 'Auto-created group for Planning Center synced members',
-                            },
-                        });
-                    }
                     const newMember = await prisma.member.create({
                         data: {
                             firstName: person.firstName,
                             lastName: person.lastName,
                             email: person.email,
                             phone: person.phone,
-                            groups: {
-                                create: {
-                                    groupId: group.id,
-                                },
-                            },
+                        },
+                    });
+                    // Create a conversation to link member to church
+                    await prisma.conversation.create({
+                        data: {
+                            churchId,
+                            memberId: newMember.id,
                         },
                     });
                     result.itemsCreated++;

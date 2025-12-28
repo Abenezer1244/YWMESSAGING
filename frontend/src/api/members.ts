@@ -29,10 +29,9 @@ export interface MembersResponse {
 }
 
 /**
- * Get all members in a group with pagination
+ * Get all members with pagination
  */
 export async function getMembers(
-  groupId: string,
   options: {
     page?: number;
     limit?: number;
@@ -44,15 +43,15 @@ export async function getMembers(
   if (options.limit) params.append('limit', options.limit.toString());
   if (options.search) params.append('search', options.search);
 
-  const response = await client.get(`/groups/${groupId}/members?${params.toString()}`);
+  const response = await client.get(`/members?${params.toString()}`);
   return response.data;
 }
 
 /**
- * Add a single member to a group
+ * Add a single member
  */
-export async function addMember(groupId: string, data: CreateMemberData): Promise<Member> {
-  const response = await client.post(`/groups/${groupId}/members`, data);
+export async function addMember(data: CreateMemberData): Promise<Member> {
+  const response = await client.post(`/members`, data);
   return response.data.data;
 }
 
@@ -60,7 +59,6 @@ export async function addMember(groupId: string, data: CreateMemberData): Promis
  * Import members from CSV file
  */
 export async function importMembers(
-  groupId: string,
   file: File
 ): Promise<{
   imported: number;
@@ -72,7 +70,7 @@ export async function importMembers(
 
   // Note: Do NOT set Content-Type header - let axios set it with the boundary
   // Authorization header is automatically added by the client interceptor
-  const response = await client.post(`/groups/${groupId}/members/import`, formData, {
+  const response = await client.post(`/members/import`, formData, {
     headers: {
       // Let axios auto-set Content-Type with multipart boundary
       // 'Content-Type': 'multipart/form-data' - DO NOT SET, let axios handle it
@@ -94,9 +92,9 @@ export async function updateMember(
 }
 
 /**
- * Remove a member from a group
+ * Remove a member
  */
-export async function removeMember(groupId: string, memberId: string): Promise<any> {
-  const response = await client.delete(`/groups/${groupId}/members/${memberId}`);
+export async function removeMember(memberId: string): Promise<any> {
+  const response = await client.delete(`/members/${memberId}`);
   return response.data.data;
 }

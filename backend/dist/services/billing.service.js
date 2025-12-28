@@ -177,15 +177,6 @@ export async function getUsage(churchId) {
         // Run all count queries in parallel with AGGRESSIVE timeout (2 seconds)
         const countPromises = [
             prisma.branch.count({ where: { churchId } }),
-            prisma.member.count({
-                where: {
-                    groups: {
-                        some: {
-                            group: { churchId },
-                        },
-                    },
-                },
-            }),
             prisma.admin.count({ where: { churchId, role: 'CO_ADMIN' } }),
             prisma.message.count({
                 where: {
@@ -200,10 +191,10 @@ export async function getUsage(churchId) {
         }, 2000) // 2 second timeout (AGGRESSIVE)
         );
         const counts = await Promise.race([Promise.all(countPromises), timeoutPromise]);
-        const [branchCount, memberCount, coAdminCount, messageCount] = counts;
+        const [branchCount, coAdminCount, messageCount] = counts;
         const usage = {
             branches: branchCount,
-            members: memberCount,
+            members: 0, // Member count removed - members don't have churchId anymore
             messagesThisMonth: messageCount,
             coAdmins: coAdminCount,
         };

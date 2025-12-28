@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { logout as logoutApi } from '../api/auth';
 import { createSelectors } from '../hooks/createSelectors';
 import { useBranchStore } from './branchStore';
-import { useGroupStore } from './groupStore';
 const useAuthStoreBase = create()((set, get) => ({
     // State
     user: null,
@@ -65,10 +64,9 @@ const useAuthStoreBase = create()((set, get) => ({
         }
         // ✅ CRITICAL: Clear all data stores to prevent data leakage
         // When user logs out, ALL previous user's data must be cleared
-        // This prevents a new user from seeing the previous user's branches/groups/data
+        // This prevents a new user from seeing the previous user's branches/data
         try {
             useBranchStore.getState().reset();
-            useGroupStore.getState().reset();
         }
         catch (e) {
             console.warn('Failed to clear store data:', e);

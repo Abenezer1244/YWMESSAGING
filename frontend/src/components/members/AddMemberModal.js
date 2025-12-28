@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { addMember } from '../../api/members';
-export function AddMemberModal({ isOpen, groupId, onClose, onSuccess }) {
+export function AddMemberModal({ isOpen, onClose, onSuccess }) {
     const { register, handleSubmit, reset, formState: { errors } } = useForm({
         defaultValues: {
             firstName: '',
@@ -24,7 +24,7 @@ export function AddMemberModal({ isOpen, groupId, onClose, onSuccess }) {
                 toast.error('First name, last name, and phone are required');
                 return;
             }
-            const member = await addMember(groupId, {
+            const member = await addMember({
                 firstName,
                 lastName,
                 phone,

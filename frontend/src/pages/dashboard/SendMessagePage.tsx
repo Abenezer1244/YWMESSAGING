@@ -1,87 +1,45 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Loader, Send, FileText, Users, Trash2 } from 'lucide-react';
+import { Loader, Send, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useGroupStore } from '../../stores/groupStore';
-import { useBranchStore } from '../../stores/branchStore';
 import { useMessageStore } from '../../stores/messageStore';
 import { sendMessage } from '../../api/messages';
-import { getGroups } from '../../api/groups';
 import { getTemplates, MessageTemplate } from '../../api/templates';
 import TemplateFormModal from '../../components/templates/TemplateFormModal';
 import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
 
 export function SendMessagePage() {
-  const { groups, setGroups } = useGroupStore();
-  const { currentBranchId } = useBranchStore();
   const { addMessage } = useMessageStore();
 
   const [content, setContent] = useState('');
-  const [targetType, setTargetType] = useState<'groups' | 'all'>('groups');
-  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(false);
   const [templates, setTemplates] = useState<MessageTemplate[]>([]);
   const [showSaveModal, setShowSaveModal] = useState(false);
 
   useEffect(() => {
-    loadGroupsAndTemplates();
-  }, [currentBranchId]);
+    loadTemplates();
+  }, []);
 
-  const loadGroupsAndTemplates = async () => {
+  const loadTemplates = async () => {
     setIsPageLoading(true);
     try {
-      // ✅ PERFORMANCE: Load groups and templates in parallel (independent calls)
-      const promises: Promise<any>[] = [
-        getTemplates().catch(error => {
-          console.error('Failed to load templates:', error);
-          return [];
-        }),
-      ];
-
-      let groupsPromiseIndex = -1;
-
-      // Groups loading depends on currentBranchId
-      if (currentBranchId && groups.length === 0) {
-        groupsPromiseIndex = 0;
-        promises.unshift(
-          getGroups(currentBranchId).catch(error => {
-            console.error('Failed to load groups:', error);
-            return [];
-          })
-        );
-      }
-
-      const results = await Promise.all(promises);
-
-      // Set results in correct order
-      if (groupsPromiseIndex === 0) {
-        setGroups(results[0]);
-        setTemplates(results[1]);
-      } else {
-        setTemplates(results[0]);
-      }
+      const data = await getTemplates().catch(error => {
+        console.error('Failed to load templates:', error);
+        return [];
+      });
+      setTemplates(data);
     } catch (error) {
-      console.error('Failed to load data:', error);
+      console.error('Failed to load templates:', error);
       toast.error('Failed to load page data');
     } finally {
       setIsPageLoading(false);
     }
   };
 
-  // Calculate segments and cost
+  // Calculate segments
   const segments = Math.ceil(content.length / 160) || 0;
-  const totalCost = (segments * selectedGroupIds.length) * 0.0075;
-  const recipientCount = selectedGroupIds.reduce(
-    (sum, gId) => sum + (groups.find((g) => g.id === gId)?.memberCount || 0),
-    0
-  );
-
-  const handleGroupToggle = (groupId: string) => {
-    setSelectedGroupIds((prev) =>
-      prev.includes(groupId) ? prev.filter((id) => id !== groupId) : [...prev, groupId]
-    );
-  };
+  const totalCost = (segments) * 0.0075;
 
   const handleUseTemplate = (template: MessageTemplate) => {
     setContent(template.content);
@@ -94,24 +52,17 @@ export function SendMessagePage() {
       return;
     }
 
-    if (targetType === 'groups' && selectedGroupIds.length === 0) {
-      toast.error('Please select at least one group');
-      return;
-    }
-
     try {
       setIsLoading(true);
 
       const message = await sendMessage({
         content: content.trim(),
-        targetType: targetType === 'all' ? 'all' : 'groups',
-        targetIds: targetType === 'all' ? undefined : selectedGroupIds,
+        targetType: 'all',
       });
 
       addMessage(message);
       toast.success(`Message queued for ${message.totalRecipients} recipients`);
       setContent('');
-      setSelectedGroupIds([]);
     } catch (error) {
       toast.error((error as Error).message || 'Failed to send message');
     } finally {
@@ -211,127 +162,24 @@ export function SendMessagePage() {
             )}
           </motion.div>
 
-          {/* Recipient Selection */}
+          {/* Recipient Note */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Send To
-            </label>
-            <div className="space-y-3">
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <input
-                  type="radio"
-                  name="targetType"
-                  value="groups"
-                  checked={targetType === 'groups'}
-                  onChange={(e) => setTargetType(e.target.value as 'groups' | 'all')}
-                  className="w-4 h-4 accent-primary cursor-pointer"
-                />
-                <span className="text-sm font-medium text-foreground">Select Groups</span>
-              </label>
-
-              {targetType === 'groups' && (
-                <div className="ml-7 space-y-2 bg-muted p-4 rounded-lg border border-border">
-                  {groups.length === 0 ? (
-                    <p className="text-muted-foreground text-sm">No groups available</p>
-                  ) : (
-                    groups.map((group) => (
-                      <label
-                        key={group.id}
-                        className="flex items-center gap-3 cursor-pointer group"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedGroupIds.includes(group.id)}
-                          onChange={() => handleGroupToggle(group.id)}
-                          className="w-4 h-4 rounded accent-primary cursor-pointer"
-                        />
-                        <span className="text-sm text-foreground/80">
-                          {group.name} ({group.memberCount} members)
-                        </span>
-                      </label>
-                    ))
-                  )}
-                </div>
-              )}
-
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <input
-                  type="radio"
-                  name="targetType"
-                  value="all"
-                  checked={targetType === 'all'}
-                  onChange={(e) => setTargetType(e.target.value as 'groups' | 'all')}
-                  className="w-4 h-4 accent-primary cursor-pointer"
-                />
-                <span className="text-sm font-medium text-foreground">All Members</span>
-              </label>
-            </div>
+            <SoftCard variant="gradient">
+              <div className="space-y-2">
+                <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  📬 Message will be sent to:
+                </p>
+                <p className="text-sm text-foreground/80">All members in your church</p>
+              </div>
+            </SoftCard>
           </motion.div>
 
-          {/* Recipient Preview */}
-          {targetType === 'groups' && selectedGroupIds.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-            >
-              <SoftCard variant="gradient">
-                <div className="space-y-3">
-                  <p className="text-sm font-semibold text-foreground flex items-center gap-2">
-                    📬 Will send to:
-                  </p>
-                  <div className="space-y-2">
-                    {selectedGroupIds.map((groupId) => {
-                      const group = groups.find((g) => g.id === groupId);
-                      return (
-                        <div key={groupId} className="flex items-center justify-between text-sm">
-                          <span className="text-foreground/80">{group?.name}</span>
-                          <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded">
-                            {group?.memberCount} members
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className="border-t border-primary/20 pt-2 mt-2">
-                    <p className="text-sm font-medium text-foreground">
-                      Total: <span className="text-primary">{recipientCount} recipients</span>
-                    </p>
-                  </div>
-                </div>
-              </SoftCard>
-            </motion.div>
-          )}
-
-          {targetType === 'all' && segments > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-            >
-              <SoftCard variant="gradient">
-                <div className="space-y-2">
-                  <p className="text-sm font-semibold text-foreground flex items-center gap-2">
-                    📬 Will send to:
-                  </p>
-                  <p className="text-sm text-foreground/80">All members in your church</p>
-                  <div className="border-t border-primary/20 pt-2 mt-2">
-                    <p className="text-sm font-medium text-foreground">
-                      Total: <span className="text-primary">{recipientCount} recipients</span>
-                    </p>
-                  </div>
-                </div>
-              </SoftCard>
-            </motion.div>
-          )}
-
           {/* Cost Summary */}
-          {(targetType === 'all' || selectedGroupIds.length > 0) && segments > 0 && (
+          {segments > 0 && (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -340,16 +188,17 @@ export function SendMessagePage() {
               <SoftCard variant="gradient">
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-foreground/80">Recipients:</span>
-                    <span className="font-medium text-foreground">{recipientCount}</span>
+                    <span className="text-foreground/80">Cost per recipient:</span>
+                    <span className="font-medium text-foreground">${(segments * 0.0075).toFixed(4)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-foreground/80">Segments:</span>
                     <span className="font-medium text-foreground">{segments}</span>
                   </div>
-                  <div className="flex justify-between border-t border-border/40 pt-2">
-                    <span className="font-medium text-foreground">Estimated Cost:</span>
-                    <span className="font-bold text-primary">${totalCost.toFixed(2)}</span>
+                  <div className="border-t border-border/40 pt-2">
+                    <p className="text-xs text-foreground/60">
+                      Total cost will depend on the number of members who receive this message
+                    </p>
                   </div>
                 </div>
               </SoftCard>
@@ -368,10 +217,8 @@ export function SendMessagePage() {
               size="md"
               onClick={() => {
                 setContent('');
-                setSelectedGroupIds([]);
               }}
               disabled={isLoading}
-              icon={<Trash2 className="w-4 h-4" />}
             >
               Clear
             </SoftButton>
@@ -380,11 +227,7 @@ export function SendMessagePage() {
               size="md"
               fullWidth
               onClick={handleSendMessage}
-              disabled={
-                isLoading ||
-                !content.trim() ||
-                (targetType === 'groups' && selectedGroupIds.length === 0)
-              }
+              disabled={isLoading || !content.trim()}
               icon={isLoading ? (
                 <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
                   <Loader className="w-4 h-4" />
@@ -404,8 +247,7 @@ export function SendMessagePage() {
           template={null}
           onClose={() => {
             setShowSaveModal(false);
-            // Reload templates after saving new template
-            loadGroupsAndTemplates();
+            loadTemplates();
           }}
         />
       )}

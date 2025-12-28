@@ -1,11 +1,10 @@
 /**
- * Send welcome message when a member is added to a group
- * Triggered by GroupMember creation
- * Delay: 1 minute
+ * Send welcome message when a member is added to a church
+ * Note: Group functionality has been removed
  */
-export declare function sendWelcomeMessage(groupMemberId: string, groupId: string, memberId: string): Promise<void>;
+export declare function sendWelcomeMessage(memberId: string, churchId: string): Promise<void>;
 /**
  * Helper to call welcome message job with delay
  */
-export declare function queueWelcomeMessage(groupMemberId: string, groupId: string, memberId: string, delayMs?: number): Promise<void>;
+export declare function queueWelcomeMessage(memberId: string, churchId: string, delayMs?: number): Promise<void>;
 //# sourceMappingURL=welcomeMessage.job.d.ts.map

@@ -12,7 +12,7 @@ export async function getOnboardingProgress(churchId) {
         },
     });
     // Return all known tasks, even if not yet created in DB
-    const allTasks = ['create_branch', 'create_group', 'add_members', 'send_message'];
+    const allTasks = ['create_branch', 'add_members', 'send_message'];
     return allTasks.map(taskId => {
         const found = progress.find(p => p.taskId === taskId);
         return {
@@ -67,24 +67,12 @@ async function verifyTaskCompletion(churchId, taskId) {
                 where: { churchId },
             });
             return branchCount > 0;
-        case 'create_group':
-            // Check if church has at least one group
-            const groupCount = await prisma.group.count({
+        case 'add_members':
+            // Check if church has at least one conversation (which requires a member)
+            const conversationCount = await prisma.conversation.count({
                 where: { churchId },
             });
-            return groupCount > 0;
-        case 'add_members':
-            // Check if church has at least one member
-            const memberCount = await prisma.member.count({
-                where: {
-                    groups: {
-                        some: {
-                            group: { churchId },
-                        },
-                    },
-                },
-            });
-            return memberCount > 0;
+            return conversationCount > 0;
         case 'send_message':
             // Check if church has sent at least one message
             const messageCount = await prisma.message.count({

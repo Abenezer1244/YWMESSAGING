@@ -13,16 +13,9 @@ export interface UpdateMemberData {
     optInSms?: boolean;
 }
 /**
- * Get members for a group with pagination and search
- * ✅ CACHED: First page (no search) is cached for 30 minutes
- * BEFORE: Database query on every member list load
- * AFTER: Redis cache hit returns in <5ms (100+ times faster)
- *
- * Note: Search results are not cached (search is dynamic/unpredictable)
- *
- * Impact: 100 member list views per hour × 30 min TTL = Only 2 DB queries per hour
+ * Get all members with pagination and search
  */
-export declare function getMembers(groupId: string, options?: {
+export declare function getMembers(options?: {
     page?: number;
     limit?: number;
     search?: string;
@@ -44,10 +37,9 @@ export declare function getMembers(groupId: string, options?: {
     };
 }>;
 /**
- * Add single member to group
- * ✅ PROTECTED: Function-level 4-second timeout to prevent hangs (AGGRESSIVE)
+ * Add single member
  */
-export declare function addMember(groupId: string, data: CreateMemberData): Promise<{
+export declare function addMember(data: CreateMemberData): Promise<{
     id: any;
     firstName: any;
     lastName: any;
@@ -58,12 +50,12 @@ export declare function addMember(groupId: string, data: CreateMemberData): Prom
     createdAt: any;
 }>;
 /**
- * Bulk import members to group
+ * Bulk import members
  * ✅ OPTIMIZED: Batch operations instead of per-member queries
  * Before: 500 queries (2-5 per member in loop)
- * After: 5 queries (1 for fetch existing, 1 for create members, 1 for check existing groupMembers, 1 for create groupMembers, multiple queueWelcomeMessage)
+ * After: 3 queries (1 for fetch existing, 1 for create members, 1 for success)
  */
-export declare function importMembers(groupId: string, membersData: Array<{
+export declare function importMembers(membersData: Array<{
     firstName: string;
     lastName: string;
     phone: string;
@@ -89,9 +81,19 @@ export declare function updateMember(memberId: string, data: UpdateMemberData): 
     createdAt: Date;
 }>;
 /**
- * Remove member from group
+ * Delete a member
  */
-export declare function removeMemberFromGroup(groupId: string, memberId: string): Promise<{
-    success: boolean;
+export declare function deleteMember(memberId: string): Promise<{
+    id: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    phoneHash: string | null;
+    email: string | null;
+    encryptedEmail: string | null;
+    emailHash: string | null;
+    optInSms: boolean;
+    createdAt: Date;
+    updatedAt: Date;
 }>;
 //# sourceMappingURL=member.service.d.ts.map

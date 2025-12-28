@@ -16,61 +16,25 @@ export async function resolveRecipients(churchId, options) {
                 members.set(member.phone, { id: member.id, phone: member.phone });
             }
         }
-        else if (options.targetType === 'groups' && options.targetIds?.length) {
-            // Get all members from selected groups
-            const groupMembers = await prisma.groupMember.findMany({
-                where: {
-                    groupId: { in: options.targetIds },
-                },
-                include: {
-                    member: {
-                        select: { id: true, phone: true, optInSms: true },
-                    },
-                },
-            });
-            for (const gm of groupMembers) {
-                if (gm.member.optInSms) {
-                    members.set(gm.member.phone, { id: gm.member.id, phone: gm.member.phone });
-                }
-            }
-        }
-        else if (options.targetType === 'branches' && options.targetIds?.length) {
-            // Get all members from all groups in selected branches
-            const groupMembers = await prisma.groupMember.findMany({
-                where: {
-                    group: {
-                        branchId: { in: options.targetIds },
-                    },
-                },
-                include: {
-                    member: {
-                        select: { id: true, phone: true, optInSms: true },
-                    },
-                },
-            });
-            for (const gm of groupMembers) {
-                if (gm.member.optInSms) {
-                    members.set(gm.member.phone, { id: gm.member.id, phone: gm.member.phone });
-                }
-            }
-        }
         else if (options.targetType === 'all') {
-            // Get all members from entire church
-            const allMembers = await prisma.member.findMany({
-                where: {
-                    groups: {
-                        some: {
-                            group: {
-                                churchId,
-                            },
+            // Get all members through conversations (members don't have churchId anymore)
+            const conversations = await prisma.conversation.findMany({
+                where: { churchId },
+                select: {
+                    member: {
+                        select: {
+                            id: true,
+                            phone: true,
+                            optInSms: true,
                         },
                     },
-                    optInSms: true,
                 },
-                select: { id: true, phone: true },
             });
-            for (const member of allMembers) {
-                members.set(member.phone, { id: member.id, phone: member.phone });
+            for (const conv of conversations) {
+                const member = conv.member;
+                if (member.optInSms) {
+                    members.set(member.phone, { id: member.id, phone: member.phone });
+                }
             }
         }
     }

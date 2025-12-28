@@ -21,7 +21,6 @@ const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const BranchesPage = lazy(() => import('./pages/dashboard/BranchesPage'));
-const GroupsPage = lazy(() => import('./pages/dashboard/GroupsPage'));
 const MembersPage = lazy(() => import('./pages/dashboard/MembersPage'));
 const SendMessagePage = lazy(() => import('./pages/dashboard/SendMessagePage'));
 const MessageHistoryPage = lazy(() => import('./pages/dashboard/MessageHistoryPage'));
@@ -274,14 +273,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <BranchesPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/branches/:branchId/groups"
-            element={
-              <ProtectedRoute>
-                <GroupsPage />
               </ProtectedRoute>
             }
           />

@@ -24,21 +24,21 @@ export interface MembersResponse {
     };
 }
 /**
- * Get all members in a group with pagination
+ * Get all members with pagination
  */
-export declare function getMembers(groupId: string, options?: {
+export declare function getMembers(options?: {
     page?: number;
     limit?: number;
     search?: string;
 }): Promise<MembersResponse>;
 /**
- * Add a single member to a group
+ * Add a single member
  */
-export declare function addMember(groupId: string, data: CreateMemberData): Promise<Member>;
+export declare function addMember(data: CreateMemberData): Promise<Member>;
 /**
  * Import members from CSV file
  */
-export declare function importMembers(groupId: string, file: File): Promise<{
+export declare function importMembers(file: File): Promise<{
     imported: number;
     failed: number;
     failedDetails?: Array<{
@@ -51,7 +51,7 @@ export declare function importMembers(groupId: string, file: File): Promise<{
  */
 export declare function updateMember(memberId: string, data: Partial<CreateMemberData>): Promise<Member>;
 /**
- * Remove a member from a group
+ * Remove a member
  */
-export declare function removeMember(groupId: string, memberId: string): Promise<any>;
+export declare function removeMember(memberId: string): Promise<any>;
 //# sourceMappingURL=members.d.ts.map

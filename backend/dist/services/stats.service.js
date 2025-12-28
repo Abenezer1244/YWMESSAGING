@@ -130,32 +130,20 @@ async function getBranchStatsUncached(churchId) {
             select: {
                 id: true,
                 name: true,
-                groups: {
-                    select: {
-                        id: true,
-                        _count: {
-                            select: { members: true }, // Count members without loading them
-                        },
-                    },
-                },
             },
         });
         // ✅ Query 2: Get message stats for all branches in one query
-        // Simplified query to avoid JSONB issues - just count messages by target type
         const messageStats = await prisma.$queryRaw `
       SELECT
         b.id as branch_id,
         COUNT(DISTINCT m.id) as message_count,
         COUNT(CASE WHEN mr.status = 'delivered' THEN 1 END) as delivered_count
       FROM "Branch" b
-      LEFT JOIN "Group" g ON g."branchId" = b.id
+      LEFT JOIN "Member" mem ON mem."branchId" = b.id
       LEFT JOIN "Message" m ON m."churchId" = b."churchId"
         AND (m."targetType" IN ('branches', 'all') OR m."targetType" IS NULL)
       LEFT JOIN "MessageRecipient" mr ON mr."messageId" = m.id
-        AND mr."memberId" IN (
-          SELECT "memberId" FROM "GroupMember"
-          WHERE "groupId" IN (SELECT id FROM "Group" WHERE "branchId" = b.id)
-        )
+        AND mr."memberId" = mem.id
       WHERE b."churchId" = ${churchId}
       GROUP BY b.id
     `;
@@ -169,25 +157,19 @@ async function getBranchStatsUncached(churchId) {
         }
         const stats = [];
         for (const branch of branchesWithCounts) {
-            // Calculate total member count
-            let memberCount = 0;
-            for (const group of branch.groups) {
-                memberCount += group._count.members;
-            }
             const messageStat = messageStatsMap.get(branch.id) || {
                 messageCount: 0,
                 deliveredCount: 0,
             };
-            const deliveryRate = messageStat.messageCount > 0 && memberCount > 0
-                ? Math.round((messageStat.deliveredCount / (messageStat.messageCount * memberCount)) * 100)
+            const deliveryRate = messageStat.messageCount > 0
+                ? Math.round((messageStat.deliveredCount / messageStat.messageCount) * 100)
                 : 0;
             stats.push({
                 id: branch.id,
                 name: branch.name,
-                memberCount,
+                memberCount: 0, // Member count removed - members don't have branchId anymore
                 messageCount: messageStat.messageCount,
                 deliveryRate: Math.min(Math.max(deliveryRate, 0), 100),
-                groupCount: branch.groups.length,
             });
         }
         return stats;
@@ -213,19 +195,17 @@ async function getBranchStatsUncached(churchId) {
  */
 export async function getSummaryStats(churchId) {
     return getCachedWithFallback(CACHE_KEYS.churchStats(churchId), async () => {
-        const [messages, members, branches, groups] = await Promise.all([
+        const [messages, conversations, branches] = await Promise.all([
             prisma.message.count({ where: { churchId } }),
-            prisma.member.count({ where: { groups: { some: { group: { churchId } } } } }),
+            prisma.conversation.count({ where: { churchId } }), // Members accessed through conversations
             prisma.branch.count({ where: { churchId } }),
-            prisma.group.count({ where: { churchId } }),
         ]);
         const messageStats = await getMessageStats(churchId, 30);
         return {
             totalMessages: messages,
             averageDeliveryRate: messageStats.deliveryRate,
-            totalMembers: members,
+            totalMembers: conversations, // Members count through conversations
             totalBranches: branches,
-            totalGroups: groups,
         };
     }, CACHE_TTL.SHORT // 5 minutes
     );

@@ -17,7 +17,6 @@ interface BranchStat {
     memberCount: number;
     messageCount: number;
     deliveryRate: number;
-    groupCount: number;
 }
 /**
  * Get message statistics for a church
@@ -53,7 +52,6 @@ export declare function getSummaryStats(churchId: string): Promise<{
     averageDeliveryRate: number;
     totalMembers: number;
     totalBranches: number;
-    totalGroups: number;
 }>;
 export {};
 //# sourceMappingURL=stats.service.d.ts.map

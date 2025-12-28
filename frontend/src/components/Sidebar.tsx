@@ -78,12 +78,6 @@ export function Sidebar() {
       path: '/branches',
     },
     {
-      label: 'Groups',
-      icon: <Users className="w-5 h-5" />,
-      path: `/branches/${currentBranchId}/groups`,
-      conditional: true,
-    },
-    {
       label: 'Members',
       icon: <Users className="w-5 h-5" />,
       path: '/members',

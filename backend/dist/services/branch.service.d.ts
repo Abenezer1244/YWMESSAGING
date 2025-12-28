@@ -24,8 +24,6 @@ export declare function getBranches(churchId: string): Promise<{
     isActive: boolean;
     createdAt: Date;
     updatedAt: Date;
-    groupCount: number;
-    memberCount: number;
 }[]>;
 /**
  * Create a new branch
@@ -62,7 +60,6 @@ export declare function updateBranch(branchId: string, churchId: string, input: 
  */
 export declare function deleteBranch(branchId: string, churchId: string): Promise<{
     success: boolean;
-    groupsDeleted: number;
     membersDeleted: number;
 }>;
 //# sourceMappingURL=branch.service.d.ts.map

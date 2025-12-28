@@ -1,14 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useSearchParams, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Users, Trash2, Loader } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../stores/authStore';
-import { useBranchStore } from '../../stores/branchStore';
-import { useGroupStore } from '../../stores/groupStore';
 import { getMembers, Member, removeMember } from '../../api/members';
-import { getBranches } from '../../api/branches';
-import { getGroups } from '../../api/groups';
 import { AddMemberModal } from '../../components/members/AddMemberModal';
 import { ImportCSVModal } from '../../components/members/ImportCSVModal';
 import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
@@ -19,32 +14,6 @@ import { designTokens } from '../../utils/designTokens';
 
 export function MembersPage() {
   const auth = useAuthStore();
-  const { branches, setBranches, setLoading: setBranchLoading } = useBranchStore();
-  const { groups, setGroups } = useGroupStore();
-  const [searchParams] = useSearchParams();
-  const { groupId: urlGroupId } = useParams<{ groupId?: string }>();
-  const [branchesLoaded, setBranchesLoaded] = useState(branches.length > 0);
-  const [isInitialLoading, setIsInitialLoading] = useState(!groups.length);
-
-  // Determine group ID with fallback to previously selected group
-  let groupId = urlGroupId || searchParams.get('groupId') || groups[0]?.id || '';
-
-  // ✅ FIX: Restore previously selected group from sessionStorage if available
-  // This ensures members page shows the same group after navigation
-  if (!groupId && typeof window !== 'undefined') {
-    const savedGroupId = sessionStorage.getItem('selectedGroupId');
-    if (savedGroupId && groups.some(g => g.id === savedGroupId)) {
-      groupId = savedGroupId;
-    }
-  }
-
-  // ✅ FIX: Ensure search params are always prioritized over fallback
-  // This prevents the Members page from always showing the first group
-  // when navigating via ?groupId=xxx query parameter
-  const queryGroupId = searchParams.get('groupId');
-  if (queryGroupId) {
-    groupId = queryGroupId;
-  }
 
   const [members, setMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -57,29 +26,17 @@ export function MembersPage() {
 
   const limit = 50;
   const pages = Math.ceil(total / limit);
-  const currentGroup = groups.find((g) => g.id === groupId);
 
-  // Define loadMembers function first (must be before useEffect hooks)
-  // CRITICAL: Only update total on first load (page=1) or search, NOT on every page navigation
   const loadMembers = useCallback(async (pageNum: number = 1, updateTotal: boolean = true) => {
-    if (!groupId) return;
-
     try {
       setIsLoading(true);
-      const data = await getMembers(groupId, {
+      const data = await getMembers({
         page: pageNum,
         limit,
         search: search || undefined,
       });
       setMembers(data.data);
 
-      // CRITICAL FIX: Only update total count when explicitly requested
-      // This prevents pagination from showing changing "X of Y" as data modifies
-      // Total is updated only on:
-      // 1. Initial load (page 1)
-      // 2. After search
-      // 3. After add/import/delete (explicit calls)
-      // NOT on page navigation
       if (updateTotal) {
         setTotal(data.pagination.total);
       }
@@ -88,205 +45,65 @@ export function MembersPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [groupId, search]);
+  }, [search]);
 
-  // Load branches first if not already loaded
+  // Initial load
   useEffect(() => {
-    const loadBranches = async () => {
-      if (!auth.church?.id) {
-        setBranchesLoaded(true);
-        return;
-      }
-
-      // If branches already loaded, skip
-      if (branches.length > 0) {
-        setBranchesLoaded(true);
-        return;
-      }
-
-      setBranchLoading(true);
-      try {
-        const branchesData = await getBranches(auth.church.id);
-        setBranches(branchesData);
-      } catch (error) {
-        console.error('Failed to load branches:', error);
-      } finally {
-        setBranchLoading(false);
-        setBranchesLoaded(true);
-      }
-    };
-
-    loadBranches();
-  }, [auth.church?.id, branches.length, setBranches, setBranchLoading]);
-
-  // Load groups from ALL branches when needed
-  // CRITICAL: Reload if groupId doesn't exist in store (fixes navigation persistence bug)
-  useEffect(() => {
-    const loadGroupsIfNeeded = async () => {
-      if (!auth.church?.id || branches.length === 0) {
-        setIsInitialLoading(false);
-        return;
-      }
-
-      // If we have a groupId but it doesn't exist in store, reload from API
-      // This handles the case where user navigates away and back - Zustand has stale data
-      if (groupId && !groups.some(g => g.id === groupId)) {
-        console.log('[MembersPage] Selected groupId not in store, reloading groups from API');
-        let allGroups: typeof groups = [];
-
-        for (const branch of branches) {
-          try {
-            const branchGroups = await getGroups(branch.id);
-            allGroups = [...allGroups, ...branchGroups];
-          } catch (error) {
-            console.error(`Failed to load groups for branch ${branch.id}:`, error);
-          }
-        }
-
-        if (allGroups.length > 0) {
-          setGroups(allGroups);
-          console.log('[MembersPage] Groups reloaded:', allGroups.length);
-        }
-        setIsInitialLoading(false);
-        return;
-      }
-
-      // Otherwise, load if groups is empty
-      if (groups.length === 0) {
-        console.log('[MembersPage] Groups empty, loading from API');
-        let allGroups: typeof groups = [];
-
-        for (const branch of branches) {
-          try {
-            const branchGroups = await getGroups(branch.id);
-            allGroups = [...allGroups, ...branchGroups];
-          } catch (error) {
-            console.error(`Failed to load groups for branch ${branch.id}:`, error);
-          }
-        }
-
-        if (allGroups.length > 0) {
-          setGroups(allGroups);
-          console.log('[MembersPage] Groups loaded:', allGroups.length);
-        }
-      }
-
-      setIsInitialLoading(false);
-    };
-
-    loadGroupsIfNeeded();
-  }, [auth.church?.id, branches, groupId, groups, setGroups]);
-
-  // Save selected group ID to sessionStorage for persistence across navigation
-  useEffect(() => {
-    if (groupId && typeof window !== 'undefined') {
-      sessionStorage.setItem('selectedGroupId', groupId);
-    }
-  }, [groupId]);
-
-  // Load members when group changes (initial load) - UPDATE TOTAL
-  useEffect(() => {
-    if (groupId) {
-      loadMembers(1, true);  // true = update total
-    }
-  }, [groupId, loadMembers]);
+    loadMembers(1, true);
+  }, []);
 
   // Load members when page changes (pagination) - DON'T UPDATE TOTAL
-  // This keeps pagination stable and prevents "X of Y" from changing
   useEffect(() => {
-    if (groupId && page > 1) {
-      loadMembers(page, false);  // false = don't update total
+    if (page > 1) {
+      loadMembers(page, false);
     }
-  }, [page, groupId, loadMembers]);
+  }, [page, loadMembers]);
 
-  // Debounce search - wait 500ms after user stops typing before searching
+  // Debounce search
   useEffect(() => {
-    if (!groupId) return;
-
     const searchTimer = setTimeout(() => {
-      // Reset to page 1 when searching
       setPage(1);
-      loadMembers(1, true);  // true = update total for new search results
+      loadMembers(1, true);
     }, 500);
 
     return () => clearTimeout(searchTimer);
-  }, [search, groupId, loadMembers]);
+  }, [search, loadMembers]);
 
   const handleAddSuccess = async (newMember: Member) => {
-    // ✅ INSTANT: Add to UI immediately (optimistic update)
     setMembers(prevMembers => [newMember, ...prevMembers]);
     setTotal(prevTotal => prevTotal + 1);
     setIsAddModalOpen(false);
     toast.success('Member added successfully');
-    // No refetch needed - optimistic update is sufficient
-    // The member is now in the UI and the backend has persisted it
   };
 
   const handleImportSuccess = () => {
-    // ✅ INSTANT: Close modal immediately
     setIsImportModalOpen(false);
     toast.success('Members imported successfully');
-
-    // 🔄 REFETCH: Reload members list since import adds multiple members
-    // Reset to page 1 and refresh the member list
     setPage(1);
-    // Allow state update to batch before refetch
     setTimeout(() => {
       loadMembers(1, true);
     }, 50);
   };
 
   const handleDeleteMember = async (memberId: string, memberName: string) => {
-    if (!window.confirm(`Are you sure you want to remove ${memberName} from this group?`)) {
+    if (!window.confirm(`Are you sure you want to remove ${memberName}?`)) {
       return;
     }
 
     try {
       setDeletingMemberId(memberId);
-
-      // ✅ INSTANT: Remove from UI immediately (optimistic update)
       setMembers(prevMembers => prevMembers.filter(m => m.id !== memberId));
       setTotal(prevTotal => Math.max(0, prevTotal - 1));
 
-      // 🔄 ASYNC: Call API to persist the deletion
-      await removeMember(groupId, memberId);
+      await removeMember(memberId);
       toast.success('Member removed successfully');
     } catch (error) {
       toast.error((error as Error).message || 'Failed to remove member');
-      // Refetch to restore the member if deletion failed
       await loadMembers(page, true);
     } finally {
       setDeletingMemberId(null);
     }
   };
-
-  // Show loading spinner while initially loading groups
-  if (isInitialLoading) {
-    return (
-      <SoftLayout>
-        <div className="min-h-screen bg-background flex items-center justify-center p-6">
-          <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity }}>
-            <Loader className="w-8 h-8 text-primary" />
-          </motion.div>
-        </div>
-      </SoftLayout>
-    );
-  }
-
-  // Show error if no group selected and no groupId in URL
-  if (!groupId) {
-    return (
-      <SoftLayout>
-        <div className="min-h-screen bg-background flex items-center justify-center p-6">
-          <SoftCard className="text-center max-w-md">
-            <p className="text-foreground/80 text-lg">
-              No group selected. Create or select a group first.
-            </p>
-          </SoftCard>
-        </div>
-      </SoftLayout>
-    );
-  }
 
   return (
     <SoftLayout>
@@ -304,7 +121,7 @@ export function MembersPage() {
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Members</span>
               </h1>
               <p className="text-muted-foreground">
-                {currentGroup?.name || 'Group'} • {total} members
+                {total} members total
               </p>
             </div>
             <SoftButton
@@ -456,14 +273,12 @@ export function MembersPage() {
       {/* Modals */}
       <AddMemberModal
         isOpen={isAddModalOpen}
-        groupId={groupId}
         onClose={() => setIsAddModalOpen(false)}
         onSuccess={handleAddSuccess}
       />
 
       <ImportCSVModal
         isOpen={isImportModalOpen}
-        groupId={groupId}
         onClose={() => setIsImportModalOpen(false)}
         onSuccess={handleImportSuccess}
       />

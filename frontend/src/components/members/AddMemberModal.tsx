@@ -5,7 +5,6 @@ import { Member, addMember } from '../../api/members';
 
 interface AddMemberModalProps {
   isOpen: boolean;
-  groupId: string;
   onClose: () => void;
   onSuccess: (member: Member) => void;
 }
@@ -17,7 +16,7 @@ interface FormData {
   email: string;
 }
 
-export function AddMemberModal({ isOpen, groupId, onClose, onSuccess }: AddMemberModalProps) {
+export function AddMemberModal({ isOpen, onClose, onSuccess }: AddMemberModalProps) {
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
     defaultValues: {
       firstName: '',
@@ -42,7 +41,7 @@ export function AddMemberModal({ isOpen, groupId, onClose, onSuccess }: AddMembe
         return;
       }
 
-      const member = await addMember(groupId, {
+      const member = await addMember({
         firstName,
         lastName,
         phone,

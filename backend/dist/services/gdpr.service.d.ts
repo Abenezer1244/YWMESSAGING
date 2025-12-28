@@ -88,38 +88,6 @@ export declare function exportChurchData(churchId: string): Promise<{
         createdAt: Date;
         updatedAt: Date;
     }[];
-    groups: ({
-        members: {
-            id: string;
-            groupId: string;
-            memberId: string;
-            welcomeMessageSent: boolean;
-            joinedAt: Date;
-        }[];
-    } & {
-        id: string;
-        branchId: string;
-        churchId: string;
-        name: string;
-        description: string | null;
-        welcomeMessageEnabled: boolean;
-        welcomeMessageText: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-    })[];
-    members: {
-        id: string;
-        firstName: string;
-        lastName: string;
-        phone: string;
-        phoneHash: string | null;
-        email: string | null;
-        encryptedEmail: string | null;
-        emailHash: string | null;
-        optInSms: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-    }[];
     messages: ({
         recipients: {
             id: string;
@@ -156,6 +124,19 @@ export declare function exportChurchData(churchId: string): Promise<{
         updatedAt: Date;
     }[];
     conversations: ({
+        member: {
+            id: string;
+            firstName: string;
+            lastName: string;
+            phone: string;
+            phoneHash: string | null;
+            email: string | null;
+            encryptedEmail: string | null;
+            emailHash: string | null;
+            optInSms: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+        };
         messages: {
             id: string;
             conversationId: string;

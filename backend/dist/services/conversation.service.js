@@ -178,36 +178,23 @@ export async function getConversation(conversationId, churchId, options = {}) {
  */
 async function broadcastOutboundToMembers(churchId, content) {
     try {
-        // Get all members of the church who opted in for SMS
-        // Include members who are in groups OR have conversations with this church
-        const members = await prisma.member.findMany({
-            where: {
-                optInSms: true,
-                OR: [
-                    // Members in groups for this church
-                    {
-                        groups: {
-                            some: {
-                                group: { churchId },
-                            },
-                        },
-                    },
-                    // Members who have conversations with this church (texted the church number)
-                    {
-                        conversations: {
-                            some: {
-                                churchId,
-                            },
-                        },
-                    },
-                ],
-            },
+        // Get all members through conversations (members don't have churchId anymore)
+        const conversations = await prisma.conversation.findMany({
+            where: { churchId },
             select: {
-                id: true,
-                firstName: true,
-                phone: true,
+                member: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        phone: true,
+                        optInSms: true,
+                    },
+                },
             },
         });
+        const members = conversations
+            .map(conv => conv.member)
+            .filter(member => member.optInSms);
         if (members.length === 0) {
             console.log('ℹ️ No members to notify');
             return;

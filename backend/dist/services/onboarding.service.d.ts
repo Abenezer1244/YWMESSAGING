@@ -2,7 +2,7 @@
  * Onboarding Service - Tracks and verifies onboarding task completion
  * Each task is verified against actual data (e.g., branch was created, members were added)
  */
-type TaskId = 'create_branch' | 'create_group' | 'add_members' | 'send_message';
+type TaskId = 'create_branch' | 'add_members' | 'send_message';
 interface OnboardingStatus {
     taskId: TaskId;
     completed: boolean;

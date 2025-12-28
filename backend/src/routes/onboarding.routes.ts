@@ -87,7 +87,7 @@ router.post('/complete/:taskId', async (req: Request, res: Response) => {
 
     const result = await completeOnboardingTask(
       churchId,
-      taskId as 'create_branch' | 'create_group' | 'add_members' | 'send_message'
+      taskId as 'create_branch' | 'add_members' | 'send_message'
     );
 
     if (!result.success) {
