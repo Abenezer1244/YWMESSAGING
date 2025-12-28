@@ -1,0 +1,17 @@
+{
+  "accountCreation": "SUCCESS",
+  "login": "PENDING",
+  "membersPageLoad": "SUCCESS",
+  "memberAddition": "SKIPPED",
+  "memberDeletion": "SKIPPED",
+  "groupReferenceCheck": "PASS",
+  "pageScreenshots": [
+    "test_dashboard.png",
+    "test_members_page.png",
+    "test_members_with_new_member.png",
+    "test_branches_page.png",
+    "test_analytics_page.png",
+    "test_settings_page.png"
+  ],
+  "groupReferencesFound": []
+}
