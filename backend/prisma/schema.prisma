@@ -167,7 +167,7 @@ model Message {
   churchId            String
   content             String
   status              String   @default("pending") // pending, sent, failed
-  targetType          String   // individual, groups, branches, all
+  targetType          String   // individual, all (branches for recurring messages)
   targetIds           String   @default("") // JSON array of IDs
   totalRecipients     Int      @default(0)
   deliveredCount      Int      @default(0)
@@ -236,7 +236,7 @@ model RecurringMessage {
   churchId    String
   name        String
   content     String
-  targetType  String   // individual, groups, branches, all
+  targetType  String   // branches, all
   targetIds   String   @default("") // JSON array
   frequency   String   // daily, weekly, monthly
   dayOfWeek   Int?     // 0-6 for weekly
