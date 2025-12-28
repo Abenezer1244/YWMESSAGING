@@ -49,6 +49,12 @@ app.use((req, res, next) => {
     if (req.path?.includes('/import') || req.path?.includes('/batch')) {
         timeoutMs = 90000; // 90 seconds for import/batch operations
     }
+    // Member operations (add single member) also need reasonable time for DB operations
+    // Adding a member requires: create member record + link to group + cache invalidation
+    // Default 10s is not enough under load, increased to 60s for slow/overloaded databases
+    if (req.path?.includes('/groups/') && req.path?.includes('/members') && req.method === 'POST') {
+        timeoutMs = 60000; // 60 seconds for adding a single member
+    }
     const requestTimeout = setTimeout(() => {
         if (!res.headersSent) {
             console.error('[TIMEOUT]', req.method, req.path, `- Hard timeout after ${timeoutMs}ms`);

@@ -49,8 +49,8 @@ export declare function getMembers(groupId: string, options?: {
  */
 export declare function addMember(groupId: string, data: CreateMemberData): Promise<{
     id: any;
-    firstName: string;
-    lastName: string;
+    firstName: any;
+    lastName: any;
     phone: string;
     phoneHash: string;
     email: string | undefined;

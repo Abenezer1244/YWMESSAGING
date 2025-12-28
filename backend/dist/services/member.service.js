@@ -180,8 +180,8 @@ async function addMemberInternal(groupId, data) {
     // Return the real member with actual ID from database
     const response = {
         id: member.id,
-        firstName: data.firstName.trim(),
-        lastName: data.lastName.trim(),
+        firstName: member.firstName,
+        lastName: member.lastName,
         phone: formattedPhone,
         phoneHash,
         email: data.email?.trim(),

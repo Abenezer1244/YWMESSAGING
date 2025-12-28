@@ -78,14 +78,11 @@ export async function addMemberToGroup(memberId, groupId) {
             joinedAt: groupMember.joinedAt
         });
         // Invalidate cache so next list query reflects the new member
-        try {
-            await invalidateCache(CACHE_KEYS.groupMembers(groupId));
-            console.log(`[addMemberToGroup] ✅ Cache invalidated for group: ${groupId}`);
-        }
-        catch (cacheError) {
+        // Fire-and-forget: Don't await, prevent blocking on Redis issues
+        invalidateCache(CACHE_KEYS.groupMembers(groupId)).catch((cacheError) => {
             console.error(`[addMemberToGroup] ⚠️ Cache invalidation failed (non-blocking):`, cacheError.message);
-            // Continue - cache is secondary to data persistence
-        }
+            // Cache failure doesn't block API - data is already persisted
+        });
         const duration = Date.now() - startTime;
         console.log(`[addMemberToGroup] ✅ Job completed successfully in ${duration}ms`);
     }
