@@ -19,10 +19,11 @@ import { designTokens } from '../../utils/designTokens';
 
 export function MembersPage() {
   const auth = useAuthStore();
-  const { branches } = useBranchStore();
+  const { branches, setBranches, setLoading: setBranchLoading } = useBranchStore();
   const { groups, setGroups } = useGroupStore();
   const [searchParams] = useSearchParams();
   const { groupId: urlGroupId } = useParams<{ groupId?: string }>();
+  const [branchesLoaded, setBranchesLoaded] = useState(branches.length > 0);
   const [isInitialLoading, setIsInitialLoading] = useState(!groups.length);
 
   let groupId = urlGroupId || searchParams.get('groupId') || groups[0]?.id || '';
@@ -79,7 +80,36 @@ export function MembersPage() {
     }
   }, [groupId, search]);
 
-  // Load branches and groups on mount if not already loaded
+  // Load branches first if not already loaded
+  useEffect(() => {
+    const loadBranches = async () => {
+      if (!auth.church?.id) {
+        setBranchesLoaded(true);
+        return;
+      }
+
+      // If branches already loaded, skip
+      if (branches.length > 0) {
+        setBranchesLoaded(true);
+        return;
+      }
+
+      setBranchLoading(true);
+      try {
+        const branchesData = await getBranches(auth.church.id);
+        setBranches(branchesData);
+      } catch (error) {
+        console.error('Failed to load branches:', error);
+      } finally {
+        setBranchLoading(false);
+        setBranchesLoaded(true);
+      }
+    };
+
+    loadBranches();
+  }, [auth.church?.id, branches.length, setBranches, setBranchLoading]);
+
+  // Load groups and groups on mount if not already loaded
   useEffect(() => {
     if (!groups.length && auth.church?.id && branches.length > 0) {
       const loadGroupsForFirstBranch = async () => {
