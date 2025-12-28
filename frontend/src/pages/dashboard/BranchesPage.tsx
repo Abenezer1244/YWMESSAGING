@@ -65,7 +65,7 @@ export function BranchesPage() {
       const result = await deleteBranch(branchId);
       removeBranch(branchId);
       toast.success(
-        `Branch deleted. ${result.groupsDeleted} group(s) and ${result.membersDeleted} member(s) were removed.`
+        `Branch deleted. ${result.membersDeleted} member(s) were removed.`
       );
     } catch (error: any) {
       const message = error.response?.data?.error || 'Failed to delete branch';
@@ -161,11 +161,7 @@ export function BranchesPage() {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div className="text-center">
-                      <p className="text-2xl font-bold text-primary">{branch.groupCount}</p>
-                      <p className="text-xs text-muted-foreground uppercase">Groups</p>
-                    </div>
+                  <div className="mb-6">
                     <div className="text-center">
                       <p className="text-2xl font-bold text-primary">{branch.memberCount}</p>
                       <p className="text-xs text-muted-foreground uppercase">Members</p>

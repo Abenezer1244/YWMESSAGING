@@ -55,7 +55,6 @@ export function AnalyticsPage() {
             { label: 'Delivery Rate', value: `${summaryStats.averageDeliveryRate}%`, color: 'text-green-400' },
             { label: 'Total Members', value: summaryStats.totalMembers, color: 'text-blue-400' },
             { label: 'Branches', value: summaryStats.totalBranches, color: 'text-amber-400' },
-            { label: 'Total Groups', value: summaryStats.totalGroups, color: 'text-red-400' },
         ]
         : [], [summaryStats]);
     /**
@@ -126,10 +125,6 @@ export function AnalyticsPage() {
                                             {
                                                 label: 'Members',
                                                 key: 'memberCount',
-                                            },
-                                            {
-                                                label: 'Groups',
-                                                key: 'groupCount',
                                             },
                                             {
                                                 label: 'Messages',

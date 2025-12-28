@@ -56,7 +56,6 @@ export function DashboardPage() {
 
   const [loading, setLoading] = useState(true);
   const [totalMembers, setTotalMembers] = useState(0);
-  const [totalGroups, setTotalGroups] = useState(0);
   const [messageStats, setMessageStats] = useState<any>(null);
   const [summaryStats, setSummaryStats] = useState<any>(null);
   const [showWelcome, setShowWelcome] = useState(false);
@@ -176,7 +175,6 @@ export function DashboardPage() {
       if (msgStats) setMessageStats(msgStats);
 
       // Members count is available from summary stats
-      // No longer loading groups since they've been removed
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
       toast.error('Failed to load dashboard data');
@@ -188,7 +186,6 @@ export function DashboardPage() {
   const totalBranches = branches.length;
   const totalMessagesSent = summaryStats?.totalMessages || 0;
   const deliveryRate = messageStats?.deliveryRate || 0;
-  const totalGroupsActive = summaryStats?.totalGroups || 0;
 
   // Memoize expensive chart data transformations to prevent unnecessary recalculations
   const barChartData = useMemo(
@@ -337,15 +334,6 @@ export function DashboardPage() {
                 gradient="from-purple-500 to-pink-500"
                 index={2}
               />
-              <SoftStat
-                icon={Activity}
-                label="Active Groups"
-                value={totalGroupsActive.toString()}
-                change={5}
-                changeType="positive"
-                gradient="from-orange-500 to-red-500"
-                index={3}
-              />
             </div>
 
             {/* Delivery Rate Card - 10DLC Promotion */}
@@ -479,10 +467,9 @@ export function DashboardPage() {
             >
               <SoftCard variant="default" index={3}>
                 <h3 className="text-lg font-bold text-foreground mb-6">Quick Stats</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {[
                     { label: 'Branches', value: totalBranches },
-                    { label: 'Groups', value: totalGroupsActive },
                     { label: 'Members', value: totalMembers },
                     { label: 'Messages', value: totalMessagesSent },
                   ].map((stat, idx) => (

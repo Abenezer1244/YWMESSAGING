@@ -1,0 +1,1 @@
+import{c as a}from"./index-Dja08LDH.js";async function t(t={}){const n=new URLSearchParams;t.days&&n.append("days",t.days.toString());return(await a.get(`/analytics/messages?${n.toString()}`)).data}async function n(){return(await a.get("/analytics/branches")).data}async function s(){return(await a.get("/analytics/summary")).data}export{t as a,n as b,s as g};
