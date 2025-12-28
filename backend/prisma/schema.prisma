@@ -625,7 +625,7 @@ model DeadLetterQueue {
 model OnboardingProgress {
   id        String   @id @default(cuid())
   churchId  String
-  taskId    String   // create_branch, create_group, add_members, send_message
+  taskId    String   // create_branch, add_members, send_message
   completed Boolean  @default(false)
   completedAt DateTime?
   createdAt DateTime @default(now())

@@ -77,7 +77,7 @@ router.post('/complete/:taskId', async (req: Request, res: Response) => {
     const { taskId } = req.params;
 
     // Validate taskId
-    const validTasks = ['create_branch', 'create_group', 'add_members', 'send_message'];
+    const validTasks = ['create_branch', 'add_members', 'send_message'];
     if (!validTasks.includes(taskId)) {
       return res.status(400).json({
         success: false,
