@@ -256,9 +256,19 @@ export async function getSummaryStats(churchId: string) {
   return getCachedWithFallback(
     CACHE_KEYS.churchStats(churchId),
     async () => {
-      const [messages, members, branches] = await Promise.all([
+      // ✅ FIX: Count unique members who received messages from this church
+      // Member model has no churchId field, so we count through MessageRecipient with efficient SQL
+      const memberCountResult = await prisma.$queryRaw<Array<{ count: number }>>`
+        SELECT COUNT(DISTINCT mr."memberId") as count
+        FROM "MessageRecipient" mr
+        JOIN "Message" m ON mr."messageId" = m.id
+        WHERE m."churchId" = ${churchId}
+      `;
+
+      const memberCount = memberCountResult[0]?.count || 0;
+
+      const [messages, branches] = await Promise.all([
         prisma.message.count({ where: { churchId } }),
-        prisma.member.count(),
         prisma.branch.count({ where: { churchId } }),
       ]);
 
@@ -267,7 +277,7 @@ export async function getSummaryStats(churchId: string) {
       return {
         totalMessages: messages,
         averageDeliveryRate: messageStats.deliveryRate,
-        totalMembers: members,
+        totalMembers: memberCount,
         totalBranches: branches,
       };
     },
