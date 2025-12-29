@@ -216,6 +216,12 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
+  // ✅ FIX: Don't render protected routes until auth check is complete
+  // This prevents race conditions where ProtectedRoute redirects before auth is restored
+  if (isCheckingAuth) {
+    return <PageLoader />;
+  }
+
   return (
     <ThemeProvider>
       <Router>
