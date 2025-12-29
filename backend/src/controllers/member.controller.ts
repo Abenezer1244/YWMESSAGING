@@ -8,21 +8,22 @@ import * as memberService from '../services/member.service.js';
  */
 export async function listMembers(req: Request, res: Response) {
   try {
-    const churchId = req.user?.churchId;
+    const tenantId = req.tenantId;
+    const tenantPrisma = req.prisma;
     const page = Math.max(1, req.query.page ? parseInt(req.query.page as string) : 1);
     const limit = Math.min(10000, req.query.limit ? parseInt(req.query.limit as string) : 50);
     const search = req.query.search as string | undefined;
 
     console.log(`[listMembers] GET REQUEST: page=${page}, limit=${limit}, search=${search}`);
 
-    if (!churchId) {
+    if (!tenantId || !tenantPrisma) {
       return res.status(401).json({
         success: false,
         error: 'Unauthorized',
       });
     }
 
-    const result = await memberService.getMembers({
+    const result = await memberService.getMembers(tenantId, tenantPrisma, {
       page,
       limit,
       search,
@@ -50,13 +51,14 @@ export async function listMembers(req: Request, res: Response) {
  */
 export async function addMember(req: Request, res: Response) {
   try {
-    const churchId = req.user?.churchId;
+    const tenantId = req.tenantId;
+    const tenantPrisma = req.prisma;
     const { firstName, lastName, phone, email, optInSms } = req.body;
 
     console.log('[addMember] Starting - phone:', phone);
 
-    if (!churchId) {
-      console.error('[addMember] No churchId in request');
+    if (!tenantId || !tenantPrisma) {
+      console.error('[addMember] No tenant context in request');
       return res.status(401).json({
         success: false,
         error: 'Unauthorized',
@@ -73,7 +75,7 @@ export async function addMember(req: Request, res: Response) {
     }
 
     console.log('[addMember] Input validated, calling service');
-    const member = await memberService.addMember({
+    const member = await memberService.addMember(tenantId, tenantPrisma, {
       firstName,
       lastName,
       phone,
@@ -103,10 +105,11 @@ export async function addMember(req: Request, res: Response) {
 export async function updateMember(req: Request, res: Response) {
   try {
     const { memberId } = req.params;
-    const churchId = req.user?.churchId;
+    const tenantId = req.tenantId;
+    const tenantPrisma = req.prisma;
     const { firstName, lastName, phone, email, optInSms } = req.body;
 
-    if (!churchId) {
+    if (!tenantId || !tenantPrisma) {
       return res.status(401).json({
         success: false,
         error: 'Unauthorized',
@@ -120,7 +123,7 @@ export async function updateMember(req: Request, res: Response) {
       });
     }
 
-    const member = await memberService.updateMember(memberId, {
+    const member = await memberService.updateMember(tenantId, tenantPrisma, memberId, {
       firstName,
       lastName,
       phone,
@@ -149,18 +152,19 @@ export async function updateMember(req: Request, res: Response) {
 export async function deleteMember(req: Request, res: Response) {
   try {
     const { memberId } = req.params;
-    const churchId = req.user?.churchId;
+    const tenantId = req.tenantId;
+    const tenantPrisma = req.prisma;
 
     console.log(`[deleteMember] Deleting member: ${memberId}`);
 
-    if (!churchId) {
+    if (!tenantId || !tenantPrisma) {
       return res.status(401).json({
         success: false,
         error: 'Unauthorized',
       });
     }
 
-    await memberService.deleteMember(memberId);
+    await memberService.deleteMember(tenantId, tenantPrisma, memberId);
 
     res.json({
       success: true,
@@ -182,11 +186,12 @@ export async function deleteMember(req: Request, res: Response) {
  */
 export async function importMembers(req: Request, res: Response) {
   try {
-    const churchId = req.user?.churchId;
+    const tenantId = req.tenantId;
+    const tenantPrisma = req.prisma;
 
     console.log('[importMembers] Starting import');
 
-    if (!churchId) {
+    if (!tenantId || !tenantPrisma) {
       return res.status(401).json({
         success: false,
         error: 'Unauthorized',
@@ -219,7 +224,7 @@ export async function importMembers(req: Request, res: Response) {
 
     // Import members
     console.log(`[importMembers] Importing ${validationResult.valid.length} members...`);
-    const result = await memberService.importMembers(validationResult.valid);
+    const result = await memberService.importMembers(tenantId, tenantPrisma, validationResult.valid);
 
     console.log(`[importMembers] Import complete: ${result.imported} imported, ${result.failed} failed`);
 
