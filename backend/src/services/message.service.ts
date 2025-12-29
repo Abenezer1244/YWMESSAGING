@@ -1,4 +1,4 @@
-import { prisma } from '../lib/prisma.js';
+import { PrismaClient } from '@prisma/client';
 
 export interface ResolveRecipientsOptions {
   targetType: 'individual' | 'all';
@@ -16,7 +16,8 @@ export interface CreateMessageData {
  * Returns unique opted-in members by phone number
  */
 export async function resolveRecipients(
-  churchId: string,
+  tenantId: string,
+  tenantPrisma: PrismaClient,
   options: ResolveRecipientsOptions
 ): Promise<Array<{ id: string; phone: string }>> {
   const members = new Map<string, { id: string; phone: string }>();
@@ -24,7 +25,7 @@ export async function resolveRecipients(
   try {
     if (options.targetType === 'individual' && options.targetIds?.length === 1) {
       // Single member
-      const member = await prisma.member.findUnique({
+      const member = await tenantPrisma.member.findUnique({
         where: { id: options.targetIds[0] },
         select: { id: true, phone: true, optInSms: true },
       });
@@ -33,9 +34,8 @@ export async function resolveRecipients(
         members.set(member.phone, { id: member.id, phone: member.phone });
       }
     } else if (options.targetType === 'all') {
-      // Get all members through conversations (members don't have churchId anymore)
-      const conversations = await prisma.conversation.findMany({
-        where: { churchId },
+      // Get all members through conversations
+      const conversations = await tenantPrisma.conversation.findMany({
         select: {
           member: {
             select: {
@@ -65,11 +65,12 @@ export async function resolveRecipients(
  * Create message record
  */
 export async function createMessage(
-  churchId: string,
+  tenantId: string,
+  tenantPrisma: PrismaClient,
   data: CreateMessageData
 ): Promise<any> {
   // Resolve recipients
-  const recipients = await resolveRecipients(churchId, {
+  const recipients = await resolveRecipients(tenantId, tenantPrisma, {
     targetType: data.targetType,
     targetIds: data.targetIds,
   });
@@ -79,9 +80,8 @@ export async function createMessage(
   }
 
   // Create message record
-  const message = await prisma.message.create({
+  const message = await tenantPrisma.message.create({
     data: {
-      churchId,
       content: data.content,
       targetType: data.targetType,
       targetIds: JSON.stringify(data.targetIds || []),
@@ -91,7 +91,7 @@ export async function createMessage(
   });
 
   // Create message recipient records in batch (not one-by-one)
-  await prisma.messageRecipient.createMany({
+  await tenantPrisma.messageRecipient.createMany({
     data: recipients.map((recipient) => ({
       messageId: message.id,
       memberId: recipient.id,
@@ -113,7 +113,8 @@ export async function createMessage(
  * Get message history with pagination
  */
 export async function getMessageHistory(
-  churchId: string,
+  tenantId: string,
+  tenantPrisma: PrismaClient,
   options: {
     page?: number;
     limit?: number;
@@ -123,13 +124,13 @@ export async function getMessageHistory(
   const { page = 1, limit = 20, status } = options;
   const skip = (page - 1) * limit;
 
-  const where: any = { churchId };
+  const where: any = {};
   if (status) {
     where.status = status;
   }
 
   const [messages, total] = await Promise.all([
-    prisma.message.findMany({
+    tenantPrisma.message.findMany({
       where,
       select: {
         id: true,
@@ -146,7 +147,7 @@ export async function getMessageHistory(
       skip,
       take: limit,
     }),
-    prisma.message.count({ where }),
+    tenantPrisma.message.count({ where }),
   ]);
 
   return {
@@ -166,8 +167,8 @@ export async function getMessageHistory(
 /**
  * Get single message details with recipients
  */
-export async function getMessageDetails(messageId: string): Promise<any> {
-  const message = await prisma.message.findUnique({
+export async function getMessageDetails(tenantId: string, tenantPrisma: PrismaClient, messageId: string): Promise<any> {
+  const message = await tenantPrisma.message.findUnique({
     where: { id: messageId },
     include: {
       recipients: {
@@ -205,8 +206,8 @@ export async function getMessageDetails(messageId: string): Promise<any> {
 /**
  * Update message delivery stats
  */
-export async function updateMessageStats(messageId: string): Promise<void> {
-  const stats = await prisma.messageRecipient.groupBy({
+export async function updateMessageStats(tenantId: string, tenantPrisma: PrismaClient, messageId: string): Promise<void> {
+  const stats = await tenantPrisma.messageRecipient.groupBy({
     by: ['status'],
     where: { messageId },
     _count: { id: true },
@@ -220,7 +221,7 @@ export async function updateMessageStats(messageId: string): Promise<void> {
     {} as Record<string, number>
   );
 
-  await prisma.message.update({
+  await tenantPrisma.message.update({
     where: { id: messageId },
     data: {
       deliveredCount: counts['delivered'] || 0,
@@ -240,12 +241,14 @@ export async function updateMessageStats(messageId: string): Promise<void> {
  * Accepts messageId to avoid redundant database fetch
  */
 export async function updateRecipientStatus(
+  tenantId: string,
+  tenantPrisma: PrismaClient,
   recipientId: string,
   status: 'delivered' | 'failed',
   messageId: string,
   data?: { failureReason?: string }
 ): Promise<void> {
-  await prisma.messageRecipient.update({
+  await tenantPrisma.messageRecipient.update({
     where: { id: recipientId },
     data: {
       status,
@@ -256,5 +259,5 @@ export async function updateRecipientStatus(
   });
 
   // Update message stats
-  await updateMessageStats(messageId);
+  await updateMessageStats(tenantId, tenantPrisma, messageId);
 }

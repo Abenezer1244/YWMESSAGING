@@ -1,4 +1,4 @@
-import { prisma } from '../lib/prisma.js';
+import { PrismaClient } from '@prisma/client';
 import { formatToE164 } from '../utils/phone.utils.js';
 import { encrypt, decrypt, hashForSearch } from '../utils/encryption.utils.js';
 import { queueWelcomeMessage } from '../jobs/welcomeMessage.job.js';
@@ -25,6 +25,8 @@ export interface UpdateMemberData {
  * Get all members with pagination and search
  */
 export async function getMembers(
+  tenantId: string,
+  tenantPrisma: PrismaClient,
   options: {
     page?: number;
     limit?: number;
@@ -34,7 +36,7 @@ export async function getMembers(
   const { page = 1, limit = 50, search } = options;
 
   // Fetch members directly without caching (no longer grouped, simple list)
-  return fetchMembersPage(page, limit, search);
+  return fetchMembersPage(tenantPrisma, page, limit, search);
 }
 
 /**
@@ -42,6 +44,7 @@ export async function getMembers(
  * Used by getMembers (which handles caching)
  */
 async function fetchMembersPage(
+  tenantPrisma: PrismaClient,
   page: number,
   limit: number,
   search?: string
@@ -72,7 +75,7 @@ async function fetchMembersPage(
   }
 
   const [members, total] = await Promise.all([
-    prisma.member.findMany({
+    tenantPrisma.member.findMany({
       where,
       skip,
       take: limit,
@@ -87,7 +90,7 @@ async function fetchMembersPage(
       },
       orderBy: { createdAt: 'desc' },
     }),
-    prisma.member.count({ where }),
+    tenantPrisma.member.count({ where }),
   ]);
 
   // Decrypt phone numbers in results
@@ -110,8 +113,8 @@ async function fetchMembersPage(
 /**
  * Add single member
  */
-export async function addMember(data: CreateMemberData) {
-  return addMemberInternal(data);
+export async function addMember(tenantId: string, tenantPrisma: PrismaClient, data: CreateMemberData) {
+  return addMemberInternal(tenantPrisma, data);
 }
 
 /**
@@ -127,7 +130,7 @@ export async function addMember(data: CreateMemberData) {
  * - API returns quickly (~600-800ms)
  * - Member ID is real and can be deleted/updated immediately
  */
-async function addMemberInternal(data: CreateMemberData) {
+async function addMemberInternal(tenantPrisma: PrismaClient, data: CreateMemberData) {
   console.log('[addMember] Starting member add');
 
   // Validate phone (fast, no DB)
@@ -137,7 +140,7 @@ async function addMemberInternal(data: CreateMemberData) {
   console.log('[addMember] Phone validated:', formattedPhone);
 
   // Check if member exists (quick lookup)
-  const existingMember = await prisma.member.findFirst({
+  const existingMember = await tenantPrisma.member.findFirst({
     where: {
       OR: [
         { phoneHash },
@@ -153,7 +156,7 @@ async function addMemberInternal(data: CreateMemberData) {
   } else {
     // Create new member - this is fast (~50-100ms)
     console.log('[addMember] Creating new member...');
-    member = await prisma.member.create({
+    member = await tenantPrisma.member.create({
       data: {
         firstName: data.firstName.trim(),
         lastName: data.lastName.trim(),
@@ -191,6 +194,8 @@ async function addMemberInternal(data: CreateMemberData) {
  * After: 3 queries (1 for fetch existing, 1 for create members, 1 for success)
  */
 export async function importMembers(
+  tenantId: string,
+  tenantPrisma: PrismaClient,
   membersData: Array<{
     firstName: string;
     lastName: string;
@@ -221,7 +226,7 @@ export async function importMembers(
   // ✅ Query 2: Fetch ALL existing members by phone or email in ONE query
   console.log(`[importMembers] Fetching existing members from database...`);
   const fetchExistingStart = Date.now();
-  const existingMembers = await prisma.member.findMany({
+  const existingMembers = await tenantPrisma.member.findMany({
     where: {
       OR: [
         { phoneHash: { in: formattedData.map((d) => d.phoneHash) } },
@@ -293,7 +298,7 @@ export async function importMembers(
   const createStart = Date.now();
   const createdMembers: any[] = [];
   if (newMembersToCreate.length > 0) {
-    const createResult = await prisma.member.createMany({
+    const createResult = await tenantPrisma.member.createMany({
       data: newMembersToCreate,
       skipDuplicates: true,
     });
@@ -302,7 +307,7 @@ export async function importMembers(
     // Fetch the newly created members to get IDs
     console.log(`[importMembers] Fetching newly created members...`);
     const fetchNewStart = Date.now();
-    const newMembersFetch = await prisma.member.findMany({
+    const newMembersFetch = await tenantPrisma.member.findMany({
       where: {
         phoneHash: { in: newMembersToCreate.map((m) => m.phoneHash) },
       },
@@ -360,8 +365,8 @@ export async function importMembers(
 /**
  * Update member
  */
-export async function updateMember(memberId: string, data: UpdateMemberData) {
-  const member = await prisma.member.findUnique({
+export async function updateMember(tenantId: string, tenantPrisma: PrismaClient, memberId: string, data: UpdateMemberData) {
+  const member = await tenantPrisma.member.findUnique({
     where: { id: memberId },
   });
 
@@ -381,7 +386,7 @@ export async function updateMember(memberId: string, data: UpdateMemberData) {
   if (data.email !== undefined) updateData.email = data.email?.trim();
   if (data.optInSms !== undefined) updateData.optInSms = data.optInSms;
 
-  const updated = await prisma.member.update({
+  const updated = await tenantPrisma.member.update({
     where: { id: memberId },
     data: updateData,
   });
@@ -400,10 +405,10 @@ export async function updateMember(memberId: string, data: UpdateMemberData) {
 /**
  * Delete a member
  */
-export async function deleteMember(memberId: string) {
+export async function deleteMember(tenantId: string, tenantPrisma: PrismaClient, memberId: string) {
   console.log(`[deleteMember] Deleting member: ${memberId}`);
 
-  const deleteResult = await prisma.member.delete({
+  const deleteResult = await tenantPrisma.member.delete({
     where: { id: memberId },
   });
 

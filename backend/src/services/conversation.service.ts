@@ -1,15 +1,16 @@
-import { prisma } from '../lib/prisma.js';
+import { PrismaClient } from '@prisma/client';
 import * as telnyxService from './telnyx.service.js';
 import { decrypt, decryptPhoneSafe } from '../utils/encryption.utils.js';
 import { getCached, setCached, invalidateCache } from './cache.service.js';
 
 /**
- * Get all conversations for a church (sorted by newest)
+ * Get all conversations for a tenant (sorted by newest)
  * ✅ OPTIMIZED: Cache conversations list for 5 minutes
  * Reduces database load for frequently accessed lists
  */
 export async function getConversations(
-  churchId: string,
+  tenantId: string,
+  tenantPrisma: PrismaClient,
   options: {
     status?: string;
     page?: number;
@@ -28,7 +29,7 @@ export async function getConversations(
   const skip = (page - 1) * limit;
 
   // ✅ CACHE: Check if conversations list is cached
-  const cacheKey = `conversations:${churchId}:${status}:${page}:${limit}`;
+  const cacheKey = `conversations:${tenantId}:${status}:${page}:${limit}`;
   const cached = await getCached<{
     data: any[];
     pagination: {
@@ -43,12 +44,14 @@ export async function getConversations(
   }
 
   try {
+    const where: any = {};
+    if (status) {
+      where.status = status;
+    }
+
     const [conversations, total] = await Promise.all([
-      prisma.conversation.findMany({
-        where: {
-          churchId,
-          ...(status ? { status } : {}),
-        },
+      tenantPrisma.conversation.findMany({
+        where,
         include: {
           member: {
             select: {
@@ -74,12 +77,7 @@ export async function getConversations(
         skip,
         take: limit,
       }),
-      prisma.conversation.count({
-        where: {
-          churchId,
-          ...(status ? { status } : {}),
-        },
-      }),
+      tenantPrisma.conversation.count({ where }),
     ]);
 
     const result = {
@@ -114,8 +112,9 @@ export async function getConversations(
  * Get single conversation with all messages
  */
 export async function getConversation(
+  tenantId: string,
+  tenantPrisma: PrismaClient,
   conversationId: string,
-  churchId: string,
   options: {
     page?: number;
     limit?: number;
@@ -125,12 +124,9 @@ export async function getConversation(
   const skip = (page - 1) * limit;
 
   try {
-    const conversation = await prisma.conversation.findUnique({
+    const conversation = await tenantPrisma.conversation.findUnique({
       where: { id: conversationId },
       include: {
-        church: {
-          select: { id: true, name: true },
-        },
         member: {
           select: {
             id: true,
@@ -149,14 +145,9 @@ export async function getConversation(
       throw new Error('Conversation not found');
     }
 
-    // Verify ownership
-    if (conversation.churchId !== churchId) {
-      throw new Error('Access denied');
-    }
-
     // Get messages (paginated)
     const [messages, total] = await Promise.all([
-      prisma.conversationMessage.findMany({
+      tenantPrisma.conversationMessage.findMany({
         where: { conversationId },
         include: {
           member: {
@@ -170,14 +161,13 @@ export async function getConversation(
         skip,
         take: limit,
       }),
-      prisma.conversationMessage.count({
+      tenantPrisma.conversationMessage.count({
         where: { conversationId },
       }),
     ]);
 
     return {
       id: conversation.id,
-      church: conversation.church,
       member: conversation.member,
       status: conversation.status,
       unreadCount: conversation.unreadCount,
@@ -218,13 +208,13 @@ export async function getConversation(
  * After: 1s (parallel, limited by slowest single SMS)
  */
 async function broadcastOutboundToMembers(
-  churchId: string,
+  tenantId: string,
+  tenantPrisma: PrismaClient,
   content: string
 ): Promise<void> {
   try {
-    // Get all members through conversations (members don't have churchId anymore)
-    const conversations = await prisma.conversation.findMany({
-      where: { churchId },
+    // Get all members through conversations
+    const conversations = await tenantPrisma.conversation.findMany({
       select: {
         member: {
           select: {
@@ -265,7 +255,7 @@ async function broadcastOutboundToMembers(
       try {
         // Decrypt phone number (stored encrypted in database, or plain text for legacy records)
         const decryptedPhone = decryptPhoneSafe(member.phone);
-        await telnyxService.sendSMS(decryptedPhone, messageText, churchId);
+        await telnyxService.sendSMS(decryptedPhone, messageText, tenantId);
         console.log(`   ✓ Sent to ${member.firstName}`);
         return { success: true, member: member.firstName };
       } catch (error: any) {
@@ -293,12 +283,13 @@ async function broadcastOutboundToMembers(
  * Create text-only reply message
  */
 export async function createReply(
+  tenantId: string,
+  tenantPrisma: PrismaClient,
   conversationId: string,
-  churchId: string,
   content: string
 ): Promise<any> {
   try {
-    const conversation = await prisma.conversation.findUnique({
+    const conversation = await tenantPrisma.conversation.findUnique({
       where: { id: conversationId },
       include: { member: true },
     });
@@ -307,12 +298,8 @@ export async function createReply(
       throw new Error('Conversation not found');
     }
 
-    if (conversation.churchId !== churchId) {
-      throw new Error('Access denied');
-    }
-
     // Create message
-    const message = await prisma.conversationMessage.create({
+    const message = await tenantPrisma.conversationMessage.create({
       data: {
         conversationId,
         memberId: conversation.memberId,
@@ -322,16 +309,16 @@ export async function createReply(
     });
 
     // Update conversation
-    await prisma.conversation.update({
+    await tenantPrisma.conversation.update({
       where: { id: conversationId },
       data: { lastMessageAt: new Date() },
     });
 
-    // ✅ CACHE INVALIDATION: Clear all conversation lists for this church
-    await invalidateCache(`conversations:${churchId}:*`);
+    // ✅ CACHE INVALIDATION: Clear all conversation lists for this tenant
+    await invalidateCache(`conversations:${tenantId}:*`);
 
     // Broadcast to all members
-    await broadcastOutboundToMembers(churchId, content);
+    await broadcastOutboundToMembers(tenantId, tenantPrisma, content);
 
     return {
       id: message.id,
@@ -350,8 +337,9 @@ export async function createReply(
  * Create reply with media attachment
  */
 export async function createReplyWithMedia(
+  tenantId: string,
+  tenantPrisma: PrismaClient,
   conversationId: string,
-  churchId: string,
   content: string | undefined,
   mediaData: {
     s3Url: string;
@@ -366,7 +354,7 @@ export async function createReplyWithMedia(
   }
 ): Promise<any> {
   try {
-    const conversation = await prisma.conversation.findUnique({
+    const conversation = await tenantPrisma.conversation.findUnique({
       where: { id: conversationId },
       include: { member: true },
     });
@@ -375,12 +363,8 @@ export async function createReplyWithMedia(
       throw new Error('Conversation not found');
     }
 
-    if (conversation.churchId !== churchId) {
-      throw new Error('Access denied');
-    }
-
     // Create message with media
-    const message = await prisma.conversationMessage.create({
+    const message = await tenantPrisma.conversationMessage.create({
       data: {
         conversationId,
         memberId: conversation.memberId,
@@ -399,14 +383,14 @@ export async function createReplyWithMedia(
     });
 
     // Update conversation
-    await prisma.conversation.update({
+    await tenantPrisma.conversation.update({
       where: { id: conversationId },
       data: { lastMessageAt: new Date() },
     });
 
     // Broadcast to all members
     const displayText = content || `[${mediaData.type}]`;
-    await broadcastOutboundToMembers(churchId, displayText);
+    await broadcastOutboundToMembers(tenantId, tenantPrisma, displayText);
 
     return {
       id: message.id,
@@ -428,11 +412,12 @@ export async function createReplyWithMedia(
  * Mark conversation as read
  */
 export async function markAsRead(
-  conversationId: string,
-  churchId: string
+  tenantId: string,
+  tenantPrisma: PrismaClient,
+  conversationId: string
 ): Promise<void> {
   try {
-    const conversation = await prisma.conversation.findUnique({
+    const conversation = await tenantPrisma.conversation.findUnique({
       where: { id: conversationId },
     });
 
@@ -440,11 +425,7 @@ export async function markAsRead(
       throw new Error('Conversation not found');
     }
 
-    if (conversation.churchId !== churchId) {
-      throw new Error('Access denied');
-    }
-
-    await prisma.conversation.update({
+    await tenantPrisma.conversation.update({
       where: { id: conversationId },
       data: { unreadCount: 0 },
     });
@@ -460,12 +441,13 @@ export async function markAsRead(
  * Update conversation status
  */
 export async function updateStatus(
+  tenantId: string,
+  tenantPrisma: PrismaClient,
   conversationId: string,
-  churchId: string,
   status: 'open' | 'closed' | 'archived'
 ): Promise<void> {
   try {
-    const conversation = await prisma.conversation.findUnique({
+    const conversation = await tenantPrisma.conversation.findUnique({
       where: { id: conversationId },
     });
 
@@ -473,17 +455,13 @@ export async function updateStatus(
       throw new Error('Conversation not found');
     }
 
-    if (conversation.churchId !== churchId) {
-      throw new Error('Access denied');
-    }
-
-    await prisma.conversation.update({
+    await tenantPrisma.conversation.update({
       where: { id: conversationId },
       data: { status },
     });
 
-    // ✅ CACHE INVALIDATION: Clear all conversation lists for this church
-    await invalidateCache(`conversations:${churchId}:*`);
+    // ✅ CACHE INVALIDATION: Clear all conversation lists for this tenant
+    await invalidateCache(`conversations:${tenantId}:*`);
 
     console.log(`✅ Updated conversation status: ${conversationId} → ${status}`);
   } catch (error: any) {
@@ -496,11 +474,12 @@ export async function updateStatus(
  * Delete conversation and all messages
  */
 export async function deleteConversation(
-  conversationId: string,
-  churchId: string
+  tenantId: string,
+  tenantPrisma: PrismaClient,
+  conversationId: string
 ): Promise<void> {
   try {
-    const conversation = await prisma.conversation.findUnique({
+    const conversation = await tenantPrisma.conversation.findUnique({
       where: { id: conversationId },
     });
 
@@ -508,12 +487,8 @@ export async function deleteConversation(
       throw new Error('Conversation not found');
     }
 
-    if (conversation.churchId !== churchId) {
-      throw new Error('Access denied');
-    }
-
     // Delete all messages (cascade handled by Prisma)
-    await prisma.conversation.delete({
+    await tenantPrisma.conversation.delete({
       where: { id: conversationId },
     });
 
