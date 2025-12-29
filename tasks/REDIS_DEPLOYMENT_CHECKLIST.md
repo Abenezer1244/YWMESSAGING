@@ -40,7 +40,7 @@ From Render Redis dashboard:
 - [ ] **IMPORTANT**: Use the full URL including password!
 
 ### Step 3: Update Backend Environment Variables
-In Render backend service dashboard (`connect-yw-backend`):
+In Render backend service dashboard (`koinonia-sms-backend`):
 
 1. **Navigate**: Settings → Environment Variables
 2. **Add/Update**:

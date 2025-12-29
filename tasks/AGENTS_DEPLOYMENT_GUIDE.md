@@ -94,7 +94,7 @@ Once deployed, test the endpoint:
 
 ```bash
 # Test webhook endpoint on production
-curl https://connect-yw-backend.onrender.com/api/webhooks/github/agents/health
+curl https://koinonia-sms-backend.onrender.com/api/webhooks/github/agents/health
 
 # Should return 200 OK with health check JSON
 ```
@@ -110,7 +110,7 @@ Now that your backend has the webhook endpoint, configure GitHub:
 **1. Update Existing Webhook (if any)**
 
 If you created a webhook earlier, update it:
-- **Payload URL:** `https://connect-yw-backend.onrender.com/api/webhooks/github/agents`
+- **Payload URL:** `https://koinonia-sms-backend.onrender.com/api/webhooks/github/agents`
 - **Content type:** `application/json`
 - **Secret:** Use the same secret from your `.env` GITHUB_WEBHOOK_SECRET
 - **Events:** "Send me everything"
@@ -119,7 +119,7 @@ If you created a webhook earlier, update it:
 **2. Or Add New Webhook**
 
 Click "Add webhook":
-- **Payload URL:** `https://connect-yw-backend.onrender.com/api/webhooks/github/agents`
+- **Payload URL:** `https://koinonia-sms-backend.onrender.com/api/webhooks/github/agents`
 - **Content type:** `application/json`
 - **Secret:** Generate a new webhook secret using `openssl rand -base64 32` and set in `.env`
 - **Which events:** Select "Let me select individual events"
@@ -197,7 +197,7 @@ Author: your-username
          ▼
 ┌──────────────────────────────────┐
 │  POST to Backend Webhook         │
-│  https://connect-yw-backend      │
+│  https://koinonia-sms-backend      │
 │  /api/webhooks/github/agents     │
 └────────┬─────────────────────────┘
          │

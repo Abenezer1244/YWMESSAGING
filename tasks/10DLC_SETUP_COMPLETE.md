@@ -40,13 +40,13 @@ The 10DLC (10-Digit Long Code) auto-registration system is now **fully operation
 **Status:** Configured on Render
 - `TELNYX_API_KEY` - For Telnyx API calls ✅
 - `INTERNAL_SCHEDULER_KEY` - For CloudWatch authentication ✅
-- `BACKEND_URL` - Set to https://connect-yw-backend.onrender.com ✅
+- `BACKEND_URL` - Set to https://koinonia-sms-backend.onrender.com ✅
 
 ### 4. ✅ AWS CloudWatch EventBridge
 **Status:** Active and tested
 - **Rule Name:** `dlc-approval-check-every-30-mins`
 - **Schedule:** Every 30 minutes (cron: `*/30 * * * ? *`)
-- **Target:** `https://connect-yw-backend.onrender.com/api/scheduler/dlc-approval-check`
+- **Target:** `https://koinonia-sms-backend.onrender.com/api/scheduler/dlc-approval-check`
 - **Authentication:** API key header (`x-api-key`)
 - **Status:** ✅ Tested and working
 
@@ -112,7 +112,7 @@ The 10DLC (10-Digit Long Code) auto-registration system is now **fully operation
 
 **Request:**
 ```bash
-curl -X POST https://connect-yw-backend.onrender.com/api/scheduler/dlc-approval-check \
+curl -X POST https://koinonia-sms-backend.onrender.com/api/scheduler/dlc-approval-check \
   -H "x-api-key: a2f8c4e1b9d7f5e3c1a9b7d5f3e1c9a7b5d3f1e9c7a5b3d1f9e7c5a3b1d9f7" \
   -H "Content-Type: application/json" \
   -d "{}"
@@ -147,7 +147,7 @@ curl -X POST https://connect-yw-backend.onrender.com/api/scheduler/dlc-approval-
 ### Check Current Status
 
 ```bash
-curl https://connect-yw-backend.onrender.com/api/scheduler/status \
+curl https://koinonia-sms-backend.onrender.com/api/scheduler/status \
   -H "x-api-key: a2f8c4e1b9d7f5e3c1a9b7d5f3e1c9a7b5d3f1e9c7a5b3d1f9e7c5a3b1d9f7"
 ```
 
@@ -160,7 +160,7 @@ This returns:
 ### Check Metrics
 
 ```bash
-curl https://connect-yw-backend.onrender.com/api/scheduler/metrics \
+curl https://koinonia-sms-backend.onrender.com/api/scheduler/metrics \
   -H "x-api-key: a2f8c4e1b9d7f5e3c1a9b7d5f3e1c9a7b5d3f1e9c7a5b3d1f9e7c5a3b1d9f7"
 ```
 
@@ -238,19 +238,19 @@ Returns CloudWatch-compatible metrics:
 
 ### 1. Manual Trigger (Test Anytime)
 ```bash
-curl -X POST https://connect-yw-backend.onrender.com/api/scheduler/dlc-approval-check \
+curl -X POST https://koinonia-sms-backend.onrender.com/api/scheduler/dlc-approval-check \
   -H "x-api-key: a2f8c4e1b9d7f5e3c1a9b7d5f3e1c9a7b5d3f1e9c7a5b3d1f9e7c5a3b1d9f7"
 ```
 
 ### 2. Check Scheduler Health
 ```bash
-curl https://connect-yw-backend.onrender.com/api/scheduler/status \
+curl https://koinonia-sms-backend.onrender.com/api/scheduler/status \
   -H "x-api-key: a2f8c4e1b9d7f5e3c1a9b7d5f3e1c9a7b5d3f1e9c7a5b3d1f9e7c5a3b1d9f7"
 ```
 
 ### 3. View Render Logs
 - Go to: https://dashboard.render.com/
-- Select `connect-yw-backend`
+- Select `koinonia-sms-backend`
 - View logs to see scheduler execution
 - Look for `[DLC Approval Check]` entries
 
@@ -279,7 +279,7 @@ WHERE dlcStatus = 'approved';
 **Cause:** Target endpoint unreachable or rule disabled
 **Fix:**
 1. Verify rule is enabled: https://console.aws.amazon.com/events/
-2. Check backend is running: curl https://connect-yw-backend.onrender.com/health
+2. Check backend is running: curl https://koinonia-sms-backend.onrender.com/health
 3. Check API key is correct
 
 ### Issue: Churches not upgrading

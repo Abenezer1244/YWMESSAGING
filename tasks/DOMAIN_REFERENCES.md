@@ -50,7 +50,7 @@ This document lists all hardcoded domain names, URLs, and email addresses found 
 ### Backend Services
 
 #### sendgrid.service.ts
-- Line 31: `from: process.env.SENDGRID_FROM_EMAIL || 'noreply@connect-yw.com'`
+- Line 31: `from: process.env.SENDGRID_FROM_EMAIL || 'noreply@koinonia-sms.com'`
 
 ---
 
@@ -60,15 +60,15 @@ This document lists all hardcoded domain names, URLs, and email addresses found 
 
 #### .env (Development)
 - Line 13: `FRONTEND_URL=http://localhost:5173`
-- Line 40: `SUPPORT_EMAIL=support@connect-yw.com`
+- Line 40: `SUPPORT_EMAIL=support@koinonia-sms.com`
 
 #### .env.example (Template)
 - Line 14: `FRONTEND_URL=http://localhost:5173`
-- Line 43: `SUPPORT_EMAIL=support@connect-yw.com`
+- Line 43: `SUPPORT_EMAIL=support@koinonia-sms.com`
 
 #### .env.production (Production)
-- Line 11: `FRONTEND_URL=https://connect-yw-frontend.onrender.com`
-- Line 34: `SUPPORT_EMAIL=support@connect-yw.com`
+- Line 11: `FRONTEND_URL=https://koinonia-sms-frontend.onrender.com`
+- Line 34: `SUPPORT_EMAIL=support@koinonia-sms.com`
 
 ### Frontend Configuration
 
@@ -152,7 +152,7 @@ Lines 102-122: Third-party domain CSP directives for Stripe, CDN, Google Fonts
 6. `frontend/src/pages/SecurityPage.tsx` - security, support, www.connect.com
 7. `frontend/src/pages/TermsPage.tsx` - support, www.connect.com
 8. `frontend/src/components/landing/Pricing.tsx` - support
-9. `backend/src/services/sendgrid.service.ts` - noreply@connect-yw.com
+9. `backend/src/services/sendgrid.service.ts` - noreply@koinonia-sms.com
 
 ### Environment Configuration Files (5 files):
 1. `backend/.env`

@@ -140,11 +140,12 @@ export function DashboardPage() {
             ]);
             if (profileData)
                 setProfile(profileData);
-            if (stats)
+            if (stats) {
+                setTotalMembers(stats.totalMembers);
                 setSummaryStats(stats);
+            }
             if (msgStats)
                 setMessageStats(msgStats);
-            // Members count is available from summary stats
         }
         catch (error) {
             console.error('Failed to load dashboard data:', error);

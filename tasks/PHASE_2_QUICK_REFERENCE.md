@@ -20,7 +20,7 @@
 ### ✅ Before Deployment
 ```bash
 # Baseline metrics
-curl -s https://api.ywmessaging.com/metrics/queries | jq '.statistics.p95'
+curl -s https://api.koinoniasms.com/metrics/queries | jq '.statistics.p95'
 # Record: ___ms
 ```
 
@@ -36,7 +36,7 @@ tail -5 /var/log/application.log | jq
 # Expected: Valid JSON with correlationId fields
 
 # Check metrics endpoint
-curl -s https://api.ywmessaging.com/metrics/queries | jq '.health'
+curl -s https://api.koinoniasms.com/metrics/queries | jq '.health'
 # Expected: "healthy" or "degraded"
 ```
 
@@ -65,12 +65,12 @@ ping -c 1 replica-2.internal && echo "✅ Replica 2 up"
 ### ✅ After Deployment
 ```bash
 # Check replication status
-psql -U postgres -h primary -d ywmessaging -c "
+psql -U postgres -h primary -d koinoniasms -c "
   SELECT slot_name, active FROM pg_replication_slots;"
 # Expected: 2 rows, both active=true
 
 # Verify lag < 1 second
-psql -U postgres -h primary -d ywmessaging -c "
+psql -U postgres -h primary -d koinoniasms -c "
   SELECT replay_lag FROM pg_stat_replication;"
 # Expected: < 1000ms
 ```
@@ -107,7 +107,7 @@ psql -U pgbouncer -d pgbouncer -c "SHOW pools;"
 # Expected: cl_waiting = 0, sv_active = 40-50
 
 # Verify connection count dropped
-psql -U postgres -h primary -d ywmessaging -c "
+psql -U postgres -h primary -d koinoniasms -c "
   SELECT count(*) FROM pg_stat_activity WHERE pid <> pg_backend_pid();"
 # Expected: Much lower than before (50 instead of 200+)
 ```
@@ -115,7 +115,7 @@ psql -U postgres -h primary -d ywmessaging -c "
 ### 🔴 Emergency Bypass PgBouncer
 ```bash
 # Set DATABASE_URL to direct primary connection
-DATABASE_URL=postgresql://primary:5432/ywmessaging
+DATABASE_URL=postgresql://primary:5432/koinoniasms
 # Restart app
 pm2 restart app
 ```
@@ -152,7 +152,7 @@ redis-cli INFO stats | grep keyspace
 
 # Test rate limiting
 for i in {1..15}; do
-  curl -s -w "%{http_code}" https://api.ywmessaging.com/api/test
+  curl -s -w "%{http_code}" https://api.koinoniasms.com/api/test
 done
 # Expected: 10x 200, then 429s
 ```
@@ -181,17 +181,17 @@ pm2 restart app
 ### ✅ Immediate Post-Maintenance (30 min)
 ```bash
 # Application up?
-curl -s -w "%{http_code}" https://api.ywmessaging.com/health
+curl -s -w "%{http_code}" https://api.koinoniasms.com/health
 # Expected: 200
 
 # Check partitions created
-psql -U postgres -h primary -d ywmessaging -c "
+psql -U postgres -h primary -d koinoniasms -c "
   SELECT count(DISTINCT tablename) FROM pg_tables
   WHERE tablename LIKE 'conversation_message_%';"
 # Expected: 24+ partitions
 
 # Query performance improved?
-time psql -U postgres -h primary -d ywmessaging -c "
+time psql -U postgres -h primary -d koinoniasms -c "
   SELECT * FROM conversation_message WHERE conversation_id = 'x' LIMIT 50;"
 # Expected: ~200ms (3-4x faster)
 ```
@@ -211,22 +211,22 @@ COMMIT;
 
 ### Check Application Health
 ```bash
-curl -s https://api.ywmessaging.com/health | jq
+curl -s https://api.koinoniasms.com/health | jq
 # Or detailed:
-curl -s https://api.ywmessaging.com/health/detailed | jq
+curl -s https://api.koinoniasms.com/health/detailed | jq
 ```
 
 ### Monitor Database
 ```bash
 # Connection count
-psql -U postgres -h primary -d ywmessaging -c "
+psql -U postgres -h primary -d koinoniasms -c "
   SELECT count(*) FROM pg_stat_activity WHERE pid <> pg_backend_pid();"
 
 # Query performance
-curl -s https://api.ywmessaging.com/metrics/queries | jq '.statistics'
+curl -s https://api.koinoniasms.com/metrics/queries | jq '.statistics'
 
 # Replica lag
-psql -U postgres -h primary -d ywmessaging -c "
+psql -U postgres -h primary -d koinoniasms -c "
   SELECT max(replay_lag) FROM pg_stat_replication;"
 
 # PgBouncer pool status
@@ -269,7 +269,7 @@ sudo systemctl restart redis-server
 
 ```
 Application not responding?
-├─→ Check: curl -s https://api.ywmessaging.com/health
+├─→ Check: curl -s https://api.koinoniasms.com/health
 ├─→ Status: 200 OK?
 │   ├─→ Yes: Check error logs (tail /var/log/application.log)
 │   └─→ No: Go to "Database Down" below
@@ -283,7 +283,7 @@ Database is down?
 └─→ Still down: Failover to replica-1 (see Week 3-4 above)
 
 Slow queries?
-├─→ Check: curl -s https://api.ywmessaging.com/metrics/queries | jq
+├─→ Check: curl -s https://api.koinoniasms.com/metrics/queries | jq
 ├─→ p95 > 500ms?
 │   ├─→ Check cache hit rate (redis-cli INFO stats)
 │   ├─→ Check replication lag (SELECT max(replay_lag) FROM pg_stat_replication;)
@@ -307,7 +307,7 @@ Cache not warming?
 ├─→ < 100 keys?
 │   ├─→ Verify Redis is accessible from app
 │   ├─→ Check CACHE_WARMING_ENABLED=true in .env
-│   └─→ Manually warm: curl https://api.ywmessaging.com/health/detailed
+│   └─→ Manually warm: curl https://api.koinoniasms.com/health/detailed
 └─→ Recovery: Manually rebuild cache or flush and restart
 
 Still broken?
@@ -367,10 +367,10 @@ Week 8:   __________________________________________________
 
 | Service | URL |
 |---------|-----|
-| Health Check | https://api.ywmessaging.com/health |
-| Detailed Health | https://api.ywmessaging.com/health/detailed |
-| Query Metrics | https://api.ywmessaging.com/metrics/queries |
-| Admin Dashboard | https://dashboard.ywmessaging.com/admin |
+| Health Check | https://api.koinoniasms.com/health |
+| Detailed Health | https://api.koinoniasms.com/health/detailed |
+| Query Metrics | https://api.koinoniasms.com/metrics/queries |
+| Admin Dashboard | https://dashboard.koinoniasms.com/admin |
 | Datadog APM | https://app.datadoghq.com/apm/services |
 | PgBouncer Stats | `psql -U pgbouncer -d pgbouncer` |
 | Redis CLI | `redis-cli` |

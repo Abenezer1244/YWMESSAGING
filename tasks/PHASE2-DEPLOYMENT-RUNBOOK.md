@@ -392,7 +392,7 @@ curl -I https://api.koinoniasms.com/health
 
 # Option A: Render (Recommended for consistency)
 # 1. Clone Backend-1 service
-# 2. Name it: ywmessaging-api-2, ywmessaging-api-3
+# 2. Name it: koinoniasms-api-2, koinoniasms-api-3
 # 3. Point to same GitHub repo and branch
 # 4. Use same environment variables
 # 5. Update DATABASE_URL to point to PgBouncer
@@ -520,7 +520,7 @@ openssl s_client -connect api.koinoniasms.com:443
 ```bash
 # Stop one backend server
 ssh ubuntu@backend-1.render.com
-systemctl stop ywmessaging-api  # Or equivalent restart command
+systemctl stop koinoniasms-api  # Or equivalent restart command
 
 # From NGINX, check status
 curl http://localhost:8080/nginx_status
@@ -537,7 +537,7 @@ done
 # Verify none go to Backend-1
 
 # Restart Backend-1
-systemctl start ywmessaging-api
+systemctl start koinoniasms-api
 
 # Wait for health checks to pass (30 seconds)
 # Verify Backend-1 comes back into rotation
@@ -715,7 +715,7 @@ watch -n 5 'psql -h pgbouncer-ip -p 6432 -U pgbouncer pgbouncer -c "SHOW STATS;"
 watch -n 5 'curl -s http://localhost:8080/nginx_status'
 
 # Monitor backend logs
-tail -f /var/log/ywmessaging-api/out.log
+tail -f /var/log/koinoniasms-api/out.log
 
 # Monitor health checks
 watch -n 10 'for i in 1 2 3; do echo "Backend-$i:"; curl -s http://backend-$i:3000/health | jq; done'

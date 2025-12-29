@@ -19,8 +19,8 @@ export const websocketConfig: Partial<ServerOptions> = {
       'https://koinoniasms.com',
       'https://www.koinoniasms.com',
       // Render deployments
-      'https://connect-yw-frontend.onrender.com',
-      'https://connect-yw-backend.onrender.com',
+      'https://koinonia-sms-frontend.onrender.com',
+      'https://koinonia-sms-backend.onrender.com',
       // Environment-based fallback
       process.env.FRONTEND_URL || 'https://koinoniasms.com',
     ],

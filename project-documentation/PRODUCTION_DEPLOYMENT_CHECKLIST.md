@@ -84,11 +84,11 @@
 - [ ] Monitor deployment logs in real-time
 - [ ] Verify health check endpoint returns 200:
   ```bash
-  curl -s https://api.ywmessaging.com/health | jq '.status'
+  curl -s https://api.koinoniasms.com/health | jq '.status'
   ```
 - [ ] Verify detailed health check:
   ```bash
-  curl -s https://api.ywmessaging.com/health/detailed | jq
+  curl -s https://api.koinoniasms.com/health/detailed | jq
   ```
 
 ### [ ] Immediate Post-Deployment Checks (First 2 minutes)
@@ -215,7 +215,7 @@ kubectl set replicas deployment/backend-api 0
 kubectl set replicas deployment/backend-api-previous 3
 
 # 4. Verify health
-curl -s https://api.ywmessaging.com/health | jq '.status'
+curl -s https://api.koinoniasms.com/health | jq '.status'
 
 # 5. Monitor metrics
 # Watch for error rate, latency returning to normal (5-10 minutes)
@@ -274,13 +274,13 @@ kubectl delete deployment backend-api
 ### Health & Status
 ```bash
 # Health check
-curl -s https://api.ywmessaging.com/health | jq
+curl -s https://api.koinoniasms.com/health | jq
 
 # Detailed health
-curl -s https://api.ywmessaging.com/health/detailed | jq
+curl -s https://api.koinoniasms.com/health/detailed | jq
 
 # Ready probe
-curl -s https://api.ywmessaging.com/ready | jq
+curl -s https://api.koinoniasms.com/ready | jq
 ```
 
 ### Logs
@@ -298,13 +298,13 @@ journalctl -u backend-api -n 100 --no-pager
 ### Database
 ```bash
 # Connection count
-psql -h primary -U postgres -d ywmessaging -c "SELECT count(*) FROM pg_stat_activity WHERE pid <> pg_backend_pid();"
+psql -h primary -U postgres -d koinoniasms -c "SELECT count(*) FROM pg_stat_activity WHERE pid <> pg_backend_pid();"
 
 # Slow queries
-psql -h primary -U postgres -d ywmessaging -c "SELECT * FROM pg_stat_statements ORDER BY mean_exec_time DESC LIMIT 10;"
+psql -h primary -U postgres -d koinoniasms -c "SELECT * FROM pg_stat_statements ORDER BY mean_exec_time DESC LIMIT 10;"
 
 # Cache hit ratio
-psql -h primary -U postgres -d ywmessaging -c "SELECT sum(heap_blks_hit)/(sum(heap_blks_hit)+sum(heap_blks_read)) as ratio FROM pg_statio_user_tables;"
+psql -h primary -U postgres -d koinoniasms -c "SELECT sum(heap_blks_hit)/(sum(heap_blks_hit)+sum(heap_blks_read)) as ratio FROM pg_statio_user_tables;"
 ```
 
 ### Cache/Redis
@@ -379,7 +379,7 @@ redis-cli FLUSHDB  # Only in emergency
 - **CloudWatch Logs**: https://console.aws.amazon.com/cloudwatch/
 - **PostgreSQL Logs**: `/var/log/postgresql/postgresql.log`
 - **Application Logs**: `/var/log/application.log`
-- **Status Page**: https://status.ywmessaging.com
+- **Status Page**: https://status.koinoniasms.com
 
 ---
 

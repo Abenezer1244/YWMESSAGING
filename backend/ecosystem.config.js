@@ -12,7 +12,7 @@
  * Usage:
  *   - Production: pm2 start ecosystem.config.js
  *   - Development: npm run dev (without PM2)
- *   - Reload: pm2 reload ywmessaging-api (zero-downtime)
+ *   - Reload: pm2 reload koinonia-api (zero-downtime)
  *   - Monitor: pm2 monit
  *   - Logs: pm2 logs
  *
@@ -26,7 +26,7 @@ module.exports = {
   apps: [
     {
       // Application name (used in logs and PM2 dashboard)
-      name: 'ywmessaging-api',
+      name: 'koinonia-api',
 
       // Script to execute
       script: './dist/index.js',
@@ -119,8 +119,8 @@ module.exports = {
   //     user: 'deploy',
   //     host: 'your-server.com',
   //     ref: 'origin/main',
-  //     repo: 'https://github.com/your-org/ywmessaging.git',
-  //     path: '/var/www/ywmessaging',
+  //     repo: 'https://github.com/your-org/koinonia-sms.git',
+  //     path: '/var/www/koinonia-sms',
   //     'post-deploy': 'npm install && npm run build && pm2 reload ecosystem.config.js --env production',
   //     'pre-deploy-local': 'echo "Deploying to production"'
   //   }

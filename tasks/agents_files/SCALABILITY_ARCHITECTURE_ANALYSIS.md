@@ -598,7 +598,7 @@ Node.js Event Loop:
    - Share rate limits across instances
 
 2. **Separate Worker Nodes**
-   - Create new Render service: `connect-yw-worker`
+   - Create new Render service: `koinonia-sms-worker`
    - Move scheduled jobs to worker (cron jobs)
    - Run queue processors on worker (not main API)
 

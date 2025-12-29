@@ -17,7 +17,7 @@ export function initDatadog() {
     }
     try {
         tracer.init({
-            service: 'connect-yw-backend',
+            service: 'koinonia-sms-backend',
             version: process.env.APP_VERSION || '1.0.0',
             env: process.env.NODE_ENV || 'development',
             // Sampling: trace 10% of requests in production, 100% in development
@@ -28,7 +28,7 @@ export function initDatadog() {
         tracer.use('http', { service: 'http-client' });
         tracer.use('redis', { service: 'redis' });
         console.log('✅ Datadog APM initialized');
-        console.log(`   Service: connect-yw-backend`);
+        console.log(`   Service: koinonia-sms-backend`);
         console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
         console.log(`   Sample Rate: ${process.env.NODE_ENV === 'production' ? '10%' : '100%'}`);
     }

@@ -288,7 +288,7 @@ CHURCH_ID="church-12345" \
 npm run loadtest:load
 
 # Test against production (CAUTION!)
-BASE_URL=https://api.ywmessaging.com npm run loadtest:smoke
+BASE_URL=https://api.koinoniasms.com npm run loadtest:smoke
 ```
 
 ---
@@ -419,7 +419,7 @@ jobs:
         image: postgres:15
         env:
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: ywmessaging_test
+          POSTGRES_DB: koinoniasms_test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -488,10 +488,10 @@ jobs:
 
 ```bash
 # Run against staging with production data
-BASE_URL=https://staging.ywmessaging.com npm run loadtest:load
+BASE_URL=https://staging.koinoniasms.com npm run loadtest:load
 
 # Cleanup: Delete test data after test
-curl -X DELETE https://staging.ywmessaging.com/admin/cleanup-test-data \
+curl -X DELETE https://staging.koinoniasms.com/admin/cleanup-test-data \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 

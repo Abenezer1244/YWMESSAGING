@@ -153,7 +153,7 @@ The Koinonia YW Platform has a **solid foundation** on Render with GitHub Action
 #### Backend Service
 ```yaml
 type: web
-name: connect-yw-backend
+name: koinonia-sms-backend
 env: node
 region: oregon
 plan: standard  # ← Can handle ~100 concurrent users
@@ -173,7 +173,7 @@ autoDeployOnPush: true
 #### Frontend Service
 ```yaml
 type: web
-name: connect-yw-frontend
+name: koinonia-sms-frontend
 env: node
 region: oregon
 plan: standard
@@ -190,7 +190,7 @@ healthCheckPath: /
 #### Database Service
 ```yaml
 type: pserv
-name: connect-yw-db
+name: koinonia-sms-db
 plan: starter  # ← Max ~4GB storage, not recommended for >1000 churches
 postgresMajorVersion: 15
 preDeployCommand: cd backend && npx prisma migrate deploy
@@ -321,7 +321,7 @@ Render PostgreSQL **Starter Plan** (current) has:
 ```yaml
 # render.yaml - Upgrade database plan
 type: pserv
-name: connect-yw-db
+name: koinonia-sms-db
 plan: standard  # Upgrade from starter ($15/mo)
 postgresMajorVersion: 15
 ```
@@ -357,7 +357,7 @@ postgresMajorVersion: 15
 
 # Setup:
 # 1. Create account at uptimerobot.com
-# 2. Add monitor: https://api.ywmessaging.com/health
+# 2. Add monitor: https://api.koinoniasms.com/health
 # 3. Check frequency: Every 5 minutes
 # 4. Alert to: Slack webhook + Email
 # 5. Downtime threshold: Alert after 2 failed checks (10 min)
@@ -559,7 +559,7 @@ export const options = {
 
 export default function () {
   // Test login endpoint
-  const loginRes = http.post('https://api.ywmessaging.com/api/auth/login', {
+  const loginRes = http.post('https://api.koinoniasms.com/api/auth/login', {
     email: 'test@church.com',
     password: 'TestPass123!',
   });
@@ -573,7 +573,7 @@ export default function () {
 
   // Test send message endpoint
   const msgRes = http.post(
-    'https://api.ywmessaging.com/api/messages/send',
+    'https://api.koinoniasms.com/api/messages/send',
     {
       content: 'Test message',
       targetType: 'group',
@@ -852,7 +852,7 @@ SENTRY_EOF
 ```yaml
 # render.yaml - Upgrade database plan for backups
 type: pserv
-name: connect-yw-db
+name: koinonia-sms-db
 plan: standard  # ← $15/month, includes PITR
 postgresMajorVersion: 15
 preDeployCommand: cd backend && npx prisma migrate deploy
@@ -885,11 +885,11 @@ PagerDuty Setup:
 1. **Configure Uptime Robot** (30 minutes - FREE)
 ```
 1. Create account at uptimerobot.com
-2. Add monitor: https://api.ywmessaging.com/health
+2. Add monitor: https://api.koinoniasms.com/health
 3. Check frequency: Every 5 minutes
 4. Alert method: Slack webhook
 5. Downtime threshold: Alert after 2 failed checks (10 min)
-6. Status page: https://status.ywmessaging.com (auto-generated)
+6. Status page: https://status.koinoniasms.com (auto-generated)
 ```
 
 2. **Deploy New Relic APM** (1 hour)
@@ -923,7 +923,7 @@ NR_EOF
 ## SEV-1 (CRITICAL: Complete Outage)
 Duration: <15 minutes to page
 Response Steps:
-1. Run health check: curl https://api.ywmessaging.com/health
+1. Run health check: curl https://api.koinoniasms.com/health
 2. Check Render dashboard for recent deployments
 3. Check Sentry for error spike
 4. Check New Relic for infrastructure issues
@@ -996,7 +996,7 @@ export const options = {
 };
 
 export default function() {
-  const baseUrl = 'https://api.ywmessaging.com';
+  const baseUrl = 'https://api.koinoniasms.com';
 
   group('Send Message Flow', () => {
     let res = http.post(`${baseUrl}/api/messages/send`, {
@@ -1704,7 +1704,7 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment:
       name: production
-      url: https://connect-yw-backend.onrender.com
+      url: https://koinonia-sms-backend.onrender.com
     steps:
       - uses: actions/checkout@v4
 
@@ -1726,7 +1726,7 @@ jobs:
       - name: Smoke tests
         run: |
           sleep 60  # Wait for deployment
-          curl -f https://connect-yw-backend.onrender.com/health || exit 1
+          curl -f https://koinonia-sms-backend.onrender.com/health || exit 1
           echo "✅ Backend health check passed"
 
       # ✅ Notify deployment
@@ -2149,7 +2149,7 @@ Render supports Infrastructure as Code through `render.yaml` blueprint files. Th
 services:
   # Backend API Service
   - type: web
-    name: connect-yw-backend
+    name: koinonia-sms-backend
     env: node
     region: oregon
     plan: standard  # Upgraded from starter
@@ -2175,11 +2175,11 @@ services:
         sync: false
       - key: DATABASE_URL
         fromDatabase:
-          name: connect-yw-db
+          name: koinonia-sms-db
           property: connectionString
       - key: REDIS_URL
         fromService:
-          name: connect-yw-redis
+          name: koinonia-sms-redis
           type: redis
           property: connectionString
 
@@ -2194,7 +2194,7 @@ services:
 
   # Frontend Web Service
   - type: web
-    name: connect-yw-frontend
+    name: koinonia-sms-frontend
     env: node
     region: oregon
     plan: standard
@@ -2208,7 +2208,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: VITE_API_BASE_URL
-        value: https://api.ywmessaging.com
+        value: https://api.koinoniasms.com
       - key: VITE_SENTRY_DSN
         sync: false
 
@@ -2216,7 +2216,7 @@ services:
 
   # Background Worker (Message Processing)
   - type: worker
-    name: connect-yw-worker
+    name: koinonia-sms-worker
     env: node
     region: oregon
     plan: standard
@@ -2232,11 +2232,11 @@ services:
         value: message-processor
       - key: DATABASE_URL
         fromDatabase:
-          name: connect-yw-db
+          name: koinonia-sms-db
           property: connectionString
       - key: REDIS_URL
         fromService:
-          name: connect-yw-redis
+          name: koinonia-sms-redis
           type: redis
           property: connectionString
 
@@ -2245,7 +2245,7 @@ services:
 # Databases
 databases:
   # PostgreSQL Database (Upgraded to Standard)
-  - name: connect-yw-db
+  - name: koinonia-sms-db
     plan: standard  # $15/month - includes backups + PITR
     postgresMajorVersion: 15
     region: oregon
@@ -2259,7 +2259,7 @@ databases:
         description: Public access for external tools
 
   # Redis Instance (for caching + queues)
-  - name: connect-yw-redis
+  - name: koinonia-sms-redis
     plan: starter  # Start small, can upgrade
     region: oregon
     maxmemoryPolicy: allkeys-lru  # LRU eviction policy
@@ -2297,7 +2297,7 @@ terraform {
 
   # Backend configuration for state management
   backend "s3" {
-    bucket         = "ywmessaging-terraform-state"
+    bucket         = "koinoniasms-terraform-state"
     key            = "render/production/terraform.tfstate"
     region         = "us-west-2"
     encrypt        = true
@@ -2311,11 +2311,11 @@ provider "render" {
 
 # Backend Web Service
 resource "render_web_service" "backend" {
-  name        = "connect-yw-backend"
+  name        = "koinonia-sms-backend"
   region      = "oregon"
   plan        = "standard"
   runtime     = "node"
-  repo_url    = "https://github.com/your-org/ywmessaging"
+  repo_url    = "https://github.com/your-org/koinoniasms"
   branch      = "main"
 
   build_command = "cd backend && npm ci && npm run build"
@@ -2339,7 +2339,7 @@ resource "render_web_service" "backend" {
 
 # PostgreSQL Database
 resource "render_postgres" "main" {
-  name               = "connect-yw-db"
+  name               = "koinonia-sms-db"
   plan               = "standard"
   region             = "oregon"
   postgres_version   = "15"
@@ -2351,7 +2351,7 @@ resource "render_postgres" "main" {
 
 # Redis Cache
 resource "render_redis" "cache" {
-  name   = "connect-yw-redis"
+  name   = "koinonia-sms-redis"
   plan   = "starter"
   region = "oregon"
 
@@ -2606,7 +2606,7 @@ jobs:
       # Build frontend
       - name: Build Frontend
         env:
-          VITE_API_BASE_URL: https://api.ywmessaging.com
+          VITE_API_BASE_URL: https://api.koinoniasms.com
         run: |
           cd frontend
           npm ci
@@ -2634,7 +2634,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment:
       name: staging
-      url: https://staging.ywmessaging.com
+      url: https://staging.koinoniasms.com
 
     steps:
       - uses: actions/checkout@v4
@@ -2656,7 +2656,7 @@ jobs:
       # ✅ Smoke tests on staging
       - name: Staging Smoke Tests
         run: |
-          curl -f https://staging-api.ywmessaging.com/health || exit 1
+          curl -f https://staging-api.koinoniasms.com/health || exit 1
           echo "✅ Staging health check passed"
 
       # Notify team
@@ -2679,7 +2679,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment:
       name: production
-      url: https://ywmessaging.com
+      url: https://koinoniasms.com
 
     steps:
       - uses: actions/checkout@v4
@@ -2709,7 +2709,7 @@ jobs:
       # ✅ Production smoke tests
       - name: Production Smoke Tests
         run: |
-          curl -f https://api.ywmessaging.com/health || exit 1
+          curl -f https://api.koinoniasms.com/health || exit 1
           echo "✅ Production health check passed"
 
       # ✅ Notify on success
@@ -3014,14 +3014,14 @@ await rotateSecret('prod/jwt/secret');
    # render.yaml - Add Virginia services
    services:
      - type: web
-       name: connect-yw-backend-virginia
+       name: koinonia-sms-backend-virginia
        region: virginia
        # Same config as Oregon
 
    databases:
-     - name: connect-yw-db-virginia
+     - name: koinonia-sms-db-virginia
        region: virginia
-       replica_of: connect-yw-db  # Read replica
+       replica_of: koinonia-sms-db  # Read replica
    ```
 
 2. **Configure Geographic Load Balancing**
@@ -3087,8 +3087,8 @@ TOTAL Multi-Region Cost:      $468/month
 # scripts/backup-database.sh
 
 # Configuration
-DB_NAME="ywmessaging_prod"
-S3_BUCKET="ywmessaging-db-backups"
+DB_NAME="koinoniasms_prod"
+S3_BUCKET="koinoniasms-db-backups"
 RETENTION_DAYS=90
 
 # Create backup with pg_dump
@@ -3157,16 +3157,16 @@ jobs:
 # Test backup restoration to ensure backups are valid
 
 # Download latest backup
-aws s3 cp s3://ywmessaging-db-backups/postgres/latest.sql.gz /tmp/
+aws s3 cp s3://koinoniasms-db-backups/postgres/latest.sql.gz /tmp/
 
 # Create test database
-createdb ywmessaging_test_restore
+createdb koinoniasms_test_restore
 
 # Restore backup
-gunzip -c /tmp/latest.sql.gz | psql ywmessaging_test_restore
+gunzip -c /tmp/latest.sql.gz | psql koinoniasms_test_restore
 
 # Verify data integrity
-psql ywmessaging_test_restore -c "
+psql koinoniasms_test_restore -c "
 SELECT
   (SELECT COUNT(*) FROM church) as church_count,
   (SELECT COUNT(*) FROM message) as message_count,
@@ -3174,7 +3174,7 @@ SELECT
 "
 
 # Cleanup
-dropdb ywmessaging_test_restore
+dropdb koinoniasms_test_restore
 
 echo "✅ Backup restore test successful"
 ```
@@ -3203,7 +3203,7 @@ Production Database:
 
 ALTER SYSTEM SET wal_level = replica;
 ALTER SYSTEM SET archive_mode = on;
-ALTER SYSTEM SET archive_command = 'aws s3 cp %p s3://ywmessaging-wal-archive/%f';
+ALTER SYSTEM SET archive_command = 'aws s3 cp %p s3://koinoniasms-wal-archive/%f';
 ALTER SYSTEM SET archive_timeout = 300;  -- 5 minutes
 
 -- Reload configuration
@@ -3330,7 +3330,7 @@ curl -H "Authorization: Bearer $RENDER_API_KEY" \
 # MCP Source: AWS Cost Explorer API
 
 resource "awscc_ce_anomaly_monitor" "cost_monitor" {
-  monitor_name = "ywmessaging-cost-monitor"
+  monitor_name = "koinoniasms-cost-monitor"
   monitor_type = "DIMENSIONAL"
 
   monitor_specification = jsonencode({
@@ -3346,14 +3346,14 @@ resource "awscc_ce_anomaly_monitor" "cost_monitor" {
 }
 
 resource "awscc_ce_anomaly_subscription" "cost_alerts" {
-  subscription_name = "ywmessaging-cost-alerts"
+  subscription_name = "koinoniasms-cost-alerts"
   frequency         = "DAILY"
   monitor_arn_list  = [awscc_ce_anomaly_monitor.cost_monitor.monitor_arn]
   threshold         = 100  # Alert if anomaly > $100
 
   subscribers = [{
     type    = "EMAIL"
-    address = "ops@ywmessaging.com"
+    address = "ops@koinoniasms.com"
   }]
 }
 ```
@@ -3691,7 +3691,7 @@ echo "✅ All compliance checks passed"
 #### Phase 3: Week 5-6 (Advanced Monitoring + CI/CD)
 - [ ] **Uptime Monitoring** (30 minutes)
   - [ ] Create Uptime Robot account (FREE)
-  - [ ] Add health check: https://api.ywmessaging.com/health
+  - [ ] Add health check: https://api.koinoniasms.com/health
   - [ ] Set frequency: 5 minutes
   - [ ] Configure Slack notifications
   - [ ] Create public status page

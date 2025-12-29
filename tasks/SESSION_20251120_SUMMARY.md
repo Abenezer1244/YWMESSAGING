@@ -180,7 +180,7 @@ Telnyx Sends Verification Webhook
 ✅ Webhook signature verified (ED25519) - processing
 ✅ Brand created: ALLMIGHTY GOD CHURCH
 ✅ 10DLC webhook accepted for processing
-     [POST]202connect-yw-backend.onrender.com/api/webhooks/10dlc/status
+     [POST]202koinonia-sms-backend.onrender.com/api/webhooks/10dlc/status
 ```
 
 All showing 202 ACCEPTED status (correct for webhooks).

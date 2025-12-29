@@ -88,7 +88,7 @@ Option C - AWS (Most complex):
 - [ ] GitHub account with new repo created
 
 **Environment Setup:**
-- [ ] Create GitHub repo: `connect-yw-platform`
+- [ ] Create GitHub repo: `koinonia-sms-platform`
 - [ ] Clone to local machine
 - [ ] Set up .gitignore for Node.js projects
 - [ ] Create development branch: `git checkout -b development`
@@ -8761,7 +8761,7 @@ git push origin development
 Railway PostgreSQL:
 
 1. Create Railway account
-2. New project: "connect-yw-backend"
+2. New project: "koinonia-sms-backend"
 3. Add PostgreSQL plugin
 4. Copy DATABASE_URL
 5. Run migrations:

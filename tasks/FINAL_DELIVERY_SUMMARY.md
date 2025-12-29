@@ -371,7 +371,7 @@ YWMESSAGING/
 ```
 TELNYX_WEBHOOK_SECRET=<your-webhook-secret>
 TELNYX_API_KEY=<existing-api-key>
-WEBHOOK_BASE_URL=https://connect-yw-backend.onrender.com
+WEBHOOK_BASE_URL=https://koinonia-sms-backend.onrender.com
 ```
 
 ---

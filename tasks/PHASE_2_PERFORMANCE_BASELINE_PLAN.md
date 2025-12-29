@@ -58,7 +58,7 @@ LIMIT 20;
 **Connection Count**
 ```bash
 # Current baseline
-psql -h primary -U postgres -d ywmessaging -c "
+psql -h primary -U postgres -d koinoniasms -c "
   SELECT count(*) as active_connections
   FROM pg_stat_activity
   WHERE pid <> pg_backend_pid();"
@@ -106,10 +106,10 @@ ORDER BY count DESC;
 ```bash
 # Measure actual HTTP response time
 # Method 1: Load test with ApacheBench
-ab -n 1000 -c 10 https://api.ywmessaging.com/api/v1/users
+ab -n 1000 -c 10 https://api.koinoniasms.com/api/v1/users
 
 # Method 2: Curl timing
-curl -w "@curl-format.txt" -o /dev/null -s https://api.ywmessaging.com/api/v1/users
+curl -w "@curl-format.txt" -o /dev/null -s https://api.koinoniasms.com/api/v1/users
 # Format: time_namelookup, time_connect, time_appconnect, time_pretransfer,
 #         time_redirect, time_starttransfer, time_total
 
@@ -193,7 +193,7 @@ FROM pg_statio_user_tables;
 # Capture connection pattern throughout day
 # Every 5 minutes for 24 hours:
 for i in {1..288}; do
-  psql -h primary -U postgres -d ywmessaging -c \
+  psql -h primary -U postgres -d koinoniasms -c \
     "SELECT now(), count(*) FROM pg_stat_activity WHERE pid <> pg_backend_pid();" \
     >> connections-baseline.log
   sleep 300
@@ -229,7 +229,7 @@ tail -100000 /var/log/application.log | \
 ```bash
 # Active users at any given time
 # Infer from active sessions
-psql -h primary -U postgres -d ywmessaging -c "
+psql -h primary -U postgres -d koinoniasms -c "
   SELECT count(DISTINCT user_id) as active_users
   FROM active_sessions
   WHERE created_at > now() - interval '5 minutes';"
@@ -279,7 +279,7 @@ sync
 echo 3 > /proc/sys/vm/drop_caches
 
 # 2. Reset PostgreSQL stats
-psql -U postgres -h primary -d ywmessaging -c "
+psql -U postgres -h primary -d koinoniasms -c "
   SELECT pg_stat_statements_reset();"
 
 # 3. Wait 30 seconds for system to stabilize
@@ -287,7 +287,7 @@ sleep 30
 
 # 4. Run measurement query
 # Record output to baseline.txt
-psql -U postgres -h primary -d ywmessaging -c \
+psql -U postgres -h primary -d koinoniasms -c \
   "SELECT pg_stat_statements.query, mean_time, stddev_time, calls
    FROM pg_stat_statements
    WHERE query NOT LIKE '%pg_stat%'
@@ -308,16 +308,16 @@ psql -U postgres -h primary -d ywmessaging -c \
 # Simulate realistic traffic
 for i in {1..100}; do
   # User list
-  curl -s https://api.ywmessaging.com/api/v1/users > /dev/null &
+  curl -s https://api.koinoniasms.com/api/v1/users > /dev/null &
 
   # Conversation list
-  curl -s https://api.ywmessaging.com/api/v1/conversations > /dev/null &
+  curl -s https://api.koinoniasms.com/api/v1/conversations > /dev/null &
 
   # Message fetch
-  curl -s https://api.ywmessaging.com/api/v1/messages > /dev/null &
+  curl -s https://api.koinoniasms.com/api/v1/messages > /dev/null &
 
   # Dashboard (expensive query)
-  curl -s https://api.ywmessaging.com/api/v1/analytics > /dev/null &
+  curl -s https://api.koinoniasms.com/api/v1/analytics > /dev/null &
 
   wait
 done
@@ -339,7 +339,7 @@ time bash load-test.sh
 **Setup**:
 ```bash
 # Use Apache Bench for concurrent load
-ab -n 10000 -c 100 https://api.ywmessaging.com/api/v1/users
+ab -n 10000 -c 100 https://api.koinoniasms.com/api/v1/users
 
 # What to record:
 # - Requests per second: ___
@@ -362,7 +362,7 @@ ab -n 10000 -c 100 https://api.ywmessaging.com/api/v1/users
 for i in {1..3600}; do
   # Send 10 concurrent requests per second
   for j in {1..10}; do
-    curl -s https://api.ywmessaging.com/api/v1/users > /dev/null &
+    curl -s https://api.koinoniasms.com/api/v1/users > /dev/null &
   done
 
   # Wait 1 second for next batch
@@ -371,7 +371,7 @@ for i in {1..3600}; do
   # Every 60 seconds, record metrics
   if [ $((i % 60)) -eq 0 ]; then
     echo "Time: $((i/60)) min" >> sustained-load.log
-    psql -U postgres -h primary -d ywmessaging -c \
+    psql -U postgres -h primary -d koinoniasms -c \
       "SELECT mean_time FROM pg_stat_statements
        WHERE query LIKE 'SELECT%users%' LIMIT 1;" >> sustained-load.log
     ps aux | grep node >> sustained-load.log

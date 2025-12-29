@@ -282,7 +282,7 @@ Deployment usually takes 2-3 minutes.
 Test webhook endpoint after deployment completes:
 
 ```bash
-curl https://connect-yw-backend.onrender.com/api/webhooks/github/agents/health
+curl https://koinonia-sms-backend.onrender.com/api/webhooks/github/agents/health
 ```
 
 Expected response:
@@ -481,7 +481,7 @@ Critical: 0 | High: 2
 ### **Webhook Not Firing**
 
 1. Check webhook configuration in GitHub:
-   - Payload URL: `https://connect-yw-backend.onrender.com/api/webhooks/github/agents`
+   - Payload URL: `https://koinonia-sms-backend.onrender.com/api/webhooks/github/agents`
    - Secret: Matches `GITHUB_WEBHOOK_SECRET` in .env
    - Events: PR, Push, Workflows selected
    - Active: ✅ Checked

@@ -43,9 +43,9 @@ npm run build
 ### Step 1.3: Open Monitoring Dashboards (Keep These Open During Deploy)
 Open these in browser tabs NOW:
 - [ ] Render Dashboard: https://dashboard.render.com
-- [ ] Health Check: https://api.ywmessaging.com/health/detailed
+- [ ] Health Check: https://api.koinoniasms.com/health/detailed
 - [ ] Datadog: https://app.datadoghq.com/apm/services (if available)
-- [ ] Your App Frontend: https://app.ywmessaging.com (login ready)
+- [ ] Your App Frontend: https://app.koinoniasms.com (login ready)
 
 ---
 
@@ -76,7 +76,7 @@ See: `CUSTOMER_NOTIFICATION_TEMPLATE.md` for full text
 ### Step 3.1: Go to Render Dashboard
 1. Open: https://dashboard.render.com
 2. Login with your account
-3. Find your **backend service** (e.g., "connect-yw-backend")
+3. Find your **backend service** (e.g., "koinonia-sms-backend")
 4. Click on it
 
 ### Step 3.2: Trigger Deploy
@@ -118,11 +118,11 @@ After build succeeds:
 ### Step 4.1: Health Check Endpoints
 ```bash
 # Quick health check
-curl https://api.ywmessaging.com/health
+curl https://api.koinoniasms.com/health
 # Should return: {"status":"ok"} or similar
 
 # Detailed health check
-curl https://api.ywmessaging.com/health/detailed | jq
+curl https://api.koinoniasms.com/health/detailed | jq
 # Should show:
 # - database: connected
 # - redis: connected (or fallback)
@@ -132,7 +132,7 @@ curl https://api.ywmessaging.com/health/detailed | jq
 **Health Check Result**: ✅ PASS / ❌ FAIL
 
 ### Step 4.2: Manual Feature Test (5 minutes)
-Open your app at: https://app.ywmessaging.com
+Open your app at: https://app.koinoniasms.com
 
 **Test 1: Login**
 - [ ] Can you log in? YES / NO

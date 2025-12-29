@@ -101,7 +101,7 @@ After this maintenance, you can expect:
 📞 SUPPORT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 If you experience any issues:
-• Email: support@ywmessaging.com
+• Email: support@koinoniasms.com
 • Slack: [Your Slack channel if applicable]
 • Response time: [Your typical response time]
 
@@ -126,7 +126,7 @@ YW Messaging API maintenance on [DATE] at [TIME] UTC.
 Expected downtime: 10-15 minutes.
 No data loss. All features available after.
 
-Status: https://status.ywmessaging.com
+Status: https://status.koinoniasms.com
 ```
 
 ---
@@ -141,7 +141,7 @@ Status: https://status.ywmessaging.com
 5. **Follow-up**: Send "Maintenance Complete" email 30 minutes after
 
 ### Status Page Approach
-1. Go to: https://status.ywmessaging.com (if you have one)
+1. Go to: https://status.koinoniasms.com (if you have one)
 2. Create "Maintenance Window" event
 3. Set time range with expected duration
 4. Mark as "Scheduled Maintenance"
@@ -189,7 +189,7 @@ Replace these in templates:
 - `[INSERT TIME] UTC` → 2:00-2:15 AM UTC
 - `[Your Name]` → Your actual name
 - `[Your Slack channel]` → #incidents or similar
-- `support@ywmessaging.com` → Your support email
+- `support@koinoniasms.com` → Your support email
 
 ---
 

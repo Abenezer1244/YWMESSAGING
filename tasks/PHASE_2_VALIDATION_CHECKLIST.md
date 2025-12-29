@@ -31,7 +31,7 @@ free -h | grep Mem
 
 # 3. Response latency (p95)
 # Command:
-curl -s https://api.ywmessaging.com/metrics/queries | jq '.statistics.p95'
+curl -s https://api.koinoniasms.com/metrics/queries | jq '.statistics.p95'
 # Baseline: [___]ms
 
 # 4. Error rate
@@ -45,11 +45,11 @@ tail -100 /var/log/application.log | grep ERROR | wc -l
 - [ ] **Application Deployment Successful**
   ```bash
   # 1. Check application is running
-  curl -s https://api.ywmessaging.com/health
+  curl -s https://api.koinoniasms.com/health
   # Expected: 200 OK, status: healthy
 
   # 2. Check application version includes Winston logging
-  curl -s https://api.ywmessaging.com/version
+  curl -s https://api.koinoniasms.com/version
   # Expected: version includes "phase2" or current date
 
   # 3. No critical errors in logs
@@ -75,15 +75,15 @@ tail -100 /var/log/application.log | grep ERROR | wc -l
 - [ ] **Query Monitoring Active**
   ```bash
   # 1. Check metrics endpoint is available
-  curl -s https://api.ywmessaging.com/metrics/queries | jq
+  curl -s https://api.koinoniasms.com/metrics/queries | jq
   # Expected: Returns JSON with statistics, slowQueries, health
 
   # 2. Verify queries are being tracked
-  curl -s https://api.ywmessaging.com/metrics/queries | jq '.statistics.total_queries'
+  curl -s https://api.koinoniasms.com/metrics/queries | jq '.statistics.total_queries'
   # Expected: > 0 (queries have been tracked)
 
   # 3. Check health status
-  curl -s https://api.ywmessaging.com/metrics/queries | jq '.health'
+  curl -s https://api.koinoniasms.com/metrics/queries | jq '.health'
   # Expected: "healthy" or "degraded" (not missing)
   ```
 
@@ -95,7 +95,7 @@ tail -100 /var/log/application.log | grep ERROR | wc -l
 
   # 2. Verify traces are being sent
   # In Datadog UI, check:
-  # - APM > Services showing "ywmessaging-api"
+  # - APM > Services showing "koinoniasms-api"
   # - Service showing traces from last 5 minutes
   # Expected: Active traces visible
   ```
@@ -111,7 +111,7 @@ tail -100 /var/log/application.log | grep ERROR | wc -l
   # Expected: Within 50MB of baseline
 
   # 3. Response latency (compare to baseline)
-  curl -s https://api.ywmessaging.com/metrics/queries | jq '.statistics.p95'
+  curl -s https://api.koinoniasms.com/metrics/queries | jq '.statistics.p95'
   # Expected: Within 10% of baseline (±25ms typical)
 
   # 4. Error rate (compare to baseline)
@@ -123,32 +123,32 @@ tail -100 /var/log/application.log | grep ERROR | wc -l
   ```bash
   # 1. Test core APIs
   # Login:
-  curl -X POST https://api.ywmessaging.com/auth/login \
+  curl -X POST https://api.koinoniasms.com/auth/login \
     -d '{"email":"test@test.com","password":"test"}' \
     -H "Content-Type: application/json"
   # Expected: 200 or 401 (not 500)
 
   # 2. Test message sending
-  curl -X POST https://api.ywmessaging.com/api/messages \
+  curl -X POST https://api.koinoniasms.com/api/messages \
     -d '{"to":"1234567890","body":"test"}' \
     -H "Authorization: Bearer [token]" \
     -H "Content-Type: application/json"
   # Expected: 200 or 400 (not 500)
 
   # 3. Test dashboard loading
-  curl -s https://ywmessaging.com/dashboard | grep -q "dashboard"
+  curl -s https://koinoniasms.com/dashboard | grep -q "dashboard"
   # Expected: HTML contains "dashboard"
   ```
 
 - [ ] **Backward Compatibility Verified**
   ```bash
   # 1. Old API endpoints still work
-  curl -s https://api.ywmessaging.com/api/v1/users | jq
+  curl -s https://api.koinoniasms.com/api/v1/users | jq
   # Expected: Returns valid JSON (not 404 or 500)
 
   # 2. Database queries still functional
   # Check critical tables
-  psql -h primary -U postgres -d ywmessaging -c "SELECT COUNT(*) FROM users;"
+  psql -h primary -U postgres -d koinoniasms -c "SELECT COUNT(*) FROM users;"
   # Expected: Returns row count without error
   ```
 
@@ -180,11 +180,11 @@ tail -100 /var/log/application.log | grep ERROR | wc -l
 
 ```bash
 # 1. Baseline query latency
-curl -s https://api.ywmessaging.com/metrics/queries | jq '.statistics | {p50, p95, p99}'
+curl -s https://api.koinoniasms.com/metrics/queries | jq '.statistics | {p50, p95, p99}'
 # Record: {p50: ___ms, p95: ___ms, p99: ___ms}
 
 # 2. Baseline connection count
-psql -U postgres -h primary -d ywmessaging -c "
+psql -U postgres -h primary -d koinoniasms -c "
   SELECT count(*) FROM pg_stat_activity WHERE pid <> pg_backend_pid();"
 # Record: ___ connections
 
@@ -198,17 +198,17 @@ watch -n 1 'top -b -n 1 | grep postgres | head -5'
 - [ ] **Replicas Are Connected**
   ```bash
   # 1. Check replication status on primary
-  psql -U postgres -h primary -d ywmessaging -c "
+  psql -U postgres -h primary -d koinoniasms -c "
     SELECT slot_name, slot_type, active FROM pg_replication_slots;"
   # Expected: 2 rows, both active=true
 
   # 2. Verify data is being replicated
-  psql -U postgres -h primary -d ywmessaging -c "
+  psql -U postgres -h primary -d koinoniasms -c "
     SELECT * FROM pg_stat_replication;"
   # Expected: 2 rows with state='streaming'
 
   # 3. Check replication lag
-  psql -U postgres -h primary -d ywmessaging -c "
+  psql -U postgres -h primary -d koinoniasms -c "
     SELECT write_lag, flush_lag, replay_lag FROM pg_stat_replication;"
   # Expected: All < 1000ms (all three should be small)
   ```
@@ -216,17 +216,17 @@ watch -n 1 'top -b -n 1 | grep postgres | head -5'
 - [ ] **Replicas Are Healthy**
   ```bash
   # 1. Can connect to replica-1
-  psql -U postgres -h replica-1.internal -d ywmessaging -c "SELECT 1;"
+  psql -U postgres -h replica-1.internal -d koinoniasms -c "SELECT 1;"
   # Expected: 1 (success)
 
   # 2. Can connect to replica-2
-  psql -U postgres -h replica-2.internal -d ywmessaging -c "SELECT 1;"
+  psql -U postgres -h replica-2.internal -d koinoniasms -c "SELECT 1;"
   # Expected: 1 (success)
 
   # 3. Data is consistent
   # Run on both replica and primary, compare:
-  psql -U postgres -h primary -d ywmessaging -c "SELECT COUNT(*) FROM users;"
-  psql -U postgres -h replica-1.internal -d ywmessaging -c "SELECT COUNT(*) FROM users;"
+  psql -U postgres -h primary -d koinoniasms -c "SELECT COUNT(*) FROM users;"
+  psql -U postgres -h replica-1.internal -d koinoniasms -c "SELECT COUNT(*) FROM users;"
   # Expected: Counts match within 1 second
   ```
 
@@ -247,7 +247,7 @@ watch -n 1 'top -b -n 1 | grep postgres | head -5'
 - [ ] **Performance Improved**
   ```bash
   # 1. Query latency improved (compare to baseline)
-  curl -s https://api.ywmessaging.com/metrics/queries | jq '.statistics | {p50, p95, p99}'
+  curl -s https://api.koinoniasms.com/metrics/queries | jq '.statistics | {p50, p95, p99}'
   # Expected: No change in p95/p99 (reads go to replicas, not primary)
   # Network latency added: ~5-15ms (replica in same region)
 
@@ -257,7 +257,7 @@ watch -n 1 'top -b -n 1 | grep postgres | head -5'
   # Expected: CPU % decreased 20-40% (reads offloaded)
 
   # 3. Connection count on primary decreased
-  psql -U postgres -h primary -d ywmessaging -c "
+  psql -U postgres -h primary -d koinoniasms -c "
     SELECT count(*) FROM pg_stat_activity WHERE pid <> pg_backend_pid();"
   # Expected: Decreased by 20-40% (read connections on replicas)
   ```
@@ -269,11 +269,11 @@ watch -n 1 'top -b -n 1 | grep postgres | head -5'
   sudo systemctl stop postgresql
 
   # 2. App should still work (failover to primary or other replica)
-  curl -s https://api.ywmessaging.com/health
+  curl -s https://api.koinoniasms.com/health
   # Expected: 200 OK (no downtime)
 
   # 3. Verify app is still responsive
-  curl -s https://api.ywmessaging.com/api/v1/users | jq | head -5
+  curl -s https://api.koinoniasms.com/api/v1/users | jq | head -5
   # Expected: Valid JSON response
 
   # 4. Restart replica
@@ -281,7 +281,7 @@ watch -n 1 'top -b -n 1 | grep postgres | head -5'
 
   # 5. Verify recovery
   # Wait 30 seconds
-  psql -U postgres -h primary -d ywmessaging -c "
+  psql -U postgres -h primary -d koinoniasms -c "
     SELECT * FROM pg_stat_replication WHERE slot_name LIKE 'replica_1%';"
   # Expected: state='streaming' (replication re-established)
   ```
@@ -289,12 +289,12 @@ watch -n 1 'top -b -n 1 | grep postgres | head -5'
 - [ ] **Health Check Reflects Status**
   ```bash
   # 1. Check detailed health
-  curl -s https://api.ywmessaging.com/health/detailed | jq '.services.database.replicas'
+  curl -s https://api.koinoniasms.com/health/detailed | jq '.services.database.replicas'
   # Expected: Shows both replicas as connected with lag < 1000ms
 
   # 2. When replica is down
   # Stop one replica, check health
-  curl -s https://api.ywmessaging.com/health/detailed | jq '.status'
+  curl -s https://api.koinoniasms.com/health/detailed | jq '.status'
   # Expected: "degraded" (if one replica down, still healthy overall)
   ```
 
@@ -314,14 +314,14 @@ After initial validation, monitor for 24 hours:
 ```bash
 # Every 4 hours, verify:
 # 1. Replication lag < 1000ms
-psql -U postgres -h primary -d ywmessaging -c "
+psql -U postgres -h primary -d koinoniasms -c "
   SELECT max(replay_lag) FROM pg_stat_replication;"
 
 # 2. No errors in replication
 tail -50 /var/log/postgresql/postgresql.log | grep -i error
 
 # 3. Application error rate stable
-curl -s https://api.ywmessaging.com/metrics/errors | jq '.error_rate'
+curl -s https://api.koinoniasms.com/metrics/errors | jq '.error_rate'
 ```
 
 ### Sign-Off
@@ -344,19 +344,19 @@ curl -s https://api.ywmessaging.com/metrics/errors | jq '.error_rate'
 
 ```bash
 # 1. Direct connection count (before PgBouncer)
-psql -U postgres -h primary -d ywmessaging -c "
+psql -U postgres -h primary -d koinoniasms -c "
   SELECT count(*) FROM pg_stat_activity WHERE pid <> pg_backend_pid();"
 # Record: ___ connections
 
 # 2. Connection setup time (measure 10 connections)
 time for i in {1..10}; do
-  psql -U postgres -h primary -d ywmessaging -c "SELECT 1;" > /dev/null
+  psql -U postgres -h primary -d koinoniasms -c "SELECT 1;" > /dev/null
 done
 # Record total time: ___ seconds
 # Per-connection: ___ ms average
 
 # 3. Query throughput (count queries per minute)
-psql -U postgres -h primary -d ywmessaging -c "
+psql -U postgres -h primary -d koinoniasms -c "
   SELECT extract(epoch from (now() - pg_postmaster_start_time())) as uptime_seconds,
          count(*) as total_queries
   FROM pg_stat_statements;"
@@ -386,14 +386,14 @@ psql -U postgres -h primary -d ywmessaging -c "
   psql -U pgbouncer -d pgbouncer -c "SHOW pools;"
   # Expected output:
   # database    | user       | cl_active | cl_waiting | sv_active | sv_idle
-  # ywmessaging | app_user   | 30-50     | 0          | 30-50     | 5-15
+  # koinoniasms | app_user   | 30-50     | 0          | 30-50     | 5-15
 
   # 2. Verify no waiting clients
   psql -U pgbouncer -d pgbouncer -c "SHOW pools;" | grep cl_waiting
   # Expected: 0 (no clients waiting)
 
   # 3. Check connection count on actual database
-  psql -U postgres -h primary -d ywmessaging -c "
+  psql -U postgres -h primary -d koinoniasms -c "
     SELECT count(*) FROM pg_stat_activity WHERE pid <> pg_backend_pid();"
   # Expected: 30-50 (matches PgBouncer pool size, NOT hundreds)
   ```
@@ -402,7 +402,7 @@ psql -U postgres -h primary -d ywmessaging -c "
   ```bash
   # 1. Connection setup time (compare to baseline)
   time for i in {1..10}; do
-    psql -U postgres -h localhost -p 6432 -U pguser -d ywmessaging -c "SELECT 1;" > /dev/null
+    psql -U postgres -h localhost -p 6432 -U pguser -d koinoniasms -c "SELECT 1;" > /dev/null
   done
   # Expected: Total time reduced by 95%
   # Baseline was: ~100ms per connection (1000ms total)
@@ -411,7 +411,7 @@ psql -U postgres -h primary -d ywmessaging -c "
   # 2. Query throughput increased
   # Measure same query repeated:
   time for i in {1..1000}; do
-    psql -U postgres -h localhost -p 6432 -U pguser -d ywmessaging -c "SELECT 1;" > /dev/null
+    psql -U postgres -h localhost -p 6432 -U pguser -d koinoniasms -c "SELECT 1;" > /dev/null
   done
   # Expected: Significantly faster than direct connections
 
@@ -423,11 +423,11 @@ psql -U postgres -h primary -d ywmessaging -c "
 - [ ] **Application Works with PgBouncer**
   ```bash
   # 1. Test core API still works
-  curl -s https://api.ywmessaging.com/health
+  curl -s https://api.koinoniasms.com/health
   # Expected: 200 OK
 
   # 2. Database queries functional
-  curl -s https://api.ywmessaging.com/api/v1/users | jq | head -5
+  curl -s https://api.koinoniasms.com/api/v1/users | jq | head -5
   # Expected: Valid JSON response
 
   # 3. No connection timeout errors
@@ -460,7 +460,7 @@ psql -U postgres -h primary -d ywmessaging -c "
   sudo systemctl stop postgresql
 
   # 2. Application attempts should fail gracefully
-  curl -s https://api.ywmessaging.com/health
+  curl -s https://api.koinoniasms.com/health
   # Expected: Eventually 500 (database unreachable)
   # Should NOT hang for > 30 seconds
 
@@ -520,14 +520,14 @@ psql -U pgbouncer -d pgbouncer -c "
 
 ```bash
 # 1. Database query count (baseline load)
-psql -U postgres -h primary -d ywmessaging -c "
+psql -U postgres -h primary -d koinoniasms -c "
   SELECT count(*) as total_queries
   FROM pg_stat_statements
   WHERE query NOT LIKE '%pg_stat%';"
 # Record: ___ queries
 
 # 2. Query latency (p95)
-curl -s https://api.ywmessaging.com/metrics/queries | jq '.statistics.p95'
+curl -s https://api.koinoniasms.com/metrics/queries | jq '.statistics.p95'
 # Record: ___ms
 
 # 3. Error rate from rate limiting
@@ -585,12 +585,12 @@ tail -1000 /var/log/application.log | grep "Too Many Requests" | wc -l
   # 1. Check rate limit middleware is working
   # Make rapid requests
   for i in {1..120}; do
-    curl -s -o /dev/null -w "%{http_code}" https://api.ywmessaging.com/api/test
+    curl -s -o /dev/null -w "%{http_code}" https://api.koinoniasms.com/api/test
   done
   # Expected: Mostly 200s, then 429s when limit exceeded
 
   # 2. Verify rate limit headers present
-  curl -s -i https://api.ywmessaging.com/api/test | grep "X-RateLimit"
+  curl -s -i https://api.koinoniasms.com/api/test | grep "X-RateLimit"
   # Expected: See X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset
 
   # 3. Check rate limit errors logged appropriately
@@ -601,14 +601,14 @@ tail -1000 /var/log/application.log | grep "Too Many Requests" | wc -l
 - [ ] **Database Load Decreased**
   ```bash
   # 1. Compare query count (should be lower due to caching)
-  psql -U postgres -h primary -d ywmessaging -c "
+  psql -U postgres -h primary -d koinoniasms -c "
     SELECT count(*) as total_queries
     FROM pg_stat_statements
     WHERE query NOT LIKE '%pg_stat%';"
   # Expected: Reduced by 30-50% from baseline
 
   # 2. Query latency stayed same or improved
-  curl -s https://api.ywmessaging.com/metrics/queries | jq '.statistics.p95'
+  curl -s https://api.koinoniasms.com/metrics/queries | jq '.statistics.p95'
   # Expected: Similar to baseline (no degradation)
 
   # 3. Primary CPU usage lower
@@ -620,7 +620,7 @@ tail -1000 /var/log/application.log | grep "Too Many Requests" | wc -l
   ```bash
   # 1. Verify cascade invalidation on data update
   # Create a new user via API
-  curl -X POST https://api.ywmessaging.com/api/users \
+  curl -X POST https://api.koinoniasms.com/api/users \
     -d '{"name":"test","email":"test@test.com"}' \
     -H "Authorization: Bearer [token]"
 
@@ -629,7 +629,7 @@ tail -1000 /var/log/application.log | grep "Too Many Requests" | wc -l
   # Expected: nil (cache cleared after new user)
 
   # 3. Verify cache is re-populated on next request
-  curl -s https://api.ywmessaging.com/api/users
+  curl -s https://api.koinoniasms.com/api/users
   # Check cache was created again
   redis-cli EXISTS "users:list:all"
   # Expected: 1 (exists)
@@ -640,7 +640,7 @@ tail -1000 /var/log/application.log | grep "Too Many Requests" | wc -l
   # 1. Test free tier limit (10 req/min)
   # Use API key with free tier, send 12 requests
   for i in {1..12}; do
-    curl -s -X GET https://api.ywmessaging.com/api/test \
+    curl -s -X GET https://api.koinoniasms.com/api/test \
       -H "X-API-Key: free_key_123" \
       -o /dev/null -w "%{http_code}"
   done
@@ -658,7 +658,7 @@ tail -1000 /var/log/application.log | grep "Too Many Requests" | wc -l
 redis-cli INFO stats | grep -E "keyspace_hits|keyspace_misses|expired_keys"
 
 # Monitor rate limiting every 4 hours:
-curl -s https://api.ywmessaging.com/admin/rate-limit/analytics | jq '.blocked_count'
+curl -s https://api.koinoniasms.com/admin/rate-limit/analytics | jq '.blocked_count'
 ```
 
 ### Issues Found?
@@ -692,7 +692,7 @@ curl -s https://api.ywmessaging.com/admin/rate-limit/analytics | jq '.blocked_co
 
 ```bash
 # 1. Record final pre-partition table sizes
-psql -U postgres -h primary -d ywmessaging -c "
+psql -U postgres -h primary -d koinoniasms -c "
   SELECT tablename, pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename))
   FROM pg_tables
   WHERE tablename IN ('conversation_message', 'message', 'message_recipient', 'conversation')
@@ -701,7 +701,7 @@ psql -U postgres -h primary -d ywmessaging -c "
 
 # 2. Baseline query times (critical queries)
 # Test query from application
-time psql -U postgres -h primary -d ywmessaging -c "
+time psql -U postgres -h primary -d koinoniasms -c "
   SELECT * FROM conversation_message
   WHERE conversation_id = 'abc123'
   ORDER BY created_at DESC
@@ -720,7 +720,7 @@ pg_dump -Fc -f backup-$(date +%Y%m%d).dump postgresql://...
 - [ ] **Application Is Up**
   ```bash
   # 1. Check HTTP 200 response
-  curl -s -w "%{http_code}" https://api.ywmessaging.com/health
+  curl -s -w "%{http_code}" https://api.koinoniasms.com/health
   # Expected: 200
 
   # 2. Check no SQL errors in logs
@@ -729,24 +729,24 @@ pg_dump -Fc -f backup-$(date +%Y%m%d).dump postgresql://...
 
   # 3. Test key user flows
   # Login
-  curl -X POST https://api.ywmessaging.com/auth/login ...
+  curl -X POST https://api.koinoniasms.com/auth/login ...
   # Expected: Works as before
 
   # Message loading
-  curl -s https://api.ywmessaging.com/api/messages
+  curl -s https://api.koinoniasms.com/api/messages
   # Expected: Works as before
   ```
 
 - [ ] **Partitioned Tables Created Correctly**
   ```bash
   # 1. Verify partition exists and is primary table
-  psql -U postgres -h primary -d ywmessaging -c "
+  psql -U postgres -h primary -d koinoniasms -c "
     SELECT tablename FROM pg_tables
     WHERE tablename = 'conversation_message';"
   # Expected: conversation_message (parent partition table)
 
   # 2. Check all child partitions exist
-  psql -U postgres -h primary -d ywmessaging -c "
+  psql -U postgres -h primary -d koinoniasms -c "
     SELECT tablename FROM pg_tables
     WHERE tablename LIKE 'conversation_message_%'
     ORDER BY tablename;"
@@ -760,7 +760,7 @@ pg_dump -Fc -f backup-$(date +%Y%m%d).dump postgresql://...
   # conversation_message_2025_02 (future)
 
   # 3. Verify row count matches
-  psql -U postgres -h primary -d ywmessaging -c "
+  psql -U postgres -h primary -d koinoniasms -c "
     SELECT count(*) FROM conversation_message;"
   # Expected: Matches row count from before partitioning
   ```
@@ -768,7 +768,7 @@ pg_dump -Fc -f backup-$(date +%Y%m%d).dump postgresql://...
 - [ ] **Data Integrity Verified**
   ```bash
   # 1. Run data validation query
-  psql -U postgres -h primary -d ywmessaging -c "
+  psql -U postgres -h primary -d koinoniasms -c "
     SELECT
       (SELECT count(*) FROM conversation_message) as total_rows,
       (SELECT count(DISTINCT id) FROM conversation_message) as distinct_ids,
@@ -777,13 +777,13 @@ pg_dump -Fc -f backup-$(date +%Y%m%d).dump postgresql://...
   # Expected: total_rows == distinct_ids, null_ids = 0
 
   # 2. Check specific conversation's messages (spot check)
-  psql -U postgres -h primary -d ywmessaging -c "
+  psql -U postgres -h primary -d koinoniasms -c "
     SELECT count(*) FROM conversation_message
     WHERE conversation_id = 'abc123';"
   # Expected: Returns count without error
 
   # 3. Verify replicas also partitioned (if they exist)
-  psql -U postgres -h replica-1.internal -d ywmessaging -c "
+  psql -U postgres -h replica-1.internal -d koinoniasms -c "
     SELECT count(DISTINCT tablename) FROM pg_tables
     WHERE tablename LIKE 'conversation_message_%';"
   # Expected: Same number of partitions as primary
@@ -792,7 +792,7 @@ pg_dump -Fc -f backup-$(date +%Y%m%d).dump postgresql://...
 - [ ] **Query Performance Improved**
   ```bash
   # 1. Re-run baseline query (compare to pre-partition time)
-  time psql -U postgres -h primary -d ywmessaging -c "
+  time psql -U postgres -h primary -d koinoniasms -c "
     SELECT * FROM conversation_message
     WHERE conversation_id = 'abc123'
     ORDER BY created_at DESC
@@ -800,7 +800,7 @@ pg_dump -Fc -f backup-$(date +%Y%m%d).dump postgresql://...
   # Expected: 3-4x faster than before (850ms → 200ms)
 
   # 2. Run explain plan to verify partition pruning
-  psql -U postgres -h primary -d ywmessaging -c "
+  psql -U postgres -h primary -d koinoniasms -c "
     EXPLAIN (ANALYZE, BUFFERS)
     SELECT * FROM conversation_message
     WHERE conversation_id = 'abc123'
@@ -810,7 +810,7 @@ pg_dump -Fc -f backup-$(date +%Y%m%d).dump postgresql://...
   # Expected: Shows "Partition Pruned X partitions"
 
   # 3. Test range queries (analytics use case)
-  time psql -U postgres -h primary -d ywmessaging -c "
+  time psql -U postgres -h primary -d koinoniasms -c "
     SELECT date_trunc('day', created_at) as day, count(*) as count
     FROM conversation_message
     WHERE created_at > '2024-11-01' AND created_at < '2024-12-01'
@@ -821,7 +821,7 @@ pg_dump -Fc -f backup-$(date +%Y%m%d).dump postgresql://...
 - [ ] **Indexes Created Successfully**
   ```bash
   # 1. Verify indexes exist on partitioned table
-  psql -U postgres -h primary -d ywmessaging -c "
+  psql -U postgres -h primary -d koinoniasms -c "
     SELECT indexname FROM pg_indexes
     WHERE tablename = 'conversation_message'
     ORDER BY indexname;"
@@ -830,7 +830,7 @@ pg_dump -Fc -f backup-$(date +%Y%m%d).dump postgresql://...
   # - idx_conversation_message_created
 
   # 2. Check index sizes
-  psql -U postgres -h primary -d ywmessaging -c "
+  psql -U postgres -h primary -d koinoniasms -c "
     SELECT indexname, pg_size_pretty(pg_relation_size(indexrelid))
     FROM pg_stat_user_indexes
     WHERE relname = 'conversation_message';"
@@ -840,7 +840,7 @@ pg_dump -Fc -f backup-$(date +%Y%m%d).dump postgresql://...
 - [ ] **Storage Savings Verified**
   ```bash
   # 1. Compare new partition table size vs old
-  psql -U postgres -h primary -d ywmessaging -c "
+  psql -U postgres -h primary -d koinoniasms -c "
     SELECT tablename, pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename))
     FROM pg_tables
     WHERE tablename IN ('conversation_message')
@@ -857,7 +857,7 @@ pg_dump -Fc -f backup-$(date +%Y%m%d).dump postgresql://...
 - [ ] **Hourly Application Health Check**
   ```bash
   # Every hour, verify:
-  curl -s https://api.ywmessaging.com/health | jq '.status'
+  curl -s https://api.koinoniasms.com/health | jq '.status'
   # Expected: "healthy"
 
   # Record: Time, Status, Any errors
@@ -867,7 +867,7 @@ pg_dump -Fc -f backup-$(date +%Y%m%d).dump postgresql://...
   ```bash
   # Every 4 hours, run performance tests
   # Load test with concurrent users (100+ simultaneous)
-  ab -n 1000 -c 100 https://api.ywmessaging.com/api/messages
+  ab -n 1000 -c 100 https://api.koinoniasms.com/api/messages
 
   # Expected:
   # - Requests per second: > 100
@@ -878,18 +878,18 @@ pg_dump -Fc -f backup-$(date +%Y%m%d).dump postgresql://...
 - [ ] **No Slow Queries** Introduced
   ```bash
   # Every 4 hours, check metrics
-  curl -s https://api.ywmessaging.com/metrics/queries | jq '.health'
+  curl -s https://api.koinoniasms.com/metrics/queries | jq '.health'
   # Expected: "healthy" (not degraded)
 
   # Check slow query count
-  curl -s https://api.ywmessaging.com/metrics/queries | jq '.slowQueries | length'
+  curl -s https://api.koinoniasms.com/metrics/queries | jq '.slowQueries | length'
   # Expected: < 5
   ```
 
 - [ ] **Replication Still Working** (if applicable)
   ```bash
   # Every 6 hours, verify replica lag
-  psql -U postgres -h primary -d ywmessaging -c "
+  psql -U postgres -h primary -d koinoniasms -c "
     SELECT max(replay_lag) FROM pg_stat_replication;"
   # Expected: < 1000ms
   ```
@@ -897,7 +897,7 @@ pg_dump -Fc -f backup-$(date +%Y%m%d).dump postgresql://...
 - [ ] **Data Consistency Over Time**
   ```bash
   # Every 12 hours, run spot check
-  psql -U postgres -h primary -d ywmessaging -c "
+  psql -U postgres -h primary -d koinoniasms -c "
     SELECT count(*) FROM conversation_message;"
   # Should match previous count (no data loss)
   ```
@@ -923,7 +923,7 @@ COMMIT;
 
 # Downtime: < 1 second
 # Verify application resumed normal operation
-curl -s https://api.ywmessaging.com/health
+curl -s https://api.koinoniasms.com/health
 ```
 
 ### Sign-Off

@@ -402,7 +402,7 @@ vertical: String                  // RELIGION
 ```
 TELNYX_API_KEY=<your-key>
 TELNYX_WEBHOOK_PUBLIC_KEY=<your-public-key>
-WEBHOOK_BASE_URL=https://connect-yw-backend.onrender.com
+WEBHOOK_BASE_URL=https://koinonia-sms-backend.onrender.com
 DATABASE_URL=<your-postgres-url>
 ```
 

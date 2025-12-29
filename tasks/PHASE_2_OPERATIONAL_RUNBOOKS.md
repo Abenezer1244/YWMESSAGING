@@ -33,7 +33,7 @@
 ssh postgres-primary.internal
 
 # 2. Check replication status
-psql -U postgres -d ywmessaging -c "SELECT * FROM pg_stat_replication;"
+psql -U postgres -d koinoniasms -c "SELECT * FROM pg_stat_replication;"
 
 # Expected output:
 # - Should show 2 rows (one for each replica)
@@ -98,7 +98,7 @@ watch -n 1 'pg_isready -h localhost'
 # Should show "accepting connections"
 
 # 3. Update application connection string
-# DATABASE_URL=postgresql://replica-1.internal:5432/ywmessaging
+# DATABASE_URL=postgresql://replica-1.internal:5432/koinoniasms
 # Restart application servers (coordinated restart)
 
 # 4. Start new replica from existing replica-2
@@ -108,14 +108,14 @@ watch -n 1 'pg_isready -h localhost'
 **Post-Failover Validation** (1 minute):
 ```bash
 # 1. Connect to new primary (old replica-1)
-psql -h replica-1.internal -U postgres -d ywmessaging
+psql -h replica-1.internal -U postgres -d koinoniasms
 
 # 2. Run test query
 SELECT COUNT(*) FROM users;
 # Should return result quickly
 
 # 3. Check application health
-curl -H "Content-Type: application/json" https://api.ywmessaging.com/health
+curl -H "Content-Type: application/json" https://api.koinoniasms.com/health
 # Should return 200 OK
 ```
 
@@ -156,7 +156,7 @@ sudo mv postgresql postgresql.old
 # 4. Create new replication slot on primary
 ssh postgres-primary.internal
 sudo su - postgres
-psql -d ywmessaging -c "SELECT pg_create_physical_replication_slot('replica_1_slot');"
+psql -d koinoniasms -c "SELECT pg_create_physical_replication_slot('replica_1_slot');"
 
 # 5. Run pg_basebackup from replica
 ssh replica-1.internal
@@ -173,7 +173,7 @@ sudo systemctl start postgresql
 
 # 7. Verify replication started
 # Wait 30 seconds, then on primary:
-psql -d ywmessaging -c "SELECT * FROM pg_stat_replication WHERE application_name = 'replica_1';"
+psql -d koinoniasms -c "SELECT * FROM pg_stat_replication WHERE application_name = 'replica_1';"
 # Should show "streaming" status
 
 # 8. Verify replica is catching up
@@ -185,7 +185,7 @@ psql -d ywmessaging -c "SELECT * FROM pg_stat_replication WHERE application_name
 **Monitoring Recovery**:
 ```bash
 # Every 30 seconds, check:
-psql -h replica-1.internal -U postgres -d ywmessaging -c "SELECT now() - pg_last_xact_replay_timestamp();"
+psql -h replica-1.internal -U postgres -d koinoniasms -c "SELECT now() - pg_last_xact_replay_timestamp();"
 # Should show lag decreasing toward 0
 
 # Fully recovered when lag is < 1 second
@@ -221,7 +221,7 @@ pg_ctl promote -D /var/lib/postgresql/12/main/
 watch -n 1 'pg_isready -h localhost'
 
 # 6. Verify no data loss
-psql -h replica-1.internal -U postgres -d ywmessaging -c "SELECT COUNT(*) FROM users;"
+psql -h replica-1.internal -U postgres -d koinoniasms -c "SELECT COUNT(*) FROM users;"
 # Compare with previous known value
 
 # 7. Restart primary
@@ -230,7 +230,7 @@ sudo systemctl start postgresql
 
 # 8. Verify primary rejoins as replica
 # Wait 2 minutes
-psql -h postgres-primary.internal -U postgres -d ywmessaging -c "SELECT * FROM pg_stat_replication;"
+psql -h postgres-primary.internal -U postgres -d koinoniasms -c "SELECT * FROM pg_stat_replication;"
 # Should show it's no longer primary
 
 # 9. Restore original configuration
@@ -278,7 +278,7 @@ SHOW pools;
 
 # Output should show:
 # database    | user         | cl_active | cl_waiting | sv_active | sv_idle | ...
-# ywmessaging | app_user     | 45        | 0          | 45        | 5       | ...
+# koinoniasms | app_user     | 45        | 0          | 45        | 5       | ...
 
 # 3. Interpret the results:
 # cl_active:  Client connections using pool (should be 45-55 on 50-pool)
@@ -374,7 +374,7 @@ psql -U pgbouncer -d pgbouncer -c "SHOW servers;"
 # 4. Identify stuck query
 # Check application logs for long-running queries
 # OR query primary database
-psql -U postgres -h postgres-primary.internal -d ywmessaging -c "
+psql -U postgres -h postgres-primary.internal -d koinoniasms -c "
   SELECT pid, usename, state, query, now() - query_start as duration
   FROM pg_stat_activity
   WHERE state != 'idle'
@@ -390,7 +390,7 @@ psql -U postgres -h postgres-primary.internal -d ywmessaging -c "
 **Recovery**:
 ```bash
 # Option 1: Kill stuck query (if identified and safe)
-psql -U postgres -h postgres-primary.internal -d ywmessaging -c "
+psql -U postgres -h postgres-primary.internal -d koinoniasms -c "
   SELECT pg_terminate_backend(12345);  -- Replace 12345 with PID
 "
 
@@ -424,7 +424,7 @@ pm2 restart app
 **Steps**:
 ```bash
 # 1. Access metrics endpoint
-curl -s https://api.ywmessaging.com/metrics/queries | jq
+curl -s https://api.koinoniasms.com/metrics/queries | jq
 
 # Response format:
 # {
@@ -452,7 +452,7 @@ curl -s https://api.ywmessaging.com/metrics/queries | jq
 
 # 3. Analyze the query
 # Check if it uses indexes properly
-psql -U postgres -h postgres-primary.internal -d ywmessaging
+psql -U postgres -h postgres-primary.internal -d koinoniasms
 
 # EXPLAIN ANALYZE on the slow query
 EXPLAIN ANALYZE
@@ -490,7 +490,7 @@ LIMIT 50;
 
 ```bash
 # 1. Analyze current query plan
-psql -U postgres -h postgres-primary.internal -d ywmessaging
+psql -U postgres -h postgres-primary.internal -d koinoniasms
 
 EXPLAIN ANALYZE
 SELECT * FROM conversation_message
@@ -542,7 +542,7 @@ LIMIT 50;
 # 1. Baseline measurement (BEFORE)
 # Run query 100 times and measure
 time for i in {1..100}; do
-  psql -U postgres -h primary -d ywmessaging -c "
+  psql -U postgres -h primary -d koinoniasms -c "
     SELECT * FROM conversation_message
     WHERE conversation_id = 'abc123'
     ORDER BY created_at DESC LIMIT 50;
@@ -559,7 +559,7 @@ done
 
 # 3. After optimization measurement (AFTER)
 time for i in {1..100}; do
-  psql -U postgres -h primary -d ywmessaging -c "
+  psql -U postgres -h primary -d koinoniasms -c "
     SELECT * FROM conversation_message
     WHERE conversation_id = 'abc123' AND created_at > '2024-11-01'
     ORDER BY created_at DESC LIMIT 50;
@@ -650,7 +650,7 @@ tail -f logs/application.log | grep "Cache warming"
 
 # 3. Manually warm cache
 # Call health endpoint which triggers warming
-curl https://api.ywmessaging.com/health/detailed
+curl https://api.koinoniasms.com/health/detailed
 
 # 4. Verify keys are now in cache
 redis-cli --scan --pattern "users:*"
@@ -714,13 +714,13 @@ redis-cli --scan --pattern "*:20241201*" | xargs redis-cli DEL
 # 2. After clearing, monitor database load
 # Should see temporary spike in queries
 # Watch CPU/query latency
-watch -n 2 'curl -s https://api.ywmessaging.com/metrics/queries | jq ".statistics.p95"'
+watch -n 2 'curl -s https://api.koinoniasms.com/metrics/queries | jq ".statistics.p95"'
 
 # Expected: Returns to normal within 5-10 minutes
 
 # 3. Verify application is functioning normally
 # Run smoke tests
-curl https://api.ywmessaging.com/health
+curl https://api.koinoniasms.com/health
 # Should return 200 OK
 
 # 4. If issues occur, the cache will re-warm automatically
@@ -744,7 +744,7 @@ curl https://api.ywmessaging.com/health
 
 # 2. Query rate limit status
 curl -X GET \
-  "https://api.ywmessaging.com/admin/rate-limit/status/key_prod_abc123def456" \
+  "https://api.koinoniasms.com/admin/rate-limit/status/key_prod_abc123def456" \
   -H "Authorization: Bearer [admin-token]"
 
 # Response:
@@ -785,7 +785,7 @@ curl -X GET \
 # Enterprise: 10000 req/min
 
 # 2. Update client's tier in database
-psql -U postgres -h postgres-primary.internal -d ywmessaging
+psql -U postgres -h postgres-primary.internal -d koinoniasms
 
 UPDATE api_keys
 SET tier = 'professional'
@@ -793,12 +793,12 @@ WHERE key = 'key_prod_abc123def456';
 
 # 3. Reset client's current window (so new limit applies)
 curl -X POST \
-  "https://api.ywmessaging.com/admin/rate-limit/reset/key_prod_abc123def456" \
+  "https://api.koinoniasms.com/admin/rate-limit/reset/key_prod_abc123def456" \
   -H "Authorization: Bearer [admin-token]"
 
 # 4. Verify new limit is in effect
 curl -X GET \
-  "https://api.ywmessaging.com/admin/rate-limit/status/key_prod_abc123def456" \
+  "https://api.koinoniasms.com/admin/rate-limit/status/key_prod_abc123def456" \
   -H "Authorization: Bearer [admin-token]"
 
 # Response should now show: requestLimit: 1000
@@ -819,7 +819,7 @@ curl -X GET \
 ```bash
 # 1. Identify pattern of blocks
 curl -X GET \
-  "https://api.ywmessaging.com/admin/rate-limit/analytics" \
+  "https://api.koinoniasms.com/admin/rate-limit/analytics" \
   -H "Authorization: Bearer [admin-token]"
 
 # Look for:
@@ -880,7 +880,7 @@ WHERE key = 'key_prod_abc123def456';
 **Steps**:
 ```bash
 # 1. Check partition distribution
-psql -U postgres -h postgres-primary.internal -d ywmessaging -c "
+psql -U postgres -h postgres-primary.internal -d koinoniasms -c "
 SELECT
   schemaname,
   tablename,
@@ -934,7 +934,7 @@ WHERE relname LIKE 'conversation_message_%';
 # Example: conversation_message_2023_12 (now > 12 months old)
 
 # 2. Export partition to CSV
-psql -U postgres -h postgres-primary.internal -d ywmessaging \
+psql -U postgres -h postgres-primary.internal -d koinoniasms \
   -c "COPY (SELECT * FROM conversation_message_2023_12) TO STDOUT" \
   | gzip > conversation_message_2023_12.csv.gz
 
@@ -942,15 +942,15 @@ psql -U postgres -h postgres-primary.internal -d ywmessaging \
 
 # 3. Upload to S3
 aws s3 cp conversation_message_2023_12.csv.gz \
-  s3://ywmessaging-backup/partitions/conversation_message_2023_12.csv.gz \
+  s3://koinoniasms-backup/partitions/conversation_message_2023_12.csv.gz \
   --sse AES256
 
 # 4. Verify upload
-aws s3 ls s3://ywmessaging-backup/partitions/ | grep 2023_12
+aws s3 ls s3://koinoniasms-backup/partitions/ | grep 2023_12
 
 # 5. Delete partition from database
 # (Do NOT do this until backup is confirmed in S3)
-psql -U postgres -h postgres-primary.internal -d ywmessaging -c "
+psql -U postgres -h postgres-primary.internal -d koinoniasms -c "
   DROP TABLE conversation_message_2023_12;
 "
 
@@ -964,7 +964,7 @@ psql -U postgres -h postgres-primary.internal -d ywmessaging -c "
 **Verify Archival**:
 ```bash
 # Confirm partition is gone
-psql -U postgres -h postgres-primary.internal -d ywmessaging -c "
+psql -U postgres -h postgres-primary.internal -d koinoniasms -c "
   SELECT count(*) FROM pg_tables
   WHERE tablename = 'conversation_message_2023_12';
 "
@@ -972,7 +972,7 @@ psql -U postgres -h postgres-primary.internal -d ywmessaging -c "
 # Should return: 0
 
 # Confirm backup is in S3
-aws s3 ls s3://ywmessaging-backup/partitions/conversation_message_2023_12.csv.gz
+aws s3 ls s3://koinoniasms-backup/partitions/conversation_message_2023_12.csv.gz
 
 # Should return file with size > 0
 ```
@@ -989,7 +989,7 @@ aws s3 ls s3://ywmessaging-backup/partitions/conversation_message_2023_12.csv.gz
 ```bash
 # 1. Download partition from S3
 aws s3 cp \
-  s3://ywmessaging-backup/partitions/conversation_message_2023_12.csv.gz \
+  s3://koinoniasms-backup/partitions/conversation_message_2023_12.csv.gz \
   conversation_message_2023_12.csv.gz
 
 # 2. Decompress
@@ -1008,7 +1008,7 @@ CREATE TABLE conversation_message_2023_12 (
 );
 
 # 4. Import data
-psql -U postgres -h postgres-primary.internal -d ywmessaging \
+psql -U postgres -h postgres-primary.internal -d koinoniasms \
   -c "COPY conversation_message_2023_12 FROM STDIN" \
   < conversation_message_2023_12.csv
 
@@ -1067,7 +1067,7 @@ sudo tail -100 /var/log/postgresql/postgresql.log
 ```bash
 # If restart succeeded:
 # 1. Run health check
-curl https://api.ywmessaging.com/health
+curl https://api.koinoniasms.com/health
 
 # If still failing:
 # 2. Check disk space
@@ -1123,7 +1123,7 @@ psql -U pgbouncer -d pgbouncer -c "SHOW pools;"
 psql -U pgbouncer -d pgbouncer -c "SHOW clients;" | grep waiting | wc -l
 
 # 3. Kill long-running queries
-psql -U postgres -h postgres-primary.internal -d ywmessaging -c "
+psql -U postgres -h postgres-primary.internal -d koinoniasms -c "
   SELECT pg_terminate_backend(pid) FROM pg_stat_activity
   WHERE state != 'idle' AND query_start < NOW() - INTERVAL '5 minutes';"
 
@@ -1149,7 +1149,7 @@ watch -n 2 'psql -U pgbouncer -d pgbouncer -c "SHOW pools;"'
 **Diagnosis**:
 ```bash
 # 1. Check replication status
-psql -U postgres -h postgres-primary.internal -d ywmessaging -c "
+psql -U postgres -h postgres-primary.internal -d koinoniasms -c "
   SELECT * FROM pg_stat_replication WHERE slot_name = 'replica_1_slot';"
 
 # If shows: state = 'catchup'
@@ -1198,7 +1198,7 @@ SELECT pg_create_physical_replication_slot('replica_1_slot');
 
 **Check endpoint**:
 ```bash
-curl -s https://api.ywmessaging.com/health/detailed | jq
+curl -s https://api.koinoniasms.com/health/detailed | jq
 
 # Response format:
 {

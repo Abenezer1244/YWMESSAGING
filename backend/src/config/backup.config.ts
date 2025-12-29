@@ -189,7 +189,7 @@ export const UPGRADE_INSTRUCTIONS = `
 
 ### Step 2: Select PostgreSQL Database
 1. Click on "PostgreSQL" in left sidebar
-2. Select "connect-yw" database (or your database name)
+2. Select "koinonia-sms" database (or your database name)
 
 ### Step 3: Access Database Settings
 1. Click "Settings" tab

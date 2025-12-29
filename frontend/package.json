@@ -1,7 +1,7 @@
 {
-  "name": "connect-frontend",
+  "name": "koinonia-sms-frontend",
   "version": "0.1.0",
-  "description": "Frontend for Koinonia Enterprise Communication Platform",
+  "description": "Frontend for Koinonia SMS",
   "private": true,
   "type": "module",
   "scripts": {

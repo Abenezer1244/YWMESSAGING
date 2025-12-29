@@ -168,7 +168,7 @@ Based on typical Node.js + Express + PostgreSQL architecture:
 // ecosystem.config.js
 module.exports = {
   apps: [{
-    name: 'ywmessaging-api',
+    name: 'koinoniasms-api',
     script: './dist/index.js',
     instances: 'max',  // Spawn one instance per CPU core
     exec_mode: 'cluster',  // Enable cluster mode
@@ -187,7 +187,7 @@ module.exports = {
       host: 'your-server.com',
       ref: 'origin/main',
       repo: 'https://github.com/repo.git',
-      path: '/var/www/ywmessaging'
+      path: '/var/www/koinoniasms'
     }
   }
 };
@@ -204,7 +204,7 @@ module.exports = {
 **Deploy Nginx as Reverse Proxy Load Balancer:**
 ```nginx
 # /etc/nginx/nginx.conf
-upstream ywmessaging_backend {
+upstream koinoniasms_backend {
     # Session persistence: use ip_hash for sticky sessions
     ip_hash;
 
@@ -217,17 +217,17 @@ upstream ywmessaging_backend {
 
 server {
     listen 80;
-    server_name api.ywmessaging.com;
+    server_name api.koinoniasms.com;
 
     # Health check endpoint
     location /health {
         access_log off;
-        proxy_pass http://ywmessaging_backend;
+        proxy_pass http://koinoniasms_backend;
     }
 
     # All other traffic through load balancer
     location / {
-        proxy_pass http://ywmessaging_backend;
+        proxy_pass http://koinoniasms_backend;
         proxy_http_version 1.1;
         proxy_set_header Connection "";
         proxy_set_header Host $host;
@@ -285,7 +285,7 @@ app.use(session({
 ```ini
 # /etc/pgbouncer/pgbouncer.ini
 [databases]
-ywmessaging = host=postgres-primary.internal dbname=ywmessaging
+koinoniasms = host=postgres-primary.internal dbname=koinoniasms
 
 [pgbouncer]
 pool_mode = transaction
@@ -444,7 +444,7 @@ if (cluster.isPrimary) {
 // ecosystem.config.js - PM2 cluster configuration
 module.exports = {
   apps: [{
-    name: 'ywmessaging-api',
+    name: 'koinoniasms-api',
     script: './dist/index.js',
     instances: 'max',  // Spawn one instance per CPU core
     exec_mode: 'cluster',  // Enable cluster mode
@@ -475,8 +475,8 @@ module.exports = {
       user: 'deploy',
       host: 'your-server.com',
       ref: 'origin/main',
-      repo: 'https://github.com/your-org/ywmessaging.git',
-      path: '/var/www/ywmessaging',
+      repo: 'https://github.com/your-org/koinoniasms.git',
+      path: '/var/www/koinoniasms',
       'post-deploy': 'npm install && pm2 reload ecosystem.config.js --env production'
     }
   }
@@ -497,10 +497,10 @@ pm2 monit
 pm2 logs
 
 # Graceful reload (zero-downtime)
-pm2 reload ywmessaging-api
+pm2 reload koinoniasms-api
 
 # Scale up/down
-pm2 scale ywmessaging-api 8  # Scale to 8 instances
+pm2 scale koinoniasms-api 8  # Scale to 8 instances
 
 # Save configuration
 pm2 save
@@ -662,15 +662,15 @@ http {
                application/json application/javascript application/xml+rss;
 
     # Upstream backend servers (YWMESSAGING instances)
-    upstream ywmessaging_backend {
+    upstream koinoniasms_backend {
         # Load balancing method
         least_conn;  # Route to server with fewest active connections
 
         # Backend servers (Railway instances)
-        server ywmessaging-1.railway.app:443 weight=1 max_fails=3 fail_timeout=30s;
-        server ywmessaging-2.railway.app:443 weight=1 max_fails=3 fail_timeout=30s;
-        server ywmessaging-3.railway.app:443 weight=1 max_fails=3 fail_timeout=30s;
-        server ywmessaging-4.railway.app:443 weight=1 max_fails=3 fail_timeout=30s;
+        server koinoniasms-1.railway.app:443 weight=1 max_fails=3 fail_timeout=30s;
+        server koinoniasms-2.railway.app:443 weight=1 max_fails=3 fail_timeout=30s;
+        server koinoniasms-3.railway.app:443 weight=1 max_fails=3 fail_timeout=30s;
+        server koinoniasms-4.railway.app:443 weight=1 max_fails=3 fail_timeout=30s;
 
         # Connection pooling to backends
         keepalive 32;
@@ -689,7 +689,7 @@ http {
     server {
         listen 80;
         listen [::]:80;
-        server_name api.ywmessaging.com;
+        server_name api.koinoniasms.com;
 
         # Redirect HTTP to HTTPS
         return 301 https://$server_name$request_uri;
@@ -698,11 +698,11 @@ http {
     server {
         listen 443 ssl http2;
         listen [::]:443 ssl http2;
-        server_name api.ywmessaging.com;
+        server_name api.koinoniasms.com;
 
         # SSL certificates
-        ssl_certificate /etc/nginx/ssl/ywmessaging.crt;
-        ssl_certificate_key /etc/nginx/ssl/ywmessaging.key;
+        ssl_certificate /etc/nginx/ssl/koinoniasms.crt;
+        ssl_certificate_key /etc/nginx/ssl/koinoniasms.key;
 
         # Security headers
         add_header X-Frame-Options "SAMEORIGIN" always;
@@ -726,7 +726,7 @@ http {
             limit_req zone=auth_limit burst=20 nodelay;
             limit_req_status 429;
 
-            proxy_pass https://ywmessaging_backend;
+            proxy_pass https://koinoniasms_backend;
             proxy_http_version 1.1;
 
             # Headers
@@ -752,7 +752,7 @@ http {
             limit_req zone=api_limit burst=200 nodelay;
             limit_req_status 429;
 
-            proxy_pass https://ywmessaging_backend;
+            proxy_pass https://koinoniasms_backend;
             proxy_http_version 1.1;
 
             # Headers for backend
@@ -784,7 +784,7 @@ http {
 
         # Static assets (if served from backend)
         location ~* \.(jpg|jpeg|png|gif|ico|css|js)$ {
-            proxy_pass https://ywmessaging_backend;
+            proxy_pass https://koinoniasms_backend;
             expires 1y;
             add_header Cache-Control "public, immutable";
             access_log off;
@@ -976,7 +976,7 @@ const prisma = new PrismaClient();
 **Production Configuration (/etc/pgbouncer/pgbouncer.ini):**
 ```ini
 [databases]
-ywmessaging = host=postgres-primary.railway.app port=5432 dbname=ywmessaging user=postgres password=xxxxx
+koinoniasms = host=postgres-primary.railway.app port=5432 dbname=koinoniasms user=postgres password=xxxxx
 
 [pgbouncer]
 # Connection Pooling Strategy
@@ -1038,10 +1038,10 @@ server_reset_query_always = 0
 ```typescript
 // .env
 # OLD: Direct PostgreSQL connection
-# DATABASE_URL="postgresql://user:password@postgres.railway.app:5432/ywmessaging"
+# DATABASE_URL="postgresql://user:password@postgres.railway.app:5432/koinoniasms"
 
 # NEW: Through PgBouncer
-DATABASE_URL="postgresql://user:password@pgbouncer.railway.app:6432/ywmessaging?pgbouncer=true"
+DATABASE_URL="postgresql://user:password@pgbouncer.railway.app:6432/koinoniasms?pgbouncer=true"
 
 # Add pgbouncer=true parameter to enable transaction pooling compatibility
 ```
@@ -1658,7 +1658,7 @@ const logger = createLogger({
   format: format.json(),
   transports: [
     new transports.CloudWatch({
-      logGroupName: 'ywmessaging-production',
+      logGroupName: 'koinoniasms-production',
       logStreamName: `server-${process.env.SERVER_ID}`,
     }),
   ],
@@ -2075,8 +2075,8 @@ export const db = new SmartPrisma();
 **Environment Variables:**
 ```bash
 # .env
-DATABASE_URL_PRIMARY="postgresql://user:pass@primary.railway.app:5432/ywmessaging"
-DATABASE_URL_REPLICA="postgresql://user:pass@replica.railway.app:5432/ywmessaging"
+DATABASE_URL_PRIMARY="postgresql://user:pass@primary.railway.app:5432/koinoniasms"
+DATABASE_URL_REPLICA="postgresql://user:pass@replica.railway.app:5432/koinoniasms"
 ```
 
 ### Performance Impact
@@ -2220,10 +2220,10 @@ export class MessageService {
 
 **Environment Variables:**
 ```bash
-SHARD_0_URL="postgresql://user:pass@shard0.db.com:5432/ywmessaging"
-SHARD_1_URL="postgresql://user:pass@shard1.db.com:5432/ywmessaging"
-SHARD_2_URL="postgresql://user:pass@shard2.db.com:5432/ywmessaging"
-SHARD_3_URL="postgresql://user:pass@shard3.db.com:5432/ywmessaging"
+SHARD_0_URL="postgresql://user:pass@shard0.db.com:5432/koinoniasms"
+SHARD_1_URL="postgresql://user:pass@shard1.db.com:5432/koinoniasms"
+SHARD_2_URL="postgresql://user:pass@shard2.db.com:5432/koinoniasms"
+SHARD_3_URL="postgresql://user:pass@shard3.db.com:5432/koinoniasms"
 ```
 
 ### Performance Impact
@@ -3381,7 +3381,7 @@ upstream nodejs_backend {
 
 server {
   listen 80;
-  server_name api.ywmessaging.com;
+  server_name api.koinoniasms.com;
 
   location / {
     proxy_pass http://nodejs_backend;
@@ -3468,7 +3468,7 @@ upstream nodejs_backend {
 **/etc/pgbouncer/pgbouncer.ini**:
 ```ini
 [databases]
-ywmessaging = host=postgres-primary port=5432 dbname=ywmessaging
+koinoniasms = host=postgres-primary port=5432 dbname=koinoniasms
 
 [pgbouncer]
 listen_addr = 127.0.0.1
@@ -3516,10 +3516,10 @@ log_pooler_errors = 1
 **Update DATABASE_URL to use PgBouncer**:
 ```bash
 # Before (Direct PostgreSQL)
-DATABASE_URL="postgresql://user:pass@localhost:5432/ywmessaging"
+DATABASE_URL="postgresql://user:pass@localhost:5432/koinoniasms"
 
 # After (Through PgBouncer)
-DATABASE_URL="postgresql://user:pass@localhost:6432/ywmessaging?pgbouncer=true"
+DATABASE_URL="postgresql://user:pass@localhost:6432/koinoniasms?pgbouncer=true"
 ```
 
 **Prisma Configuration**:
@@ -3769,7 +3769,7 @@ async function archiveOldMessages() {
   });
 
   await s3.putObject({
-    Bucket: 'ywmessaging-archive',
+    Bucket: 'koinoniasms-archive',
     Key: `messages-${cutoffDate.toISOString()}.json`,
     Body: JSON.stringify(oldMessages)
   });

@@ -11,7 +11,7 @@
 
 ### Current Architecture
 ```
-Single API Instance (connect-yw-backend on Render)
+Single API Instance (koinonia-sms-backend on Render)
         ↓
     Internet Traffic
         ↓
@@ -24,7 +24,7 @@ Single API Instance (connect-yw-backend on Render)
 Load Balancer (Render native)
     ↙          ↘
 Instance 1    Instance 2
-(connect-yw-backend-1)  (connect-yw-backend-2)
+(koinonia-sms-backend-1)  (koinonia-sms-backend-2)
     ↘          ↙
   PostgreSQL Database
      Redis Cache
@@ -42,7 +42,7 @@ Instance 1    Instance 2
 ## Step 1: Understanding Render Deployment
 
 ### Current Single Instance Setup
-- **Service Name**: `connect-yw-backend`
+- **Service Name**: `koinonia-sms-backend`
 - **Region**: `oregon`
 - **Plan**: Standard ($12/month for Render Free tier or paid)
 - **Environment**: Uses shared PostgreSQL + Redis
@@ -61,10 +61,10 @@ Render automatically handles:
 ### Option A: Render Dashboard (Recommended)
 
 1. **Go to Services**: https://dashboard.render.com/services
-2. **Select API Service**: `connect-yw-backend`
+2. **Select API Service**: `koinonia-sms-backend`
 3. **Click Menu** (...) → **Duplicate**
 4. **Configure Duplicate**:
-   - **Name**: `connect-yw-backend-2` (or similar)
+   - **Name**: `koinonia-sms-backend-2` (or similar)
    - **Region**: `oregon` (same as original)
    - **Branch**: `main` (same as original)
    - **Environment Variables**: Copy from original (auto-populated)
@@ -78,11 +78,11 @@ Create `infrastructure/main.tf`:
 
 ```hcl
 resource "render_service" "backend_1" {
-  name           = "connect-yw-backend"
+  name           = "koinonia-sms-backend"
   plan           = "standard"
   region         = "oregon"
   branch         = "main"
-  github_repo    = "your-org/ywmessaging"
+  github_repo    = "your-org/koinoniasms"
   auto_deploy    = true
   environment_variables = {
     DATABASE_URL = var.database_url
@@ -92,11 +92,11 @@ resource "render_service" "backend_1" {
 }
 
 resource "render_service" "backend_2" {
-  name           = "connect-yw-backend-2"
+  name           = "koinonia-sms-backend-2"
   plan           = "standard"
   region         = "oregon"
   branch         = "main"
-  github_repo    = "your-org/ywmessaging"
+  github_repo    = "your-org/koinoniasms"
   auto_deploy    = true
   environment_variables = {
     DATABASE_URL = var.database_url
@@ -127,8 +127,8 @@ terraform apply
 
 1. **Navigate**: https://dashboard.render.com/services
 2. **Find Both Instances**:
-   - `connect-yw-backend` (original)
-   - `connect-yw-backend-2` (new)
+   - `koinonia-sms-backend` (original)
+   - `koinonia-sms-backend-2` (new)
 3. **Verify Status**: Both show "Live"
 
 ### Monitor Deployment Logs
@@ -143,7 +143,7 @@ For each instance, check:
 🔨 Building Docker image...
 ✅ Build succeeded in 2m 30s
 🚀 Deploying to production...
-✅ Service is live at https://connect-yw-backend-2.onrender.com
+✅ Service is live at https://koinonia-sms-backend-2.onrender.com
 🔄 Health checks: Passing
 ```
 
@@ -151,10 +151,10 @@ For each instance, check:
 
 ```bash
 # Test Original Instance
-curl https://connect-yw-backend.onrender.com/health
+curl https://koinonia-sms-backend.onrender.com/health
 
 # Test New Instance
-curl https://connect-yw-backend-2.onrender.com/health
+curl https://koinonia-sms-backend-2.onrender.com/health
 
 # Expected Response
 {
@@ -190,7 +190,7 @@ NODE_ENV=production            ✅ Same for both
 
 ```bash
 # From any API instance
-curl https://connect-yw-backend-2.onrender.com/api/health
+curl https://koinonia-sms-backend-2.onrender.com/api/health
 
 # Should return
 {
@@ -214,7 +214,7 @@ Render automatically balances traffic using:
 ### Monitor Request Distribution
 
 **In Render Dashboard**:
-1. **Select Backend Service**: `connect-yw-backend`
+1. **Select Backend Service**: `koinonia-sms-backend`
 2. **View Metrics**:
    - **Requests**: Should split between instances
    - **Response Time**: Similar on both
@@ -234,7 +234,7 @@ Error Rate: <0.1% (both instances)
 ```bash
 # Send 100 requests and check distribution
 for i in {1..100}; do
-  curl -s https://connect-yw-backend.onrender.com/api/health | \
+  curl -s https://koinonia-sms-backend.onrender.com/api/health | \
     grep -o "instance.*" | head -1
 done | sort | uniq -c
 
@@ -314,12 +314,12 @@ app.use('/', healthRoutes);
 ### Simulate Instance Failure
 
 1. **Stop First Instance**:
-   - **In Render Dashboard**: Select `connect-yw-backend` → **Suspend**
+   - **In Render Dashboard**: Select `koinonia-sms-backend` → **Suspend**
    - Render automatically routes all traffic to Instance 2
 
 2. **Verify Service Continues**:
    ```bash
-   curl https://connect-yw-backend.onrender.com/api/health
+   curl https://koinonia-sms-backend.onrender.com/api/health
    # Should still work, now from Instance 2
    ```
 
@@ -329,7 +329,7 @@ app.use('/', healthRoutes);
    - Response time unchanged (Instance 2 handles load)
 
 4. **Resume First Instance**:
-   - **In Render Dashboard**: Select `connect-yw-backend` → **Resume**
+   - **In Render Dashboard**: Select `koinonia-sms-backend` → **Resume**
    - Render re-adds to load balancer
    - Traffic splits 50/50 again
 
@@ -418,12 +418,12 @@ With 2 instances, you can deploy with zero downtime:
 If you need to control deployment order:
 
 1. **Deploy to Instance 2 first**:
-   - Render Dashboard → `connect-yw-backend-2` → **Redeploy**
+   - Render Dashboard → `koinonia-sms-backend-2` → **Redeploy**
    - Wait for successful deploy
    - Instance 2 serves traffic while Instance 1 handles requests
 
 2. **Deploy to Instance 1**:
-   - Render Dashboard → `connect-yw-backend` → **Redeploy**
+   - Render Dashboard → `koinonia-sms-backend` → **Redeploy**
    - Instance 1 updates while Instance 2 handles traffic
 
 ---
@@ -431,7 +431,7 @@ If you need to control deployment order:
 ## ✅ SIGN-OFF CHECKLIST
 
 Admin (who provisioned instances):
-- [ ] 2nd API instance created (`connect-yw-backend-2`)
+- [ ] 2nd API instance created (`koinonia-sms-backend-2`)
 - [ ] Both instances show "Live" status
 - [ ] Same environment variables on both
 - [ ] Both have access to PostgreSQL and Redis
@@ -452,7 +452,7 @@ Developer (who verified):
 ✅ **2nd Instance Deployment is successful when**:
 
 1. **Provisioning**
-   - [ ] `connect-yw-backend-2` created successfully
+   - [ ] `koinonia-sms-backend-2` created successfully
    - [ ] Both instances show "Live"
    - [ ] Deployment completed in < 5 minutes
    - [ ] No errors in build logs
@@ -493,7 +493,7 @@ Developer (who verified):
 If 2nd instance causes problems:
 
 1. **Delete 2nd Instance**:
-   - Render Dashboard → `connect-yw-backend-2` → **Delete Service**
+   - Render Dashboard → `koinonia-sms-backend-2` → **Delete Service**
 
 2. **Verify Service**:
    - Single instance automatically handles all traffic

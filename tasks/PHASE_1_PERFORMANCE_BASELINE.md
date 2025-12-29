@@ -248,8 +248,8 @@ These items require Render dashboard access and must be completed by infrastruct
 **Document**: `SECOND_API_INSTANCE_CHECKLIST.md`
 **Admin Step**:
 1. Go to Render dashboard → Services
-2. Select `connect-yw-backend` → Click "..." menu
-3. Click "Duplicate" → Configure as `connect-yw-backend-2`
+2. Select `koinonia-sms-backend` → Click "..." menu
+3. Click "Duplicate" → Configure as `koinonia-sms-backend-2`
 4. Same branch, environment variables, region
 5. **Timeline**: 5 minutes to create, 2-3 minutes to deploy
 

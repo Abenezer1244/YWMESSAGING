@@ -586,7 +586,7 @@ Use a test Planning Center organization:
 ```
 Setup Planning Center webhook:
   Event: person.create, person.update, person.destroy
-  URL: https://ywmessaging.com/webhooks/planning-center
+  URL: https://koinoniasms.com/webhooks/planning-center
 
 When webhook fires:
   - Immediately sync that person

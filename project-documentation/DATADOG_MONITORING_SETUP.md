@@ -118,7 +118,7 @@ When a user reports an issue:
 
 1. Ask for the timestamp (e.g., "2025-12-02 14:30:00 UTC")
 2. Go to Traces in Datadog
-3. Filter by `service:connect-yw-backend`
+3. Filter by `service:koinonia-sms-backend`
 4. Look for traces around that timestamp
 5. Click any trace to see:
    - All database queries made

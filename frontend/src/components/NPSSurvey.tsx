@@ -73,7 +73,7 @@ export function NPSSurvey({ onSubmit, onClose }: NPSSurveyProps) {
             Thank you for your feedback!
           </h2>
           <p className="text-gray-600">
-            Your response helps us improve YW Messaging.
+            Your response helps us improve Koinonia SMS.
           </p>
         </Card>
       </div>
@@ -98,7 +98,7 @@ export function NPSSurvey({ onSubmit, onClose }: NPSSurveyProps) {
             How are we doing?
           </h2>
           <p className="text-gray-600 text-sm mb-6">
-            Your feedback helps us improve YW Messaging
+            Your feedback helps us improve Koinonia SMS
           </p>
 
           {/* Score Selection */}

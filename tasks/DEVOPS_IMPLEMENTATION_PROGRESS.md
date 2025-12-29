@@ -93,10 +93,10 @@ Steps:
 ```
 Steps:
 1. Create account at https://uptimerobot.com (free tier)
-2. Add monitor: https://api.ywmessaging.com/health
+2. Add monitor: https://api.koinoniasms.com/health
 3. Check frequency: Every 5 minutes
 4. Alerts: Slack webhook + Email
-5. Status page: https://status.ywmessaging.com (public)
+5. Status page: https://status.koinoniasms.com (public)
 ```
 
 ### Priority 4: New Relic APM (1 hour)

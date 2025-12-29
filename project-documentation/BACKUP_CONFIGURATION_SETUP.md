@@ -17,7 +17,7 @@ Current database plan: **Starter (Free)** - No automated backups
 
 1. Go to https://dashboard.render.com
 2. Click **PostgreSQL** in left sidebar
-3. Select **connect-yw** database
+3. Select **koinonia-sms** database
 4. Click **Settings** tab
 5. Find **Plan** section
 6. Click dropdown (currently shows "Starter")
@@ -29,7 +29,7 @@ Current database plan: **Starter (Free)** - No automated backups
 ### Step 3: Verify Backups Enabled
 
 1. Refresh Render dashboard
-2. Click **connect-yw** database
+2. Click **koinonia-sms** database
 3. Verify new **Backups** tab appears
 4. Click **Backups** → See 7-day recovery window ✅
 
@@ -124,7 +124,7 @@ export async function verifyBackupHealth(): Promise<void> {
 **Weekly manual verification** (takes 2 minutes):
 
 1. Go to https://dashboard.render.com/postgresql
-2. Click **connect-yw** database
+2. Click **koinonia-sms** database
 3. Click **Backups** tab
 4. Verify:
    - ✅ Latest backup timestamp is within last 24 hours

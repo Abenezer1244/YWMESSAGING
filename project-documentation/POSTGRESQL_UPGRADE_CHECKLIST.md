@@ -38,7 +38,7 @@ These steps must be completed by someone with access to Render dashboard.
 
 ### Login to Render Dashboard
 1. **Navigate**: https://dashboard.render.com
-2. **Select PostgreSQL service**: `connect-yw-production` or similar
+2. **Select PostgreSQL service**: `koinonia-sms-production` or similar
 3. **Check current plan**: View "Plan" section
 
 ### Current Metrics to Check
@@ -70,7 +70,7 @@ Standard Tier ($43/month):
 ### Option A: Render Dashboard (Recommended)
 
 1. **Go to Database Service**: https://dashboard.render.com/pg
-2. **Select Service**: `connect-yw-production`
+2. **Select Service**: `koinonia-sms-production`
 3. **Click "Plan"**: In the service details page
 4. **Select New Plan**:
    - **Recommended**: Standard ($43/month)

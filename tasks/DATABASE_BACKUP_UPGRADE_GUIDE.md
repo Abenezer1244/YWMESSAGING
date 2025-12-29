@@ -66,7 +66,7 @@ This upgrade is **REQUIRED** for production deployment:
 
 ### Step 2: Select PostgreSQL Database
 1. Click **PostgreSQL** in the left sidebar (under "Databases")
-2. Look for **"connect-yw"** or similar database name
+2. Look for **"koinonia-sms"** or similar database name
 3. Click on it to open database details
 
 **Example path:**

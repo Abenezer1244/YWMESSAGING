@@ -187,7 +187,7 @@ All endpoints verified:
 ## Current Production Status
 
 ### Deployed Services ✅
-- **Backend**: Live on Render (`connect-yw-backend.onrender.com`)
+- **Backend**: Live on Render (`koinonia-sms-backend.onrender.com`)
 - **Database**: PostgreSQL on Render
 - **API Routes**: All 6 MCP endpoints active
 - **Webhooks**: GitHub integration receiving real events
@@ -352,7 +352,7 @@ EXA_API_KEY=***REDACTED***
 ## Quick Reference Links
 
 **Deployed Backend**:
-https://connect-yw-backend.onrender.com
+https://koinonia-sms-backend.onrender.com
 
 **GitHub Repo**:
 https://github.com/Abenezer1244/YWMESSAGING

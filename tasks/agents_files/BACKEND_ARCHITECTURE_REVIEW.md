@@ -2377,7 +2377,7 @@ export function errorHandler(
 # render.yaml
 services:
   - type: web
-    name: connect-yw-backend
+    name: koinonia-sms-backend
     env: node
     buildCommand: npm install && npm run build
     startCommand: npm start

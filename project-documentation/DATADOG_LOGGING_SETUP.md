@@ -52,7 +52,7 @@ Datadog Dashboard + Alerts
 Render has native Datadog integration via log drains.
 
 1. **Go to**: https://dashboard.render.com
-2. **Select**: Any service (e.g., connect-yw-backend)
+2. **Select**: Any service (e.g., koinonia-sms-backend)
 3. **Settings** → **Logs** → **Add Log Drain**
 4. **Provider**: Datadog
 5. **API Key**: Paste your Datadog API key
@@ -62,8 +62,8 @@ Render has native Datadog integration via log drains.
 9. **Click**: Create
 
 **Repeat for**:
-- Backend API service (connect-yw-backend)
-- Backend API service 2 (connect-yw-backend-2) - when deployed
+- Backend API service (koinonia-sms-backend)
+- Backend API service 2 (koinonia-sms-backend-2) - when deployed
 - Any other services
 
 ### Step 4: Verify Logs Flowing

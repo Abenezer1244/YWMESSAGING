@@ -196,7 +196,7 @@ For issues or questions, refer to:
 
 ## 📞 Contact
 
-Support email: support@connect-yw.com
+Support email: support@koinonia-sms.com
 
 ---
 

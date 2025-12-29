@@ -120,7 +120,7 @@ Real results from actual web search
 
 ```bash
 # 1. Check Render logs
-Dashboard → Services → connect-yw-backend → Logs
+Dashboard → Services → koinonia-sms-backend → Logs
 Look for:
   ✅ "npm install"
   ✅ "tsc" (TypeScript compilation)

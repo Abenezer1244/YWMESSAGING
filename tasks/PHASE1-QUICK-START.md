@@ -149,7 +149,7 @@ Remaining tasks (from checklist):
 ### PM2 Best Practices
 - Monitor with: `pm2 monit`
 - View logs with: `pm2 logs`
-- Reload (not restart) for zero-downtime: `pm2 reload ywmessaging-api`
+- Reload (not restart) for zero-downtime: `pm2 reload koinoniasms-api`
 - Always test reload procedure before production deployment
 
 ### Database Migration

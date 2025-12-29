@@ -56,8 +56,8 @@ EOF
 Open these in your browser tabs now (will use during deployment):
 - **Datadog APM**: https://app.datadoghq.com/apm/services
 - **Render Logs**: https://dashboard.render.com (your deployment)
-- **Health Check**: https://api.ywmessaging.com/health
-- **Detailed Health**: https://api.ywmessaging.com/health/detailed
+- **Health Check**: https://api.koinoniasms.com/health
+- **Detailed Health**: https://api.koinoniasms.com/health/detailed
 
 ### Step 1.3: Prepare Rollback Knowledge
 ```bash
@@ -144,18 +144,18 @@ git log -1 --pretty=format:"%H %s"
 ### Step 2.4: Verify Deployment Success (Immediately after)
 ```bash
 # 1. Health Check Endpoint
-curl -s https://api.ywmessaging.com/health | jq '.status'
+curl -s https://api.koinoniasms.com/health | jq '.status'
 # Expected: "ok" or "healthy"
 
 # 2. Detailed Health
-curl -s https://api.ywmessaging.com/health/detailed | jq
+curl -s https://api.koinoniasms.com/health/detailed | jq
 # Should show all services connected:
 # - database: connected
 # - redis: connected (or fallback)
 # - external_services: responsive
 
 # 3. Ready Probe
-curl -s https://api.ywmessaging.com/ready | jq
+curl -s https://api.koinoniasms.com/ready | jq
 # Expected: "ready" or similar
 ```
 
@@ -168,13 +168,13 @@ curl -s https://api.ywmessaging.com/ready | jq
 # Test critical endpoints with your admin account
 
 # 1. Login endpoint
-curl -X POST https://api.ywmessaging.com/api/auth/login \
+curl -X POST https://api.koinoniasms.com/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@test.com","password":"your-password"}'
 # Should return: 200 OK with token
 
 # 2. Get conversations
-curl -s https://api.ywmessaging.com/api/v1/conversations \
+curl -s https://api.koinoniasms.com/api/v1/conversations \
   -H "Authorization: Bearer YOUR_TOKEN" | jq '.length'
 # Should return: number of conversations
 
@@ -201,7 +201,7 @@ Open your web app and test:
 # Quick health check script
 check_health() {
   echo "=== Health Check at $(date) ==="
-  curl -s https://api.ywmessaging.com/health/detailed | jq '{
+  curl -s https://api.koinoniasms.com/health/detailed | jq '{
     status: .status,
     database: .checks.database,
     redis: .checks.redis,
@@ -245,7 +245,7 @@ If ANY of these happen, rollback immediately:
 # - Confirm to deploy previous version (0e83b25)
 
 # 2. Monitor health
-curl -s https://api.ywmessaging.com/health | jq '.status'
+curl -s https://api.koinoniasms.com/health | jq '.status'
 # Wait 3-5 minutes for deploy
 
 # 3. Verify rollback worked
@@ -290,13 +290,13 @@ echo "Reason: [describe issue here]" >> DEPLOYMENT_LOG_$(date +%Y%m%d).md
 ### Monitor API Health
 ```bash
 # Simple health check
-curl https://api.ywmessaging.com/health
+curl https://api.koinoniasms.com/health
 
 # Full health details
-curl https://api.ywmessaging.com/health/detailed | jq
+curl https://api.koinoniasms.com/health/detailed | jq
 
 # Ready check
-curl https://api.ywmessaging.com/ready
+curl https://api.koinoniasms.com/ready
 ```
 
 ### Check Recent Logs (via Datadog or CloudWatch)
@@ -316,12 +316,12 @@ git show 4419922 --stat  # See what changed
 ### Test Critical Endpoints
 ```bash
 # Auth endpoint test
-curl -X POST https://api.ywmessaging.com/api/auth/login \
+curl -X POST https://api.koinoniasms.com/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"test"}'
 
 # Messages endpoint test
-curl https://api.ywmessaging.com/api/v1/messages \
+curl https://api.koinoniasms.com/api/v1/messages \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 

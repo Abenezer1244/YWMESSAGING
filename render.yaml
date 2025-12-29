@@ -1,11 +1,11 @@
 # Render.com Infrastructure Configuration
-# This file defines how Connect YW will be deployed on Render
+# This file defines how Koinonia SMS will be deployed on Render
 # See: https://render.com/docs/infrastructure-as-code
 
 services:
   # Backend API Service
   - type: web
-    name: connect-yw-backend
+    name: koinonia-sms-backend
     env: node
     region: oregon
     plan: standard
@@ -50,7 +50,7 @@ services:
 
   # Frontend Web Service
   - type: web
-    name: connect-yw-frontend
+    name: koinonia-sms-frontend
     env: node
     region: oregon
     plan: standard

@@ -1460,7 +1460,7 @@ button:focus-visible {
 
 // 5. Implement resource hints
 <head>
-  <link rel="preconnect" href="https://api.ywmessaging.com" />
+  <link rel="preconnect" href="https://api.koinoniasms.com" />
   <link rel="dns-prefetch" href="https://cdn.cloudinary.com" />
 </head>
 ```

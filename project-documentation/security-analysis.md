@@ -1458,7 +1458,7 @@ describe('Access Control', () => {
 ```bash
 # Run automated security scanning
 docker run -t owasp/zap2docker-stable zap-baseline.py \
-  -t https://connect-yw-backend.onrender.com \
+  -t https://koinonia-sms-backend.onrender.com \
   -r security-report.html
 ```
 
@@ -3040,15 +3040,15 @@ env:
   contexts:
     - name: "Koinonia YW API"
       urls:
-        - "https://connect-yw-backend.onrender.com"
+        - "https://koinonia-sms-backend.onrender.com"
       includePaths:
-        - "https://connect-yw-backend.onrender.com/api/.*"
+        - "https://koinonia-sms-backend.onrender.com/api/.*"
       excludePaths:
-        - "https://connect-yw-backend.onrender.com/api/health"
+        - "https://koinonia-sms-backend.onrender.com/api/health"
       authentication:
         method: "json"
         parameters:
-          loginUrl: "https://connect-yw-backend.onrender.com/api/auth/login"
+          loginUrl: "https://koinonia-sms-backend.onrender.com/api/auth/login"
           loginRequestData: "{\"email\":\"test@church.com\",\"password\":\"testpassword\"}"
         verification:
           method: "response"
@@ -3098,7 +3098,7 @@ jobs:
       - name: ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.10.0
         with:
-          target: 'https://connect-yw-backend.onrender.com'
+          target: 'https://koinonia-sms-backend.onrender.com'
           rules_file_name: '.zap/rules.tsv'
           cmd_options: '-a'
 

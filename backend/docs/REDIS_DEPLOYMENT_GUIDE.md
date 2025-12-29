@@ -77,7 +77,7 @@ terraform apply
 
 ### In Render Dashboard
 
-1. **Go to backend service**: https://dashboard.render.com/services/connect-yw-backend
+1. **Go to backend service**: https://dashboard.render.com/services/koinonia-sms-backend
 2. **Settings** → **Environment Variables**
 3. **Update or Add**:
 

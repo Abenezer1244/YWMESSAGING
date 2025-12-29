@@ -1444,7 +1444,7 @@ pm2 start dist/server.js -i 4
 # ecosystem.config.js
 module.exports = {
   apps: [{
-    name: 'ywmessaging-api',
+    name: 'koinoniasms-api',
     script: './dist/server.js',
     instances: 'max',  // Use all CPU cores
     exec_mode: 'cluster',
@@ -2281,7 +2281,7 @@ datasource db {
 
 ```ini
 [databases]
-ywmessaging = host=postgres port=5432 dbname=ywmessaging
+koinoniasms = host=postgres port=5432 dbname=koinoniasms
 
 [pgbouncer]
 listen_addr = 0.0.0.0

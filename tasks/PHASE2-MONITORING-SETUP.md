@@ -200,7 +200,7 @@ curl -w "@curl-format.txt" https://api.koinoniasms.com/health/detailed
 **Monitor via Logs**:
 ```bash
 # Watch backend logs for slow queries
-tail -f /var/log/ywmessaging-api/out.log | grep "SLOW QUERY"
+tail -f /var/log/koinoniasms-api/out.log | grep "SLOW QUERY"
 
 # Example:
 # [SLOW QUERY] user.findUnique took 1234ms (threshold: 500ms)
@@ -219,10 +219,10 @@ Alert when:
 **Monitor via Application Logs**:
 ```bash
 # Count errors in real-time
-tail -f /var/log/ywmessaging-api/error.log | wc -l
+tail -f /var/log/koinoniasms-api/error.log | wc -l
 
 # Count by error type
-grep -o 'Error: [^(]*' /var/log/ywmessaging-api/error.log | sort | uniq -c | sort -rn
+grep -o 'Error: [^(]*' /var/log/koinoniasms-api/error.log | sort | uniq -c | sort -rn
 ```
 
 **Setup with DataDog**:
@@ -248,10 +248,10 @@ Alert when:
 **Monitor via Logs**:
 ```bash
 # Check for lock contention
-grep "Job lock held by another server" /var/log/ywmessaging-api/out.log | wc -l
+grep "Job lock held by another server" /var/log/koinoniasms-api/out.log | wc -l
 
 # See which jobs have conflicts
-grep "Job lock held" /var/log/ywmessaging-api/out.log | grep -o "job: [^ ]*" | sort | uniq -c
+grep "Job lock held" /var/log/koinoniasms-api/out.log | grep -o "job: [^ ]*" | sort | uniq -c
 ```
 
 **Expected Behavior**:
@@ -281,14 +281,14 @@ pm2 status
 # ┌─────────────────────────────────────────────────────────────────────┐
 # │ id │ name              │ mode │ ↺  │ status  │ ↓ cpu │ ↓ mem       │
 # ├────┼──────────────────────────────────────────────────────────────────┤
-# │ 0  │ ywmessaging-api  │ cluster │ 0 │ online  │ 2%   │ 256.0 MB   │
-# │ 1  │ ywmessaging-api  │ cluster │ 0 │ online  │ 1.2% │ 245.3 MB   │
-# │ 2  │ ywmessaging-api  │ cluster │ 0 │ online  │ 3%   │ 267.1 MB   │
-# │ 3  │ ywmessaging-api  │ cluster │ 0 │ online  │ 1.5% │ 251.2 MB   │
+# │ 0  │ koinoniasms-api  │ cluster │ 0 │ online  │ 2%   │ 256.0 MB   │
+# │ 1  │ koinoniasms-api  │ cluster │ 0 │ online  │ 1.2% │ 245.3 MB   │
+# │ 2  │ koinoniasms-api  │ cluster │ 0 │ online  │ 3%   │ 267.1 MB   │
+# │ 3  │ koinoniasms-api  │ cluster │ 0 │ online  │ 1.5% │ 251.2 MB   │
 # └─────────────────────────────────────────────────────────────────────┘
 
 # Monitor logs
-pm2 logs ywmessaging-api --lines 100
+pm2 logs koinoniasms-api --lines 100
 ```
 
 **Create Alerts**:

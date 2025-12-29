@@ -177,7 +177,7 @@ This looks like an older format (KEY_ID_secret). Telnyx v2 API typically uses Be
 
 2. **Update Render Production:**
    - Go to: https://dashboard.render.com/
-   - Select: `connect-yw-backend` service
+   - Select: `koinonia-sms-backend` service
    - Settings → Environment Variables
    - Update `TELNYX_API_KEY` with new key
    - Backend will auto-restart
@@ -224,7 +224,7 @@ cd backend && node test-endpoints.js
 
 ### Step 3: Update Production (Render)
 1. Go to: https://dashboard.render.com/
-2. Select `connect-yw-backend`
+2. Select `koinonia-sms-backend`
 3. Settings → Environment
 4. Update `TELNYX_API_KEY` with new key
 5. Click "Save" (backend will auto-redeploy)

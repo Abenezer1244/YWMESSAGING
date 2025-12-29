@@ -74,8 +74,8 @@ This document provides a comprehensive DevOps strategy for scaling KoinoniaSMS f
 ### 1.2 Current Infrastructure Stack
 
 **Hosting:** Render.com
-- Backend: `connect-yw-backend` (Standard plan, Oregon region)
-- Frontend: `connect-yw-frontend` (Standard plan, Oregon region)
+- Backend: `koinonia-sms-backend` (Standard plan, Oregon region)
+- Frontend: `koinonia-sms-frontend` (Standard plan, Oregon region)
 - Database: PostgreSQL 15 (Starter plan)
 
 **Repository:** GitHub
@@ -1192,7 +1192,7 @@ include_tags: true
 
 ```yaml
 databases:
-  - name: connect-yw-db
+  - name: koinonia-sms-db
     databaseName: connect_yw_production
     user: connect_yw_user
     region: oregon
