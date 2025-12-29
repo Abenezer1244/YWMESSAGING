@@ -1,86 +1,28 @@
 import { parseCSV, formatAndValidate } from '../utils/csvParser.util.js';
 import * as memberService from '../services/member.service.js';
-import { invalidateCache, CACHE_KEYS } from '../services/cache.service.js';
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
 /**
- * SECURITY: Verify group belongs to authenticated user's church
- */
-async function verifyGroupOwnership(groupId, churchId) {
-    const group = await prisma.group.findFirst({
-        where: {
-            id: groupId,
-            branch: {
-                churchId,
-            },
-        },
-    });
-    return !!group;
-}
-/**
- * SECURITY: Verify member belongs to authenticated user's church
- */
-async function verifyMemberOwnership(memberId, churchId) {
-    const member = await prisma.member.findFirst({
-        where: {
-            id: memberId,
-            groups: {
-                some: {
-                    group: {
-                        churchId,
-                    },
-                },
-            },
-        },
-    });
-    return !!member;
-}
-/**
- * GET /api/groups/:groupId/members
- * SECURITY: Verifies group belongs to authenticated user's church
+ * GET /api/members
+ * Get all members for authenticated user's church
  */
 export async function listMembers(req, res) {
     try {
-        const { groupId } = req.params;
         const churchId = req.user?.churchId;
         const page = Math.max(1, req.query.page ? parseInt(req.query.page) : 1);
         const limit = Math.min(10000, req.query.limit ? parseInt(req.query.limit) : 50);
         const search = req.query.search;
-        console.log(`[listMembers] GET REQUEST: groupId=${groupId}, page=${page}, limit=${limit}`);
-        console.log(`[listMembers] Query params: page=${req.query.page}, limit=${req.query.limit}`);
-        console.log(`[listMembers] Parsed: page=${page}, limit=${limit}, parseInt result=${req.query.limit ? parseInt(req.query.limit) : 'N/A'}`);
+        console.log(`[listMembers] GET REQUEST: page=${page}, limit=${limit}, search=${search}`);
         if (!churchId) {
             return res.status(401).json({
                 success: false,
                 error: 'Unauthorized',
             });
         }
-        // ✅ CRITICAL: Verify group belongs to authenticated user's church
-        // This prevents data leakage between accounts
-        const group = await prisma.group.findFirst({
-            where: {
-                id: groupId,
-                branch: {
-                    churchId,
-                },
-            },
-        });
-        if (!group) {
-            console.error('[listMembers] SECURITY: User tried to access unauthorized group', {
-                churchId,
-                groupId,
-            });
-            return res.status(403).json({
-                success: false,
-                error: 'Access denied - group does not belong to your church',
-            });
-        }
-        const result = await memberService.getMembers(groupId, {
+        const result = await memberService.getMembers({
             page,
             limit,
             search,
         });
-        console.log(`[listMembers] Returning ${result.data.length} members for group ${groupId}`);
+        console.log(`[listMembers] Returning ${result.data.length} members`);
         res.json({
             success: true,
             data: result.data,
@@ -88,6 +30,7 @@ export async function listMembers(req, res) {
         });
     }
     catch (error) {
+        console.error('[listMembers] ERROR:', error.message);
         res.status(400).json({
             success: false,
             error: error.message,
@@ -95,19 +38,14 @@ export async function listMembers(req, res) {
     }
 }
 /**
- * POST /api/groups/:groupId/members
- * SECURITY: Verifies group belongs to authenticated user's church
+ * POST /api/members
+ * Add a new member
  */
 export async function addMember(req, res) {
     try {
-        const { groupId } = req.params;
         const churchId = req.user?.churchId;
         const { firstName, lastName, phone, email, optInSms } = req.body;
-        // 🔍 UNIQUE TEST IDENTIFIER - If you see this, the new code IS deployed!
-        console.log('═══════════════════════════════════════════════════════════');
-        console.log('🚀 DEPLOYMENT_VERIFICATION_49062c3: addMember endpoint called');
-        console.log('═══════════════════════════════════════════════════════════');
-        console.log('[addMember] Starting - groupId:', groupId, 'phone:', phone);
+        console.log('[addMember] Starting - phone:', phone);
         if (!churchId) {
             console.error('[addMember] No churchId in request');
             return res.status(401).json({
@@ -115,25 +53,6 @@ export async function addMember(req, res) {
                 error: 'Unauthorized',
             });
         }
-        // ✅ CRITICAL: Verify group belongs to authenticated user's church
-        // This prevents users from adding members to other churches' groups
-        const group = await prisma.group.findFirst({
-            where: {
-                id: groupId,
-                churchId: churchId,
-            },
-        });
-        if (!group) {
-            console.error('[addMember] SECURITY: User tried to access unauthorized group', {
-                churchId,
-                groupId,
-            });
-            return res.status(403).json({
-                success: false,
-                error: 'Access denied - group does not belong to your church',
-            });
-        }
-        console.log('[addMember] Security: Group ownership verified', { churchId, groupId });
         // Validate input
         if (!firstName || !lastName || !phone) {
             console.error('[addMember] Missing required fields - firstName:', firstName, 'lastName:', lastName, 'phone:', phone);
@@ -143,27 +62,14 @@ export async function addMember(req, res) {
             });
         }
         console.log('[addMember] Input validated, calling service');
-        const member = await memberService.addMember(groupId, {
+        const member = await memberService.addMember({
             firstName,
             lastName,
             phone,
             email,
             optInSms,
         });
-        // ✅ CRITICAL: Ensure database transaction is committed
-        // Add 5ms delay to ensure PostgreSQL COMMIT completes before we invalidate cache
-        // This prevents race condition where refetch happens before write is committed
-        await new Promise(resolve => setTimeout(resolve, 5));
-        // ✅ CRITICAL: Invalidate cache BEFORE responding
-        // Ensures subsequent member list queries reflect the new member
-        try {
-            await invalidateCache(CACHE_KEYS.groupMembers(groupId));
-            console.log('[addMember] Cache invalidated successfully');
-        }
-        catch (err) {
-            console.error('[addMember] Cache invalidation error (non-blocking):', err);
-            // Continue anyway - cache invalidation failure shouldn't block member creation
-        }
+        console.log('[addMember] Member created successfully');
         res.status(201).json({
             success: true,
             data: member,
@@ -178,112 +84,8 @@ export async function addMember(req, res) {
     }
 }
 /**
- * POST /api/groups/:groupId/members/import
- * SECURITY: Verifies group belongs to authenticated user's church
- */
-export async function importMembers(req, res) {
-    try {
-        const { groupId } = req.params;
-        const churchId = req.user?.churchId;
-        if (!churchId) {
-            return res.status(401).json({
-                success: false,
-                error: 'Unauthorized',
-            });
-        }
-        // ✅ CRITICAL: Verify group belongs to authenticated user's church
-        // This prevents users from importing into other churches' groups
-        const group = await prisma.group.findFirst({
-            where: {
-                id: groupId,
-                churchId: churchId,
-            },
-        });
-        if (!group) {
-            console.error('[importMembers] SECURITY: User tried to access unauthorized group', {
-                churchId,
-                groupId,
-            });
-            return res.status(403).json({
-                success: false,
-                error: 'Access denied - group does not belong to your church',
-            });
-        }
-        console.log('[importMembers] Security: Group ownership verified', { churchId, groupId });
-        if (!req.file) {
-            return res.status(400).json({
-                success: false,
-                error: 'CSV file is required',
-            });
-        }
-        // SECURITY: Validate file size (max 5MB)
-        if (req.file.size > 5 * 1024 * 1024) {
-            return res.status(400).json({
-                success: false,
-                error: 'File size exceeds 5MB limit',
-            });
-        }
-        // Parse CSV
-        const rows = parseCSV(req.file.buffer);
-        // Diagnostic logging
-        console.log(`[importMembers] CSV parsing complete: ${rows.length} rows`);
-        if (rows.length > 0) {
-            console.log(`[importMembers] First CSV row: ${JSON.stringify(rows[0])}`);
-            console.log(`[importMembers] Second CSV row: ${JSON.stringify(rows[1])}`);
-            if (rows.length > 2) {
-                console.log(`[importMembers] Last CSV row: ${JSON.stringify(rows[rows.length - 1])}`);
-            }
-        }
-        // Validate and format
-        const parsed = formatAndValidate(rows);
-        // More diagnostic logging
-        console.log(`[importMembers] After validation: ${parsed.valid.length} valid, ${parsed.invalid.length} invalid`);
-        if (parsed.valid.length > 0) {
-            console.log(`[importMembers] First validated member: ${JSON.stringify(parsed.valid[0])}`);
-            if (parsed.valid.length > 1) {
-                console.log(`[importMembers] Second validated member: ${JSON.stringify(parsed.valid[1])}`);
-            }
-        }
-        if (parsed.valid.length === 0) {
-            return res.status(400).json({
-                success: false,
-                error: 'No valid rows to import',
-                failedDetails: parsed.invalid,
-            });
-        }
-        // Import to database
-        const result = await memberService.importMembers(groupId, parsed.valid);
-        // ✅ CRITICAL: Invalidate cache BEFORE responding
-        // Ensures subsequent member list queries get fresh data
-        try {
-            await invalidateCache(CACHE_KEYS.groupMembers(groupId));
-            console.log('[importMembers] Cache invalidated successfully');
-        }
-        catch (err) {
-            console.error('[importMembers] Cache invalidation error:', err);
-            // Continue anyway - cache invalidation failure shouldn't block import response
-        }
-        res.json({
-            success: true,
-            data: {
-                imported: result.imported,
-                failed: result.failed,
-                ...(result.failedDetails.length > 0 && {
-                    failedDetails: result.failedDetails,
-                }),
-            },
-        });
-    }
-    catch (error) {
-        res.status(400).json({
-            success: false,
-            error: error.message,
-        });
-    }
-}
-/**
  * PUT /api/members/:memberId
- * SECURITY: Verifies member belongs to authenticated user's church
+ * Update a member
  */
 export async function updateMember(req, res) {
     try {
@@ -296,17 +98,10 @@ export async function updateMember(req, res) {
                 error: 'Unauthorized',
             });
         }
-        // ✅ CRITICAL: Verify member belongs to authenticated user's church
-        // This prevents users from updating members in other churches
-        const hasMembership = await verifyMemberOwnership(memberId, churchId);
-        if (!hasMembership) {
-            console.error('[updateMember] SECURITY: User tried to update unauthorized member', {
-                churchId,
-                memberId,
-            });
-            return res.status(403).json({
+        if (!firstName && !lastName && !phone && email === undefined && optInSms === undefined) {
+            return res.status(400).json({
                 success: false,
-                error: 'Access denied - member does not belong to your church',
+                error: 'At least one field must be provided to update',
             });
         }
         const member = await memberService.updateMember(memberId, {
@@ -316,84 +111,95 @@ export async function updateMember(req, res) {
             email,
             optInSms,
         });
-        // ✅ CRITICAL: Invalidate cache BEFORE responding
-        // Ensures subsequent member queries get updated data
-        try {
-            await invalidateCache(CACHE_KEYS.memberAll(memberId));
-            console.log('[updateMember] Cache invalidated successfully');
-        }
-        catch (err) {
-            console.error('[updateMember] Cache invalidation error (non-blocking):', err);
-            // Continue anyway - cache invalidation failure shouldn't block member update
-        }
         res.json({
             success: true,
             data: member,
         });
     }
     catch (error) {
-        res.status(400).json({
+        console.error('[updateMember] ERROR:', error.message);
+        const statusCode = error.message.includes('not found') ? 404 : 400;
+        res.status(statusCode).json({
             success: false,
             error: error.message,
         });
     }
 }
 /**
- * DELETE /api/groups/:groupId/members/:memberId
- * SECURITY: Verifies group and member belong to authenticated user's church
+ * DELETE /api/members/:memberId
+ * Delete a member
  */
-export async function removeMember(req, res) {
+export async function deleteMember(req, res) {
     try {
-        const { groupId, memberId } = req.params;
+        const { memberId } = req.params;
         const churchId = req.user?.churchId;
-        console.log(`[removeMember] DELETE REQUEST: groupId=${groupId}, memberId=${memberId}`);
+        console.log(`[deleteMember] Deleting member: ${memberId}`);
         if (!churchId) {
             return res.status(401).json({
                 success: false,
                 error: 'Unauthorized',
             });
         }
-        // ✅ CRITICAL: Verify group belongs to authenticated user's church
-        // This prevents users from removing members from other churches' groups
-        const group = await prisma.group.findFirst({
-            where: {
-                id: groupId,
-                branch: {
-                    churchId,
-                },
-            },
+        await memberService.deleteMember(memberId);
+        res.json({
+            success: true,
+            data: { id: memberId },
         });
-        if (!group) {
-            console.error('[removeMember] SECURITY: User tried to access unauthorized group', {
-                churchId,
-                groupId,
-            });
-            return res.status(403).json({
+    }
+    catch (error) {
+        console.error('[deleteMember] ERROR:', error.message);
+        const statusCode = error.message.includes('not found') ? 404 : 400;
+        res.status(statusCode).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}
+/**
+ * POST /api/members/import
+ * Import members from CSV file
+ */
+export async function importMembers(req, res) {
+    try {
+        const churchId = req.user?.churchId;
+        console.log('[importMembers] Starting import');
+        if (!churchId) {
+            return res.status(401).json({
                 success: false,
-                error: 'Access denied - group does not belong to your church',
+                error: 'Unauthorized',
             });
         }
-        const result = await memberService.removeMemberFromGroup(groupId, memberId);
-        console.log(`[removeMember] Member successfully deleted: ${memberId}`);
-        // ✅ CRITICAL: Invalidate cache BEFORE responding (wait for completion)
-        // Ensures clients get fresh data immediately after deletion
-        try {
-            await Promise.all([
-                invalidateCache(CACHE_KEYS.groupMembers(groupId)),
-                invalidateCache(CACHE_KEYS.memberAll(memberId)),
-            ]);
-            console.log('[removeMember] Cache invalidated successfully');
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                error: 'No file uploaded',
+            });
         }
-        catch (err) {
-            console.error('[removeMember] Cache invalidation error (non-blocking):', err);
-            // Continue anyway - cache invalidation failure shouldn't block member deletion
+        // Parse CSV
+        console.log('[importMembers] CSV received, parsing...');
+        const parsed = parseCSV(req.file.buffer);
+        console.log(`[importMembers] Parsed ${parsed.length} rows from CSV`);
+        // Format and validate members
+        const validationResult = formatAndValidate(parsed);
+        console.log(`[importMembers] Validated ${validationResult.valid.length} members, ${validationResult.invalid.length} invalid`);
+        if (validationResult.valid.length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'No valid members found in CSV',
+                invalid: validationResult.invalid,
+            });
         }
+        // Import members
+        console.log(`[importMembers] Importing ${validationResult.valid.length} members...`);
+        const result = await memberService.importMembers(validationResult.valid);
+        console.log(`[importMembers] Import complete: ${result.imported} imported, ${result.failed} failed`);
         res.json({
             success: true,
             data: result,
         });
     }
     catch (error) {
+        console.error('[importMembers] ERROR:', error.message);
         res.status(400).json({
             success: false,
             error: error.message,

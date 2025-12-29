@@ -9,6 +9,7 @@ import { originValidationMiddleware } from './middleware/origin-validation.middl
 import { initSentry, getSentryRequestHandler, getSentryErrorHandler } from './config/sentry.config.js';
 import authRoutes from './routes/auth.routes.js';
 import branchRoutes from './routes/branch.routes.js';
+import memberRoutes from './routes/member.routes.js';
 import messageRoutes from './routes/message.routes.js';
 import templateRoutes from './routes/template.routes.js';
 import recurringRoutes from './routes/recurring.routes.js';
@@ -349,6 +350,7 @@ app.use('/api/auth', authLimiter, authRoutes);
 // Protected API Routes - JWT-based, no CSRF needed
 // Apply moderate rate limiting to general API endpoints
 app.use('/api/branches', apiLimiter, branchRoutes);
+app.use('/api/members', apiLimiter, memberRoutes);
 // Apply strict per-user rate limiting to messages (prevent SMS spam)
 app.use('/api/messages', messageRateLimiter, messageRoutes);
 app.use('/api/templates', apiLimiter, templateRoutes);
