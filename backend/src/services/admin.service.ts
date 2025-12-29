@@ -1,7 +1,8 @@
-import { prisma } from '../lib/prisma.js';
+import { PrismaClient } from '@prisma/client';
 import { hashPassword } from '../utils/password.utils.js';
 import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from './cache.service.js';
 import { encrypt, hashForSearch } from '../utils/encryption.utils.js';
+import { getRegistryPrisma } from '../lib/tenant-prisma.js';
 
 export interface UpdateChurchInput {
   name?: string;
@@ -22,38 +23,26 @@ export interface UpdateChurchInput {
 }
 
 /**
- * Update church profile
+ * Update church profile (registry)
  */
 export async function updateChurchProfile(
-  churchId: string,
+  tenantId: string,
   input: UpdateChurchInput
 ) {
   try {
-    const updated = await prisma.church.update({
-      where: { id: churchId },
+    const registryPrisma = getRegistryPrisma();
+    const updated = await registryPrisma.tenant.update({
+      where: { id: tenantId },
       data: {
         // Basic profile
         ...(input.name && { name: input.name }),
-        ...(input.email && { email: input.email }),
-        // 10DLC Delivery Option
-        ...(typeof input.wantsPremiumDelivery === 'boolean' && { wantsPremiumDelivery: input.wantsPremiumDelivery }),
-        // 10DLC Brand Information
-        ...(input.ein && { ein: input.ein }),
-        ...(input.brandPhoneNumber && { brandPhoneNumber: input.brandPhoneNumber }),
-        ...(input.streetAddress && { streetAddress: input.streetAddress }),
-        ...(input.city && { city: input.city }),
-        ...(input.state && { state: input.state }),
-        ...(input.postalCode && { postalCode: input.postalCode }),
-        ...(input.website && { website: input.website }),
-        ...(input.entityType && { entityType: input.entityType }),
-        ...(input.vertical && { vertical: input.vertical }),
       },
     });
 
-    console.log(`✅ Church profile updated: ${churchId}`);
+    console.log(`✅ Church profile updated: ${tenantId}`);
 
     // Invalidate church settings cache
-    await invalidateCache(CACHE_KEYS.churchSettings(churchId));
+    await invalidateCache(CACHE_KEYS.churchSettings(tenantId));
 
     return updated;
   } catch (error) {
@@ -63,46 +52,31 @@ export async function updateChurchProfile(
 }
 
 /**
- * Get church profile (including 10DLC fields) - cached for 1 hour
+ * Get church profile (registry) - cached for 1 hour
  */
-export async function getChurchProfile(churchId: string) {
+export async function getChurchProfile(tenantId: string) {
   try {
     // Try cache first
-    const cached = await getCached(CACHE_KEYS.churchSettings(churchId));
+    const cached = await getCached(CACHE_KEYS.churchSettings(tenantId));
     if (cached) {
       return cached;
     }
 
-    const church = await prisma.church.findUnique({
-      where: { id: churchId },
+    const registryPrisma = getRegistryPrisma();
+    const church = await registryPrisma.tenant.findUnique({
+      where: { id: tenantId },
       select: {
-        // Basic profile
         id: true,
         name: true,
-        email: true,
-        subscriptionStatus: true,
+        status: true,
         createdAt: true,
         updatedAt: true,
-        // 10DLC Delivery Status
-        wantsPremiumDelivery: true,
-        dlcStatus: true,
-        deliveryRate: true,
-        // 10DLC Brand Information
-        ein: true,
-        brandPhoneNumber: true,
-        streetAddress: true,
-        city: true,
-        state: true,
-        postalCode: true,
-        website: true,
-        entityType: true,
-        vertical: true,
       },
     });
 
     // Cache for 1 hour
     if (church) {
-      await setCached(CACHE_KEYS.churchSettings(churchId), church, CACHE_TTL.LONG);
+      await setCached(CACHE_KEYS.churchSettings(tenantId), church, CACHE_TTL.LONG);
     }
 
     return church;
@@ -113,20 +87,19 @@ export async function getChurchProfile(churchId: string) {
 }
 
 /**
- * Get all co-admins for a church - cached for 30 minutes
+ * Get all co-admins for a tenant - cached for 30 minutes
  */
-export async function getCoAdmins(churchId: string) {
+export async function getCoAdmins(tenantId: string, tenantPrisma: PrismaClient) {
   try {
     // Try cache first
-    const cacheKey = `church:${churchId}:coadmins`;
+    const cacheKey = `church:${tenantId}:coadmins`;
     const cached = await getCached(cacheKey);
     if (cached) {
       return cached;
     }
 
-    const coAdmins = await prisma.admin.findMany({
+    const coAdmins = await tenantPrisma.admin.findMany({
       where: {
-        churchId,
         role: 'CO_ADMIN',
       },
       select: {
@@ -153,14 +126,11 @@ export async function getCoAdmins(churchId: string) {
 /**
  * Remove a co-admin
  */
-export async function removeCoAdmin(churchId: string, adminId: string) {
+export async function removeCoAdmin(tenantId: string, tenantPrisma: PrismaClient, adminId: string) {
   try {
-    // Verify admin belongs to church
-    const admin = await prisma.admin.findFirst({
-      where: {
-        id: adminId,
-        churchId,
-      },
+    // Verify admin exists and is co-admin
+    const admin = await tenantPrisma.admin.findUnique({
+      where: { id: adminId },
     });
 
     if (!admin) {
@@ -172,18 +142,18 @@ export async function removeCoAdmin(churchId: string, adminId: string) {
     }
 
     // Delete the admin
-    await prisma.admin.delete({
+    await tenantPrisma.admin.delete({
       where: { id: adminId },
     });
 
     // Invalidate co-admins cache
-    const cacheKey = `church:${churchId}:coadmins`;
+    const cacheKey = `church:${tenantId}:coadmins`;
     await invalidateCache(cacheKey);
 
     // Invalidate admin's own cache
     await invalidateCache(CACHE_KEYS.adminRole(adminId));
 
-    console.log(`✅ Co-admin removed: ${adminId} from church ${churchId}`);
+    console.log(`✅ Co-admin removed: ${adminId} from church ${tenantId}`);
   } catch (error) {
     console.error('Failed to remove co-admin:', error);
     throw error;
@@ -275,14 +245,15 @@ export async function getActivityLogCount(churchId: string): Promise<number> {
  * Invite a co-admin (create new co-admin account)
  */
 export async function inviteCoAdmin(
-  churchId: string,
+  tenantId: string,
+  tenantPrisma: PrismaClient,
   email: string,
   firstName: string,
   lastName: string
 ) {
   try {
     // Check if email already exists
-    const existingAdmin = await prisma.admin.findUnique({
+    const existingAdmin = await tenantPrisma.admin.findFirst({
       where: { email },
     });
 
@@ -301,9 +272,8 @@ export async function inviteCoAdmin(
     const emailHash = hashForSearch(email);
 
     // Create new co-admin
-    const newAdmin = await prisma.admin.create({
+    const newAdmin = await tenantPrisma.admin.create({
       data: {
-        churchId,
         email,
         encryptedEmail,
         emailHash,
@@ -323,10 +293,10 @@ export async function inviteCoAdmin(
     });
 
     // Invalidate co-admins cache
-    const cacheKey = `church:${churchId}:coadmins`;
+    const cacheKey = `church:${tenantId}:coadmins`;
     await invalidateCache(cacheKey);
 
-    console.log(`✅ Co-admin invited: ${email} for church ${churchId}`);
+    console.log(`✅ Co-admin invited: ${email} for church ${tenantId}`);
 
     // Return co-admin info with temporary password
     return {
