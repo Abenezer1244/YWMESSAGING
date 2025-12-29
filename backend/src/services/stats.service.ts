@@ -170,8 +170,8 @@ export async function getBranchStats(churchId: string): Promise<BranchStat[]> {
  */
 async function getBranchStatsUncached(churchId: string): Promise<BranchStat[]> {
   try {
-    // ✅ Query 1: Get branches with member counts using aggregation
-    const branchesWithCounts = await prisma.branch.findMany({
+    // ✅ Query 1: Get all branches for this church
+    const branches = await prisma.branch.findMany({
       where: { churchId },
       select: {
         id: true,
@@ -179,9 +179,9 @@ async function getBranchStatsUncached(churchId: string): Promise<BranchStat[]> {
       },
     });
 
-    // ✅ Query 2: Get message stats for all branches in one query
-    // ✅ FIX: Removed broken Member JOIN (members no longer have branchId)
-    // Count messages sent to branches (targetType IN 'branches', 'all', or NULL)
+    // ✅ Query 2: Get message stats - count messages sent to each branch
+    // For now, count all messages sent to this church (simplified approach)
+    // TODO: Later improve to check if branch ID is in targetIds JSON array
     const messageStats = await prisma.$queryRaw<Array<{
       branch_id: string;
       message_count: number;
@@ -190,42 +190,39 @@ async function getBranchStatsUncached(churchId: string): Promise<BranchStat[]> {
       SELECT
         b.id as branch_id,
         COUNT(DISTINCT m.id) as message_count,
-        COUNT(CASE WHEN mr.status = 'delivered' THEN 1 END) as delivered_count
+        SUM(CASE WHEN mr.status = 'delivered' THEN 1 ELSE 0 END) as delivered_count
       FROM "Branch" b
       LEFT JOIN "Message" m ON m."churchId" = b."churchId"
-        AND (m."targetType" IN ('branches', 'all') OR m."targetType" IS NULL)
       LEFT JOIN "MessageRecipient" mr ON mr."messageId" = m.id
       WHERE b."churchId" = ${churchId}
       GROUP BY b.id
     `;
 
-  // Merge results
-  const messageStatsMap = new Map<string, { messageCount: number; deliveredCount: number }>();
-  for (const stat of messageStats) {
-    messageStatsMap.set(stat.branch_id, {
-      messageCount: Number(stat.message_count) || 0,
-      deliveredCount: Number(stat.delivered_count) || 0,
-    });
-  }
+    // Build result map
+    const messageStatsMap = new Map<string, { messageCount: number; deliveredCount: number }>();
+    for (const stat of messageStats) {
+      messageStatsMap.set(stat.branch_id, {
+        messageCount: Number(stat.message_count) || 0,
+        deliveredCount: Number(stat.delivered_count) || 0,
+      });
+    }
 
-  const stats: BranchStat[] = [];
+    // Build final stats with delivery rates
+    const stats: BranchStat[] = [];
+    for (const branch of branches) {
+      const messageStat = messageStatsMap.get(branch.id) || {
+        messageCount: 0,
+        deliveredCount: 0,
+      };
 
-  for (const branch of branchesWithCounts) {
-    const messageStat = messageStatsMap.get(branch.id) || {
-      messageCount: 0,
-      deliveredCount: 0,
-    };
-
-    const deliveryRate = messageStat.messageCount > 0
-        ? Math.round(
-            (messageStat.deliveredCount / messageStat.messageCount) * 100
-          )
+      const deliveryRate = messageStat.messageCount > 0
+        ? Math.round((messageStat.deliveredCount / messageStat.messageCount) * 100)
         : 0;
 
       stats.push({
         id: branch.id,
         name: branch.name,
-        memberCount: 0, // Member count removed - members don't have branchId anymore
+        memberCount: 0, // Members don't have branch relationship
         messageCount: messageStat.messageCount,
         deliveryRate: Math.min(Math.max(deliveryRate, 0), 100),
       });
