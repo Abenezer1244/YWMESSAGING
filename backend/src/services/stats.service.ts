@@ -181,7 +181,7 @@ async function getBranchStatsUncached(churchId: string): Promise<BranchStat[]> {
 
     // ✅ Query 2: Get message stats for all branches in one query
     // ✅ FIX: Removed broken Member JOIN (members no longer have branchId)
-    // Count messages sent to this church (members don't have branch relationships)
+    // Count messages sent to branches (targetType IN 'branches', 'all', or NULL)
     const messageStats = await prisma.$queryRaw<Array<{
       branch_id: string;
       message_count: number;
@@ -193,6 +193,7 @@ async function getBranchStatsUncached(churchId: string): Promise<BranchStat[]> {
         COUNT(CASE WHEN mr.status = 'delivered' THEN 1 END) as delivered_count
       FROM "Branch" b
       LEFT JOIN "Message" m ON m."churchId" = b."churchId"
+        AND (m."targetType" IN ('branches', 'all') OR m."targetType" IS NULL)
       LEFT JOIN "MessageRecipient" mr ON mr."messageId" = m.id
       WHERE b."churchId" = ${churchId}
       GROUP BY b.id
