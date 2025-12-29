@@ -61,8 +61,8 @@ export function AddMemberModal({ isOpen, onClose, onSuccess }: AddMemberModalPro
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg max-w-md w-full mx-4 p-6">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 pointer-events-none">
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg max-w-md w-full mx-4 p-6 pointer-events-auto">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Add Member</h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
