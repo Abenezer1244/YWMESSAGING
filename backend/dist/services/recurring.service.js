@@ -1,15 +1,13 @@
-import { prisma } from '../lib/prisma.js';
-export async function getRecurringMessages(churchId) {
-    return await prisma.recurringMessage.findMany({
-        where: { churchId },
+export async function getRecurringMessages(tenantId, tenantPrisma) {
+    return await tenantPrisma.recurringMessage.findMany({
         orderBy: { nextSendAt: 'asc' },
     });
 }
-export async function createRecurringMessage(churchId, data) {
+export async function createRecurringMessage(tenantId, tenantPrisma, data) {
     const nextSendAt = calculateNextSendAt(data.frequency, data.timeOfDay, data.dayOfWeek);
-    return await prisma.recurringMessage.create({
+    return await tenantPrisma.recurringMessage.create({
         data: {
-            churchId,
+            churchId: tenantId,
             name: data.name,
             content: data.content,
             targetType: data.targetType,
@@ -22,7 +20,7 @@ export async function createRecurringMessage(churchId, data) {
         },
     });
 }
-export async function updateRecurringMessage(messageId, data) {
+export async function updateRecurringMessage(tenantId, tenantPrisma, messageId, data) {
     const updates = {};
     if (data.name)
         updates.name = data.name;
@@ -45,25 +43,25 @@ export async function updateRecurringMessage(messageId, data) {
             updates.nextSendAt = calculateNextSendAt(data.frequency, data.timeOfDay, data.dayOfWeek);
         }
     }
-    return await prisma.recurringMessage.update({
+    return await tenantPrisma.recurringMessage.update({
         where: { id: messageId },
         data: updates,
     });
 }
-export async function deleteRecurringMessage(messageId) {
-    return await prisma.recurringMessage.delete({
+export async function deleteRecurringMessage(tenantId, tenantPrisma, messageId) {
+    return await tenantPrisma.recurringMessage.delete({
         where: { id: messageId },
     });
 }
-export async function toggleRecurringMessage(messageId, isActive) {
-    return await prisma.recurringMessage.update({
+export async function toggleRecurringMessage(tenantId, tenantPrisma, messageId, isActive) {
+    return await tenantPrisma.recurringMessage.update({
         where: { id: messageId },
         data: { isActive },
     });
 }
-export async function updateNextSendAt(messageId, frequency, timeOfDay, dayOfWeek) {
+export async function updateNextSendAt(tenantId, tenantPrisma, messageId, frequency, timeOfDay, dayOfWeek) {
     const nextSendAt = calculateNextSendAt(frequency, timeOfDay, dayOfWeek);
-    return await prisma.recurringMessage.update({
+    return await tenantPrisma.recurringMessage.update({
         where: { id: messageId },
         data: { nextSendAt },
     });

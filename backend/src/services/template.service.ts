@@ -19,6 +19,7 @@ export async function createTemplate(
 ) {
   return await tenantPrisma.messageTemplate.create({
     data: {
+      churchId: tenantId,
       name: data.name,
       content: data.content,
       category: data.category,

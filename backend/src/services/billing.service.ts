@@ -30,7 +30,7 @@ export async function recordSMSUsage(
 
     // For now, we'll track usage in-memory or via a simple table
     // This allows us to calculate costs without a full migration
-    console.log(`[Billing] Recording SMS usage for church ${tenantId}: $${SMS_COST_PER_MESSAGE}`);
+    console.log(`[Billing] Recording SMS usage for tenant ${tenantId}: $${SMS_COST_PER_MESSAGE}`);
 
     return {
       cost: SMS_COST_PER_MESSAGE,
@@ -133,7 +133,7 @@ export async function getCurrentPlan(tenantId: string): Promise<PlanName | 'tria
 
     // Cache miss or timeout, query registry database with AGGRESSIVE timeout (2 seconds)
     const registryPrisma = getRegistryPrisma();
-    const dbPromise = registryPrisma.tenant.findUnique({
+    const dbPromise = registryPrisma.church.findUnique({
       where: { id: tenantId },
       select: { subscriptionStatus: true },
     });
@@ -160,7 +160,7 @@ export async function getCurrentPlan(tenantId: string): Promise<PlanName | 'tria
 }
 
 /**
- * Get plan limits for a church (uses config/plans.ts)
+ * Get plan limits for a tenant (uses config/plans.ts)
  */
 export function getPlanLimits(plan: PlanName | string): PlanLimits | null {
   // Trial users get starter plan limits
@@ -262,7 +262,7 @@ export async function getUsage(tenantId: string, tenantPrisma: PrismaClient): Pr
 export async function isOnTrial(tenantId: string): Promise<boolean> {
   try {
     const registryPrisma = getRegistryPrisma();
-    const tenant = await registryPrisma.tenant.findUnique({
+    const tenant = await registryPrisma.church.findUnique({
       where: { id: tenantId },
       select: { subscriptionStatus: true, trialEndsAt: true },
     });

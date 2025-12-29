@@ -36,7 +36,6 @@ export async function addToDLQ(entry) {
         const dlqRecord = await prisma.deadLetterQueue.create({
             data: {
                 category: entry.category,
-                churchId: entry.churchId,
                 externalId: entry.externalId,
                 originalPayload: entry.originalPayload,
                 errorMessage: entry.errorMessage,
@@ -67,7 +66,6 @@ export async function listPendingDLQ(options) {
             where: {
                 status: 'PENDING',
                 ...(options?.category && { category: options.category }),
-                ...(options?.churchId && { churchId: options.churchId }),
             },
             orderBy: { createdAt: 'asc' },
             take: limit,
@@ -77,7 +75,6 @@ export async function listPendingDLQ(options) {
             where: {
                 status: 'PENDING',
                 ...(options?.category && { category: options.category }),
-                ...(options?.churchId && { churchId: options.churchId }),
             },
         }),
     ]);

@@ -110,7 +110,7 @@ export async function loginHandler(req: Request, res: Response): Promise<void> {
 
     // If MFA is enabled, require MFA verification
     if (mfaRecord?.mfaEnabled) {
-      const mfaSessionToken = generateMFASessionToken(result.adminId, result.churchId);
+      const mfaSessionToken = generateMFASessionToken(result.adminId, result.tenantId);
       res.status(200).json({
         success: true,
         mfaRequired: true,
@@ -200,7 +200,7 @@ export async function refreshToken(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const result = await refreshAccessToken(payload.adminId);
+    const result = await refreshAccessToken(payload.adminId, payload.churchId);
 
     // ✅ SECURITY: Determine cookie domain and sameSite based on actual request origin
     // Check hostname from request, supporting reverse proxy scenarios (X-Forwarded-Host header)
@@ -261,7 +261,13 @@ export async function getMe(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const admin = await getAdmin(req.user.adminId);
+    const tenantId = (req as any).tenantId;
+    if (!tenantId) {
+      res.status(401).json({ error: 'Tenant context missing' });
+      return;
+    }
+
+    const admin = await getAdmin(req.user.adminId, tenantId);
     if (!admin) {
       res.status(404).json({ error: 'Admin not found' });
       return;
@@ -384,7 +390,8 @@ export async function verifyMFAHandler(req: Request, res: Response): Promise<voi
       return;
     }
 
-    const { adminId, churchId } = payload;
+    const adminId = payload.adminId;
+    const tenantId = payload.churchId;
 
     // ✅ SECURITY: Verify TOTP code first
     let isValidCode = await mfaService.verifyTOTPCode(adminId, code);
@@ -399,10 +406,9 @@ export async function verifyMFAHandler(req: Request, res: Response): Promise<voi
       return;
     }
 
-    // ✅ SECURITY: Get admin data and church info
+    // ✅ SECURITY: Get admin data
     const admin = await prisma.admin.findUnique({
       where: { id: adminId },
-      include: { church: true },
     });
 
     if (!admin) {
@@ -410,10 +416,21 @@ export async function verifyMFAHandler(req: Request, res: Response): Promise<voi
       return;
     }
 
+    // Get church data
+    const church = await prisma.church.findUnique({
+      where: { id: tenantId },
+      select: {
+        id: true,
+        name: true,
+        subscriptionStatus: true,
+        trialEndsAt: true,
+      },
+    });
+
     // Generate final access and refresh tokens
     const { generateAccessToken, generateRefreshToken } = await import('../utils/jwt.utils.js');
-    const accessToken = generateAccessToken(adminId, churchId, admin.role);
-    const refreshToken = generateRefreshToken(adminId);
+    const accessToken = generateAccessToken(adminId, tenantId, admin.role);
+    const refreshToken = generateRefreshToken(adminId, tenantId);
 
     // ✅ SECURITY: Determine cookie domain and sameSite based on environment
     const xForwardedHost = req.get('x-forwarded-host');
@@ -463,10 +480,10 @@ export async function verifyMFAHandler(req: Request, res: Response): Promise<voi
           userRole: admin.userRole,
         },
         church: {
-          id: admin.church.id,
-          name: admin.church.name,
-          email: admin.church.email,
-          trialEndsAt: admin.church.trialEndsAt,
+          id: church?.id || tenantId,
+          name: church?.name || 'Church',
+          subscriptionStatus: church?.subscriptionStatus || 'trial',
+          trialEndsAt: church?.trialEndsAt || new Date(),
         },
         accessToken,
         refreshToken,
@@ -489,6 +506,12 @@ export async function completeWelcome(req: Request, res: Response): Promise<void
       return;
     }
 
+    const tenantId = (req as any).tenantId;
+    if (!tenantId) {
+      res.status(401).json({ error: 'Tenant context missing' });
+      return;
+    }
+
     // ✅ SECURITY: Validate request body with Zod schema
     const validationResult = safeValidate(completeWelcomeSchema, req.body);
     if (!validationResult.success) {
@@ -499,9 +522,6 @@ export async function completeWelcome(req: Request, res: Response): Promise<void
     const { userRole } = validationResult.data as any;
 
     // Update admin record
-    const { PrismaClient } = await import('@prisma/client');
-    const prisma = new PrismaClient();
-
     const updatedAdmin = await prisma.admin.update({
       where: { id: req.user.adminId },
       data: {

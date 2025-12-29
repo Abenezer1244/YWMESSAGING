@@ -36,7 +36,6 @@ router.get('/pending', authenticateToken, isAdmin, async (req, res) => {
         const { category, churchId, limit, offset } = req.query;
         const result = await dlqService.listPendingDLQ({
             category: category,
-            churchId: churchId,
             limit: limit ? parseInt(limit) : undefined,
             offset: offset ? parseInt(offset) : undefined,
         });

@@ -29,6 +29,7 @@ export async function createRecurringMessage(
 
   return await tenantPrisma.recurringMessage.create({
     data: {
+      churchId: tenantId,
       name: data.name,
       content: data.content,
       targetType: data.targetType,

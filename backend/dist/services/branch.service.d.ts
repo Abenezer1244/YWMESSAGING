@@ -1,3 +1,4 @@
+import { PrismaClient } from '@prisma/client';
 export interface CreateBranchInput {
     name: string;
     address?: string;
@@ -12,11 +13,10 @@ export interface UpdateBranchInput {
     isActive?: boolean;
 }
 /**
- * Get all branches for a church
+ * Get all branches for a tenant
  */
-export declare function getBranches(churchId: string): Promise<{
+export declare function getBranches(tenantId: string, tenantPrisma: PrismaClient): Promise<{
     id: string;
-    churchId: string;
     name: string;
     address: string | null;
     phone: string | null;
@@ -29,9 +29,8 @@ export declare function getBranches(churchId: string): Promise<{
  * Create a new branch
  * Checks plan limit first (defaults to STARTER plan for new churches)
  */
-export declare function createBranch(churchId: string, input: CreateBranchInput): Promise<{
+export declare function createBranch(tenantId: string, tenantPrisma: PrismaClient, input: CreateBranchInput): Promise<{
     id: string;
-    churchId: string;
     name: string;
     address: string | null;
     phone: string | null;
@@ -43,9 +42,8 @@ export declare function createBranch(churchId: string, input: CreateBranchInput)
 /**
  * Update a branch
  */
-export declare function updateBranch(branchId: string, churchId: string, input: UpdateBranchInput): Promise<{
+export declare function updateBranch(tenantId: string, tenantPrisma: PrismaClient, branchId: string, input: UpdateBranchInput): Promise<{
     id: string;
-    churchId: string;
     name: string;
     address: string | null;
     phone: string | null;
@@ -58,7 +56,7 @@ export declare function updateBranch(branchId: string, churchId: string, input: 
  * Delete a branch
  * Cannot delete if it's the only branch
  */
-export declare function deleteBranch(branchId: string, churchId: string): Promise<{
+export declare function deleteBranch(tenantId: string, tenantPrisma: PrismaClient, branchId: string): Promise<{
     success: boolean;
     membersDeleted: number;
 }>;

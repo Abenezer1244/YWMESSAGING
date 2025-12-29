@@ -31,7 +31,7 @@ export async function updateChurchProfile(
 ) {
   try {
     const registryPrisma = getRegistryPrisma();
-    const updated = await registryPrisma.tenant.update({
+    const updated = await registryPrisma.church.update({
       where: { id: tenantId },
       data: {
         // Basic profile
@@ -63,12 +63,11 @@ export async function getChurchProfile(tenantId: string) {
     }
 
     const registryPrisma = getRegistryPrisma();
-    const church = await registryPrisma.tenant.findUnique({
+    const church = await registryPrisma.church.findUnique({
       where: { id: tenantId },
       select: {
         id: true,
         name: true,
-        status: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -164,14 +163,14 @@ export async function removeCoAdmin(tenantId: string, tenantPrisma: PrismaClient
  * Log an activity
  */
 export async function logActivity(
-  churchId: string,
+  tenantId: string,
   adminId: string,
   action: string,
   details: Record<string, any> = {}
 ) {
   try {
     const logEntry = {
-      churchId,
+      tenantId,
       adminId,
       action,
       details: JSON.stringify(details),
@@ -179,11 +178,11 @@ export async function logActivity(
     };
 
     console.log(
-      `📝 Activity logged - Church: ${churchId}, Action: ${action}, Admin: ${adminId}`
+      `📝 Activity logged - Tenant: ${tenantId}, Action: ${action}, Admin: ${adminId}`
     );
 
     // In production, store in database
-    // await prisma.activityLog.create({ data: logEntry });
+    // await tenantPrisma.activityLog.create({ data: logEntry });
 
     return logEntry;
   } catch (error) {
@@ -193,10 +192,10 @@ export async function logActivity(
 }
 
 /**
- * Get activity logs for a church
+ * Get activity logs for a tenant
  */
 export async function getActivityLogs(
-  churchId: string,
+  tenantId: string,
   limit: number = 50,
   offset: number = 0
 ) {
@@ -205,7 +204,7 @@ export async function getActivityLogs(
     const logs = [
       {
         id: `log_${Date.now()}`,
-        churchId,
+        tenantId,
         action: 'Login',
         details: 'Admin logged in',
         timestamp: new Date(Date.now() - 3600000),
@@ -213,7 +212,7 @@ export async function getActivityLogs(
       },
       {
         id: `log_${Date.now() - 1}`,
-        churchId,
+        tenantId,
         action: 'Message Sent',
         details: '5 messages sent to group',
         timestamp: new Date(Date.now() - 7200000),
@@ -231,7 +230,7 @@ export async function getActivityLogs(
 /**
  * Get activity log count
  */
-export async function getActivityLogCount(churchId: string): Promise<number> {
+export async function getActivityLogCount(tenantId: string): Promise<number> {
   try {
     // For MVP, return mock count
     return 42;
@@ -274,6 +273,7 @@ export async function inviteCoAdmin(
     // Create new co-admin
     const newAdmin = await tenantPrisma.admin.create({
       data: {
+        churchId: tenantId,
         email,
         encryptedEmail,
         emailHash,

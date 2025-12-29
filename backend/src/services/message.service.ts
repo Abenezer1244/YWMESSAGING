@@ -82,6 +82,7 @@ export async function createMessage(
   // Create message record
   const message = await tenantPrisma.message.create({
     data: {
+      churchId: tenantId,
       content: data.content,
       targetType: data.targetType,
       targetIds: JSON.stringify(data.targetIds || []),

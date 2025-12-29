@@ -1,328 +1,186 @@
-[694f3869.2cd2e9-3] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3869.2cd2e8-4] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.005 user=postgres database=connect_yw_production host=10.20.85.224 port=47966
-[694f3869.2cd2e9-4] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.005 user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 host=10.20.85.224 port=47968
-[694f344f.2ccd12-4] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  SSL error: unexpected eof while reading
-[694f344d.2ccd0b-4] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  SSL error: unexpected eof while reading
-[694f344f.2ccd12-5] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  could not receive data from client: Connection reset by peer
-[694f344d.2ccd0b-5] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  could not receive data from client: Connection reset by peer
-[694f344d.2ccd0a-4] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  SSL error: unexpected eof while reading
-[694f344d.2ccd0a-5] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  could not receive data from client: Connection reset by peer
-[694f344d.2ccd09-4] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  SSL error: unexpected eof while reading
-[694f344d.2ccd08-4] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  SSL error: unexpected eof while reading
-[694f344d.2ccd09-5] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  could not receive data from client: Connection reset by peer
-[694f344d.2ccd08-5] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  could not receive data from client: Connection reset by peer
-[694f344f.2ccd12-6] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  disconnection: session time: 0:17:34.566 user=connect_yw_user database=connect_yw_production host=10.21.52.34 port=53012
-[694f344d.2ccd0b-6] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  disconnection: session time: 0:17:36.625 user=connect_yw_user database=connect_yw_production host=10.21.52.34 port=52996
-[694f344a.2ccd07-4] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  SSL error: unexpected eof while reading
-[694f344d.2ccd0a-6] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  disconnection: session time: 0:17:36.626 user=connect_yw_user database=connect_yw_production host=10.21.52.34 port=52986
-[694f344a.2ccd07-5] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  could not receive data from client: Connection reset by peer
-[694f3448.2ccd06-4] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  SSL error: unexpected eof while reading
-[694f3448.2ccd06-5] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  could not receive data from client: Connection reset by peer
-[694f344d.2ccd08-6] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  disconnection: session time: 0:17:36.671 user=connect_yw_user database=connect_yw_production host=10.21.52.34 port=52970
-[694f3450.2ccd16-4] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  SSL error: unexpected eof while reading
-[694f344d.2ccd09-6] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  disconnection: session time: 0:17:36.648 user=connect_yw_user database=connect_yw_production host=10.21.52.34 port=52982
-[694f3450.2ccd16-5] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  could not receive data from client: Connection reset by peer
-[694f344a.2ccd07-6] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  disconnection: session time: 0:17:39.591 user=connect_yw_user database=connect_yw_production host=10.21.52.34 port=52966
-[694f3448.2ccd06-6] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  disconnection: session time: 0:17:41.482 user=connect_yw_user database=connect_yw_production host=10.21.52.34 port=52950
-[694f3450.2ccd16-6] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.52.34,LOG:  disconnection: session time: 0:17:33.451 user=connect_yw_user database=connect_yw_production host=10.21.52.34 port=53026
-[694f387c.2cd2f5-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=38732
-[694f387c.2cd2f6-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=38744
-[694f387c.2cd2f7-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=38750
-[694f387c.2cd2f7-2] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f387c.2cd2f7-3] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f387c.2cd2f8-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=38752
-[694f387c.2cd2f8-2] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f387c.2cd2f8-3] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f387c.2cd2f7-4] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.006 user=postgres database=connect_yw_production host=10.20.85.224 port=38750
-[694f387c.2cd2f8-4] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.006 user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 host=10.20.85.224 port=38752
-2025-12-27 01:38:24.555 P00   INFO: archive-push command begin 2.55.1: [pg_wal/0000000100000041000000A6] --archive-async --archive-push-queue-max=5242880kB --compress-level=1 --compress-type=lz4 --exec-id=2937641-77f12523 --log-level-console=detail --log-level-file=off --log-level-stderr=warn --pg1-path=/pgdata/dpg-d41af09r0fns73c9i010-a --process-max=1 --repo1-host=dpg-d41af09r0fns73c9i010-a-pgbackrest --repo1-host-ca-file=/etc/pgbackrest/certs/ca.crt --repo1-host-cert-file=/etc/pgbackrest/certs/tls.crt --repo1-host-key-file=/etc/pgbackrest/certs/tls.key --repo1-host-type=tls --repo1-host-user=pgbackrest --spool-path=/pgdata/pgbackrest-async-spool --stanza=dpg-d41af09r0fns73c9i010-a
-2025-12-27 01:38:25.158 P00   INFO: pushed WAL file '0000000100000041000000A6' to the archive asynchronously
-2025-12-27 01:38:25.158 P00   INFO: archive-push command end: completed successfully (605ms)
-[694f38a5.2cd376-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=38952
-[694f38a5.2cd377-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=38954
-[694f38a5.2cd378-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=38980
-[694f38a5.2cd378-2] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f38a5.2cd378-3] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f38a5.2cd379-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=38992
-[694f38a5.2cd379-2] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f38a5.2cd379-3] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f38a5.2cd378-4] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.047 user=postgres database=connect_yw_production host=10.20.85.224 port=38980
-[694f38a5.2cd379-4] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.090 user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 host=10.20.85.224 port=38992
-[694f38b8.2cd38e-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=58820
-[694f38b8.2cd38f-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=58832
-[694f38b8.2cd390-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=58836
-[694f38b8.2cd390-2] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f38b8.2cd390-3] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f38b8.2cd391-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=58852
-[694f38b8.2cd391-2] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f38b8.2cd391-3] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f38b8.2cd390-4] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.006 user=postgres database=connect_yw_production host=10.20.85.224 port=58836
-[694f38b8.2cd391-4] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.005 user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 host=10.20.85.224 port=58852
-[694f38e1.2cd3b8-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=59866
-[694f38e1.2cd3b9-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=59868
-[694f38e1.2cd3c0-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=59874
-[694f38e1.2cd3c0-2] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f38e1.2cd3c0-3] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f38e1.2cd3c4-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=59884
-[694f38e1.2cd3c4-2] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f38e1.2cd3c4-3] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f38e1.2cd3c0-4] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.008 user=postgres database=connect_yw_production host=10.20.85.224 port=59874
-[694f38e1.2cd3c4-4] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.007 user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 host=10.20.85.224 port=59884
-[694f38f4.2cd3d0-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=46152
-[694f38f4.2cd3d1-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=46164
-[694f38f4.2cd3d2-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=46172
-[694f38f4.2cd3d2-2] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f38f4.2cd3d2-3] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f38f4.2cd3d3-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=46176
-[694f38f4.2cd3d3-2] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f38f4.2cd3d3-3] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f38f4.2cd3d2-4] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.006 user=postgres database=connect_yw_production host=10.20.85.224 port=46172
-[694f38f4.2cd3d3-4] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.006 user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 host=10.20.85.224 port=46176
-[694f38fd.2cd3dd-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=48750
-[694f38fd.2cd3dd-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f38fd.2cd3dd-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3901.2cd3e7-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=48766
-[694f3901.2cd3e7-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3901.2cd3e7-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3904.2cd3e9-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=58628
-[694f3905.2cd3ea-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=58640
-[694f3905.2cd3eb-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=58650
-[694f3905.2cd3ec-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=58656
-[694f3905.2cd3ed-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=58670
-[694f3905.2cd3eb-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3905.2cd3eb-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3905.2cd3ea-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3905.2cd3ea-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3904.2cd3e9-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3904.2cd3e9-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3905.2cd3ec-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3905.2cd3ec-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3905.2cd3ed-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3905.2cd3ed-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f390a.2cd3f7-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=58674
-[694f390a.2cd3f7-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f390a.2cd3f7-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f390b.2cd3f8-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=58678
-[694f390b.2cd3f8-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f390b.2cd3f8-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f391d.2cd403-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=46732
-[694f391d.2cd404-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=46746
-[694f391d.2cd405-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=46754
-[694f391d.2cd405-2] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f391d.2cd405-3] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f391d.2cd40f-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=46764
-[694f391d.2cd40f-2] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f391d.2cd40f-3] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f391d.2cd405-4] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.048 user=postgres database=connect_yw_production host=10.20.85.224 port=46754
-[694f391d.2cd40f-4] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.007 user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 host=10.20.85.224 port=46764
-[694f3930.2cd41b-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=33072
-[694f3930.2cd41c-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=33086
-[694f3930.2cd41d-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=33088
-[694f3930.2cd41d-2] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3930.2cd41d-3] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3930.2cd41e-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=33096
-[694f3930.2cd41e-2] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3930.2cd41e-3] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3930.2cd41d-4] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.007 user=postgres database=connect_yw_production host=10.20.85.224 port=33088
-[694f3930.2cd41e-4] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.006 user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 host=10.20.85.224 port=33096
-[694f3937.2cd428-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=39374
-[694f3937.2cd428-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3937.2cd428-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3937.2cd429-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=39376
-[694f3937.2cd429-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3937.2cd429-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3950.2cd447-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35042
-[694f3950.2cd447-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3950.2cd447-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3951.2cd448-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35046
-[694f3952.2cd449-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35058
-[694f3952.2cd44a-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35068
-[694f3952.2cd44b-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35082
-[694f3952.2cd44c-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35084
-[694f3952.2cd44d-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35094
-[694f3952.2cd44e-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35098
-[694f3952.2cd44f-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35106
-[694f3952.2cd450-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35110
-[694f3952.2cd451-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35112
-[694f3952.2cd452-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35124
-[694f3952.2cd453-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35126
-[694f3952.2cd454-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35140
-[694f3952.2cd455-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35146
-[694f3952.2cd456-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35158
-[694f3952.2cd457-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35166
-[694f3952.2cd458-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35180
-[694f3952.2cd459-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35192
-[694f3952.2cd45a-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35196
-[694f3952.2cd45b-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35202
-[694f3952.2cd45c-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35210
-[694f3952.2cd45d-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35214
-[694f3952.2cd45e-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35218
-[694f3952.2cd45f-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35220
-[694f3952.2cd460-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35230
-[694f3952.2cd461-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35232
-[694f3952.2cd462-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35240
-[694f3952.2cd463-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35242
-[694f3952.2cd464-1] user=[unknown],db=[unknown],app=[unknown],client=10.21.201.47,LOG:  connection received: host=10.21.201.47 port=35258
-[694f3951.2cd448-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3951.2cd448-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd452-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd452-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd44d-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd44d-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd45b-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd45b-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd44a-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd44a-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd44b-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd44b-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd449-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd449-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd464-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd464-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd44e-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd44e-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd456-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd456-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd451-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd453-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd451-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd453-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd44f-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd44f-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd450-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd450-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd454-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd454-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd457-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd457-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd463-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd463-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd44c-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd44c-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd45d-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd45d-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd459-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd459-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd460-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd462-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd458-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd462-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd458-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd460-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd45a-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd45a-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd455-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd455-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd45f-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd45f-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd45e-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd45e-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd461-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd461-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3952.2cd45c-2] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authenticated: identity="connect_yw_user" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3952.2cd45c-3] user=connect_yw_user,db=connect_yw_production,app=[unknown],client=10.21.201.47,LOG:  connection authorized: user=connect_yw_user database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3959.2cd465-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=55606
-[694f3959.2cd466-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=55620
-[694f3959.2cd470-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=55632
-[694f3959.2cd470-2] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3959.2cd470-3] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3959.2cd471-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=55640
-[692eaaa5.44-14237] user=,db=,app=,client=,LOG:  checkpoint starting: time
-[694f3959.2cd471-2] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3959.2cd471-3] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3959.2cd470-4] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.081 user=postgres database=connect_yw_production host=10.20.85.224 port=55632
-[694f3959.2cd471-4] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.077 user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 host=10.20.85.224 port=55640
-[692eaaa5.44-14238] user=,db=,app=,client=,LOG:  checkpoint complete: wrote 53 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 1 recycled; write=5.317 s, sync=0.005 s, total=5.336 s; sync files=38, longest=0.003 s, average=0.001 s; distance=16693 kB, estimate=16693 kB; lsn=41/A704D9C8, redo lsn=41/A704D938
-[694f396c.2cd47d-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=58430
-[694f396c.2cd47e-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=58446
-[694f396c.2cd47f-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=58456
-[694f396c.2cd47f-2] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f396c.2cd47f-3] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f396c.2cd480-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=58462
-[694f396c.2cd480-2] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f396c.2cd480-3] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f396c.2cd47f-4] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.042 user=postgres database=connect_yw_production host=10.20.85.224 port=58456
-[694f396c.2cd480-4] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.006 user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 host=10.20.85.224 port=58462
-[694f3995.2cd4a8-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=60512
-[694f3995.2cd4a9-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=60526
-[694f3995.2cd4b3-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=60532
-[694f3995.2cd4b3-2] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3995.2cd4b3-3] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3995.2cd4b4-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=60548
-[694f3995.2cd4b4-2] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3995.2cd4b4-3] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3995.2cd4b3-4] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.079 user=postgres database=connect_yw_production host=10.20.85.224 port=60532
-[694f3995.2cd4b4-4] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.085 user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 host=10.20.85.224 port=60548
-[694f39a8.2cd4c0-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=35000
-[694f39a8.2cd4c1-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=34998
-[694f39a8.2cd4c2-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=35008
-[694f39a8.2cd4c2-2] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f39a8.2cd4c2-3] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f39a8.2cd4c3-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=35022
-[694f39a8.2cd4c3-2] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f39a8.2cd4c3-3] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f39a8.2cd4c2-4] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.245 user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 host=10.20.85.224 port=35008
-[694f39a8.2cd4c3-4] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.007 user=postgres database=connect_yw_production host=10.20.85.224 port=35022
-2025-12-27 01:43:25.105 P00   INFO: archive-push command begin 2.55.1: [pg_wal/0000000100000041000000A7] --archive-async --archive-push-queue-max=5242880kB --compress-level=1 --compress-type=lz4 --exec-id=2938100-ec9ba457 --log-level-console=detail --log-level-file=off --log-level-stderr=warn --pg1-path=/pgdata/dpg-d41af09r0fns73c9i010-a --process-max=1 --repo1-host=dpg-d41af09r0fns73c9i010-a-pgbackrest --repo1-host-ca-file=/etc/pgbackrest/certs/ca.crt --repo1-host-cert-file=/etc/pgbackrest/certs/tls.crt --repo1-host-key-file=/etc/pgbackrest/certs/tls.key --repo1-host-type=tls --repo1-host-user=pgbackrest --spool-path=/pgdata/pgbackrest-async-spool --stanza=dpg-d41af09r0fns73c9i010-a
-2025-12-27 01:43:25.709 P00   INFO: pushed WAL file '0000000100000041000000A7' to the archive asynchronously
-2025-12-27 01:43:25.709 P00   INFO: archive-push command end: completed successfully (606ms)
-[694f39d1.2cd541-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=48958
-[694f39d1.2cd542-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=48966
-[694f39d1.2cd543-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=48982
-[694f39d1.2cd543-2] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f39d1.2cd543-3] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f39d1.2cd54d-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=48986
-[694f39d1.2cd54d-2] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f39d1.2cd54d-3] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f39d1.2cd543-4] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.008 user=postgres database=connect_yw_production host=10.20.85.224 port=48982
-[694f39d1.2cd54d-4] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.006 user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 host=10.20.85.224 port=48986
-[694f39e4.2cd559-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=48348
-[694f39e4.2cd55a-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=48358
-[694f39e4.2cd55b-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=48372
-[694f39e4.2cd55b-2] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f39e4.2cd55b-3] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f39e4.2cd55c-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=48388
-[694f39e4.2cd55c-2] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f39e4.2cd55c-3] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f39e4.2cd55b-4] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.077 user=postgres database=connect_yw_production host=10.20.85.224 port=48372
-[694f39e4.2cd55c-4] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.006 user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 host=10.20.85.224 port=48388
-[694f3a0d.2cd583-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=58264
-[694f3a0d.2cd584-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=58268
-[694f3a0d.2cd58e-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=58276
-[694f3a0d.2cd58e-2] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3a0d.2cd58e-3] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3a0d.2cd58f-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=58288
-[694f3a0d.2cd58f-2] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3a0d.2cd58f-3] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3a0d.2cd58e-4] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.005 user=postgres database=connect_yw_production host=10.20.85.224 port=58276
-[694f3a0d.2cd58f-4] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.062 user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 host=10.20.85.224 port=58288
-[694f3a20.2cd59b-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=42970
-[694f3a20.2cd59c-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=42978
-[694f3a20.2cd59d-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=42990
-[694f3a20.2cd59d-2] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3a20.2cd59d-3] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3a20.2cd59e-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=43004
-[694f3a20.2cd59e-2] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3a20.2cd59e-3] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3a20.2cd59d-4] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.095 user=postgres database=connect_yw_production host=10.20.85.224 port=42990
-[694f3a20.2cd59e-4] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.005 user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 host=10.20.85.224 port=43004
-[694f3a49.2cd5c5-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=41564
-[694f3a49.2cd5c6-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=41570
-[694f3a49.2cd5cd-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=41576
-[694f3a49.2cd5cd-2] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3a49.2cd5cd-3] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3a49.2cd5d1-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=41590
-[694f3a49.2cd5d1-2] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3a49.2cd5d1-3] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3a49.2cd5cd-4] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.088 user=postgres database=connect_yw_production host=10.20.85.224 port=41576
-[694f3a49.2cd5d1-4] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.007 user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 host=10.20.85.224 port=41590
-[694f3a5c.2cd5dd-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=44460
-[694f3a5c.2cd5de-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=44464
-[694f3a5c.2cd5df-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=44476
-[694f3a5c.2cd5df-2] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3a5c.2cd5df-3] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=connect_yw_production SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3a5c.2cd5e0-1] user=[unknown],db=[unknown],app=[unknown],client=10.20.85.224,LOG:  connection received: host=10.20.85.224 port=44490
-[694f3a5c.2cd5e0-2] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d41af09r0fns73c9i010-a/pg_hba.conf:88)
-[694f3a5c.2cd5e0-3] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  connection authorized: user=postgres database=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54 SSL enabled (protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384, bits=256)
-[694f3a5c.2cd5df-4] user=postgres,db=connect_yw_production,app=[unknown],client=10.20.85.224,LOG:  disconnection: session time: 0:00:03.007 user=postgres database=connect_yw_production host=10.20.85.224 port=44476
-[694f3a5c.2cd5e0-4] user=postgres,db=prisma_migrate_shadow_db_6f485609-83c7-4b98-9bfa-8d03c8065d54,app=[unknown],client=10.20.85.224,LOG:  disc
+
+Search
+Search
+
+Dec 29, 12:24 PM - 12:28 PM
+PST
+
+
+
+==> Downloading cache...
+==> Cloning from https://github.com/Abenezer1244/YWMESSAGING
+==> Checking out commit 06a45ac506c9d5bbaa4ae9e10bffe6680e290127 in branch main
+==> Downloaded 686MB in 3s. Extraction took 14s.
+==> Requesting Node.js version >=18.0.0
+==> Using Node.js version 25.2.1 via /opt/render/project/src/package.json
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Running build command 'npm ci --production=false && npm run build'...
+added 2214 packages, and audited 2217 packages in 46s
+296 packages are looking for funding
+  run `npm fund` for details
+18 vulnerabilities (6 low, 1 moderate, 11 high)
+To address issues that do not require attention, run:
+  npm audit fix
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+Run `npm audit` for details.
+> koinonia-sms@0.1.0 build
+> npm run build --workspaces
+> koinonia-sms-backend@0.1.0 build
+> prisma generate && tsc
+Prisma schema loaded from prisma/schema.prisma
+✔ Generated Prisma Client (v5.13.0) to ./node_modules/@prisma/client in 230ms
+Start using Prisma Client in Node.js (See: https://pris.ly/d/client)
+```
+import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient()
+```
+or start using Prisma Client at the edge (See: https://pris.ly/d/accelerate)
+```
+import { PrismaClient } from '@prisma/client/edge'
+const prisma = new PrismaClient()
+```
+See other ways of importing Prisma Client: http://pris.ly/d/importing-client
+┌────────────────────────────────────────────────────────────────┐
+│  Supercharge your Prisma Client with global database caching,  │
+│  scalable connection pooling and real-time database events.    │
+│  Explore Prisma Accelerate: https://pris.ly/cli/-accelerate    │
+│  Explore Prisma Pulse: https://pris.ly/cli/-pulse              │
+└────────────────────────────────────────────────────────────────┘
+src/lib/tenant-prisma.ts(257,39): error TS2339: Property 'tenant' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/services/phone-registry.service.ts(54,48): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/services/phone-registry.service.ts(70,41): error TS2339: Property 'tenant' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/services/phone-registry.service.ts(114,48): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/services/phone-registry.service.ts(130,26): error TS2339: Property 'tenant' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/services/phone-registry.service.ts(165,48): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/services/phone-registry.service.ts(206,41): error TS2339: Property 'tenant' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/services/phone-registry.service.ts(230,48): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/services/phone-registry.service.ts(256,47): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/services/phone-registry.service.ts(295,48): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/services/phone-registry.service.ts(317,33): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+npm error Lifecycle script `build` failed with error:
+npm error code 2
+npm error path /opt/render/project/src/backend
+npm error workspace koinonia-sms-backend@0.1.0
+npm error location /opt/render/project/src/backend
+npm error command failed
+npm error command sh -c prisma generate && tsc
+> koinonia-sms-frontend@0.1.0 build
+> tsc && npx vite build
+vite v7.1.12 building for production...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+transforming...
+✓ 2880 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                        1.30 kB │ gzip:   0.61 kB
+dist/assets/css/index-BlEd3H25.css                    87.56 kB │ gzip:  14.74 kB
+dist/assets/js/analytics-BjEJjmEs.js                   0.36 kB │ gzip:   0.23 kB
+dist/assets/js/billing-B8VHwF5e.js                     0.49 kB │ gzip:   0.23 kB
+dist/assets/js/themeColors-Cduerava.js                 0.52 kB │ gzip:   0.27 kB
+dist/assets/js/designTokens-BhFJIg83.js                0.53 kB │ gzip:   0.36 kB
+dist/assets/js/useBreakpoint-D_gF-sG6.js               0.59 kB │ gzip:   0.37 kB
+dist/assets/js/LineChartImpl-CiewmSrD.js               0.63 kB │ gzip:   0.40 kB
+dist/assets/js/BackButton-CD9BMhs9.js                  0.66 kB │ gzip:   0.45 kB
+dist/assets/js/messages-SG8SMC7_.js                    0.68 kB │ gzip:   0.38 kB
+dist/assets/js/BarChartImpl-ribzZB_-.js                0.72 kB │ gzip:   0.44 kB
+dist/assets/js/SoftButton-BT31kdh0.js                  0.89 kB │ gzip:   0.52 kB
+dist/assets/js/MobileTable-D0LwGODm.js                 2.99 kB │ gzip:   1.02 kB
+dist/assets/js/AnimatedBlobs-CcUmiRey.js               3.24 kB │ gzip:   1.09 kB
+dist/assets/js/TemplateFormModal-CHKBpnB4.js           3.64 kB │ gzip:   1.21 kB
+dist/assets/js/TemplatesPage-Cq_t8zxI.js               3.96 kB │ gzip:   1.59 kB
+dist/assets/js/LoginPage-CdgpJPfn.js                   4.38 kB │ gzip:   1.96 kB
+dist/assets/js/MessageHistoryPage-XJHn2aDS.js          5.03 kB │ gzip:   1.91 kB
+dist/assets/js/SendMessagePage-CxgAxDvj.js             5.10 kB │ gzip:   1.86 kB
+dist/assets/js/PrivacyPage-CQX7qSs6.js                 5.88 kB │ gzip:   1.55 kB
+dist/assets/js/SoftLayout-D9pgB24F.js                  6.08 kB │ gzip:   2.00 kB
+dist/assets/js/BlogPage-pOM1ye0Q.js                    6.10 kB │ gzip:   2.13 kB
+dist/assets/js/TermsPage-DZC6uQGt.js                   6.38 kB │ gzip:   1.87 kB
+dist/assets/js/BillingPage-BPuP1eDX.js                 6.62 kB │ gzip:   1.99 kB
+dist/assets/js/ContactPage-u3fCYE6i.js                 6.68 kB │ gzip:   1.91 kB
+dist/assets/js/CookiePolicyPage-CZZdBhTt.js            6.71 kB │ gzip:   1.75 kB
+dist/assets/js/AboutPage-7YTrDT82.js                   6.77 kB │ gzip:   2.11 kB
+dist/assets/js/CheckoutPage-B8rVcYck.js                7.09 kB │ gzip:   2.45 kB
+dist/assets/js/SubscribePage-DgDTm2PC.js               7.41 kB │ gzip:   2.48 kB
+dist/assets/js/BranchesPage-CxHR5yD3.js                7.47 kB │ gzip:   2.42 kB
+dist/assets/js/RegisterPage-Dr30YZHx.js                7.57 kB │ gzip:   2.51 kB
+dist/assets/js/ChatWidget-7xH0P2Ws.js                  8.08 kB │ gzip:   2.25 kB
+dist/assets/js/CareersPage-vyjEtXUr.js                 8.53 kB │ gzip:   2.40 kB
+dist/assets/js/SecurityPage-BKNEFX6a.js                9.10 kB │ gzip:   2.02 kB
+dist/assets/js/RecurringMessagesPage-30f-Vgb1.js       9.25 kB │ gzip:   2.81 kB
+dist/assets/js/react-stripe.esm-Bb9JIkK3.js           11.23 kB │ gzip:   4.20 kB
+dist/assets/js/PhoneNumberPurchaseModal-DO0JoCz0.js   12.10 kB │ gzip:   4.08 kB
+dist/assets/js/MembersPage-DKBXdEkp.js                13.10 kB │ gzip:   4.08 kB
+dist/assets/js/ConversationsPage-BD0JpbCr.js          18.28 kB │ gzip:   5.90 kB
+dist/assets/js/index.esm-BdG2FjqQ.js                  22.38 kB │ gzip:   8.28 kB
+dist/assets/js/focus-trap-react-Ch0l227q.js           25.80 kB │ gzip:   8.03 kB
+dist/assets/js/DashboardPage-CJChz489.js              26.09 kB │ gzip:   7.84 kB
+dist/assets/js/AnalyticsPage-YHC2x7MI.js              32.62 kB │ gzip:   9.85 kB
+dist/assets/js/AdminSettingsPage-BJYW780y.js          33.57 kB │ gzip:   8.26 kB
+dist/assets/js/vendor-utils-DZXJUmYg.js               47.35 kB │ gzip:  18.43 kB
+dist/assets/js/LandingPage-DqbUzzao.js                51.54 kB │ gzip:  10.25 kB
+dist/assets/js/vendor-ui-DmDBw7yB.js                 117.57 kB │ gzip:  37.95 kB
+dist/assets/js/vendor-react-GajVb7Yi.js              159.43 kB │ gzip:  51.99 kB
+dist/assets/js/index-BS7Ba6WZ.js                     208.63 kB │ gzip:  68.05 kB
+dist/assets/js/vendor-charts-D9m5HzY1.js             394.60 kB │ gzip: 102.47 kB
+✓ built in 17.96s
+==> Build failed 😞
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+
+==> Downloading cache...
+==> Cloning from https://github.com/Abenezer1244/YWMESSAGING
+==> Checking out commit 06a45ac506c9d5bbaa4ae9e10bffe6680e290127 in branch main
+==> Downloaded 519MB in 3s. Extraction took 11s.
+==> Using Node.js version 22.16.0 (default)
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Running build command 'npm install && npm run build'...
+up to date, audited 821 packages in 4s
+63 packages are looking for funding
+  run `npm fund` for details
+5 vulnerabilities (3 low, 2 high)
+To address issues that do not require attention, run:
+  npm audit fix
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+Run `npm audit` for details.
+> koinonia-sms-backend@0.1.0 build
+> prisma generate && tsc
+Prisma schema loaded from prisma/schema.prisma
+✔ Generated Prisma Client (v5.13.0) to ./node_modules/@prisma/client in 326ms
+Start using Prisma Client in Node.js (See: https://pris.ly/d/client)
+```
+import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient()
+```
+or start using Prisma Client at the edge (See: https://pris.ly/d/accelerate)
+```
+import { PrismaClient } from '@prisma/client/edge'
+const prisma = new PrismaClient()
+```
+See other ways of importing Prisma Client: http://pris.ly/d/importing-client
+┌────────────────────────────────────────────────────────────────┐
+│  Supercharge your Prisma Client with global database caching,  │
+│  scalable connection pooling and real-time database events.    │
+│  Explore Prisma Accelerate: https://pris.ly/cli/-accelerate    │
+│  Explore Prisma Pulse: https://pris.ly/cli/-pulse              │
+└────────────────────────────────────────────────────────────────┘
+src/lib/tenant-prisma.ts(257,39): error TS2339: Property 'tenant' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/services/phone-registry.service.ts(54,48): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/services/phone-registry.service.ts(70,41): error TS2339: Property 'tenant' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/services/phone-registry.service.ts(114,48): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/services/phone-registry.service.ts(130,26): error TS2339: Property 'tenant' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/services/phone-registry.service.ts(165,48): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/services/phone-registry.service.ts(206,41): error TS2339: Property 'tenant' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/services/phone-registry.service.ts(230,48): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/services/phone-registry.service.ts(256,47): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/services/phone-registry.service.ts(295,48): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/services/phone-registry.service.ts(317,33): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+npm error Lifecycle script `build` failed with error:
+npm error code 2
+npm error path /opt/render/project/src/backend
+npm error workspace koinonia-sms-backend@0.1.0
+npm error location /opt/render/project/src/backend
+npm error command failed
+npm error command sh -c prisma generate && tsc
+==> Build failed 😞
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys

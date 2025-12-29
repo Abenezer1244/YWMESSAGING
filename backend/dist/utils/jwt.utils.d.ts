@@ -5,6 +5,7 @@ export interface AccessTokenPayload {
 }
 export interface RefreshTokenPayload {
     adminId: string;
+    churchId: string;
 }
 export interface MFASessionTokenPayload {
     adminId: string;
@@ -17,7 +18,7 @@ export declare function generateAccessToken(adminId: string, churchId: string, r
 /**
  * Generate refresh token (long-lived: 7 days)
  */
-export declare function generateRefreshToken(adminId: string): string;
+export declare function generateRefreshToken(adminId: string, churchId: string): string;
 /**
  * Verify access token
  */

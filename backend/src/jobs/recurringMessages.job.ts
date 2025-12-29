@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import * as messageService from '../services/message.service.js';
 import * as recurringService from '../services/recurring.service.js';
 import { withJobLock } from '../services/lock.service.js';
+import { getTenantPrisma } from '../lib/tenant-prisma.js';
 
 const prisma = new PrismaClient();
 
@@ -30,11 +31,15 @@ export async function processRecurringMessages() {
 
       for (const recMessage of dueMessages) {
         try {
+          // Get tenant-specific Prisma client
+          const tenantId = recMessage.churchId;
+          const tenantPrisma = await getTenantPrisma(tenantId);
+
           // Parse target IDs
           const targetIds = recMessage.targetIds ? JSON.parse(recMessage.targetIds) : [];
 
           // Create and send message
-          const message = await messageService.createMessage(recMessage.churchId, {
+          const message = await messageService.createMessage(tenantId, tenantPrisma, {
             content: recMessage.content,
             targetType: recMessage.targetType as any,
             targetIds: targetIds.length > 0 ? targetIds : undefined,
@@ -44,6 +49,8 @@ export async function processRecurringMessages() {
 
           // Update nextSendAt
           await recurringService.updateNextSendAt(
+            tenantId,
+            tenantPrisma,
             recMessage.id,
             recMessage.frequency,
             recMessage.timeOfDay || '09:00',

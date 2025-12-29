@@ -1,18 +1,17 @@
 import { getBranches, createBranch, updateBranch, deleteBranch, } from '../services/branch.service.js';
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
 /**
- * GET /api/churches/:churchId/branches
+ * GET /api/branches
  */
 export async function listBranches(req, res) {
     try {
-        const { churchId } = req.params;
-        // Verify user has access to this church
-        if (req.user?.churchId !== churchId) {
-            res.status(403).json({ error: 'Unauthorized' });
+        const tenantId = req.tenantId;
+        const tenantPrisma = req.prisma;
+        // Verify tenant context is available
+        if (!tenantId || !tenantPrisma) {
+            res.status(401).json({ error: 'Unauthorized' });
             return;
         }
-        const branches = await getBranches(churchId);
+        const branches = await getBranches(tenantId, tenantPrisma);
         res.status(200).json({
             success: true,
             data: branches,
@@ -24,26 +23,18 @@ export async function listBranches(req, res) {
     }
 }
 /**
- * POST /api/churches/:churchId/branches
+ * POST /api/branches
  */
 export async function createBranchHandler(req, res) {
     try {
-        const { churchId } = req.params;
+        const tenantId = req.tenantId;
+        const tenantPrisma = req.prisma;
         const { name, address, phone, description } = req.body;
-        // DEBUG: Log authorization details
-        console.log('=== CREATE BRANCH DEBUG ===');
-        console.log('req.user:', req.user);
-        console.log('churchId from params:', churchId);
-        console.log('req.user?.churchId:', req.user?.churchId);
-        console.log('Match:', req.user?.churchId === churchId);
-        console.log('req.cookies:', Object.keys(req.cookies));
-        // Verify user has access to this church
-        if (req.user?.churchId !== churchId) {
-            console.log('AUTHORIZATION FAILED: churchId mismatch');
-            res.status(403).json({ error: 'Unauthorized' });
+        // Verify tenant context is available
+        if (!tenantId || !tenantPrisma) {
+            res.status(401).json({ error: 'Unauthorized' });
             return;
         }
-        console.log('AUTHORIZATION PASSED');
         // Validate required fields
         if (!name || typeof name !== 'string' || name.trim().length === 0) {
             res.status(400).json({ error: 'Branch name is required' });
@@ -55,7 +46,7 @@ export async function createBranchHandler(req, res) {
             phone: phone ? String(phone).trim() : undefined,
             description: description ? String(description).trim() : undefined,
         };
-        const branch = await createBranch(churchId, input);
+        const branch = await createBranch(tenantId, tenantPrisma, input);
         res.status(201).json({
             success: true,
             data: branch,
@@ -73,17 +64,12 @@ export async function createBranchHandler(req, res) {
 export async function updateBranchHandler(req, res) {
     try {
         const { branchId } = req.params;
+        const tenantId = req.tenantId;
+        const tenantPrisma = req.prisma;
         const { name, address, phone, description, isActive } = req.body;
-        // Verify user owns this branch
-        const branch = await prisma.branch.findUnique({
-            where: { id: branchId },
-        });
-        if (!branch) {
-            res.status(404).json({ error: 'Branch not found' });
-            return;
-        }
-        if (req.user?.churchId !== branch.churchId) {
-            res.status(403).json({ error: 'Unauthorized' });
+        // Verify tenant context is available
+        if (!tenantId || !tenantPrisma) {
+            res.status(401).json({ error: 'Unauthorized' });
             return;
         }
         const input = {
@@ -93,7 +79,7 @@ export async function updateBranchHandler(req, res) {
             ...(description !== undefined && { description: description ? String(description).trim() : undefined }),
             ...(isActive !== undefined && { isActive: Boolean(isActive) }),
         };
-        const updated = await updateBranch(branchId, branch.churchId, input);
+        const updated = await updateBranch(tenantId, tenantPrisma, branchId, input);
         res.status(200).json({
             success: true,
             data: updated,
@@ -110,19 +96,14 @@ export async function updateBranchHandler(req, res) {
 export async function deleteBranchHandler(req, res) {
     try {
         const { branchId } = req.params;
-        // Verify user owns this branch
-        const branch = await prisma.branch.findUnique({
-            where: { id: branchId },
-        });
-        if (!branch) {
-            res.status(404).json({ error: 'Branch not found' });
+        const tenantId = req.tenantId;
+        const tenantPrisma = req.prisma;
+        // Verify tenant context is available
+        if (!tenantId || !tenantPrisma) {
+            res.status(401).json({ error: 'Unauthorized' });
             return;
         }
-        if (req.user?.churchId !== branch.churchId) {
-            res.status(403).json({ error: 'Unauthorized' });
-            return;
-        }
-        const result = await deleteBranch(branchId, branch.churchId);
+        const result = await deleteBranch(tenantId, tenantPrisma, branchId);
         res.status(200).json({
             success: true,
             data: result,

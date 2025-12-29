@@ -1,9 +1,10 @@
+import { PrismaClient } from '@prisma/client';
 export interface CreateTemplateData {
     name: string;
     content: string;
     category: string;
 }
-export declare function getTemplates(churchId: string): Promise<{
+export declare function getTemplates(tenantId: string, tenantPrisma: PrismaClient): Promise<{
     id: string;
     churchId: string;
     name: string;
@@ -14,7 +15,7 @@ export declare function getTemplates(churchId: string): Promise<{
     createdAt: Date;
     updatedAt: Date;
 }[]>;
-export declare function createTemplate(churchId: string, data: CreateTemplateData): Promise<{
+export declare function createTemplate(tenantId: string, tenantPrisma: PrismaClient, data: CreateTemplateData): Promise<{
     id: string;
     churchId: string;
     name: string;
@@ -25,7 +26,7 @@ export declare function createTemplate(churchId: string, data: CreateTemplateDat
     createdAt: Date;
     updatedAt: Date;
 }>;
-export declare function updateTemplate(templateId: string, data: Partial<CreateTemplateData>): Promise<{
+export declare function updateTemplate(tenantId: string, tenantPrisma: PrismaClient, templateId: string, data: Partial<CreateTemplateData>): Promise<{
     id: string;
     churchId: string;
     name: string;
@@ -36,7 +37,7 @@ export declare function updateTemplate(templateId: string, data: Partial<CreateT
     createdAt: Date;
     updatedAt: Date;
 }>;
-export declare function deleteTemplate(templateId: string): Promise<{
+export declare function deleteTemplate(tenantId: string, tenantPrisma: PrismaClient, templateId: string): Promise<{
     id: string;
     churchId: string;
     name: string;
@@ -47,7 +48,7 @@ export declare function deleteTemplate(templateId: string): Promise<{
     createdAt: Date;
     updatedAt: Date;
 }>;
-export declare function incrementUsageCount(templateId: string): Promise<{
+export declare function incrementUsageCount(tenantId: string, tenantPrisma: PrismaClient, templateId: string): Promise<{
     id: string;
     churchId: string;
     name: string;

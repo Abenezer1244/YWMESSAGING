@@ -98,7 +98,7 @@ export async function loginHandler(req, res) {
         });
         // If MFA is enabled, require MFA verification
         if (mfaRecord?.mfaEnabled) {
-            const mfaSessionToken = generateMFASessionToken(result.adminId, result.churchId);
+            const mfaSessionToken = generateMFASessionToken(result.adminId, result.tenantId);
             res.status(200).json({
                 success: true,
                 mfaRequired: true,
@@ -179,7 +179,7 @@ export async function refreshToken(req, res) {
             res.status(401).json({ error: 'Invalid or expired refresh token' });
             return;
         }
-        const result = await refreshAccessToken(payload.adminId);
+        const result = await refreshAccessToken(payload.adminId, payload.churchId);
         // ✅ SECURITY: Determine cookie domain and sameSite based on actual request origin
         // Check hostname from request, supporting reverse proxy scenarios (X-Forwarded-Host header)
         const xForwardedHost = req.get('x-forwarded-host');
@@ -234,7 +234,12 @@ export async function getMe(req, res) {
             res.status(401).json({ error: 'Not authenticated' });
             return;
         }
-        const admin = await getAdmin(req.user.adminId);
+        const tenantId = req.tenantId;
+        if (!tenantId) {
+            res.status(401).json({ error: 'Tenant context missing' });
+            return;
+        }
+        const admin = await getAdmin(req.user.adminId, tenantId);
         if (!admin) {
             res.status(404).json({ error: 'Admin not found' });
             return;
@@ -345,7 +350,8 @@ export async function verifyMFAHandler(req, res) {
             res.status(401).json({ error: 'Invalid or expired MFA session token' });
             return;
         }
-        const { adminId, churchId } = payload;
+        const adminId = payload.adminId;
+        const tenantId = payload.churchId;
         // ✅ SECURITY: Verify TOTP code first
         let isValidCode = await mfaService.verifyTOTPCode(adminId, code);
         // If TOTP verification fails, try recovery code
@@ -356,19 +362,28 @@ export async function verifyMFAHandler(req, res) {
             res.status(400).json({ error: 'Invalid authentication code' });
             return;
         }
-        // ✅ SECURITY: Get admin data and church info
+        // ✅ SECURITY: Get admin data
         const admin = await prisma.admin.findUnique({
             where: { id: adminId },
-            include: { church: true },
         });
         if (!admin) {
             res.status(404).json({ error: 'Admin not found' });
             return;
         }
+        // Get church data
+        const church = await prisma.church.findUnique({
+            where: { id: tenantId },
+            select: {
+                id: true,
+                name: true,
+                subscriptionStatus: true,
+                trialEndsAt: true,
+            },
+        });
         // Generate final access and refresh tokens
         const { generateAccessToken, generateRefreshToken } = await import('../utils/jwt.utils.js');
-        const accessToken = generateAccessToken(adminId, churchId, admin.role);
-        const refreshToken = generateRefreshToken(adminId);
+        const accessToken = generateAccessToken(adminId, tenantId, admin.role);
+        const refreshToken = generateRefreshToken(adminId, tenantId);
         // ✅ SECURITY: Determine cookie domain and sameSite based on environment
         const xForwardedHost = req.get('x-forwarded-host');
         const hostname = xForwardedHost || req.hostname || req.get('host') || '';
@@ -413,10 +428,10 @@ export async function verifyMFAHandler(req, res) {
                     userRole: admin.userRole,
                 },
                 church: {
-                    id: admin.church.id,
-                    name: admin.church.name,
-                    email: admin.church.email,
-                    trialEndsAt: admin.church.trialEndsAt,
+                    id: church?.id || tenantId,
+                    name: church?.name || 'Church',
+                    subscriptionStatus: church?.subscriptionStatus || 'trial',
+                    trialEndsAt: church?.trialEndsAt || new Date(),
                 },
                 accessToken,
                 refreshToken,
@@ -438,6 +453,11 @@ export async function completeWelcome(req, res) {
             res.status(401).json({ error: 'Not authenticated' });
             return;
         }
+        const tenantId = req.tenantId;
+        if (!tenantId) {
+            res.status(401).json({ error: 'Tenant context missing' });
+            return;
+        }
         // ✅ SECURITY: Validate request body with Zod schema
         const validationResult = safeValidate(completeWelcomeSchema, req.body);
         if (!validationResult.success) {
@@ -446,8 +466,6 @@ export async function completeWelcome(req, res) {
         }
         const { userRole } = validationResult.data;
         // Update admin record
-        const { PrismaClient } = await import('@prisma/client');
-        const prisma = new PrismaClient();
         const updatedAdmin = await prisma.admin.update({
             where: { id: req.user.adminId },
             data: {

@@ -19,7 +19,6 @@ export type DLQCategory = 'SMS_SEND' | 'WEBHOOK_INBOUND' | 'SUBSCRIPTION_UPDATE'
 
 interface DLQEntry {
   category: DLQCategory;
-  churchId?: string;
   externalId?: string; // Message ID, webhook ID, etc.
   originalPayload: Record<string, any>;
   errorMessage: string;
@@ -51,7 +50,6 @@ export async function addToDLQ(entry: DLQEntry): Promise<string> {
     const dlqRecord = await prisma.deadLetterQueue.create({
       data: {
         category: entry.category,
-        churchId: entry.churchId,
         externalId: entry.externalId,
         originalPayload: entry.originalPayload as any,
         errorMessage: entry.errorMessage,
@@ -79,7 +77,6 @@ export async function addToDLQ(entry: DLQEntry): Promise<string> {
  */
 export async function listPendingDLQ(options?: {
   category?: DLQCategory;
-  churchId?: string;
   limit?: number;
   offset?: number;
 }) {
@@ -91,7 +88,6 @@ export async function listPendingDLQ(options?: {
       where: {
         status: 'PENDING',
         ...(options?.category && { category: options.category }),
-        ...(options?.churchId && { churchId: options.churchId }),
       },
       orderBy: { createdAt: 'asc' },
       take: limit,
@@ -101,7 +97,6 @@ export async function listPendingDLQ(options?: {
       where: {
         status: 'PENDING',
         ...(options?.category && { category: options.category }),
-        ...(options?.churchId && { churchId: options.churchId }),
       },
     }),
   ]);

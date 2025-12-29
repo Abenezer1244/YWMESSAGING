@@ -17,8 +17,8 @@ export function generateAccessToken(adminId, churchId, role) {
 /**
  * Generate refresh token (long-lived: 7 days)
  */
-export function generateRefreshToken(adminId) {
-    return jwt.sign({ adminId }, REFRESH_SECRET, { expiresIn: '7d' });
+export function generateRefreshToken(adminId, churchId) {
+    return jwt.sign({ adminId, churchId }, REFRESH_SECRET, { expiresIn: '7d' });
 }
 /**
  * Verify access token

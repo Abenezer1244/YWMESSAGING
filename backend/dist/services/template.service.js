@@ -1,14 +1,12 @@
-import { prisma } from '../lib/prisma.js';
-export async function getTemplates(churchId) {
-    return await prisma.messageTemplate.findMany({
-        where: { churchId },
+export async function getTemplates(tenantId, tenantPrisma) {
+    return await tenantPrisma.messageTemplate.findMany({
         orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
     });
 }
-export async function createTemplate(churchId, data) {
-    return await prisma.messageTemplate.create({
+export async function createTemplate(tenantId, tenantPrisma, data) {
+    return await tenantPrisma.messageTemplate.create({
         data: {
-            churchId,
+            churchId: tenantId,
             name: data.name,
             content: data.content,
             category: data.category,
@@ -16,19 +14,19 @@ export async function createTemplate(churchId, data) {
         },
     });
 }
-export async function updateTemplate(templateId, data) {
-    return await prisma.messageTemplate.update({
+export async function updateTemplate(tenantId, tenantPrisma, templateId, data) {
+    return await tenantPrisma.messageTemplate.update({
         where: { id: templateId },
         data,
     });
 }
-export async function deleteTemplate(templateId) {
-    return await prisma.messageTemplate.delete({
+export async function deleteTemplate(tenantId, tenantPrisma, templateId) {
+    return await tenantPrisma.messageTemplate.delete({
         where: { id: templateId },
     });
 }
-export async function incrementUsageCount(templateId) {
-    return await prisma.messageTemplate.update({
+export async function incrementUsageCount(tenantId, tenantPrisma, templateId) {
+    return await tenantPrisma.messageTemplate.update({
         where: { id: templateId },
         data: { usageCount: { increment: 1 } },
     });

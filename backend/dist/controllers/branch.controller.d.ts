@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 /**
- * GET /api/churches/:churchId/branches
+ * GET /api/branches
  */
 export declare function listBranches(req: Request, res: Response): Promise<void>;
 /**
- * POST /api/churches/:churchId/branches
+ * POST /api/branches
  */
 export declare function createBranchHandler(req: Request, res: Response): Promise<void>;
 /**

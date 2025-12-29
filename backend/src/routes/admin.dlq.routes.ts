@@ -49,7 +49,6 @@ router.get(
 
       const result = await dlqService.listPendingDLQ({
         category: category as any,
-        churchId: churchId as string,
         limit: limit ? parseInt(limit as string) : undefined,
         offset: offset ? parseInt(offset as string) : undefined,
       });

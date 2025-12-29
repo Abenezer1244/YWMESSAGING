@@ -1,3 +1,4 @@
+import { PrismaClient } from '@prisma/client';
 export interface UpdateChurchInput {
     name?: string;
     email?: string;
@@ -14,9 +15,9 @@ export interface UpdateChurchInput {
     vertical?: string;
 }
 /**
- * Update church profile
+ * Update church profile (registry)
  */
-export declare function updateChurchProfile(churchId: string, input: UpdateChurchInput): Promise<{
+export declare function updateChurchProfile(tenantId: string, input: UpdateChurchInput): Promise<{
     id: string;
     name: string;
     email: string;
@@ -65,33 +66,33 @@ export declare function updateChurchProfile(churchId: string, input: UpdateChurc
     updatedAt: Date;
 }>;
 /**
- * Get church profile (including 10DLC fields) - cached for 1 hour
+ * Get church profile (registry) - cached for 1 hour
  */
-export declare function getChurchProfile(churchId: string): Promise<{} | null>;
+export declare function getChurchProfile(tenantId: string): Promise<{} | null>;
 /**
- * Get all co-admins for a church - cached for 30 minutes
+ * Get all co-admins for a tenant - cached for 30 minutes
  */
-export declare function getCoAdmins(churchId: string): Promise<{}>;
+export declare function getCoAdmins(tenantId: string, tenantPrisma: PrismaClient): Promise<{}>;
 /**
  * Remove a co-admin
  */
-export declare function removeCoAdmin(churchId: string, adminId: string): Promise<void>;
+export declare function removeCoAdmin(tenantId: string, tenantPrisma: PrismaClient, adminId: string): Promise<void>;
 /**
  * Log an activity
  */
-export declare function logActivity(churchId: string, adminId: string, action: string, details?: Record<string, any>): Promise<{
-    churchId: string;
+export declare function logActivity(tenantId: string, adminId: string, action: string, details?: Record<string, any>): Promise<{
+    tenantId: string;
     adminId: string;
     action: string;
     details: string;
     timestamp: Date;
 } | undefined>;
 /**
- * Get activity logs for a church
+ * Get activity logs for a tenant
  */
-export declare function getActivityLogs(churchId: string, limit?: number, offset?: number): Promise<{
+export declare function getActivityLogs(tenantId: string, limit?: number, offset?: number): Promise<{
     id: string;
-    churchId: string;
+    tenantId: string;
     action: string;
     details: string;
     timestamp: Date;
@@ -100,11 +101,11 @@ export declare function getActivityLogs(churchId: string, limit?: number, offset
 /**
  * Get activity log count
  */
-export declare function getActivityLogCount(churchId: string): Promise<number>;
+export declare function getActivityLogCount(tenantId: string): Promise<number>;
 /**
  * Invite a co-admin (create new co-admin account)
  */
-export declare function inviteCoAdmin(churchId: string, email: string, firstName: string, lastName: string): Promise<{
+export declare function inviteCoAdmin(tenantId: string, tenantPrisma: PrismaClient, email: string, firstName: string, lastName: string): Promise<{
     admin: {
         id: string;
         email: string;

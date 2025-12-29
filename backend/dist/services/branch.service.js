@@ -1,16 +1,13 @@
-import { prisma } from '../lib/prisma.js';
 import { getPlan } from '../config/plans.js';
 /**
- * Get all branches for a church
+ * Get all branches for a tenant
  */
-export async function getBranches(churchId) {
-    const branches = await prisma.branch.findMany({
-        where: { churchId },
+export async function getBranches(tenantId, tenantPrisma) {
+    const branches = await tenantPrisma.branch.findMany({
         orderBy: { createdAt: 'asc' },
     });
     return branches.map((branch) => ({
         id: branch.id,
-        churchId: branch.churchId,
         name: branch.name,
         address: branch.address,
         phone: branch.phone,
@@ -24,20 +21,18 @@ export async function getBranches(churchId) {
  * Create a new branch
  * Checks plan limit first (defaults to STARTER plan for new churches)
  */
-export async function createBranch(churchId, input) {
+export async function createBranch(tenantId, tenantPrisma, input) {
     // Get current branch count
-    const currentCount = await prisma.branch.count({
-        where: { churchId },
-    });
+    const currentCount = await tenantPrisma.branch.count();
     // Get plan limits (defaulting to starter)
     const limits = getPlan('starter');
     // Check limit
     if (currentCount >= limits.branches) {
         throw new Error(`Branch limit reached (${limits.branches}). Upgrade your plan to add more branches.`);
     }
-    const branch = await prisma.branch.create({
+    const branch = await tenantPrisma.branch.create({
         data: {
-            churchId,
+            churchId: tenantId,
             name: input.name,
             address: input.address,
             phone: input.phone,
@@ -47,7 +42,6 @@ export async function createBranch(churchId, input) {
     });
     return {
         id: branch.id,
-        churchId: branch.churchId,
         name: branch.name,
         address: branch.address,
         phone: branch.phone,
@@ -60,15 +54,15 @@ export async function createBranch(churchId, input) {
 /**
  * Update a branch
  */
-export async function updateBranch(branchId, churchId, input) {
-    // Verify branch belongs to church
-    const branch = await prisma.branch.findFirst({
-        where: { id: branchId, churchId },
+export async function updateBranch(tenantId, tenantPrisma, branchId, input) {
+    // Verify branch exists
+    const branch = await tenantPrisma.branch.findUnique({
+        where: { id: branchId },
     });
     if (!branch) {
         throw new Error('Branch not found');
     }
-    const updated = await prisma.branch.update({
+    const updated = await tenantPrisma.branch.update({
         where: { id: branchId },
         data: {
             ...(input.name && { name: input.name }),
@@ -80,7 +74,6 @@ export async function updateBranch(branchId, churchId, input) {
     });
     return {
         id: updated.id,
-        churchId: updated.churchId,
         name: updated.name,
         address: updated.address,
         phone: updated.phone,
@@ -94,23 +87,21 @@ export async function updateBranch(branchId, churchId, input) {
  * Delete a branch
  * Cannot delete if it's the only branch
  */
-export async function deleteBranch(branchId, churchId) {
-    // Verify branch belongs to church
-    const branch = await prisma.branch.findFirst({
-        where: { id: branchId, churchId },
+export async function deleteBranch(tenantId, tenantPrisma, branchId) {
+    // Verify branch exists
+    const branch = await tenantPrisma.branch.findUnique({
+        where: { id: branchId },
     });
     if (!branch) {
         throw new Error('Branch not found');
     }
-    // Count branches for this church
-    const branchCount = await prisma.branch.count({
-        where: { churchId },
-    });
+    // Count branches for this tenant
+    const branchCount = await tenantPrisma.branch.count();
     if (branchCount <= 1) {
         throw new Error('Cannot delete the only branch. A church must have at least one branch.');
     }
     // Delete branch (cascade handled by Prisma)
-    await prisma.branch.delete({
+    await tenantPrisma.branch.delete({
         where: { id: branchId },
     });
     return {

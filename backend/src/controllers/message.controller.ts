@@ -19,9 +19,11 @@ const prisma = new PrismaClient();
  */
 export async function sendMessage(req: Request, res: Response) {
   try {
-    const churchId = req.user?.churchId;
+    const tenantId = req.tenantId;
+    const tenantPrisma = req.prisma;
+    const churchId = tenantId; // Alias for compatibility
 
-    if (!churchId) {
+    if (!tenantId || !tenantPrisma) {
       return res.status(401).json({
         success: false,
         error: 'Unauthorized',
@@ -41,7 +43,7 @@ export async function sendMessage(req: Request, res: Response) {
     const { content, targetType, targetIds } = validationResult.data as any;
 
     // Create message record
-    const message = await messageService.createMessage(churchId, {
+    const message = await messageService.createMessage(tenantId, tenantPrisma, {
       content,
       targetType,
       targetIds,
@@ -53,7 +55,7 @@ export async function sendMessage(req: Request, res: Response) {
         const recipients = await prisma.messageRecipient.findMany({
           where: { messageId: message.id },
         });
-        websocketService.broadcastMessageSent(churchId, message.id, recipients.length);
+        websocketService.broadcastMessageSent(churchId!, message.id, recipients.length);
       } catch (error) {
         console.error('Failed to emit WebSocket message:sent event:', error);
       }
@@ -105,7 +107,7 @@ export async function sendMessage(req: Request, res: Response) {
                 () => telnyxService.sendSMS(
                   decryptedPhone,
                   content,
-                  churchId
+                  churchId!
                 ),
                 `sendSMS:${recipient.id}`,
                 TELNYX_RETRY_CONFIG
@@ -137,7 +139,7 @@ export async function sendMessage(req: Request, res: Response) {
         }
 
         // Update message stats
-        await messageService.updateMessageStats(message.id);
+        await messageService.updateMessageStats(tenantId, tenantPrisma, message.id);
         console.log(`✅ Message queued for delivery: ${message.id}`);
       } catch (error: any) {
         console.error('❌ Error queueing message batch:', error.message);
@@ -162,9 +164,10 @@ export async function sendMessage(req: Request, res: Response) {
  */
 export async function getMessageHistory(req: Request, res: Response) {
   try {
-    const churchId = req.user?.churchId;
+    const tenantId = req.tenantId;
+    const tenantPrisma = req.prisma;
 
-    if (!churchId) {
+    if (!tenantId || !tenantPrisma) {
       return res.status(401).json({
         success: false,
         error: 'Unauthorized',
@@ -183,7 +186,7 @@ export async function getMessageHistory(req: Request, res: Response) {
 
     const { page, limit, status } = validationResult.data as any;
 
-    const result = await messageService.getMessageHistory(churchId, {
+    const result = await messageService.getMessageHistory(tenantId, tenantPrisma, {
       page,
       limit,
       status,
@@ -210,19 +213,20 @@ export async function getMessageHistory(req: Request, res: Response) {
 export async function getMessageDetails(req: Request, res: Response) {
   try {
     const { messageId } = req.params;
-    const churchId = req.user?.churchId;
+    const tenantId = req.tenantId;
+    const tenantPrisma = req.prisma;
 
-    if (!churchId) {
+    if (!tenantId || !tenantPrisma) {
       return res.status(401).json({
         success: false,
         error: 'Unauthorized',
       });
     }
 
-    // SECURITY: Verify message belongs to user's church before returning details
-    const message = await messageService.getMessageDetails(messageId);
+    // SECURITY: Verify message belongs to user's tenant before returning details
+    const message = await messageService.getMessageDetails(tenantId, tenantPrisma, messageId);
 
-    if (!message || message.churchId !== churchId) {
+    if (!message || message.churchId !== tenantId) {
       return res.status(403).json({
         success: false,
         error: 'Access denied',
@@ -298,7 +302,11 @@ export async function handleTelnyxWebhook(req: Request, res: Response) {
 
     if (status) {
       // Update recipient status
-      await messageService.updateRecipientStatus(recipient.id, status, recipient.message.id, {
+      const tenantId = recipient.message.churchId;
+      const { getTenantPrisma } = await import('../lib/tenant-prisma.js');
+      const tenantPrisma = await getTenantPrisma(tenantId);
+
+      await messageService.updateRecipientStatus(tenantId, tenantPrisma, recipient.id, status, recipient.message.id, {
         failureReason: payload.error_message || undefined,
       });
 

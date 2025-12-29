@@ -1,3 +1,4 @@
+import { PrismaClient } from '@prisma/client';
 export interface CreateRecurringMessageData {
     name: string;
     content: string;
@@ -7,7 +8,7 @@ export interface CreateRecurringMessageData {
     dayOfWeek?: number;
     timeOfDay: string;
 }
-export declare function getRecurringMessages(churchId: string): Promise<{
+export declare function getRecurringMessages(tenantId: string, tenantPrisma: PrismaClient): Promise<{
     id: string;
     churchId: string;
     name: string;
@@ -22,7 +23,7 @@ export declare function getRecurringMessages(churchId: string): Promise<{
     createdAt: Date;
     updatedAt: Date;
 }[]>;
-export declare function createRecurringMessage(churchId: string, data: CreateRecurringMessageData): Promise<{
+export declare function createRecurringMessage(tenantId: string, tenantPrisma: PrismaClient, data: CreateRecurringMessageData): Promise<{
     id: string;
     churchId: string;
     name: string;
@@ -37,7 +38,7 @@ export declare function createRecurringMessage(churchId: string, data: CreateRec
     createdAt: Date;
     updatedAt: Date;
 }>;
-export declare function updateRecurringMessage(messageId: string, data: Partial<CreateRecurringMessageData>): Promise<{
+export declare function updateRecurringMessage(tenantId: string, tenantPrisma: PrismaClient, messageId: string, data: Partial<CreateRecurringMessageData>): Promise<{
     id: string;
     churchId: string;
     name: string;
@@ -52,7 +53,7 @@ export declare function updateRecurringMessage(messageId: string, data: Partial<
     createdAt: Date;
     updatedAt: Date;
 }>;
-export declare function deleteRecurringMessage(messageId: string): Promise<{
+export declare function deleteRecurringMessage(tenantId: string, tenantPrisma: PrismaClient, messageId: string): Promise<{
     id: string;
     churchId: string;
     name: string;
@@ -67,7 +68,7 @@ export declare function deleteRecurringMessage(messageId: string): Promise<{
     createdAt: Date;
     updatedAt: Date;
 }>;
-export declare function toggleRecurringMessage(messageId: string, isActive: boolean): Promise<{
+export declare function toggleRecurringMessage(tenantId: string, tenantPrisma: PrismaClient, messageId: string, isActive: boolean): Promise<{
     id: string;
     churchId: string;
     name: string;
@@ -82,7 +83,7 @@ export declare function toggleRecurringMessage(messageId: string, isActive: bool
     createdAt: Date;
     updatedAt: Date;
 }>;
-export declare function updateNextSendAt(messageId: string, frequency: string, timeOfDay: string, dayOfWeek?: number): Promise<{
+export declare function updateNextSendAt(tenantId: string, tenantPrisma: PrismaClient, messageId: string, frequency: string, timeOfDay: string, dayOfWeek?: number): Promise<{
     id: string;
     churchId: string;
     name: string;

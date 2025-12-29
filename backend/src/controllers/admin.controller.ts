@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { AccessTokenPayload } from '../utils/jwt.utils.js';
 import {
   updateChurchProfile,
@@ -12,8 +11,7 @@ import {
   getActivityLogCount,
 } from '../services/admin.service.js';
 import * as telnyxService from '../services/telnyx.service.js';
-
-const prisma = new PrismaClient();
+import { getTenantPrisma, getRegistryPrisma } from '../lib/tenant-prisma.js';
 
 declare global {
   namespace Express {
@@ -29,12 +27,12 @@ declare global {
  */
 export async function getProfileHandler(req: Request, res: Response) {
   try {
-    const churchId = req.user?.churchId;
-    if (!churchId) {
+    const tenantId = (req as any).tenantId;
+    if (!tenantId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const profile = await getChurchProfile(churchId);
+    const profile = await getChurchProfile(tenantId);
     res.json(profile);
   } catch (error) {
     console.error('Failed to get profile:', error);
@@ -49,13 +47,14 @@ export async function getProfileHandler(req: Request, res: Response) {
  */
 export async function getDeliveryTierStatusHandler(req: Request, res: Response) {
   try {
-    const churchId = req.user?.churchId;
-    if (!churchId) {
+    const tenantId = (req as any).tenantId;
+    if (!tenantId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const church = await prisma.church.findUnique({
-      where: { id: churchId },
+    const registryPrisma = getRegistryPrisma();
+    const church = await registryPrisma.church.findUnique({
+      where: { id: tenantId },
       select: {
         wantsPremiumDelivery: true,
         dlcStatus: true,
@@ -128,8 +127,8 @@ export async function getDeliveryTierStatusHandler(req: Request, res: Response) 
  */
 export async function updateProfileHandler(req: Request, res: Response) {
   try {
-    const churchId = req.user?.churchId;
-    if (!churchId) {
+    const tenantId = (req as any).tenantId;
+    if (!tenantId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
@@ -151,7 +150,7 @@ export async function updateProfileHandler(req: Request, res: Response) {
       vertical,
     } = req.body;
 
-    const updated = await updateChurchProfile(churchId, {
+    const updated = await updateChurchProfile(tenantId, {
       name,
       email,
       description,
@@ -170,7 +169,7 @@ export async function updateProfileHandler(req: Request, res: Response) {
     });
 
     // Log activity
-    await logActivity(churchId, req.user?.adminId || '', 'Update Profile', {
+    await logActivity(tenantId, req.user?.adminId || '', 'Update Profile', {
       name,
       email,
       ein,
@@ -183,24 +182,25 @@ export async function updateProfileHandler(req: Request, res: Response) {
     // If church wants shared brand, skip 10DLC registration
 
     const has10DLCFields = ein && brandPhoneNumber && streetAddress && city && state && postalCode;
+    const registryPrisma = getRegistryPrisma();
 
     if (wantsPremiumDelivery === false && updated.dlcStatus === 'pending') {
       // Church explicitly chose shared brand - set status and skip 10DLC
-      console.log(`📊 Church ${churchId} selected shared brand delivery (65%)`);
-      await prisma.church.update({
-        where: { id: churchId },
+      console.log(`📊 Tenant ${tenantId} selected shared brand delivery (65%)`);
+      await registryPrisma.church.update({
+        where: { id: tenantId },
         data: { dlcStatus: 'shared_brand' },
       });
     } else if (wantsPremiumDelivery === true && has10DLCFields && updated.telnyxPhoneNumber) {
       // Church opted-in to premium 10DLC and has all required fields
       console.log(
-        `🔔 Triggering 10DLC registration for church ${churchId} with phone ${updated.telnyxPhoneNumber}`
+        `🔔 Triggering 10DLC registration for tenant ${tenantId} with phone ${updated.telnyxPhoneNumber}`
       );
       try {
         // CRITICAL FIX: Verify database persistence before triggering async job
         // Fetch fresh church record to ensure all 10DLC fields persisted
-        const freshChurch = await prisma.church.findUnique({
-          where: { id: churchId },
+        const freshChurch = await registryPrisma.church.findUnique({
+          where: { id: tenantId },
           select: {
             ein: true,
             brandPhoneNumber: true,
@@ -216,8 +216,8 @@ export async function updateProfileHandler(req: Request, res: Response) {
         if (freshChurch?.ein && freshChurch?.brandPhoneNumber && freshChurch?.streetAddress &&
             freshChurch?.city && freshChurch?.state && freshChurch?.postalCode) {
           const { registerPersonal10DLCAsync } = await import('../jobs/10dlc-registration.js');
-          registerPersonal10DLCAsync(churchId, updated.telnyxPhoneNumber).catch((err: any) => {
-            console.error(`⚠️ Failed to start 10DLC registration for church ${churchId}:`, err);
+          registerPersonal10DLCAsync(tenantId, updated.telnyxPhoneNumber).catch((err: any) => {
+            console.error(`⚠️ Failed to start 10DLC registration for tenant ${tenantId}:`, err);
             // Don't fail the request, just log it
           });
         } else {
@@ -250,12 +250,13 @@ export async function updateProfileHandler(req: Request, res: Response) {
  */
 export async function getCoAdminsHandler(req: Request, res: Response) {
   try {
-    const churchId = req.user?.churchId;
-    if (!churchId) {
+    const tenantId = (req as any).tenantId;
+    if (!tenantId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const coAdmins = await getCoAdmins(churchId);
+    const tenantPrisma = await getTenantPrisma(tenantId);
+    const coAdmins = await getCoAdmins(tenantId, tenantPrisma);
     res.json(coAdmins);
   } catch (error) {
     console.error('Failed to get co-admins:', error);
@@ -269,8 +270,8 @@ export async function getCoAdminsHandler(req: Request, res: Response) {
  */
 export async function removeCoAdminHandler(req: Request, res: Response) {
   try {
-    const churchId = req.user?.churchId;
-    if (!churchId) {
+    const tenantId = (req as any).tenantId;
+    if (!tenantId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
@@ -280,10 +281,11 @@ export async function removeCoAdminHandler(req: Request, res: Response) {
       return res.status(400).json({ error: 'Admin ID required' });
     }
 
-    await removeCoAdmin(churchId, adminId);
+    const tenantPrisma = await getTenantPrisma(tenantId);
+    await removeCoAdmin(tenantId, tenantPrisma, adminId);
 
     // Log activity
-    await logActivity(churchId, req.user?.adminId || '', 'Remove Co-Admin', {
+    await logActivity(tenantId, req.user?.adminId || '', 'Remove Co-Admin', {
       adminId,
     });
 
@@ -303,8 +305,8 @@ export async function removeCoAdminHandler(req: Request, res: Response) {
  */
 export async function inviteCoAdminHandler(req: Request, res: Response) {
   try {
-    const churchId = req.user?.churchId;
-    if (!churchId) {
+    const tenantId = (req as any).tenantId;
+    if (!tenantId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
@@ -320,10 +322,11 @@ export async function inviteCoAdminHandler(req: Request, res: Response) {
       return res.status(400).json({ error: 'Invalid email format' });
     }
 
-    const result = await inviteCoAdmin(churchId, email, firstName, lastName);
+    const tenantPrisma = await getTenantPrisma(tenantId);
+    const result = await inviteCoAdmin(tenantId, tenantPrisma, email, firstName, lastName);
 
     // Log activity
-    await logActivity(churchId, req.user?.adminId || '', 'Invite Co-Admin', {
+    await logActivity(tenantId, req.user?.adminId || '', 'Invite Co-Admin', {
       email,
       firstName,
       lastName,
@@ -355,8 +358,8 @@ export async function inviteCoAdminHandler(req: Request, res: Response) {
  */
 export async function getActivityLogsHandler(req: Request, res: Response) {
   try {
-    const churchId = req.user?.churchId;
-    if (!churchId) {
+    const tenantId = (req as any).tenantId;
+    if (!tenantId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
@@ -365,8 +368,8 @@ export async function getActivityLogsHandler(req: Request, res: Response) {
     const offset = (page - 1) * limit;
 
     const [logs, total] = await Promise.all([
-      getActivityLogs(churchId, limit, offset),
-      getActivityLogCount(churchId),
+      getActivityLogs(tenantId, limit, offset),
+      getActivityLogCount(tenantId),
     ]);
 
     res.json({
@@ -390,14 +393,14 @@ export async function getActivityLogsHandler(req: Request, res: Response) {
  */
 export async function logActivityHandler(req: Request, res: Response) {
   try {
-    const churchId = req.user?.churchId;
-    if (!churchId) {
+    const tenantId = (req as any).tenantId;
+    if (!tenantId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
     const { action, details } = req.body;
 
-    await logActivity(churchId, req.user?.adminId || '', action, details);
+    await logActivity(tenantId, req.user?.adminId || '', action, details);
 
     res.json({ success: true });
   } catch (error) {
@@ -412,8 +415,8 @@ export async function logActivityHandler(req: Request, res: Response) {
  */
 export async function linkPhoneNumberHandler(req: Request, res: Response) {
   try {
-    const churchId = req.user?.churchId;
-    if (!churchId) {
+    const tenantId = (req as any).tenantId;
+    if (!tenantId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
@@ -430,13 +433,14 @@ export async function linkPhoneNumberHandler(req: Request, res: Response) {
     }
 
     const formattedPhone = `+1${normalizedPhone.slice(-10)}`;
+    const registryPrisma = getRegistryPrisma();
 
-    // Check if number already linked to another church
-    const existingChurch = await prisma.church.findFirst({
+    // Check if number already linked to another tenant
+    const existingTenant = await registryPrisma.church.findFirst({
       where: { telnyxPhoneNumber: formattedPhone },
     });
 
-    if (existingChurch && existingChurch.id !== churchId) {
+    if (existingTenant && existingTenant.id !== tenantId) {
       return res.status(400).json({ error: 'Phone number already linked to another church' });
     }
 
@@ -446,7 +450,7 @@ export async function linkPhoneNumberHandler(req: Request, res: Response) {
       const webhookUrl = `${process.env.BACKEND_URL || 'https://api.koinoniasms.com'}/api/webhooks/telnyx/mms`;
       const webhook = await telnyxService.createWebhook(webhookUrl);
       webhookId = webhook.id;
-      console.log(`✅ Webhook auto-created for church ${churchId}: ${webhookId}`);
+      console.log(`✅ Webhook auto-created for tenant ${tenantId}: ${webhookId}`);
 
       // Try to link the number to the messaging profile
       try {
@@ -463,16 +467,16 @@ export async function linkPhoneNumberHandler(req: Request, res: Response) {
       // User can manually create it if needed
     }
 
-    // Get current church state to check delivery preference
-    const church = await prisma.church.findUnique({
-      where: { id: churchId },
+    // Get current tenant state to check delivery preference
+    const tenant = await registryPrisma.church.findUnique({
+      where: { id: tenantId },
       select: { wantsPremiumDelivery: true },
     });
 
-    // Update church with phone number and webhook ID
+    // Update tenant with phone number and webhook ID
     // Initialize 10DLC fields: start with shared brand for immediate use
-    const updated = await prisma.church.update({
-      where: { id: churchId },
+    const updated = await registryPrisma.church.update({
+      where: { id: tenantId },
       data: {
         telnyxPhoneNumber: formattedPhone,
         telnyxVerified: true,
@@ -480,7 +484,7 @@ export async function linkPhoneNumberHandler(req: Request, res: Response) {
         telnyxPurchasedAt: new Date(),
         // 10DLC: Start with shared brand for 60-70% delivery
         usingSharedBrand: true,
-        dlcStatus: church?.wantsPremiumDelivery ? 'pending' : 'shared_brand',
+        dlcStatus: tenant?.wantsPremiumDelivery ? 'pending' : 'shared_brand',
         dlcNextCheckAt: new Date(Date.now() + 12 * 60 * 60 * 1000), // Check in 12 hours
         deliveryRate: 0.65, // 65% with shared brand
       },
@@ -494,24 +498,24 @@ export async function linkPhoneNumberHandler(req: Request, res: Response) {
       },
     });
 
-    // Only trigger 10DLC registration if church opted-in to premium delivery
-    if (church?.wantsPremiumDelivery) {
+    // Only trigger 10DLC registration if tenant opted-in to premium delivery
+    if (tenant?.wantsPremiumDelivery) {
       try {
         // Import the background job function
         const { registerPersonal10DLCAsync } = await import('../jobs/10dlc-registration.js');
-        registerPersonal10DLCAsync(churchId, formattedPhone).catch((err: any) => {
-          console.error(`⚠️ Failed to start 10DLC registration for church ${churchId}:`, err);
+        registerPersonal10DLCAsync(tenantId, formattedPhone).catch((err: any) => {
+          console.error(`⚠️ Failed to start 10DLC registration for tenant ${tenantId}:`, err);
           // Don't fail the request, just log it
         });
       } catch (error) {
         console.error('⚠️ Could not import 10DLC job, skipping async registration:', error);
       }
     } else {
-      console.log(`📊 Phone linked but church ${churchId} on shared brand delivery - skipping 10DLC registration`);
+      console.log(`📊 Phone linked but tenant ${tenantId} on shared brand delivery - skipping 10DLC registration`);
     }
 
     // Log activity
-    await logActivity(churchId, req.user?.adminId || '', 'Link Phone Number', {
+    await logActivity(tenantId, req.user?.adminId || '', 'Link Phone Number', {
       phoneNumber: formattedPhone,
       webhookId: webhookId || 'manual',
     });

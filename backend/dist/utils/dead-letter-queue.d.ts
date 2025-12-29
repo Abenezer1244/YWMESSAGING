@@ -13,7 +13,6 @@
 export type DLQCategory = 'SMS_SEND' | 'WEBHOOK_INBOUND' | 'SUBSCRIPTION_UPDATE' | 'PAYMENT_PROCESS';
 interface DLQEntry {
     category: DLQCategory;
-    churchId?: string;
     externalId?: string;
     originalPayload: Record<string, any>;
     errorMessage: string;
@@ -45,7 +44,6 @@ export declare function addToDLQ(entry: DLQEntry): Promise<string>;
  */
 export declare function listPendingDLQ(options?: {
     category?: DLQCategory;
-    churchId?: string;
     limit?: number;
     offset?: number;
 }): Promise<{

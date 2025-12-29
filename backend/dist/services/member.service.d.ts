@@ -1,3 +1,4 @@
+import { PrismaClient } from '@prisma/client';
 export interface CreateMemberData {
     firstName: string;
     lastName: string;
@@ -15,7 +16,7 @@ export interface UpdateMemberData {
 /**
  * Get all members with pagination and search
  */
-export declare function getMembers(options?: {
+export declare function getMembers(tenantId: string, tenantPrisma: PrismaClient, options?: {
     page?: number;
     limit?: number;
     search?: string;
@@ -39,7 +40,7 @@ export declare function getMembers(options?: {
 /**
  * Add single member
  */
-export declare function addMember(data: CreateMemberData): Promise<{
+export declare function addMember(tenantId: string, tenantPrisma: PrismaClient, data: CreateMemberData): Promise<{
     id: any;
     firstName: any;
     lastName: any;
@@ -55,7 +56,7 @@ export declare function addMember(data: CreateMemberData): Promise<{
  * Before: 500 queries (2-5 per member in loop)
  * After: 3 queries (1 for fetch existing, 1 for create members, 1 for success)
  */
-export declare function importMembers(membersData: Array<{
+export declare function importMembers(tenantId: string, tenantPrisma: PrismaClient, membersData: Array<{
     firstName: string;
     lastName: string;
     phone: string;
@@ -71,7 +72,7 @@ export declare function importMembers(membersData: Array<{
 /**
  * Update member
  */
-export declare function updateMember(memberId: string, data: UpdateMemberData): Promise<{
+export declare function updateMember(tenantId: string, tenantPrisma: PrismaClient, memberId: string, data: UpdateMemberData): Promise<{
     id: string;
     firstName: string;
     lastName: string;
@@ -83,7 +84,7 @@ export declare function updateMember(memberId: string, data: UpdateMemberData): 
 /**
  * Delete a member
  */
-export declare function deleteMember(memberId: string): Promise<{
+export declare function deleteMember(tenantId: string, tenantPrisma: PrismaClient, memberId: string): Promise<{
     id: string;
     firstName: string;
     lastName: string;

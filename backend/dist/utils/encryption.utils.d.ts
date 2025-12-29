@@ -29,4 +29,16 @@ export declare function decryptPhoneSafe(phoneData: string): string;
  * Returns the decrypted email if encrypted, or the original email if already plain text
  */
 export declare function decryptEmailSafe(emailData: string): string;
+/**
+ * Generate token for various purposes (invitations, password resets, etc)
+ */
+export declare function generateToken(lengthBytes?: number): string;
+/**
+ * Create HMAC signature for webhook verification
+ */
+export declare function createSignature(message: string, secret: string): string;
+/**
+ * Verify HMAC signature with constant-time comparison
+ */
+export declare function verifySignature(message: string, signature: string, secret: string): boolean;
 //# sourceMappingURL=encryption.utils.d.ts.map

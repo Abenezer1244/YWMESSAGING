@@ -1,11 +1,12 @@
 import * as templateService from '../services/template.service.js';
 export async function getTemplates(req, res) {
     try {
-        const churchId = req.user?.churchId;
-        if (!churchId) {
+        const tenantId = req.tenantId;
+        const tenantPrisma = req.prisma;
+        if (!tenantId || !tenantPrisma) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
-        const templates = await templateService.getTemplates(churchId);
+        const templates = await templateService.getTemplates(tenantId, tenantPrisma);
         res.json(templates);
     }
     catch (error) {
@@ -15,15 +16,16 @@ export async function getTemplates(req, res) {
 }
 export async function createTemplate(req, res) {
     try {
-        const churchId = req.user?.churchId;
-        if (!churchId) {
+        const tenantId = req.tenantId;
+        const tenantPrisma = req.prisma;
+        if (!tenantId || !tenantPrisma) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
         const { name, content, category } = req.body;
         if (!name || !content || !category) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
-        const template = await templateService.createTemplate(churchId, {
+        const template = await templateService.createTemplate(tenantId, tenantPrisma, {
             name,
             content,
             category,
@@ -37,9 +39,14 @@ export async function createTemplate(req, res) {
 }
 export async function updateTemplate(req, res) {
     try {
+        const tenantId = req.tenantId;
+        const tenantPrisma = req.prisma;
+        if (!tenantId || !tenantPrisma) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
         const { templateId } = req.params;
         const { name, content, category } = req.body;
-        const template = await templateService.updateTemplate(templateId, {
+        const template = await templateService.updateTemplate(tenantId, tenantPrisma, templateId, {
             name,
             content,
             category,
@@ -53,8 +60,13 @@ export async function updateTemplate(req, res) {
 }
 export async function deleteTemplate(req, res) {
     try {
+        const tenantId = req.tenantId;
+        const tenantPrisma = req.prisma;
+        if (!tenantId || !tenantPrisma) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
         const { templateId } = req.params;
-        await templateService.deleteTemplate(templateId);
+        await templateService.deleteTemplate(tenantId, tenantPrisma, templateId);
         res.json({ success: true });
     }
     catch (error) {

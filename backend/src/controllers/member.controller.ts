@@ -11,7 +11,7 @@ export async function listMembers(req: Request, res: Response) {
     const tenantId = req.tenantId;
     const tenantPrisma = req.prisma;
     const page = Math.max(1, req.query.page ? parseInt(req.query.page as string) : 1);
-    const limit = Math.min(10000, req.query.limit ? parseInt(req.query.limit as string) : 50);
+    const limit = Math.min(10000, req.query.limit ? parseInt(req.query.limit as string) : 25);
     const search = req.query.search as string | undefined;
 
     console.log(`[listMembers] GET REQUEST: page=${page}, limit=${limit}, search=${search}`);

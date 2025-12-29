@@ -5,13 +5,14 @@ import { checkLimit } from '../config/plans.js';
  */
 export async function checkBranchLimit(req, res, next) {
     try {
-        const churchId = req.user?.churchId;
-        if (!churchId) {
+        const tenantId = req.tenantId;
+        const tenantPrisma = req.prisma;
+        if (!tenantId || !tenantPrisma) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
-        const usage = await getUsage(churchId);
-        const plan = await getCurrentPlan(churchId);
-        const onTrial = await isOnTrial(churchId);
+        const usage = await getUsage(tenantId, tenantPrisma);
+        const plan = await getCurrentPlan(tenantId);
+        const onTrial = await isOnTrial(tenantId);
         if (!onTrial && plan !== 'trial' && !checkLimit(plan, 'branches', usage.branches)) {
             return res.status(402).json({
                 error: 'Branch limit reached for your plan',
@@ -31,13 +32,14 @@ export async function checkBranchLimit(req, res, next) {
  */
 export async function checkMemberLimit(req, res, next) {
     try {
-        const churchId = req.user?.churchId;
-        if (!churchId) {
+        const tenantId = req.tenantId;
+        const tenantPrisma = req.prisma;
+        if (!tenantId || !tenantPrisma) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
-        const usage = await getUsage(churchId);
-        const plan = await getCurrentPlan(churchId);
-        const onTrial = await isOnTrial(churchId);
+        const usage = await getUsage(tenantId, tenantPrisma);
+        const plan = await getCurrentPlan(tenantId);
+        const onTrial = await isOnTrial(tenantId);
         if (!onTrial && plan !== 'trial' && !checkLimit(plan, 'members', usage.members)) {
             return res.status(402).json({
                 error: 'Member limit reached for your plan',
@@ -57,13 +59,14 @@ export async function checkMemberLimit(req, res, next) {
  */
 export async function checkMessageLimit(req, res, next) {
     try {
-        const churchId = req.user?.churchId;
-        if (!churchId) {
+        const tenantId = req.tenantId;
+        const tenantPrisma = req.prisma;
+        if (!tenantId || !tenantPrisma) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
-        const usage = await getUsage(churchId);
-        const plan = await getCurrentPlan(churchId);
-        const onTrial = await isOnTrial(churchId);
+        const usage = await getUsage(tenantId, tenantPrisma);
+        const plan = await getCurrentPlan(tenantId);
+        const onTrial = await isOnTrial(tenantId);
         if (!onTrial &&
             plan !== 'trial' && !checkLimit(plan, 'messagesPerMonth', usage.messagesThisMonth)) {
             return res.status(402).json({
@@ -85,13 +88,14 @@ export async function checkMessageLimit(req, res, next) {
  */
 export async function checkCoAdminLimit(req, res, next) {
     try {
-        const churchId = req.user?.churchId;
-        if (!churchId) {
+        const tenantId = req.tenantId;
+        const tenantPrisma = req.prisma;
+        if (!tenantId || !tenantPrisma) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
-        const usage = await getUsage(churchId);
-        const plan = await getCurrentPlan(churchId);
-        const onTrial = await isOnTrial(churchId);
+        const usage = await getUsage(tenantId, tenantPrisma);
+        const plan = await getCurrentPlan(tenantId);
+        const onTrial = await isOnTrial(tenantId);
         if (!onTrial && plan !== 'trial' && !checkLimit(plan, 'coAdmins', usage.coAdmins)) {
             return res.status(402).json({
                 error: 'Co-admin limit reached for your plan',

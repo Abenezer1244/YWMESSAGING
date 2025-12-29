@@ -24,7 +24,7 @@ export function MembersPage() {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [deletingMemberId, setDeletingMemberId] = useState<string | null>(null);
 
-  const limit = 50;
+  const limit = 25;
   const pages = Math.ceil(total / limit);
 
   const loadMembers = useCallback(async (pageNum: number = 1, updateTotal: boolean = true) => {

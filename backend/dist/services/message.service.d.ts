@@ -1,3 +1,4 @@
+import { PrismaClient } from '@prisma/client';
 export interface ResolveRecipientsOptions {
     targetType: 'individual' | 'all';
     targetIds?: string[];
@@ -11,18 +12,18 @@ export interface CreateMessageData {
  * Resolve recipients based on target type
  * Returns unique opted-in members by phone number
  */
-export declare function resolveRecipients(churchId: string, options: ResolveRecipientsOptions): Promise<Array<{
+export declare function resolveRecipients(tenantId: string, tenantPrisma: PrismaClient, options: ResolveRecipientsOptions): Promise<Array<{
     id: string;
     phone: string;
 }>>;
 /**
  * Create message record
  */
-export declare function createMessage(churchId: string, data: CreateMessageData): Promise<any>;
+export declare function createMessage(tenantId: string, tenantPrisma: PrismaClient, data: CreateMessageData): Promise<any>;
 /**
  * Get message history with pagination
  */
-export declare function getMessageHistory(churchId: string, options?: {
+export declare function getMessageHistory(tenantId: string, tenantPrisma: PrismaClient, options?: {
     page?: number;
     limit?: number;
     status?: string;
@@ -49,16 +50,16 @@ export declare function getMessageHistory(churchId: string, options?: {
 /**
  * Get single message details with recipients
  */
-export declare function getMessageDetails(messageId: string): Promise<any>;
+export declare function getMessageDetails(tenantId: string, tenantPrisma: PrismaClient, messageId: string): Promise<any>;
 /**
  * Update message delivery stats
  */
-export declare function updateMessageStats(messageId: string): Promise<void>;
+export declare function updateMessageStats(tenantId: string, tenantPrisma: PrismaClient, messageId: string): Promise<void>;
 /**
  * Update recipient delivery status
  * Accepts messageId to avoid redundant database fetch
  */
-export declare function updateRecipientStatus(recipientId: string, status: 'delivered' | 'failed', messageId: string, data?: {
+export declare function updateRecipientStatus(tenantId: string, tenantPrisma: PrismaClient, recipientId: string, status: 'delivered' | 'failed', messageId: string, data?: {
     failureReason?: string;
 }): Promise<void>;
 //# sourceMappingURL=message.service.d.ts.map

@@ -248,46 +248,33 @@ export async function getTenantPrisma(tenantId: string): Promise<PrismaClient> {
 // ============================================================================
 
 /**
- * Fetch tenant connection info from registry database
+ * Fetch tenant connection info from registry database (MVP: uses default database)
  */
 async function getTenantConnectionInfo(tenantId: string): Promise<TenantConnectionInfo> {
+  // MVP: Uses default DATABASE_URL for all tenants
+  // In production, registry database would store per-tenant connection strings
   const registryPrisma = getRegistryPrisma();
 
-  // Validate tenant exists and is active
-  const tenant = await registryPrisma.tenant.findUnique({
+  // Validate tenant exists
+  const tenant = await registryPrisma.church.findUnique({
     where: { id: tenantId },
     select: {
       id: true,
-      databaseUrl: true,
-      databaseHost: true,
-      databasePort: true,
-      databaseName: true,
-      status: true,
-      tenantSchemaVersion: true,
     },
   });
 
   if (!tenant) {
-    throw new Error(`Tenant ${tenantId} not found in registry`);
-  }
-
-  // Decrypt database URL
-  let databaseUrl: string;
-  try {
-    databaseUrl = decryptDatabaseUrl(tenant.databaseUrl);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to decrypt database URL: ${message}`);
+    throw new Error(`Tenant ${tenantId} not found`);
   }
 
   return {
     tenantId: tenant.id,
-    databaseUrl,
-    databaseHost: tenant.databaseHost,
-    databasePort: tenant.databasePort,
-    databaseName: tenant.databaseName,
-    status: tenant.status as 'active' | 'suspended' | 'archived' | 'deleted',
-    schemaVersion: tenant.tenantSchemaVersion,
+    databaseUrl: process.env.DATABASE_URL || '',
+    databaseHost: process.env.DATABASE_HOST || 'localhost',
+    databasePort: parseInt(process.env.DATABASE_PORT || '5432'),
+    databaseName: process.env.DATABASE_NAME || 'koinonia',
+    status: 'active',
+    schemaVersion: '1.0.0',
   };
 }
 

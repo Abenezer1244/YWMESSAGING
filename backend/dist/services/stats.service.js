@@ -139,7 +139,7 @@ async function getBranchStatsUncached(churchId) {
       SELECT
         b.id as branch_id,
         COUNT(DISTINCT m.id) as message_count,
-        SUM(CASE WHEN mr.status = 'delivered' THEN 1 ELSE 0 END) as delivered_count
+        COALESCE(SUM(CASE WHEN mr.status = 'delivered' THEN 1 ELSE 0 END), 0) as delivered_count
       FROM "Branch" b
       LEFT JOIN "Message" m ON m."churchId" = b."churchId"
       LEFT JOIN "MessageRecipient" mr ON mr."messageId" = m.id

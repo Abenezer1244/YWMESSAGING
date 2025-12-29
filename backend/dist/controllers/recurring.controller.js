@@ -1,11 +1,12 @@
 import * as recurringService from '../services/recurring.service.js';
 export async function getRecurringMessages(req, res) {
     try {
-        const churchId = req.user?.churchId;
-        if (!churchId) {
+        const tenantId = req.tenantId;
+        const tenantPrisma = req.prisma;
+        if (!tenantId || !tenantPrisma) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
-        const messages = await recurringService.getRecurringMessages(churchId);
+        const messages = await recurringService.getRecurringMessages(tenantId, tenantPrisma);
         res.json(messages);
     }
     catch (error) {
@@ -15,15 +16,16 @@ export async function getRecurringMessages(req, res) {
 }
 export async function createRecurringMessage(req, res) {
     try {
-        const churchId = req.user?.churchId;
-        if (!churchId) {
+        const tenantId = req.tenantId;
+        const tenantPrisma = req.prisma;
+        if (!tenantId || !tenantPrisma) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
         const { name, content, targetType, targetIds, frequency, dayOfWeek, timeOfDay } = req.body;
         if (!name || !content || !targetType || !frequency || !timeOfDay) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
-        const message = await recurringService.createRecurringMessage(churchId, {
+        const message = await recurringService.createRecurringMessage(tenantId, tenantPrisma, {
             name,
             content,
             targetType,
@@ -41,9 +43,14 @@ export async function createRecurringMessage(req, res) {
 }
 export async function updateRecurringMessage(req, res) {
     try {
+        const tenantId = req.tenantId;
+        const tenantPrisma = req.prisma;
+        if (!tenantId || !tenantPrisma) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
         const { messageId } = req.params;
         const { name, content, targetType, targetIds, frequency, dayOfWeek, timeOfDay } = req.body;
-        const message = await recurringService.updateRecurringMessage(messageId, {
+        const message = await recurringService.updateRecurringMessage(tenantId, tenantPrisma, messageId, {
             name,
             content,
             targetType,
@@ -61,8 +68,13 @@ export async function updateRecurringMessage(req, res) {
 }
 export async function deleteRecurringMessage(req, res) {
     try {
+        const tenantId = req.tenantId;
+        const tenantPrisma = req.prisma;
+        if (!tenantId || !tenantPrisma) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
         const { messageId } = req.params;
-        await recurringService.deleteRecurringMessage(messageId);
+        await recurringService.deleteRecurringMessage(tenantId, tenantPrisma, messageId);
         res.json({ success: true });
     }
     catch (error) {
@@ -72,12 +84,17 @@ export async function deleteRecurringMessage(req, res) {
 }
 export async function toggleRecurringMessage(req, res) {
     try {
+        const tenantId = req.tenantId;
+        const tenantPrisma = req.prisma;
+        if (!tenantId || !tenantPrisma) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
         const { messageId } = req.params;
         const { isActive } = req.body;
         if (typeof isActive !== 'boolean') {
             return res.status(400).json({ error: 'isActive must be a boolean' });
         }
-        const message = await recurringService.toggleRecurringMessage(messageId, isActive);
+        const message = await recurringService.toggleRecurringMessage(tenantId, tenantPrisma, messageId, isActive);
         res.json(message);
     }
     catch (error) {

@@ -19,6 +19,7 @@ export interface AccessTokenPayload {
 
 export interface RefreshTokenPayload {
   adminId: string;
+  churchId: string;
 }
 
 export interface MFASessionTokenPayload {
@@ -40,9 +41,9 @@ export function generateAccessToken(adminId: string, churchId: string, role: str
 /**
  * Generate refresh token (long-lived: 7 days)
  */
-export function generateRefreshToken(adminId: string): string {
+export function generateRefreshToken(adminId: string, churchId: string): string {
   return jwt.sign(
-    { adminId },
+    { adminId, churchId },
     REFRESH_SECRET,
     { expiresIn: '7d' }
   );

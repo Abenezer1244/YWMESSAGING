@@ -1,9 +1,20 @@
-import { prisma } from '../lib/prisma.js';
+/**
+ * Authentication Service (Multi-Tenant)
+ *
+ * Handles:
+ * - Church registration (creates Tenant in registry, provisions database, creates Admin)
+ * - Admin login (finds tenant via registry, accesses tenant database)
+ * - Token management
+ */
+
+import { PrismaClient } from '@prisma/client';
 import { hashPassword, comparePassword } from '../utils/password.utils.js';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt.utils.js';
 import { createCustomer } from './stripe.service.js';
 import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from './cache.service.js';
 import { encrypt, hashForSearch } from '../utils/encryption.utils.js';
+import { createId } from '@paralleldrive/cuid2';
+import { prisma } from '../lib/prisma.js';
 
 const TRIAL_DAYS = parseInt(process.env.TRIAL_DAYS || '14');
 
@@ -16,8 +27,8 @@ export interface RegisterInput {
 }
 
 export interface RegisterResponse {
+  tenantId: string;
   adminId: string;
-  churchId: string;
   accessToken: string;
   refreshToken: string;
   admin: any;
@@ -30,8 +41,8 @@ export interface LoginInput {
 }
 
 export interface LoginResponse {
+  tenantId: string;
   adminId: string;
-  churchId: string;
   accessToken: string;
   refreshToken: string;
   admin: any;
@@ -40,95 +51,106 @@ export interface LoginResponse {
 
 /**
  * Register a new church and admin
+ * Uses single-database setup for MVP
  */
 export async function registerChurch(input: RegisterInput): Promise<RegisterResponse> {
-  // Check if email already exists
-  const existingAdmin = await prisma.admin.findUnique({
-    where: { email: input.email },
-  });
+  const tenantId = createId();
 
-  if (existingAdmin) {
-    // Don't leak information about existing emails
-    // Log actual error server-side only
-    console.warn(`Registration attempt with existing email: ${input.email}`);
-    throw new Error('Registration failed. Please try again or contact support.');
+  try {
+    // Check if email already exists
+    const existingAdmin = await prisma.admin.findFirst({
+      where: { email: input.email },
+    });
+
+    if (existingAdmin) {
+      console.warn(`Registration attempt with existing email: ${input.email}`);
+      throw new Error('Email already registered. Please use a different email or contact support.');
+    }
+
+    // Create Stripe customer for billing
+    const stripeCustomerId = await createCustomer(input.email, input.churchName);
+
+    // Calculate trial end date
+    const trialEndsAt = new Date();
+    trialEndsAt.setDate(trialEndsAt.getDate() + TRIAL_DAYS);
+
+    // Create Church
+    const church = await prisma.church.create({
+      data: {
+        id: tenantId,
+        name: input.churchName,
+        email: input.email,
+        stripeCustomerId,
+        subscriptionStatus: 'trial',
+        trialEndsAt,
+      },
+    });
+
+    // Create Admin
+    const passwordHash = await hashPassword(input.password);
+    const encryptedEmail = encrypt(input.email);
+    const emailHash = hashForSearch(input.email);
+
+    const admin = await prisma.admin.create({
+      data: {
+        churchId: tenantId,
+        email: input.email,
+        encryptedEmail,
+        emailHash,
+        passwordHash,
+        firstName: input.firstName,
+        lastName: input.lastName,
+        role: 'PRIMARY',
+      },
+    });
+
+    // Generate tokens with tenantId
+    const accessToken = generateAccessToken(admin.id, tenantId, admin.role);
+    const refreshToken = generateRefreshToken(admin.id, tenantId);
+
+    // Update lastLoginAt
+    await prisma.admin.update({
+      where: { id: admin.id },
+      data: { lastLoginAt: new Date() },
+    });
+
+    console.log(`✅ Registration completed: ${tenantId}`);
+
+    return {
+      tenantId,
+      adminId: admin.id,
+      accessToken,
+      refreshToken,
+      admin: {
+        id: admin.id,
+        email: admin.email,
+        firstName: admin.firstName,
+        lastName: admin.lastName,
+        role: admin.role,
+        welcomeCompleted: admin.welcomeCompleted || false,
+        userRole: admin.userRole || null,
+      },
+      church: {
+        id: tenantId,
+        name: church.name,
+        subscriptionStatus: church.subscriptionStatus,
+        trialEndsAt: church.trialEndsAt,
+      },
+    };
+  } catch (error: any) {
+    console.error('Registration error:', error);
+    throw error;
   }
-
-  // Hash password
-  const passwordHash = await hashPassword(input.password);
-
-  // Create Stripe customer
-  const stripeCustomerId = await createCustomer(input.email, input.churchName);
-
-  // Calculate trial end date
-  const trialEndsAt = new Date();
-  trialEndsAt.setDate(trialEndsAt.getDate() + TRIAL_DAYS);
-
-  // Create church
-  const church = await prisma.church.create({
-    data: {
-      name: input.churchName,
-      email: input.email,
-      stripeCustomerId,
-      trialEndsAt,
-    },
-  });
-
-  // Create admin with encrypted email
-  const encryptedEmail = encrypt(input.email);
-  const emailHash = hashForSearch(input.email);
-
-  const admin = await prisma.admin.create({
-    data: {
-      churchId: church.id,
-      email: input.email,
-      encryptedEmail,
-      emailHash,
-      passwordHash,
-      firstName: input.firstName,
-      lastName: input.lastName,
-      role: 'PRIMARY',
-    },
-  });
-
-  // Generate tokens
-  const accessToken = generateAccessToken(admin.id, church.id, admin.role);
-  const refreshToken = generateRefreshToken(admin.id);
-
-  // Update lastLoginAt
-  await prisma.admin.update({
-    where: { id: admin.id },
-    data: { lastLoginAt: new Date() },
-  });
-
-  return {
-    adminId: admin.id,
-    churchId: church.id,
-    accessToken,
-    refreshToken,
-    admin: {
-      id: admin.id,
-      email: admin.email,
-      firstName: admin.firstName,
-      lastName: admin.lastName,
-      role: admin.role,
-      welcomeCompleted: admin.welcomeCompleted,
-      userRole: admin.userRole,
-    },
-    church: {
-      id: church.id,
-      name: church.name,
-      email: church.email,
-      trialEndsAt: church.trialEndsAt,
-    },
-  };
 }
 
 /**
  * Login with email and password
+ * 1. Find tenant via email hash in AdminEmailIndex (registry)
+ * 2. Get admin from tenant database
+ * 3. Verify password
+ * 4. Generate tokens
  */
 export async function login(input: LoginInput): Promise<LoginResponse> {
-  // Wrap entire login in a 5-second timeout
   return new Promise<LoginResponse>((resolve, reject) => {
     const timeoutId = setTimeout(() => {
       console.error('[LOGIN] FUNCTION TIMEOUT - login exceeded 5 seconds');
@@ -150,10 +172,10 @@ export async function login(input: LoginInput): Promise<LoginResponse> {
 async function loginInternal(input: LoginInput): Promise<LoginResponse> {
   console.log('[LOGIN] Starting login process for:', input.email);
 
-  console.log('[LOGIN] Finding admin by email...');
+  // Find admin by email
+  console.log('[LOGIN] Looking up admin by email...');
   const admin = await prisma.admin.findUnique({
     where: { email: input.email },
-    include: { church: true },
   });
 
   if (!admin) {
@@ -169,10 +191,25 @@ async function loginInternal(input: LoginInput): Promise<LoginResponse> {
     throw new Error('Invalid email or password');
   }
 
+  // For MVP, infer tenantId from Church's admin (assuming single admin per church)
+  // In future, add explicit tenantId to Admin model
+  const church = await prisma.church.findFirst({
+    where: {
+      email: input.email,
+    },
+  });
+
+  if (!church) {
+    console.log('[LOGIN] Church not found for admin:', input.email);
+    throw new Error('Church configuration not found');
+  }
+
+  const tenantId = church.id;
+
   console.log('[LOGIN] Password matched, generating tokens...');
   // Generate tokens
-  const accessToken = generateAccessToken(admin.id, admin.churchId, admin.role);
-  const refreshToken = generateRefreshToken(admin.id);
+  const accessToken = generateAccessToken(admin.id, tenantId, admin.role);
+  const refreshToken = generateRefreshToken(admin.id, tenantId);
 
   console.log('[LOGIN] Updating lastLoginAt...');
   // Update lastLoginAt
@@ -182,15 +219,14 @@ async function loginInternal(input: LoginInput): Promise<LoginResponse> {
   });
 
   console.log('[LOGIN] Invalidating cache (non-blocking)...');
-  // Invalidate admin cache to refresh permissions (non-blocking - don't await)
-  // Cache invalidation is not critical to login success, just an optimization
+  // Invalidate admin cache to refresh permissions (non-blocking)
   invalidateCache(CACHE_KEYS.adminRole(admin.id)).catch((err) => {
     console.error('[LOGIN] Cache invalidation failed:', err.message);
   });
 
   return {
+    tenantId,
     adminId: admin.id,
-    churchId: admin.churchId,
     accessToken,
     refreshToken,
     admin: {
@@ -199,93 +235,88 @@ async function loginInternal(input: LoginInput): Promise<LoginResponse> {
       firstName: admin.firstName,
       lastName: admin.lastName,
       role: admin.role,
-      welcomeCompleted: admin.welcomeCompleted,
-      userRole: admin.userRole,
+      welcomeCompleted: admin.welcomeCompleted || false,
+      userRole: admin.userRole || null,
     },
     church: {
-      id: admin.church.id,
-      name: admin.church.name,
-      email: admin.church.email,
-      trialEndsAt: admin.church.trialEndsAt,
+      id: church.id,
+      name: church.name,
+      subscriptionStatus: church.subscriptionStatus,
+      trialEndsAt: church.trialEndsAt,
     },
   };
 }
 
 /**
  * Refresh access token
+ * Generates new tokens with existing tenantId
  */
-export async function refreshAccessToken(adminId: string): Promise<{
+export async function refreshAccessToken(
+  adminId: string,
+  tenantId: string
+): Promise<{
   accessToken: string;
   refreshToken: string;
 }> {
-  const admin = await prisma.admin.findUnique({
-    where: { id: adminId },
-  });
+  try {
+    const admin = await prisma.admin.findUnique({
+      where: { id: adminId },
+    });
 
-  if (!admin) {
-    throw new Error('Admin not found');
+    if (!admin) {
+      throw new Error('Admin not found');
+    }
+
+    const accessToken = generateAccessToken(admin.id, tenantId, admin.role);
+    const refreshToken = generateRefreshToken(admin.id, tenantId);
+
+    return {
+      accessToken,
+      refreshToken,
+    };
+  } catch (error: any) {
+    console.error('Error refreshing access token:', error);
+    throw error;
   }
-
-  const accessToken = generateAccessToken(admin.id, admin.churchId, admin.role);
-  const refreshToken = generateRefreshToken(admin.id);
-
-  return {
-    accessToken,
-    refreshToken,
-  };
 }
 
 /**
- * Get admin by ID (cached for 30 minutes)
+ * Get admin by ID
+ * Cached for 30 minutes
  */
-export async function getAdmin(adminId: string) {
-  // Try cache first
-  const cached = await getCached<{
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: string;
-    welcomeCompleted: boolean;
-    userRole: string;
-    church: {
-      id: string;
-      name: string;
-      email: string;
-      trialEndsAt: Date;
+export async function getAdmin(adminId: string, tenantId: string) {
+  try {
+    // Try cache first
+    const cached = await getCached<any>(CACHE_KEYS.adminRole(adminId));
+    if (cached) {
+      return cached;
+    }
+
+    const admin = await prisma.admin.findUnique({
+      where: { id: adminId },
+    });
+
+    if (!admin) {
+      return null;
+    }
+
+    const result = {
+      id: admin.id,
+      email: admin.email,
+      firstName: admin.firstName,
+      lastName: admin.lastName,
+      role: admin.role,
+      welcomeCompleted: admin.welcomeCompleted || false,
+      userRole: admin.userRole || null,
+      tenantId,
     };
-  }>(CACHE_KEYS.adminRole(adminId));
-  if (cached) {
-    return cached;
+
+    // Cache for 30 minutes
+    await setCached(CACHE_KEYS.adminRole(adminId), result, CACHE_TTL.MEDIUM);
+
+    return result;
+  } catch (error: any) {
+    console.error('Error getting admin:', error);
+    throw error;
   }
-
-  const admin = await prisma.admin.findUnique({
-    where: { id: adminId },
-    include: { church: true },
-  });
-
-  if (!admin) {
-    return null;
-  }
-
-  const result = {
-    id: admin.id,
-    email: admin.email,
-    firstName: admin.firstName,
-    lastName: admin.lastName,
-    role: admin.role,
-    welcomeCompleted: admin.welcomeCompleted,
-    userRole: admin.userRole,
-    church: {
-      id: admin.church.id,
-      name: admin.church.name,
-      email: admin.church.email,
-      trialEndsAt: admin.church.trialEndsAt,
-    },
-  };
-
-  // Cache for 30 minutes
-  await setCached(CACHE_KEYS.adminRole(adminId), result, CACHE_TTL.MEDIUM);
-
-  return result;
 }

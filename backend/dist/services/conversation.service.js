@@ -1,28 +1,28 @@
-import { prisma } from '../lib/prisma.js';
 import * as telnyxService from './telnyx.service.js';
 import { decryptPhoneSafe } from '../utils/encryption.utils.js';
 import { getCached, setCached, invalidateCache } from './cache.service.js';
 /**
- * Get all conversations for a church (sorted by newest)
+ * Get all conversations for a tenant (sorted by newest)
  * ✅ OPTIMIZED: Cache conversations list for 5 minutes
  * Reduces database load for frequently accessed lists
  */
-export async function getConversations(churchId, options = {}) {
+export async function getConversations(tenantId, tenantPrisma, options = {}) {
     const { status = 'open', page = 1, limit = 20 } = options;
     const skip = (page - 1) * limit;
     // ✅ CACHE: Check if conversations list is cached
-    const cacheKey = `conversations:${churchId}:${status}:${page}:${limit}`;
+    const cacheKey = `conversations:${tenantId}:${status}:${page}:${limit}`;
     const cached = await getCached(cacheKey);
     if (cached) {
         return cached;
     }
     try {
+        const where = {};
+        if (status) {
+            where.status = status;
+        }
         const [conversations, total] = await Promise.all([
-            prisma.conversation.findMany({
-                where: {
-                    churchId,
-                    ...(status ? { status } : {}),
-                },
+            tenantPrisma.conversation.findMany({
+                where,
                 include: {
                     member: {
                         select: {
@@ -48,12 +48,7 @@ export async function getConversations(churchId, options = {}) {
                 skip,
                 take: limit,
             }),
-            prisma.conversation.count({
-                where: {
-                    churchId,
-                    ...(status ? { status } : {}),
-                },
-            }),
+            tenantPrisma.conversation.count({ where }),
         ]);
         const result = {
             data: conversations.map((conv) => ({
@@ -84,16 +79,13 @@ export async function getConversations(churchId, options = {}) {
 /**
  * Get single conversation with all messages
  */
-export async function getConversation(conversationId, churchId, options = {}) {
+export async function getConversation(tenantId, tenantPrisma, conversationId, options = {}) {
     const { page = 1, limit = 50 } = options;
     const skip = (page - 1) * limit;
     try {
-        const conversation = await prisma.conversation.findUnique({
+        const conversation = await tenantPrisma.conversation.findUnique({
             where: { id: conversationId },
             include: {
-                church: {
-                    select: { id: true, name: true },
-                },
                 member: {
                     select: {
                         id: true,
@@ -110,13 +102,9 @@ export async function getConversation(conversationId, churchId, options = {}) {
         if (!conversation) {
             throw new Error('Conversation not found');
         }
-        // Verify ownership
-        if (conversation.churchId !== churchId) {
-            throw new Error('Access denied');
-        }
         // Get messages (paginated)
         const [messages, total] = await Promise.all([
-            prisma.conversationMessage.findMany({
+            tenantPrisma.conversationMessage.findMany({
                 where: { conversationId },
                 include: {
                     member: {
@@ -130,13 +118,12 @@ export async function getConversation(conversationId, churchId, options = {}) {
                 skip,
                 take: limit,
             }),
-            prisma.conversationMessage.count({
+            tenantPrisma.conversationMessage.count({
                 where: { conversationId },
             }),
         ]);
         return {
             id: conversation.id,
-            church: conversation.church,
             member: conversation.member,
             status: conversation.status,
             unreadCount: conversation.unreadCount,
@@ -176,11 +163,10 @@ export async function getConversation(conversationId, churchId, options = {}) {
  * Before: 10s (sequential, 1000 members * 10ms per SMS)
  * After: 1s (parallel, limited by slowest single SMS)
  */
-async function broadcastOutboundToMembers(churchId, content) {
+async function broadcastOutboundToMembers(tenantId, tenantPrisma, content) {
     try {
-        // Get all members through conversations (members don't have churchId anymore)
-        const conversations = await prisma.conversation.findMany({
-            where: { churchId },
+        // Get all members through conversations
+        const conversations = await tenantPrisma.conversation.findMany({
             select: {
                 member: {
                     select: {
@@ -216,7 +202,7 @@ async function broadcastOutboundToMembers(churchId, content) {
             try {
                 // Decrypt phone number (stored encrypted in database, or plain text for legacy records)
                 const decryptedPhone = decryptPhoneSafe(member.phone);
-                await telnyxService.sendSMS(decryptedPhone, messageText, churchId);
+                await telnyxService.sendSMS(decryptedPhone, messageText, tenantId);
                 console.log(`   ✓ Sent to ${member.firstName}`);
                 return { success: true, member: member.firstName };
             }
@@ -239,20 +225,17 @@ async function broadcastOutboundToMembers(churchId, content) {
 /**
  * Create text-only reply message
  */
-export async function createReply(conversationId, churchId, content) {
+export async function createReply(tenantId, tenantPrisma, conversationId, content) {
     try {
-        const conversation = await prisma.conversation.findUnique({
+        const conversation = await tenantPrisma.conversation.findUnique({
             where: { id: conversationId },
             include: { member: true },
         });
         if (!conversation) {
             throw new Error('Conversation not found');
         }
-        if (conversation.churchId !== churchId) {
-            throw new Error('Access denied');
-        }
         // Create message
-        const message = await prisma.conversationMessage.create({
+        const message = await tenantPrisma.conversationMessage.create({
             data: {
                 conversationId,
                 memberId: conversation.memberId,
@@ -261,14 +244,14 @@ export async function createReply(conversationId, churchId, content) {
             },
         });
         // Update conversation
-        await prisma.conversation.update({
+        await tenantPrisma.conversation.update({
             where: { id: conversationId },
             data: { lastMessageAt: new Date() },
         });
-        // ✅ CACHE INVALIDATION: Clear all conversation lists for this church
-        await invalidateCache(`conversations:${churchId}:*`);
+        // ✅ CACHE INVALIDATION: Clear all conversation lists for this tenant
+        await invalidateCache(`conversations:${tenantId}:*`);
         // Broadcast to all members
-        await broadcastOutboundToMembers(churchId, content);
+        await broadcastOutboundToMembers(tenantId, tenantPrisma, content);
         return {
             id: message.id,
             content: message.content,
@@ -285,20 +268,17 @@ export async function createReply(conversationId, churchId, content) {
 /**
  * Create reply with media attachment
  */
-export async function createReplyWithMedia(conversationId, churchId, content, mediaData) {
+export async function createReplyWithMedia(tenantId, tenantPrisma, conversationId, content, mediaData) {
     try {
-        const conversation = await prisma.conversation.findUnique({
+        const conversation = await tenantPrisma.conversation.findUnique({
             where: { id: conversationId },
             include: { member: true },
         });
         if (!conversation) {
             throw new Error('Conversation not found');
         }
-        if (conversation.churchId !== churchId) {
-            throw new Error('Access denied');
-        }
         // Create message with media
-        const message = await prisma.conversationMessage.create({
+        const message = await tenantPrisma.conversationMessage.create({
             data: {
                 conversationId,
                 memberId: conversation.memberId,
@@ -316,13 +296,13 @@ export async function createReplyWithMedia(conversationId, churchId, content, me
             },
         });
         // Update conversation
-        await prisma.conversation.update({
+        await tenantPrisma.conversation.update({
             where: { id: conversationId },
             data: { lastMessageAt: new Date() },
         });
         // Broadcast to all members
         const displayText = content || `[${mediaData.type}]`;
-        await broadcastOutboundToMembers(churchId, displayText);
+        await broadcastOutboundToMembers(tenantId, tenantPrisma, displayText);
         return {
             id: message.id,
             content: message.content,
@@ -342,18 +322,15 @@ export async function createReplyWithMedia(conversationId, churchId, content, me
 /**
  * Mark conversation as read
  */
-export async function markAsRead(conversationId, churchId) {
+export async function markAsRead(tenantId, tenantPrisma, conversationId) {
     try {
-        const conversation = await prisma.conversation.findUnique({
+        const conversation = await tenantPrisma.conversation.findUnique({
             where: { id: conversationId },
         });
         if (!conversation) {
             throw new Error('Conversation not found');
         }
-        if (conversation.churchId !== churchId) {
-            throw new Error('Access denied');
-        }
-        await prisma.conversation.update({
+        await tenantPrisma.conversation.update({
             where: { id: conversationId },
             data: { unreadCount: 0 },
         });
@@ -367,23 +344,20 @@ export async function markAsRead(conversationId, churchId) {
 /**
  * Update conversation status
  */
-export async function updateStatus(conversationId, churchId, status) {
+export async function updateStatus(tenantId, tenantPrisma, conversationId, status) {
     try {
-        const conversation = await prisma.conversation.findUnique({
+        const conversation = await tenantPrisma.conversation.findUnique({
             where: { id: conversationId },
         });
         if (!conversation) {
             throw new Error('Conversation not found');
         }
-        if (conversation.churchId !== churchId) {
-            throw new Error('Access denied');
-        }
-        await prisma.conversation.update({
+        await tenantPrisma.conversation.update({
             where: { id: conversationId },
             data: { status },
         });
-        // ✅ CACHE INVALIDATION: Clear all conversation lists for this church
-        await invalidateCache(`conversations:${churchId}:*`);
+        // ✅ CACHE INVALIDATION: Clear all conversation lists for this tenant
+        await invalidateCache(`conversations:${tenantId}:*`);
         console.log(`✅ Updated conversation status: ${conversationId} → ${status}`);
     }
     catch (error) {
@@ -394,19 +368,16 @@ export async function updateStatus(conversationId, churchId, status) {
 /**
  * Delete conversation and all messages
  */
-export async function deleteConversation(conversationId, churchId) {
+export async function deleteConversation(tenantId, tenantPrisma, conversationId) {
     try {
-        const conversation = await prisma.conversation.findUnique({
+        const conversation = await tenantPrisma.conversation.findUnique({
             where: { id: conversationId },
         });
         if (!conversation) {
             throw new Error('Conversation not found');
         }
-        if (conversation.churchId !== churchId) {
-            throw new Error('Access denied');
-        }
         // Delete all messages (cascade handled by Prisma)
-        await prisma.conversation.delete({
+        await tenantPrisma.conversation.delete({
             where: { id: conversationId },
         });
         console.log(`✅ Deleted conversation: ${conversationId}`);

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 /**
  * GET /api/billing/usage
- * Get current usage for the church
+ * Get current usage for the tenant
  */
 export declare function getUsageHandler(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**
@@ -36,12 +36,12 @@ export declare function cancelHandler(req: Request, res: Response): Promise<void
 export declare function createPaymentIntentHandler(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**
  * GET /api/billing/sms-pricing
- * Get current SMS pricing for the church
+ * Get current SMS pricing for the tenant
  */
 export declare function getSMSPricing(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**
  * GET /api/billing/sms-usage
- * Get SMS usage and costs for the church (30-day default)
+ * Get SMS usage and costs for the tenant (30-day default)
  */
 export declare function getSMSUsage(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**

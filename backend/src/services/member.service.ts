@@ -33,7 +33,7 @@ export async function getMembers(
     search?: string;
   } = {}
 ) {
-  const { page = 1, limit = 50, search } = options;
+  const { page = 1, limit = 25, search } = options;
 
   // Fetch members directly without caching (no longer grouped, simple list)
   return fetchMembersPage(tenantPrisma, page, limit, search);

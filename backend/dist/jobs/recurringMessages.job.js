@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import * as messageService from '../services/message.service.js';
 import * as recurringService from '../services/recurring.service.js';
 import { withJobLock } from '../services/lock.service.js';
+import { getTenantPrisma } from '../lib/tenant-prisma.js';
 const prisma = new PrismaClient();
 /**
  * Check for recurring messages that are due and send them
@@ -25,17 +26,20 @@ export async function processRecurringMessages() {
             console.log(`Processing ${dueMessages.length} due recurring messages`);
             for (const recMessage of dueMessages) {
                 try {
+                    // Get tenant-specific Prisma client
+                    const tenantId = recMessage.churchId;
+                    const tenantPrisma = await getTenantPrisma(tenantId);
                     // Parse target IDs
                     const targetIds = recMessage.targetIds ? JSON.parse(recMessage.targetIds) : [];
                     // Create and send message
-                    const message = await messageService.createMessage(recMessage.churchId, {
+                    const message = await messageService.createMessage(tenantId, tenantPrisma, {
                         content: recMessage.content,
                         targetType: recMessage.targetType,
                         targetIds: targetIds.length > 0 ? targetIds : undefined,
                     });
                     console.log(`Sent recurring message: ${recMessage.name} to ${message.totalRecipients} recipients`);
                     // Update nextSendAt
-                    await recurringService.updateNextSendAt(recMessage.id, recMessage.frequency, recMessage.timeOfDay || '09:00', recMessage.dayOfWeek || undefined);
+                    await recurringService.updateNextSendAt(tenantId, tenantPrisma, recMessage.id, recMessage.frequency, recMessage.timeOfDay || '09:00', recMessage.dayOfWeek || undefined);
                 }
                 catch (error) {
                     console.error(`Error processing recurring message ${recMessage.id}:`, error);

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 /**
  * GET /api/conversations
- * Get all conversations for church
+ * Get all conversations for tenant
  */
 export declare function getConversations(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**

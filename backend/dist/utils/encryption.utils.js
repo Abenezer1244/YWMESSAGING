@@ -139,4 +139,31 @@ export function decryptEmailSafe(emailData) {
         return emailData;
     }
 }
+/**
+ * Generate token for various purposes (invitations, password resets, etc)
+ */
+export function generateToken(lengthBytes = 32) {
+    return crypto.randomBytes(lengthBytes).toString('hex');
+}
+/**
+ * Create HMAC signature for webhook verification
+ */
+export function createSignature(message, secret) {
+    return crypto
+        .createHmac('sha256', secret)
+        .update(message)
+        .digest('hex');
+}
+/**
+ * Verify HMAC signature with constant-time comparison
+ */
+export function verifySignature(message, signature, secret) {
+    try {
+        const expectedSignature = createSignature(message, secret);
+        return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
+    }
+    catch {
+        return false;
+    }
+}
 //# sourceMappingURL=encryption.utils.js.map
