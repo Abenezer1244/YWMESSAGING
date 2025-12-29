@@ -1,6 +1,7 @@
-import { prisma } from '../lib/prisma.js';
+import { PrismaClient } from '@prisma/client';
 import { PLANS, PlanName, PlanLimits } from '../config/plans.js';
 import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from './cache.service.js';
+import { getRegistryPrisma } from '../lib/tenant-prisma.js';
 
 /**
  * SMS billing service - tracks SMS costs and usage
@@ -14,7 +15,7 @@ const SMS_COST_PER_MESSAGE = 0.02;
  * Called after an SMS is successfully sent
  */
 export async function recordSMSUsage(
-  churchId: string,
+  tenantId: string,
   status: 'sent' | 'failed' = 'sent',
   messageRecipientId?: string
 ): Promise<{ cost: number; success: boolean }> {
@@ -29,7 +30,7 @@ export async function recordSMSUsage(
 
     // For now, we'll track usage in-memory or via a simple table
     // This allows us to calculate costs without a full migration
-    console.log(`[Billing] Recording SMS usage for church ${churchId}: $${SMS_COST_PER_MESSAGE}`);
+    console.log(`[Billing] Recording SMS usage for church ${tenantId}: $${SMS_COST_PER_MESSAGE}`);
 
     return {
       cost: SMS_COST_PER_MESSAGE,
@@ -42,10 +43,10 @@ export async function recordSMSUsage(
 }
 
 /**
- * Get SMS usage summary for a church within a date range
+ * Get SMS usage summary for a tenant within a date range
  */
 export async function getSMSUsageSummary(
-  churchId: string,
+  tenantId: string,
   startDate?: Date,
   endDate?: Date
 ): Promise<{
@@ -107,13 +108,13 @@ export function getSMSPricing() {
 // ========== Plan Management Functions (used by middleware and services) ==========
 
 /**
- * Get current plan for a church (cached)
+ * Get current plan for a tenant (cached)
  */
-export async function getCurrentPlan(churchId: string): Promise<PlanName | 'trial'> {
+export async function getCurrentPlan(tenantId: string): Promise<PlanName | 'trial'> {
   try {
     // Try cache first with AGGRESSIVE timeout (1 second)
     try {
-      const cachePromise = getCached<string>(CACHE_KEYS.churchPlan(churchId));
+      const cachePromise = getCached<string>(CACHE_KEYS.churchPlan(tenantId));
       const timeoutPromise = new Promise<null>((_, reject) =>
         setTimeout(() => {
           console.error('[BILLING] getCurrentPlan cache timeout');
@@ -130,9 +131,10 @@ export async function getCurrentPlan(churchId: string): Promise<PlanName | 'tria
       return 'trial';
     }
 
-    // Cache miss or timeout, query database with AGGRESSIVE timeout (2 seconds)
-    const dbPromise = prisma.church.findUnique({
-      where: { id: churchId },
+    // Cache miss or timeout, query registry database with AGGRESSIVE timeout (2 seconds)
+    const registryPrisma = getRegistryPrisma();
+    const dbPromise = registryPrisma.tenant.findUnique({
+      where: { id: tenantId },
       select: { subscriptionStatus: true },
     });
     const timeoutPromise = new Promise<never>((_, reject) =>
@@ -141,12 +143,12 @@ export async function getCurrentPlan(churchId: string): Promise<PlanName | 'tria
         reject(new Error('Database query timeout'));
       }, 2000) // 2 second timeout (AGGRESSIVE)
     );
-    const church = (await Promise.race([dbPromise, timeoutPromise])) as any;
-    const status = church?.subscriptionStatus as (PlanName | 'trial') | undefined;
+    const tenant = (await Promise.race([dbPromise, timeoutPromise])) as any;
+    const status = tenant?.subscriptionStatus as (PlanName | 'trial') | undefined;
     const plan = status || 'trial';
 
     // Store in cache (1 hour TTL) - non-blocking
-    setCached(CACHE_KEYS.churchPlan(churchId), plan, CACHE_TTL.LONG).catch(err =>
+    setCached(CACHE_KEYS.churchPlan(tenantId), plan, CACHE_TTL.LONG).catch(err =>
       console.warn('[BILLING] Failed to cache plan:', err)
     );
 
@@ -175,15 +177,15 @@ export function getPlanLimits(plan: PlanName | string): PlanLimits | null {
 }
 
 /**
- * Get usage for a church (cached)
+ * Get usage for a tenant (cached)
  * Cache for 30 minutes to reduce database load
  */
-export async function getUsage(churchId: string): Promise<Record<string, number>> {
+export async function getUsage(tenantId: string, tenantPrisma: PrismaClient): Promise<Record<string, number>> {
   try {
     // Try cache first with AGGRESSIVE timeout (1 second)
     let cached: Record<string, number> | null = null;
     try {
-      const cachePromise = getCached<Record<string, number>>(CACHE_KEYS.billingUsage(churchId));
+      const cachePromise = getCached<Record<string, number>>(CACHE_KEYS.billingUsage(tenantId));
       const timeoutPromise = new Promise<null>((_, reject) =>
         setTimeout(() => {
           console.error('[BILLING] getUsage cache timeout');
@@ -208,12 +210,12 @@ export async function getUsage(churchId: string): Promise<Record<string, number>
     const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
     // Run all count queries in parallel with AGGRESSIVE timeout (2 seconds)
+    // No churchId filters - database isolation handles tenant separation
     const countPromises = [
-      prisma.branch.count({ where: { churchId } }),
-      prisma.admin.count({ where: { churchId, role: 'CO_ADMIN' } }),
-      prisma.message.count({
+      tenantPrisma.branch.count({}),
+      tenantPrisma.admin.count({ where: { role: 'CO_ADMIN' } }),
+      tenantPrisma.message.count({
         where: {
-          churchId,
           createdAt: { gte: startOfMonth },
         },
       }),
@@ -231,13 +233,13 @@ export async function getUsage(churchId: string): Promise<Record<string, number>
 
     const usage = {
       branches: branchCount,
-      members: 0, // Member count removed - members don't have churchId anymore
+      members: 0, // Member count - members in tenant database
       messagesThisMonth: messageCount,
       coAdmins: coAdminCount,
     };
 
     // Cache for 30 minutes (non-blocking fire-and-forget)
-    setCached(CACHE_KEYS.billingUsage(churchId), usage, CACHE_TTL.MEDIUM).catch(err =>
+    setCached(CACHE_KEYS.billingUsage(tenantId), usage, CACHE_TTL.MEDIUM).catch(err =>
       console.warn('Failed to cache usage:', err)
     );
 
@@ -255,20 +257,21 @@ export async function getUsage(churchId: string): Promise<Record<string, number>
 }
 
 /**
- * Check if church is on trial
+ * Check if tenant is on trial
  */
-export async function isOnTrial(churchId: string): Promise<boolean> {
+export async function isOnTrial(tenantId: string): Promise<boolean> {
   try {
-    const church = await prisma.church.findUnique({
-      where: { id: churchId },
+    const registryPrisma = getRegistryPrisma();
+    const tenant = await registryPrisma.tenant.findUnique({
+      where: { id: tenantId },
       select: { subscriptionStatus: true, trialEndsAt: true },
     });
 
-    if (!church) return false;
+    if (!tenant) return false;
 
     return (
-      church.subscriptionStatus === 'trial' &&
-      church.trialEndsAt > new Date()
+      tenant.subscriptionStatus === 'trial' &&
+      tenant.trialEndsAt > new Date()
     );
   } catch (error) {
     console.error('Failed to check trial status:', error);
@@ -280,11 +283,11 @@ export async function isOnTrial(churchId: string): Promise<boolean> {
  * Invalidate billing cache when subscription changes
  * Called after plan changes, usage updates, etc.
  */
-export async function invalidateBillingCache(churchId: string): Promise<void> {
+export async function invalidateBillingCache(tenantId: string): Promise<void> {
   await Promise.all([
-    invalidateCache(CACHE_KEYS.churchPlan(churchId)),
-    invalidateCache(CACHE_KEYS.billingUsage(churchId)),
-    invalidateCache(CACHE_KEYS.churchAll(churchId)), // Also invalidate any other church caches
+    invalidateCache(CACHE_KEYS.churchPlan(tenantId)),
+    invalidateCache(CACHE_KEYS.billingUsage(tenantId)),
+    invalidateCache(CACHE_KEYS.churchAll(tenantId)), // Also invalidate any other tenant caches
   ]);
-  console.log(`[Billing] Cache invalidated for church ${churchId}`);
+  console.log(`[Billing] Cache invalidated for tenant ${tenantId}`);
 }
