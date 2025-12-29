@@ -1,0 +1,533 @@
+// ============================================================================
+// KOINONIA TENANT DATABASE SCHEMA
+// ============================================================================
+// This schema is deployed to EACH church's database (church_{churchId})
+//
+// Key Differences from main schema:
+// 1. No Church model (each database IS a church)
+// 2. No churchId field on any model
+// 3. All church-related fields removed
+// 4. All relations to Church removed
+//
+// Everything else is identical
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/tenant-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("TENANT_DATABASE_URL") // Dynamic per request
+
+  // Connection pooling for tenant database
+  // Each tenant can have multiple concurrent requests
+}
+
+// ============================================================================
+// PHYSICAL LOCATIONS (BRANCHES)
+// ============================================================================
+model Branch {
+  id          String   @id @default(cuid())
+  name        String
+  address     String?
+  phone       String?
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+// ============================================================================
+// CHURCH MEMBERS
+// ============================================================================
+model Member {
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  phone     String   // ENCRYPTED: E.164 format
+  phoneHash String?  // Hash of phone for searchable lookups
+  email     String?  @unique // DEPRECATED: Use encryptedEmail
+  encryptedEmail String?     // ENCRYPTED: Email address
+  emailHash String?          // Hash of email for searchable lookups
+  optInSms  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  messageRecipients MessageRecipient[]
+  conversations   Conversation[]
+  conversationMessages ConversationMessage[]
+
+  @@index([email])
+  @@index([emailHash])
+  @@index([phoneHash])
+  @@index([firstName, lastName])
+  @@index([createdAt])
+}
+
+// ============================================================================
+// SMS MESSAGES (BROADCAST)
+// ============================================================================
+model Message {
+  id                  String   @id @default(cuid())
+  content             String
+  status              String   @default("pending") // pending, sent, failed
+  targetType          String   // individual, all
+  targetIds           String   @default("") // JSON array of IDs
+  totalRecipients     Int      @default(0)
+  deliveredCount      Int      @default(0)
+  failedCount         Int      @default(0)
+  sentAt              DateTime?
+  createdAt           DateTime @default(now())
+
+  // Relations
+  recipients          MessageRecipient[]
+
+  @@index([status])
+  @@index([sentAt])
+  @@index([createdAt])
+}
+
+// ============================================================================
+// MESSAGE RECIPIENT TRACKING
+// ============================================================================
+model MessageRecipient {
+  id                String   @id @default(cuid())
+  messageId         String
+  memberId          String
+  status            String   @default("pending") // pending, sent, delivered, failed
+  providerMessageId String?  // Telnyx message ID
+  deliveredAt       DateTime?
+  failedAt          DateTime?
+  failureReason     String?
+
+  // Relations
+  message           Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  member            Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, memberId])
+  @@index([messageId])
+  @@index([memberId])
+  @@index([status])
+  @@index([messageId, status])
+}
+
+// ============================================================================
+// MESSAGE TEMPLATES
+// ============================================================================
+model MessageTemplate {
+  id        String   @id @default(cuid())
+  name      String
+  content   String
+  category  String   // service_reminder, event, prayer, thank_you, welcome, offering
+  isDefault Boolean  @default(false)
+  usageCount Int     @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+}
+
+// ============================================================================
+// RECURRING/SCHEDULED MESSAGES
+// ============================================================================
+model RecurringMessage {
+  id          String   @id @default(cuid())
+  name        String
+  content     String
+  targetType  String   // branches, all
+  targetIds   String   @default("") // JSON array
+  frequency   String   // daily, weekly, monthly
+  dayOfWeek   Int?     // 0-6 for weekly
+  timeOfDay   String?  // HH:MM format
+  nextSendAt  DateTime
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([nextSendAt])
+}
+
+// ============================================================================
+// ADMINISTRATORS
+// ============================================================================
+model Admin {
+  id            String   @id @default(cuid())
+  email         String   @unique // DEPRECATED: Use encryptedEmail
+  encryptedEmail String?        // ENCRYPTED: Email address
+  emailHash     String?         // Hash of email for lookups
+  passwordHash  String
+  firstName     String
+  lastName      String
+  role          String   @default("CO_ADMIN") // PRIMARY, CO_ADMIN
+  invitationToken String?
+  invitationExpiresAt DateTime?
+  lastLoginAt   DateTime?
+  welcomeCompleted Boolean @default(false)
+  userRole      String?  // pastor, admin, communications, volunteer, other
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  mfa           AdminMFA?
+
+  @@index([role])
+  @@index([emailHash])
+}
+
+// ============================================================================
+// SUBSCRIPTION (STRIPE)
+// ============================================================================
+model Subscription {
+  id              String   @id @default(cuid())
+  stripeSubId     String?  @unique
+  plan            String   @default("starter") // starter, growth, pro
+  billingCycle    String   @default("monthly") // monthly, annual
+  status          String   @default("active") // active, cancelled, past_due
+  currentPeriodStart DateTime?
+  currentPeriodEnd DateTime?
+  cancelledAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([plan])
+  @@index([status])
+  @@index([billingCycle])
+}
+
+// ============================================================================
+// PLANNING CENTER INTEGRATION
+// ============================================================================
+model PlanningCenterIntegration {
+  id                    String   @id @default(cuid())
+  organizationId        String   // PCO Organization ID
+  accessToken           String   // OAuth2 access token (encrypted)
+  refreshToken          String?  // OAuth2 refresh token
+  expiresAt             DateTime? // When access token expires
+  isEnabled             Boolean  @default(true)
+  memberSyncEnabled     Boolean  @default(true)
+  serviceSyncEnabled    Boolean  @default(false)
+  syncStatus            String   @default("pending") // pending, active, failed
+  lastSyncAt            DateTime?
+  errorMessage          String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([isEnabled])
+  @@index([syncStatus])
+  @@index([lastSyncAt])
+}
+
+// ============================================================================
+// SMS/MMS CONVERSATIONS
+// ============================================================================
+model Conversation {
+  id              String   @id @default(cuid())
+  memberId        String
+  lastMessageAt   DateTime?
+  status          String   @default("open") // open, closed, archived
+  unreadCount     Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  member          Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  messages        ConversationMessage[]
+
+  @@unique([memberId])
+  @@index([memberId])
+  @@index([lastMessageAt])
+  @@index([status])
+}
+
+// ============================================================================
+// CONVERSATION MESSAGES
+// ============================================================================
+model ConversationMessage {
+  id              String   @id @default(cuid())
+  conversationId  String
+  memberId        String
+  content         String   // Text content
+  direction       String   // "inbound" | "outbound"
+
+  // Telnyx tracking
+  providerMessageId String?  // Telnyx message ID
+  deliveryStatus  String?    // pending | delivered | failed
+
+  // S3 Media fields
+  mediaUrl        String?
+  mediaType       String?    // image | video | audio | document
+  mediaName       String?    // Original filename
+  mediaSizeBytes  Int?
+  mediaS3Key      String?
+  mediaMimeType   String?
+  mediaWidth      Int?
+  mediaHeight     Int?
+  mediaDuration   Int?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  member          Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([createdAt])
+  @@index([direction])
+  @@index([mediaType])
+  @@index([providerMessageId])
+  @@index([conversationId, createdAt])
+  @@index([direction, conversationId])
+}
+
+// ============================================================================
+// MESSAGE QUEUE (OUTGOING SMS/MMS)
+// ============================================================================
+model MessageQueue {
+  id                    String   @id @default(cuid())
+  phone                 String   // E.164 format
+  content               String   // Text message content
+  mediaS3Url            String?  // S3 URL if sending media
+  conversationMessageId String?  // Link to conversation message
+  status                String   @default("pending") // pending, sent, failed
+  retryCount            Int      @default(0)
+  lastError             String?
+  sentAt                DateTime?
+  failedAt              DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ============================================================================
+// ANALYTICS EVENTS
+// ============================================================================
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  eventName String
+  properties String? // JSON
+  createdAt DateTime @default(now())
+
+  @@index([eventName])
+}
+
+// ============================================================================
+// CHAT CONVERSATIONS (FUTURE: PUBLIC CHAT)
+// ============================================================================
+model ChatConversation {
+  id        String   @id @default(cuid())
+  adminId   String?  // null for public visitors
+  visitorId String?  // unique identifier for public visitors
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  messages  ChatMessage[]
+
+  @@index([adminId])
+  @@index([visitorId])
+}
+
+// ============================================================================
+// CHAT MESSAGES
+// ============================================================================
+model ChatMessage {
+  id              String   @id @default(cuid())
+  conversationId  String
+  role            String   // "user" or "assistant"
+  content         String
+  createdAt       DateTime @default(now())
+
+  // Relations
+  conversation    ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+}
+
+// ============================================================================
+// AGENT AUDIT TRAIL
+// ============================================================================
+model AgentAudit {
+  id                String   @id @default(cuid())
+  agentType         String   // backend-engineer, security-analyst, etc.
+  eventType         String   // pull_request, push, workflow_run
+  githubPrNumber    Int?
+  githubBranch      String?
+  status            String   // success, failed
+  findings          String   @default("[]") // JSON array
+  recommendations   String   @default("[]") // JSON array
+  severity          String?  // critical, high, medium, low, info
+  error             String?
+  createdAt         DateTime @default(now())
+
+  @@index([agentType])
+  @@index([eventType])
+  @@index([status])
+  @@index([severity])
+  @@index([createdAt])
+}
+
+// ============================================================================
+// GDPR: CONSENT AUDIT TRAIL
+// ============================================================================
+model ConsentLog {
+  id        String   @id @default(cuid())
+  memberId  String?
+  adminId   String?
+  type      String   // smsMarketing, emailMarketing, dataProcessing, analytics
+  status    String   // granted, denied, withdrawn
+  reason    String?
+  source    String   // api, web_form, email_link, signup
+  createdAt DateTime @default(now())
+
+  @@index([memberId])
+  @@index([adminId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+// ============================================================================
+// GDPR: ACCOUNT DELETION REQUESTS
+// ============================================================================
+model AccountDeletionRequest {
+  id                    String   @id @default(cuid())
+  initiatedBy           String   // Admin ID
+  confirmationToken     String   @unique
+  status                String   @default("pending") // pending, confirmed, cancelled
+  scheduledDeletionAt   DateTime
+  actualDeletionAt      DateTime?
+  reason                String?
+  cancelledAt           DateTime?
+  cancelledBy           String?
+  createdAt             DateTime @default(now())
+
+  @@index([confirmationToken])
+  @@index([status])
+  @@index([scheduledDeletionAt])
+}
+
+// ============================================================================
+// GDPR: DATA EXPORTS
+// ============================================================================
+model DataExport {
+  id            String   @id @default(cuid())
+  requestedBy   String   // Admin ID
+  status        String   @default("pending") // pending, completed, failed, expired
+  fileUrl       String?
+  fileSize      Int?
+  expiresAt     DateTime
+  errorMessage  String?
+  createdAt     DateTime @default(now())
+  completedAt   DateTime?
+
+  @@index([expiresAt])
+  @@index([status])
+}
+
+// ============================================================================
+// MFA: ADMIN MULTI-FACTOR AUTHENTICATION
+// ============================================================================
+model AdminMFA {
+  id              String   @id @default(cuid())
+  adminId         String   @unique
+  totpSecret      String   // Encrypted TOTP secret
+  mfaEnabled      Boolean  @default(false)
+  backupCodesUsed String   @default("[]") // JSON array
+  enabledAt       DateTime?
+  disabledAt      DateTime?
+  lastVerifiedAt  DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  admin           Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([mfaEnabled])
+}
+
+// ============================================================================
+// MFA: RECOVERY CODES
+// ============================================================================
+model MFARecoveryCode {
+  id          String   @id @default(cuid())
+  adminId     String
+  code        String   @unique // Hashed recovery code
+  index       Int      // Position in recovery codes list
+  usedAt      DateTime?
+  createdAt   DateTime @default(now())
+
+  @@unique([adminId, index])
+  @@index([adminId])
+  @@index([usedAt])
+}
+
+// ============================================================================
+// NPS: NET PROMOTER SCORE SURVEYS
+// ============================================================================
+model NPSSurvey {
+  id            String   @id @default(cuid())
+  responderId   String?  // Admin ID (optional for anonymous)
+  score         Int      // 0-10 rating
+  category      String   // feedback, feature_request, bug, general, other
+  feedback      String?  // Optional written feedback
+  sentiment     String?  // positive, neutral, negative
+  followupEmail String?
+  followupSent  Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  respondedAt   DateTime @default(now())
+
+  @@index([score])
+  @@index([sentiment])
+  @@index([category])
+  @@index([createdAt])
+  @@index([responderId])
+}
+
+// ============================================================================
+// DEAD LETTER QUEUE (FAILED OPERATIONS)
+// ============================================================================
+model DeadLetterQueue {
+  id               String     @id @default(cuid())
+  category         String     // SMS_SEND, WEBHOOK_INBOUND, etc.
+  externalId       String?    // message ID, webhook ID, etc.
+  originalPayload  Json       // Original operation payload
+  errorMessage     String     // Error that caused failure
+  errorStack       String?    // Stack trace
+  metadata         Json?      // Custom metadata
+  status           String     @default("PENDING") // PENDING, RESOLVED, DEAD_LETTER
+  retryCount       Int        @default(0)
+  firstAttemptAt   DateTime   @default(now())
+  lastAttemptAt    DateTime   @default(now())
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  @@index([status])
+  @@index([category])
+  @@index([externalId])
+  @@index([createdAt])
+  @@index([retryCount])
+}
+
+// ============================================================================
+// ONBOARDING PROGRESS
+// ============================================================================
+model OnboardingProgress {
+  id        String   @id @default(cuid())
+  taskId    String   // create_branch, add_members, send_message
+  completed Boolean  @default(false)
+  completedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([taskId])
+  @@index([completed])
+  @@index([completedAt])
+}

@@ -168,3 +168,35 @@ export function decryptEmailSafe(emailData: string): string {
     return emailData;
   }
 }
+
+/**
+ * Generate token for various purposes (invitations, password resets, etc)
+ */
+export function generateToken(lengthBytes: number = 32): string {
+  return crypto.randomBytes(lengthBytes).toString('hex');
+}
+
+/**
+ * Create HMAC signature for webhook verification
+ */
+export function createSignature(message: string, secret: string): string {
+  return crypto
+    .createHmac('sha256', secret)
+    .update(message)
+    .digest('hex');
+}
+
+/**
+ * Verify HMAC signature with constant-time comparison
+ */
+export function verifySignature(message: string, signature: string, secret: string): boolean {
+  try {
+    const expectedSignature = createSignature(message, secret);
+    return crypto.timingSafeEqual(
+      Buffer.from(signature),
+      Buffer.from(expectedSignature)
+    );
+  } catch {
+    return false;
+  }
+}
