@@ -166,7 +166,9 @@
       "Bash(timeout 150 node:*)",
       "Bash(timeout 60 npm run build)",
       "Bash(timeout 5 bash:*)",
-      "Bash(timeout 240 node:*)"
+      "Bash(timeout 240 node:*)",
+      "Bash(timeout 30 curl:*)",
+      "Bash(git clean:*)"
     ],
     "deny": [],
     "ask": []
