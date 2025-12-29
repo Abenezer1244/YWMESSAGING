@@ -195,16 +195,16 @@ async function getBranchStatsUncached(churchId) {
  */
 export async function getSummaryStats(churchId) {
     return getCachedWithFallback(CACHE_KEYS.churchStats(churchId), async () => {
-        const [messages, conversations, branches] = await Promise.all([
+        const [messages, members, branches] = await Promise.all([
             prisma.message.count({ where: { churchId } }),
-            prisma.conversation.count({ where: { churchId } }), // Members accessed through conversations
+            prisma.member.count(),
             prisma.branch.count({ where: { churchId } }),
         ]);
         const messageStats = await getMessageStats(churchId, 30);
         return {
             totalMessages: messages,
             averageDeliveryRate: messageStats.deliveryRate,
-            totalMembers: conversations, // Members count through conversations
+            totalMembers: members,
             totalBranches: branches,
         };
     }, CACHE_TTL.SHORT // 5 minutes
