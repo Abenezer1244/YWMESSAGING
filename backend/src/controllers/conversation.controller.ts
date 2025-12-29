@@ -16,27 +16,26 @@ import {
   ConversationParamSchema,
 } from '../lib/validation/schemas.js';
 
-const prisma = new PrismaClient();
-
 /**
  * GET /api/conversations
- * Get all conversations for church
+ * Get all conversations for tenant
  */
 export async function getConversations(req: Request, res: Response) {
   try {
-    const churchId = req.user?.churchId;
+    const tenantId = req.tenantId;
+    const tenantPrisma = req.prisma;
     const page = req.query.page ? parseInt(req.query.page as string) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
     const status = req.query.status as string | undefined;
 
-    if (!churchId) {
+    if (!tenantId || !tenantPrisma) {
       return res.status(401).json({
         success: false,
         error: 'Unauthorized',
       });
     }
 
-    const result = await conversationService.getConversations(churchId, {
+    const result = await conversationService.getConversations(tenantId, tenantPrisma, {
       page,
       limit,
       status,
@@ -63,11 +62,12 @@ export async function getConversations(req: Request, res: Response) {
 export async function getConversation(req: Request, res: Response) {
   try {
     const { conversationId } = req.params;
-    const churchId = req.user?.churchId;
+    const tenantId = req.tenantId;
+    const tenantPrisma = req.prisma;
     const page = req.query.page ? parseInt(req.query.page as string) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
 
-    if (!churchId) {
+    if (!tenantId || !tenantPrisma) {
       return res.status(401).json({
         success: false,
         error: 'Unauthorized',
@@ -75,8 +75,9 @@ export async function getConversation(req: Request, res: Response) {
     }
 
     const conversation = await conversationService.getConversation(
+      tenantId,
+      tenantPrisma,
       conversationId,
-      churchId,
       { page, limit }
     );
 
