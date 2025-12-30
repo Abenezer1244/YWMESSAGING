@@ -172,14 +172,30 @@ export async function login(input: LoginInput): Promise<LoginResponse> {
 async function loginInternal(input: LoginInput): Promise<LoginResponse> {
   console.log('[LOGIN] Starting login process for:', input.email);
 
-  // Find admin by email
-  console.log('[LOGIN] Looking up admin by email...');
-  const admin = await prisma.admin.findUnique({
+  // SECURITY: Find church by email first to identify the tenant
+  console.log('[LOGIN] Looking up church by email...');
+  const church = await prisma.church.findFirst({
     where: { email: input.email },
   });
 
+  if (!church) {
+    console.log('[LOGIN] Church not found with email:', input.email);
+    throw new Error('Invalid email or password');
+  }
+
+  const tenantId = church.id;
+
+  // SECURITY: Find admin by churchId + email (prevents cross-tenant email duplication)
+  console.log('[LOGIN] Looking up admin for church:', tenantId);
+  const admin = await prisma.admin.findFirst({
+    where: {
+      email: input.email,
+      churchId: tenantId, // SECURITY: Ensure admin belongs to this church
+    },
+  });
+
   if (!admin) {
-    console.log('[LOGIN] Admin not found:', input.email);
+    console.log('[LOGIN] Admin not found for church:', tenantId);
     throw new Error('Invalid email or password');
   }
 
@@ -190,21 +206,6 @@ async function loginInternal(input: LoginInput): Promise<LoginResponse> {
     console.log('[LOGIN] Password does not match');
     throw new Error('Invalid email or password');
   }
-
-  // For MVP, infer tenantId from Church's admin (assuming single admin per church)
-  // In future, add explicit tenantId to Admin model
-  const church = await prisma.church.findFirst({
-    where: {
-      email: input.email,
-    },
-  });
-
-  if (!church) {
-    console.log('[LOGIN] Church not found for admin:', input.email);
-    throw new Error('Church configuration not found');
-  }
-
-  const tenantId = church.id;
 
   console.log('[LOGIN] Password matched, generating tokens...');
   // Generate tokens
