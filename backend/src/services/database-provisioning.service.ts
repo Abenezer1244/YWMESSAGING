@@ -6,6 +6,8 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import { execSync } from 'child_process';
+import path from 'path';
 
 /**
  * Provision a new tenant database
@@ -22,13 +24,13 @@ export async function provisionTenantDatabase(tenantId: string): Promise<string>
     }
 
     // Extract connection details from base URL
-    // Format: postgresql://user:password@host:port/database
-    const urlMatch = baseUrl.match(/postgresql:\/\/([^:]+):([^@]+)@([^:]+):(\d+)/);
+    // Format: postgresql://user:password@host:port/database or postgresql://user:password@host/database (default port 5432)
+    const urlMatch = baseUrl.match(/postgresql:\/\/([^:]+):([^@]+)@([^:/?]+):?(\d+)?/);
     if (!urlMatch) {
       throw new Error('Invalid DATABASE_URL format');
     }
 
-    const [, user, password, host, port] = urlMatch;
+    const [, user, password, host, port = '5432'] = urlMatch;
 
     // Create a admin connection to the server to create the new database
     const adminUrl = `postgresql://${user}:${password}@${host}:${port}/postgres`;
@@ -94,9 +96,6 @@ export async function runTenantMigrations(tenantDatabaseUrl: string): Promise<vo
 
     // Run prisma db push with tenant schema to initialize all tables
     // This applies the tenant-schema.prisma to the database
-    const { execSync } = require('child_process');
-    const path = require('path');
-
     try {
       console.log('⏳ Running Prisma migrations (tenant schema)...');
 
@@ -146,12 +145,13 @@ export async function deleteTenantDatabase(tenantId: string): Promise<void> {
     }
 
     // Extract connection details from base URL
-    const urlMatch = baseUrl.match(/postgresql:\/\/([^:]+):([^@]+)@([^:]+):(\d+)/);
+    // Format: postgresql://user:password@host:port/database or postgresql://user:password@host/database (default port 5432)
+    const urlMatch = baseUrl.match(/postgresql:\/\/([^:]+):([^@]+)@([^:/?]+):?(\d+)?/);
     if (!urlMatch) {
       throw new Error('Invalid DATABASE_URL format');
     }
 
-    const [, user, password, host, port] = urlMatch;
+    const [, user, password, host, port = '5432'] = urlMatch;
 
     // Create a admin connection to drop the database
     const adminUrl = `postgresql://${user}:${password}@${host}:${port}/postgres`;
@@ -197,12 +197,13 @@ export async function tenantDatabaseExists(tenantId: string): Promise<boolean> {
     }
 
     // Extract connection details from base URL
-    const urlMatch = baseUrl.match(/postgresql:\/\/([^:]+):([^@]+)@([^:]+):(\d+)/);
+    // Format: postgresql://user:password@host:port/database or postgresql://user:password@host/database (default port 5432)
+    const urlMatch = baseUrl.match(/postgresql:\/\/([^:]+):([^@]+)@([^:/?]+):?(\d+)?/);
     if (!urlMatch) {
       throw new Error('Invalid DATABASE_URL format');
     }
 
-    const [, user, password, host, port] = urlMatch;
+    const [, user, password, host, port = '5432'] = urlMatch;
 
     // Create a admin connection to check the database
     const adminUrl = `postgresql://${user}:${password}@${host}:${port}/postgres`;
