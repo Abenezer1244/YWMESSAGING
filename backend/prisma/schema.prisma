@@ -638,3 +638,133 @@ model OnboardingProgress {
   @@index([completed])
   @@index([completedAt])
 }
+
+// ============================================================================
+// REGISTRY MODELS (Multi-Tenant Architecture)
+// ============================================================================
+//
+// Note: These models are used in the registry database (REGISTRY_DATABASE_URL)
+// They are NOT used in tenant databases
+//
+// Purpose: Central registry for tenant metadata and routing
+// - Tenant: Per-church database connection strings
+// - PhoneNumberRegistry: Maps phone numbers to tenants for SMS/MMS routing
+// - AdminEmailIndex: Maps admin emails to tenants for fast login lookup
+//
+// During runtime:
+// - Auth middleware uses getRegistryPrisma() to connect to registry database
+// - Queries these models to get tenant connection information
+// - Then creates tenant-specific PrismaClient for queries
+//
+// ============================================================================
+
+/// Central tenant record with database connection information
+///
+/// Each church/organization has ONE tenant record in the registry
+/// The tenant record points to their isolated PostgreSQL database
+///
+/// Flow:
+/// 1. Church signs up → new Tenant record created in registry
+/// 2. Separate PostgreSQL database created for that tenant
+/// 3. Tenant record stores connection string to their database
+/// 4. Auth middleware uses tenantId from JWT to look up database
+/// 5. Creates PrismaClient connected to tenant's isolated database
+model Tenant {
+  id                    String   @id @default(cuid()) // Same as churchId in JWT
+  name                  String                        // Church name
+  email                 String   @unique              // Primary admin email
+
+  // Database connection information (encrypted in production)
+  databaseUrl           String                        // Full connection string
+  databaseHost          String                        // PostgreSQL hostname
+  databasePort          Int      @default(5432)       // PostgreSQL port
+  databaseName          String                        // Database name
+
+  // Subscription and plan information
+  subscriptionStatus    String   @default("trial")    // trial | active | paused | cancelled
+  subscriptionPlan      String   @default("starter")  // starter | growth | pro
+  trialEndsAt           DateTime?                     // When trial expires
+
+  // Telnyx phone number assignment (one phone number per tenant)
+  telnyxPhoneNumber     String?  @unique              // Assigned phone number
+  telnyxNumberSid       String?  @unique              // Telnyx resource ID
+
+  // Tenant status lifecycle
+  status                String   @default("active")   // active | suspended | archived | deleted
+  schemaVersion         String   @default("1.0.0")    // Schema version for migrations
+
+  // Audit timestamps
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  lastAccessedAt        DateTime @default(now())      // For usage analytics
+
+  // Relations
+  phoneNumbers          PhoneNumberRegistry[]
+  adminEmails           AdminEmailIndex[]
+
+  // Indexes for fast queries
+  @@index([telnyxPhoneNumber])    // Fast phone number lookup for incoming SMS/MMS
+  @@index([status])               // Find all active/suspended tenants
+  @@index([subscriptionPlan])      // Analytics on plan distribution
+  @@index([createdAt])            // Time-based analytics
+}
+
+/// Maps phone numbers to tenants for incoming SMS/MMS routing
+///
+/// Purpose: Route incoming SMS/MMS to correct tenant database
+///
+/// When Telnyx sends incoming SMS/MMS to a phone number:
+/// 1. Look up phone number in this registry
+/// 2. Get tenantId from the registry
+/// 3. Get tenant database connection
+/// 4. Route message to correct database
+///
+/// One phone number = One tenant (exclusive ownership)
+model PhoneNumberRegistry {
+  id          String   @id @default(cuid())
+  phoneNumber String   @unique                  // E.164 format: +14155552671
+  tenantId    String
+
+  // Audit trail
+  registeredAt DateTime @default(now())        // When phone was registered
+  assignedAt   DateTime @default(now())        // When assigned to tenant
+
+  // Relation to tenant
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([phoneNumber])                        // Fast lookup by phone number
+  @@index([tenantId])                           // Find all numbers for a tenant
+  @@index([registeredAt])                       // Time-based analytics
+}
+
+/// Fast lookup: Email → Tenant mapping for login flow
+///
+/// Purpose: During login, find which tenant/database contains this admin email
+///
+/// Flow:
+/// 1. User enters email + password on login page
+/// 2. Query this table: "Which tenant has this email?"
+/// 3. Get tenantId and its database connection string
+/// 4. Connect to that tenant's database
+/// 5. Verify password against admin record in tenant database
+///
+/// Email hash used for privacy (store hash instead of plain email in registry)
+model AdminEmailIndex {
+  id        String   @id @default(cuid())
+  emailHash String   @unique                  // Hash of admin email for privacy
+  email     String   @unique                  // Plain email (encrypted in DB)
+  tenantId  String                            // Which tenant this admin belongs to
+  adminId   String                            // Admin ID in tenant's database
+
+  // Audit trail
+  createdAt DateTime @default(now())
+
+  // Relation to tenant
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([emailHash])                        // Fast hash-based lookup
+  @@index([email])                            // Support plain email queries too
+  @@index([tenantId])                         // Find all admins for a tenant
+}

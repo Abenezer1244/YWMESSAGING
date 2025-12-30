@@ -1,0 +1,178 @@
+// ============================================================================
+// REGISTRY DATABASE SCHEMA
+// ============================================================================
+//
+// Purpose: Central registry for all tenants in multi-tenant architecture
+//
+// Contains:
+// - Tenant metadata and connection strings
+// - Phone number to tenant mappings
+// - Admin email to tenant index for fast login lookup
+//
+// Database: Separate PostgreSQL database from tenant databases
+// Environment Variable: REGISTRY_DATABASE_URL
+// ============================================================================
+
+// Note: Registry schema generates types alongside main schema
+// Uses same output directory for simplicity during MVP
+// In production, split into separate @prisma/client instances
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("REGISTRY_DATABASE_URL")
+
+  // Connection pooling for registry database (all tenants access this)
+  // postgresql://user:password@host/db?connection_limit=20&pool_timeout=45
+  // Lower limit (20 vs 30) since registry is read-heavy, not write-heavy
+}
+
+// ============================================================================
+// TENANT METADATA
+// ============================================================================
+
+/// Central tenant record with database connection information
+///
+/// Each church/organization has ONE tenant record in the registry
+/// The tenant record points to their isolated PostgreSQL database
+///
+/// Flow:
+/// 1. Church signs up → new Tenant record created in registry
+/// 2. Separate PostgreSQL database created for that tenant
+/// 3. Tenant record stores connection string to their database
+/// 4. Auth middleware uses tenantId from JWT to look up database
+/// 5. Creates PrismaClient connected to tenant's isolated database
+model Tenant {
+  id                    String   @id @default(cuid()) // Same as churchId in JWT
+  name                  String                        // Church name
+  email                 String   @unique              // Primary admin email
+
+  // Database connection information (encrypted in production)
+  databaseUrl           String                        // Full connection string
+  databaseHost          String                        // PostgreSQL hostname
+  databasePort          Int      @default(5432)       // PostgreSQL port
+  databaseName          String                        // Database name
+
+  // Subscription and plan information
+  subscriptionStatus    String   @default("trial")    // trial | active | paused | cancelled
+  subscriptionPlan      String   @default("starter")  // starter | growth | pro
+  trialEndsAt           DateTime?                     // When trial expires
+
+  // Telnyx phone number assignment (one phone number per tenant)
+  telnyxPhoneNumber     String?  @unique              // Assigned phone number
+  telnyxNumberSid       String?  @unique              // Telnyx resource ID
+
+  // Tenant status lifecycle
+  status                String   @default("active")   // active | suspended | archived | deleted
+  schemaVersion         String   @default("1.0.0")    // Schema version for migrations
+
+  // Audit timestamps
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  lastAccessedAt        DateTime @default(now())      // For usage analytics
+
+  // Relations
+  phoneNumbers          PhoneNumberRegistry[]
+  adminEmails           AdminEmailIndex[]
+
+  // Indexes for fast queries
+  @@index([telnyxPhoneNumber])    // Fast phone number lookup for incoming SMS/MMS
+  @@index([status])               // Find all active/suspended tenants
+  @@index([subscriptionPlan])      // Analytics on plan distribution
+  @@index([createdAt])            // Time-based analytics
+}
+
+// ============================================================================
+// PHONE NUMBER REGISTRY
+// ============================================================================
+
+/// Maps phone numbers to tenants
+///
+/// Purpose: Route incoming SMS/MMS to correct tenant database
+///
+/// When Telnyx sends incoming SMS/MMS to a phone number:
+/// 1. Look up phone number in this registry
+/// 2. Get tenantId from the registry
+/// 3. Get tenant database connection
+/// 4. Route message to correct database
+///
+/// One phone number = One tenant (exclusive ownership)
+model PhoneNumberRegistry {
+  id          String   @id @default(cuid())
+  phoneNumber String   @unique                  // E.164 format: +14155552671
+  tenantId    String
+
+  // Audit trail
+  registeredAt DateTime @default(now())        // When phone was registered
+  assignedAt   DateTime @default(now())        // When assigned to tenant
+
+  // Relation to tenant
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([phoneNumber])                        // Fast lookup by phone number
+  @@index([tenantId])                           // Find all numbers for a tenant
+  @@index([registeredAt])                       // Time-based analytics
+}
+
+// ============================================================================
+// ADMIN EMAIL INDEX
+// ============================================================================
+
+/// Fast lookup: Email → Tenant mapping for login flow
+///
+/// Purpose: During login, find which tenant/database contains this admin email
+///
+/// Flow:
+/// 1. User enters email + password on login page
+/// 2. Query this table: "Which tenant has this email?"
+/// 3. Get tenantId and its database connection string
+/// 4. Connect to that tenant's database
+/// 5. Verify password against admin record in tenant database
+///
+/// Email hash used for privacy (store hash instead of plain email in registry)
+model AdminEmailIndex {
+  id        String   @id @default(cuid())
+  emailHash String   @unique                  // Hash of admin email for privacy
+  email     String   @unique                  // Plain email (encrypted in DB)
+  tenantId  String                            // Which tenant this admin belongs to
+  adminId   String                            // Admin ID in tenant's database
+
+  // Audit trail
+  createdAt DateTime @default(now())
+
+  // Relation to tenant
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([emailHash])                        // Fast hash-based lookup
+  @@index([email])                            // Support plain email queries too
+  @@index([tenantId])                         // Find all admins for a tenant
+}
+
+// ============================================================================
+// INDEXES SUMMARY
+// ============================================================================
+//
+// Tenant table indexes:
+// - telnyxPhoneNumber: Route incoming SMS to correct tenant
+// - status: Find all active/suspended tenants
+// - subscriptionPlan: Analytics queries
+// - createdAt: Time-series analytics
+//
+// PhoneNumberRegistry indexes:
+// - phoneNumber: Fast webhook routing (most critical path)
+// - tenantId: Management queries
+// - registeredAt: Analytics
+//
+// AdminEmailIndex indexes:
+// - emailHash: Fast login lookup (critical path)
+// - email: Support secondary lookups
+// - tenantId: Admin management queries
+//
+// Critical Paths (must be <10ms):
+// 1. Incoming webhook: phoneNumber → tenantId → database URL
+// 2. Login: email → tenantId → database URL
+// ============================================================================
