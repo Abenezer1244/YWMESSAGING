@@ -26,6 +26,9 @@ export function initDatadog(): void {
       env: process.env.NODE_ENV || 'development',
       // Sampling: trace 10% of requests in production, 100% in development
       sampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+      // Agent configuration
+      hostname: process.env.DD_AGENT_HOST || 'localhost',
+      port: parseInt(process.env.DD_AGENT_PORT || '8126', 10),
     });
 
     tracer.use('pg', { service: 'postgres' });

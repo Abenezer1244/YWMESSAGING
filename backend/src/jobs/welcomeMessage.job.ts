@@ -1,24 +1,28 @@
-import { PrismaClient } from '@prisma/client';
+import { getTenantPrisma, getRegistryPrisma } from '../lib/tenant-prisma.js';
 import * as telnyxService from '../services/telnyx.service.js';
 import * as billingService from '../services/billing.service.js';
 
-const prisma = new PrismaClient();
-
 /**
  * Send welcome message when a member is added to a church
- * Note: Group functionality has been removed
+ * PHASE 5: Multi-tenant refactoring
+ * - Uses tenantPrisma for member (tenant-scoped)
+ * - Uses registryPrisma for church (shared registry)
  */
 export async function sendWelcomeMessage(
   memberId: string,
-  churchId: string
+  churchId: string // Actually tenantId
 ) {
   try {
-    // Fetch member and church details
+    // Get tenant-scoped and registry clients
+    const tenantPrisma = await getTenantPrisma(churchId);
+    const registryPrisma = getRegistryPrisma();
+
+    // Fetch member from tenant database and church from registry
     const [member, church] = await Promise.all([
-      prisma.member.findUnique({
+      tenantPrisma.member.findUnique({
         where: { id: memberId },
       }),
-      prisma.church.findUnique({
+      registryPrisma.church.findUnique({
         where: { id: churchId },
       }),
     ]);

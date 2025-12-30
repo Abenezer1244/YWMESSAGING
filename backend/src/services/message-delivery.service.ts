@@ -1,4 +1,3 @@
-import { prisma } from '../lib/prisma.js';
 import { telnyxCircuitBreaker } from './circuit-breaker.service.js';
 import type { CircuitBreakerStats } from './circuit-breaker.service.js';
 import { redisClient } from '../config/redis.config.js';

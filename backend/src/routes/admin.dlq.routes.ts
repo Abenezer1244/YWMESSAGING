@@ -20,7 +20,7 @@ router.get(
   isAdmin,
   async (req: Request, res: Response) => {
     try {
-      const stats = await dlqService.getDLQStats();
+      const stats = await dlqService.getDLQStats(req.prisma!);
       res.json({
         success: true,
         data: stats,
@@ -45,9 +45,9 @@ router.get(
   isAdmin,
   async (req: Request, res: Response) => {
     try {
-      const { category, churchId, limit, offset } = req.query;
+      const { category, limit, offset } = req.query;
 
-      const result = await dlqService.listPendingDLQ({
+      const result = await dlqService.listPendingDLQ(req.prisma!, {
         category: category as any,
         limit: limit ? parseInt(limit as string) : undefined,
         offset: offset ? parseInt(offset as string) : undefined,
@@ -78,7 +78,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const item = await dlqService.getDLQItem(id);
+      const item = await dlqService.getDLQItem(req.prisma!, id);
 
       if (!item) {
         return res.status(404).json({
@@ -113,7 +113,7 @@ router.post(
       const { id } = req.params;
       const { metadata } = req.body;
 
-      const item = await dlqService.getDLQItem(id);
+      const item = await dlqService.getDLQItem(req.prisma!, id);
       if (!item) {
         return res.status(404).json({
           success: false,
@@ -121,7 +121,7 @@ router.post(
         });
       }
 
-      await dlqService.resolveDLQItem(id, metadata);
+      await dlqService.resolveDLQItem(req.prisma!, id, metadata);
 
       res.json({
         success: true,
@@ -156,7 +156,7 @@ router.post(
         });
       }
 
-      const item = await dlqService.getDLQItem(id);
+      const item = await dlqService.getDLQItem(req.prisma!, id);
       if (!item) {
         return res.status(404).json({
           success: false,
@@ -164,7 +164,7 @@ router.post(
         });
       }
 
-      await dlqService.deadLetterDLQItem(id, reason);
+      await dlqService.deadLetterDLQItem(req.prisma!, id, reason);
 
       res.json({
         success: true,
@@ -191,7 +191,7 @@ router.delete(
     try {
       const { id } = req.params;
 
-      const item = await dlqService.getDLQItem(id);
+      const item = await dlqService.getDLQItem(req.prisma!, id);
       if (!item) {
         return res.status(404).json({
           success: false,
@@ -199,7 +199,7 @@ router.delete(
         });
       }
 
-      await dlqService.deleteDLQItem(id);
+      await dlqService.deleteDLQItem(req.prisma!, id);
 
       res.json({
         success: true,

@@ -262,9 +262,10 @@ async function handlePullRequestEvent(payload: any) {
     console.log(`\n✅ All agents completed. Processing results...`);
     console.log(`   Successful responses: ${responses.length}/${agents.length}`);
 
-    // Store audit trail for each agent response
+    // Store audit trail for each agent response (no churchId for GitHub webhook events)
     for (const response of responses) {
       await storeAgentAudit(
+        undefined,
         response.agentType,
         'pull_request',
         { pr },
@@ -360,9 +361,10 @@ async function handlePushEvent(payload: any) {
     console.log(`\n✅ All agents completed. Post-merge analysis done.`);
     console.log(`   Successful responses: ${responses.length}/${agents.length}`);
 
-    // Store audit trail for each agent response
+    // Store audit trail for each agent response (no churchId for GitHub webhook events)
     for (const response of responses) {
       await storeAgentAudit(
+        undefined,
         response.agentType,
         'push',
         { after, pusher },
@@ -438,9 +440,10 @@ async function handleWorkflowRunEvent(payload: any) {
     console.log(`\n✅ Workflow analysis completed.`);
     console.log(`   Successful responses: ${responses.length}/${agents.length}`);
 
-    // Store audit trail for each agent response
+    // Store audit trail for each agent response (no churchId for GitHub webhook events)
     for (const response of responses) {
       await storeAgentAudit(
+        undefined,
         response.agentType,
         'workflow_run',
         { workflow },

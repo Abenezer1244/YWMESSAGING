@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { TenantPrismaClient } from '../lib/tenant-prisma.js';
 
 export interface CreateTemplateData {
   name: string;
@@ -6,7 +6,7 @@ export interface CreateTemplateData {
   category: string;
 }
 
-export async function getTemplates(tenantId: string, tenantPrisma: PrismaClient) {
+export async function getTemplates(tenantId: string, tenantPrisma: TenantPrismaClient) {
   return await tenantPrisma.messageTemplate.findMany({
     orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
   });
@@ -14,12 +14,11 @@ export async function getTemplates(tenantId: string, tenantPrisma: PrismaClient)
 
 export async function createTemplate(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   data: CreateTemplateData
 ) {
   return await tenantPrisma.messageTemplate.create({
     data: {
-      churchId: tenantId,
       name: data.name,
       content: data.content,
       category: data.category,
@@ -30,7 +29,7 @@ export async function createTemplate(
 
 export async function updateTemplate(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   templateId: string,
   data: Partial<CreateTemplateData>
 ) {
@@ -40,13 +39,13 @@ export async function updateTemplate(
   });
 }
 
-export async function deleteTemplate(tenantId: string, tenantPrisma: PrismaClient, templateId: string) {
+export async function deleteTemplate(tenantId: string, tenantPrisma: TenantPrismaClient, templateId: string) {
   return await tenantPrisma.messageTemplate.delete({
     where: { id: templateId },
   });
 }
 
-export async function incrementUsageCount(tenantId: string, tenantPrisma: PrismaClient, templateId: string) {
+export async function incrementUsageCount(tenantId: string, tenantPrisma: TenantPrismaClient, templateId: string) {
   return await tenantPrisma.messageTemplate.update({
     where: { id: templateId },
     data: { usageCount: { increment: 1 } },

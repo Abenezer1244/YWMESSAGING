@@ -19,7 +19,7 @@ router.use(authenticateToken);
 router.get('/progress', async (req: Request, res: Response) => {
   try {
     const churchId = (req as any).user.churchId;
-    const progress = await getOnboardingProgress(churchId);
+    const progress = await getOnboardingProgress(churchId, (req as any).prisma);
     res.json({ success: true, data: progress });
   } catch (error: any) {
     console.error('Failed to get onboarding progress:', error);
@@ -37,7 +37,7 @@ router.get('/progress', async (req: Request, res: Response) => {
 router.get('/percentage', async (req: Request, res: Response) => {
   try {
     const churchId = (req as any).user.churchId;
-    const percentage = await getOnboardingProgressPercentage(churchId);
+    const percentage = await getOnboardingProgressPercentage(churchId, (req as any).prisma);
     res.json({ success: true, data: { percentage } });
   } catch (error: any) {
     console.error('Failed to get onboarding percentage:', error);
@@ -55,7 +55,7 @@ router.get('/percentage', async (req: Request, res: Response) => {
 router.get('/summary', async (req: Request, res: Response) => {
   try {
     const churchId = (req as any).user.churchId;
-    const summary = await getOnboardingSummary(churchId);
+    const summary = await getOnboardingSummary(churchId, (req as any).prisma);
     res.json({ success: true, data: summary });
   } catch (error: any) {
     console.error('Failed to get onboarding summary:', error);
@@ -87,6 +87,7 @@ router.post('/complete/:taskId', async (req: Request, res: Response) => {
 
     const result = await completeOnboardingTask(
       churchId,
+      (req as any).prisma,
       taskId as 'create_branch' | 'add_members' | 'send_message'
     );
 
@@ -98,7 +99,7 @@ router.post('/complete/:taskId', async (req: Request, res: Response) => {
     }
 
     // Get updated summary
-    const summary = await getOnboardingSummary(churchId);
+    const summary = await getOnboardingSummary(churchId, (req as any).prisma);
 
     res.json({
       success: true,

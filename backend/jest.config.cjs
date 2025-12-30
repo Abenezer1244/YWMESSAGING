@@ -13,12 +13,9 @@ module.exports = {
   transformIgnorePatterns: [
     'node_modules/(?!(@faker-js|uuid|libphonenumber-js)/)',
   ],
-  roots: ['<rootDir>/src', '<rootDir>/tests'],
-  testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts', 'tests/**/*.test.ts'],
+  roots: ['<rootDir>/src'],
+  testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
   moduleFileExtensions: ['ts', 'js', 'json'],
-
-  // Setup files for test initialization
-  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
 
   // Coverage collection
   collectCoverageFrom: [

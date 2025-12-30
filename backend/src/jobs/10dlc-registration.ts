@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { getRegistryPrisma } from '../lib/tenant-prisma.js';
 import axios from 'axios';
-
-const prisma = new PrismaClient();
 
 /**
  * Telnyx Error Code Mapping
@@ -242,11 +240,11 @@ export async function registerPersonal10DLCAsync(
   churchId: string,
   phoneNumber: string
 ): Promise<void> {
+  const registryPrisma = getRegistryPrisma();
+
   try {
     console.log(`📝 Starting 10DLC registration for church: ${churchId}`);
-
-    // Get church info (including 10DLC brand data)
-    const church = await prisma.church.findUnique({
+    const church = await registryPrisma.church.findUnique({
       where: { id: churchId },
       select: {
         id: true,
@@ -282,7 +280,7 @@ export async function registerPersonal10DLCAsync(
       console.log(`✅ Church data validation passed`);
     } catch (validationError: any) {
       console.error(`❌ Validation error: ${validationError.message}`);
-      await prisma.church.update({
+      await registryPrisma.church.update({
         where: { id: churchId },
         data: {
           dlcStatus: 'rejected',
@@ -343,7 +341,7 @@ export async function registerPersonal10DLCAsync(
       console.error('❌ No brand ID returned from Telnyx');
       console.error('Response:', JSON.stringify(brandResponse.data, null, 2));
 
-      await prisma.church.update({
+      await registryPrisma.church.update({
         where: { id: churchId },
         data: {
           dlcStatus: 'rejected',
@@ -358,7 +356,7 @@ export async function registerPersonal10DLCAsync(
     console.log(`✅ Brand registered with Telnyx: ${brandId}`);
 
     // Store brand ID and mark as pending
-    await prisma.church.update({
+    await registryPrisma.church.update({
       where: { id: churchId },
       data: {
         dlcBrandId: brandId,
@@ -389,7 +387,7 @@ export async function registerPersonal10DLCAsync(
     }
 
     // Mark as failed but don't crash the system
-    await prisma.church.update({
+    await registryPrisma.church.update({
       where: { id: churchId },
       data: {
         dlcStatus: 'rejected',
@@ -406,11 +404,12 @@ export async function registerPersonal10DLCAsync(
  * This runs asynchronously when the brand verification webhook arrives
  */
 export async function createCampaignAsync(churchId: string): Promise<void> {
+  const registryPrisma = getRegistryPrisma();
   try {
     console.log(`📋 Starting campaign creation for church: ${churchId}`);
 
     // Get church info
-    const church = await prisma.church.findUnique({
+    const church = await registryPrisma.church.findUnique({
       where: { id: churchId },
       select: { name: true, dlcBrandId: true, id: true }
     });
@@ -477,7 +476,7 @@ export async function createCampaignAsync(churchId: string): Promise<void> {
         fullResponse: JSON.stringify(campaignResponse.data, null, 2).substring(0, 500),
       });
 
-      await prisma.church.update({
+      await registryPrisma.church.update({
         where: { id: churchId },
         data: {
           dlcStatus: 'rejected',
@@ -492,7 +491,7 @@ export async function createCampaignAsync(churchId: string): Promise<void> {
     console.log(`✅ Campaign created: ${campaignId}`);
 
     // Store campaign ID and mark as pending
-    await prisma.church.update({
+    await registryPrisma.church.update({
       where: { id: churchId },
       data: {
         dlcStatus: 'campaign_pending',
@@ -520,7 +519,7 @@ export async function createCampaignAsync(churchId: string): Promise<void> {
     }
 
     // Mark as failed but don't crash the system
-    await prisma.church.update({
+    await registryPrisma.church.update({
       where: { id: churchId },
       data: {
         dlcStatus: 'rejected',
@@ -543,7 +542,8 @@ export async function checkAndMigrateToPer10DLC(): Promise<void> {
     console.log('🔍 Checking 10DLC approval statuses (webhook safety check)...');
 
     // Find churches with pending 10DLC that are due for checking
-    const pendingChurches = await prisma.church.findMany({
+    const registryPrisma = getRegistryPrisma();
+    const pendingChurches = await registryPrisma.church.findMany({
       where: {
         dlcStatus: 'pending',
         dlcBrandId: { not: null },
@@ -578,7 +578,7 @@ export async function checkAndMigrateToPer10DLC(): Promise<void> {
           // UPGRADE to per-church brand!
           console.log(`✅ APPROVED! Migrating ${church.name} to per-church 10DLC`);
 
-          await prisma.church.update({
+          await registryPrisma.church.update({
             where: { id: church.id },
             data: {
               dlcStatus: 'approved',
@@ -597,7 +597,7 @@ export async function checkAndMigrateToPer10DLC(): Promise<void> {
 
           const failureReasons = response.data?.failureReasons || 'Unknown reason';
 
-          await prisma.church.update({
+          await registryPrisma.church.update({
             where: { id: church.id },
             data: {
               dlcStatus: 'rejected',
@@ -608,7 +608,7 @@ export async function checkAndMigrateToPer10DLC(): Promise<void> {
 
         } else if (status === 'REGISTRATION_PENDING') {
           // Still pending, reschedule check for later
-          await prisma.church.update({
+          await registryPrisma.church.update({
             where: { id: church.id },
             data: {
               dlcNextCheckAt: new Date(Date.now() + 30 * 60 * 1000), // Check again in 30 minutes

@@ -1,9 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { verifyAccessToken, AccessTokenPayload } from '../utils/jwt.utils.js';
 import { logPermissionDenied } from '../utils/security-logger.js';
 import { isTokenRevoked } from '../services/token-revocation.service.js';
-import { getTenantPrisma } from '../lib/tenant-prisma.js';
+import { getTenantPrisma, TenantPrismaClient } from '../lib/tenant-prisma.js';
 
 // ============================================================================
 // EXTEND EXPRESS REQUEST TYPE FOR MULTI-TENANCY
@@ -14,7 +13,7 @@ declare global {
     interface Request {
       user?: AccessTokenPayload;
       tenantId?: string; // Tenant identifier (churchId from JWT)
-      prisma?: PrismaClient; // Tenant-specific Prisma client
+      prisma?: TenantPrismaClient; // Tenant-specific Prisma client
     }
   }
 }

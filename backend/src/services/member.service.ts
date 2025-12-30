@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { TenantPrismaClient } from '../lib/tenant-prisma.js';
 import { formatToE164 } from '../utils/phone.utils.js';
 import { encrypt, decrypt, hashForSearch } from '../utils/encryption.utils.js';
 import { queueWelcomeMessage } from '../jobs/welcomeMessage.job.js';
@@ -26,7 +26,7 @@ export interface UpdateMemberData {
  */
 export async function getMembers(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   options: {
     page?: number;
     limit?: number;
@@ -44,7 +44,7 @@ export async function getMembers(
  * Used by getMembers (which handles caching)
  */
 async function fetchMembersPage(
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   page: number,
   limit: number,
   search?: string
@@ -113,7 +113,7 @@ async function fetchMembersPage(
 /**
  * Add single member
  */
-export async function addMember(tenantId: string, tenantPrisma: PrismaClient, data: CreateMemberData) {
+export async function addMember(tenantId: string, tenantPrisma: TenantPrismaClient, data: CreateMemberData) {
   return addMemberInternal(tenantPrisma, data);
 }
 
@@ -130,7 +130,7 @@ export async function addMember(tenantId: string, tenantPrisma: PrismaClient, da
  * - API returns quickly (~600-800ms)
  * - Member ID is real and can be deleted/updated immediately
  */
-async function addMemberInternal(tenantPrisma: PrismaClient, data: CreateMemberData) {
+async function addMemberInternal(tenantPrisma: TenantPrismaClient, data: CreateMemberData) {
   console.log('[addMember] Starting member add');
 
   // Validate phone (fast, no DB)
@@ -195,7 +195,7 @@ async function addMemberInternal(tenantPrisma: PrismaClient, data: CreateMemberD
  */
 export async function importMembers(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   membersData: Array<{
     firstName: string;
     lastName: string;
@@ -365,7 +365,7 @@ export async function importMembers(
 /**
  * Update member
  */
-export async function updateMember(tenantId: string, tenantPrisma: PrismaClient, memberId: string, data: UpdateMemberData) {
+export async function updateMember(tenantId: string, tenantPrisma: TenantPrismaClient, memberId: string, data: UpdateMemberData) {
   const member = await tenantPrisma.member.findUnique({
     where: { id: memberId },
   });
@@ -405,7 +405,7 @@ export async function updateMember(tenantId: string, tenantPrisma: PrismaClient,
 /**
  * Delete a member
  */
-export async function deleteMember(tenantId: string, tenantPrisma: PrismaClient, memberId: string) {
+export async function deleteMember(tenantId: string, tenantPrisma: TenantPrismaClient, memberId: string) {
   console.log(`[deleteMember] Deleting member: ${memberId}`);
 
   const deleteResult = await tenantPrisma.member.delete({

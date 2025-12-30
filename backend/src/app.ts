@@ -33,6 +33,7 @@ import { etagMiddleware } from './middleware/etag.middleware.js';
 import AppError, { getSafeErrorMessage, getStatusCode } from './utils/app-error.js';
 import { loggerMiddleware } from './utils/logger.js';
 import { initializeSession } from './config/session.config.js';
+import apmMiddleware from './middleware/apm.middleware.js';
 
 const app = express();
 
@@ -76,6 +77,10 @@ app.use((req, res, next) => {
 
   next();
 });
+
+// ✅ MONITORING: Add APM middleware for Datadog tracing
+// Must be early in the middleware chain to capture all requests
+app.use(apmMiddleware);
 
 // ✅ SECURITY: Initialize Sentry for error tracking and monitoring
 // Must be done as early as possible in the application lifecycle

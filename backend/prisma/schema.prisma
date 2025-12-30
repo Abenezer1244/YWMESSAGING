@@ -34,648 +34,89 @@ datasource db {
   // Status: ✅ CONFIGURED in .env (line 12)
 }
 
-// Church account
+// ============================================================================
+// REGISTRY: Church account (main tenant list)
+// ============================================================================
+// This model is in the REGISTRY database only
+// Contains metadata about each church/organization
+// Each church has their own isolated database (referenced by Tenant.databaseUrl)
+//
 model Church {
   id                           String   @id @default(cuid())
   name                         String
   email                        String   @unique
   stripeCustomerId             String?  @unique
+
+  // Telnyx phone number (main registry stores this too for lookups)
   telnyxPhoneNumber            String?
   telnyxNumberSid              String?  @unique
-  telnyxWebhookId              String?  // Telnyx webhook ID for MMS events
+  telnyxWebhookId              String?
   telnyxVerified               Boolean  @default(false)
   telnyxPurchasedAt            DateTime?
-  // Phase 2: Enterprise linking status tracking
-  telnyxPhoneLinkingStatus      String   @default("pending") // pending, linked, failed
+  telnyxPhoneLinkingStatus      String   @default("pending")
   telnyxPhoneLinkingLastAttempt DateTime?
-  telnyxPhoneLinkingRetryCount  Int      @default(0) // Tracks retry attempts for automatic recovery
-  telnyxPhoneLinkingError       String?  // Last error message for debugging
-  // Phase 3: Soft-delete for phone numbers with 30-day recovery window
-  telnyxNumberStatus           String   @default("active") // active, archived, pending-deletion
-  telnyxNumberDeletedAt        DateTime? // When the number was marked for deletion
-  telnyxNumberDeletedBy        String?   // Admin ID who initiated deletion
-  telnyxNumberRecoveryDeadline DateTime? // Until this date, number can be restored
+  telnyxPhoneLinkingRetryCount  Int      @default(0)
+  telnyxPhoneLinkingError       String?
+  telnyxNumberStatus           String   @default("active")
+  telnyxNumberDeletedAt        DateTime?
+  telnyxNumberDeletedBy        String?
+  telnyxNumberRecoveryDeadline DateTime?
 
-  // 10DLC Registration (Delivery Optimization)
-  dlcBrandId                   String?  // Telnyx 10DLC brand ID (per-church)
-  tcrBrandId                   String?  // The Campaign Registry's brand ID
-  dlcStatus                    String   @default("pending") // pending, brand_verified, campaign_pending, approved, rejected, using_shared
-  dlcRegisteredAt              DateTime? // When we submitted brand to Telnyx
-  dlcApprovedAt                DateTime? // When campaign became MNO_PROVISIONED
-  dlcRejectionReason           String?  // If rejected, why
-  dlcNextCheckAt               DateTime? // Next time to check approval status
-  dlcCampaignId                String?  // Telnyx campaign ID (for tracking campaign approval)
-  dlcCampaignStatus            String?  // Campaign status: TCR_PENDING, TELNYX_ACCEPTED, MNO_PROVISIONED, etc.
-  dlcNumberAssignedAt          DateTime? // When phone number was assigned to campaign
-  dlcCampaignSuspended         Boolean  @default(false) // Campaign suspended due to inactivity
-  dlcCampaignSuspendedAt       DateTime? // When campaign was suspended
-  dlcCampaignSuspendedReason   String?  // Why campaign was suspended (e.g., "DORMANT")
-  usingSharedBrand             Boolean  @default(true) // true = platform brand, false = per-church brand
-  wantsPremiumDelivery         Boolean  @default(false) // Church opted-in to premium 10DLC (99% delivery)
-  deliveryRate                 Float    @default(0.65) // Delivery rate (starts 65% with shared, 99% when approved)
+  // 10DLC Registration
+  dlcBrandId                   String?
+  tcrBrandId                   String?
+  dlcStatus                    String   @default("pending")
+  dlcRegisteredAt              DateTime?
+  dlcApprovedAt                DateTime?
+  dlcRejectionReason           String?
+  dlcNextCheckAt               DateTime?
+  dlcCampaignId                String?
+  dlcCampaignStatus            String?
+  dlcNumberAssignedAt          DateTime?
+  dlcCampaignSuspended         Boolean  @default(false)
+  dlcCampaignSuspendedAt       DateTime?
+  dlcCampaignSuspendedReason   String?
+  usingSharedBrand             Boolean  @default(true)
+  wantsPremiumDelivery         Boolean  @default(false)
+  deliveryRate                 Float    @default(0.65)
 
-  // 10DLC Brand Information (Required for brand registration with Telnyx)
-  ein                          String?  // Employer Identification Number (required for 10DLC)
-  brandPhoneNumber             String?  // Brand contact phone number (required for 10DLC)
-  streetAddress                String?  // Business street address (required for 10DLC)
-  city                         String?  // Business city (required for 10DLC)
-  state                        String?  // Business state - 2-letter code (required for 10DLC)
-  postalCode                   String?  // Business postal code (required for 10DLC)
-  website                      String?  // Church website URL (optional for 10DLC)
-  entityType                   String   @default("NON_PROFIT") // Legal entity type (NON_PROFIT, SOLE_PROPRIETOR, PRIVATE_CORPORATION, etc.)
-  vertical                     String   @default("RELIGION") // Industry vertical (RELIGION, EDUCATION, HEALTHCARE, etc.)
+  // 10DLC Brand Information
+  ein                          String?
+  brandPhoneNumber             String?
+  streetAddress                String?
+  city                         String?
+  state                        String?
+  postalCode                   String?
+  website                      String?
+  entityType                   String   @default("NON_PROFIT")
+  vertical                     String   @default("RELIGION")
 
   trialEndsAt                  DateTime
-  subscriptionStatus           String   @default("trial") // trial, active, cancelled, expired
+  subscriptionStatus           String   @default("trial")
   createdAt                    DateTime @default(now())
   updatedAt                    DateTime @updatedAt
 
   // Relations
-  branches              Branch[]
-  admins                Admin[]
-  messages              Message[]
-  messageTemplates      MessageTemplate[]
-  subscriptions         Subscription[]
-  recurringMessages     RecurringMessage[]
-  conversations         Conversation[]
-  planningCenterIntegration PlanningCenterIntegration?
-  npsSurveys            NPSSurvey[]
-  onboardingProgress    OnboardingProgress[]
+  tenant                Tenant?         // 1:1 relationship to Tenant (populated when church is ready)
 
   @@index([subscriptionStatus])
   @@index([trialEndsAt])
   @@index([telnyxPhoneNumber])
-  @@index([telnyxPhoneLinkingStatus]) // Index for finding churches that need linking
-  @@index([telnyxNumberStatus]) // Index for finding archived/deleted numbers
-  @@index([telnyxNumberRecoveryDeadline]) // Index for cleanup job to find expired recoveries
-  @@index([dlcStatus]) // Index for finding churches pending 10DLC approval
-  @@index([dlcNextCheckAt]) // Index for background job to check approval status
+  @@index([telnyxPhoneLinkingStatus])
+  @@index([telnyxNumberStatus])
+  @@index([telnyxNumberRecoveryDeadline])
+  @@index([dlcStatus])
+  @@index([dlcNextCheckAt])
 }
-
-// Physical locations within a church
-model Branch {
-  id          String   @id @default(cuid())
-  churchId    String
-  name        String
-  address     String?
-  phone       String?
-  description String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  church      Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
-
-  @@index([churchId])
-  @@index([isActive])
-}
-
-// Individual members
-model Member {
-  id        String   @id @default(cuid())
-  firstName String
-  lastName  String
-  phone     String   // ENCRYPTED: E.164 format (encrypted in database)
-  phoneHash String?  // Hash of phone for searchable lookups (HMAC-SHA256) - uniqueness handled in application
-  email     String?  @unique // DEPRECATED: Use encryptedEmail instead (kept for backward compatibility)
-  encryptedEmail String? // ENCRYPTED: Encrypted email address (AES-256-GCM)
-  emailHash String?  // Hash of email for searchable lookups (HMAC-SHA256) - uniqueness handled in application
-  optInSms  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  messageRecipients MessageRecipient[]
-  conversations   Conversation[]
-  conversationMessages ConversationMessage[]
-
-  @@index([email])
-  @@index([emailHash])
-  @@index([phoneHash])
-  // ✅ Priority 2.3: Composite index for efficient name-based searches (importMembers, search queries)
-  // Supports: WHERE firstName LIKE ... AND lastName LIKE ... queries
-  @@index([firstName, lastName])
-  // ✅ PHASE 1: Index for member creation date pagination
-  // Supports: WHERE createdAt >= ? ORDER BY createdAt DESC (used in member list pagination)
-  @@index([createdAt])
-}
-
-// SMS messages sent by church
-model Message {
-  id                  String   @id @default(cuid())
-  churchId            String
-  content             String
-  status              String   @default("pending") // pending, sent, failed
-  targetType          String   // individual, all (branches for recurring messages)
-  targetIds           String   @default("") // JSON array of IDs
-  totalRecipients     Int      @default(0)
-  deliveredCount      Int      @default(0)
-  failedCount         Int      @default(0)
-  sentAt              DateTime?
-  createdAt           DateTime @default(now())
-
-  // Relations
-  church              Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
-  recipients          MessageRecipient[]
-
-  @@index([churchId])
-  @@index([status])
-  @@index([sentAt])
-  // ✅ Priority 2.3: Composite index for efficient date range queries in getMessageStats
-  // Supports: WHERE churchId = ? AND createdAt >= ? queries (used in stats aggregation)
-  @@index([churchId, createdAt])
-}
-
-// Track delivery status per recipient
-model MessageRecipient {
-  id                String   @id @default(cuid())
-  messageId         String
-  memberId          String
-  status            String   @default("pending") // pending, sent, delivered, failed
-  providerMessageId String?  // Telnyx message ID (generic name for flexibility)
-  deliveredAt       DateTime?
-  failedAt          DateTime?
-  failureReason     String?
-
-  // Relations
-  message           Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  member            Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
-
-  @@unique([messageId, memberId])
-  @@index([messageId])
-  @@index([memberId])
-  @@index([status])
-  // ✅ Priority 2.3: Composite index for efficient status aggregations in getBranchStats
-  // Supports: WHERE messageId = ? AND status = 'delivered' queries used in group by aggregations
-  @@index([messageId, status])
-}
-
-// Reusable message templates
-model MessageTemplate {
-  id        String   @id @default(cuid())
-  churchId  String
-  name      String
-  content   String
-  category  String   // service_reminder, event, prayer, thank_you, welcome, offering
-  isDefault Boolean  @default(false)
-  usageCount Int     @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  church    Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
-
-  @@index([churchId])
-  @@index([category])
-}
-
-// Recurring/scheduled messages
-model RecurringMessage {
-  id          String   @id @default(cuid())
-  churchId    String
-  name        String
-  content     String
-  targetType  String   // branches, all
-  targetIds   String   @default("") // JSON array
-  frequency   String   // daily, weekly, monthly
-  dayOfWeek   Int?     // 0-6 for weekly
-  timeOfDay   String?  // HH:MM format
-  nextSendAt  DateTime
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  church      Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
-
-  @@index([churchId])
-  @@index([isActive])
-  @@index([nextSendAt])
-}
-
-// Church administrators
-model Admin {
-  id            String   @id @default(cuid())
-  churchId      String
-  email         String   @unique // DEPRECATED: Use encryptedEmail instead (kept for backward compatibility)
-  encryptedEmail String?        // ENCRYPTED: Encrypted email address (AES-256-GCM)
-  emailHash     String?         // Hash of email for searchable lookups (HMAC-SHA256) - uniqueness handled in application
-  passwordHash  String
-  firstName     String
-  lastName      String
-  role          String   @default("CO_ADMIN") // PRIMARY, CO_ADMIN
-  invitationToken String?
-  invitationExpiresAt DateTime?
-  lastLoginAt   DateTime?
-  welcomeCompleted Boolean @default(false) // Track if user completed onboarding
-  userRole      String?  // User's role in the church: pastor, admin, communications, volunteer, other
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  // Relations
-  church        Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
-  mfa           AdminMFA?
-
-  @@index([churchId])
-  @@index([role])
-  @@index([churchId, role])  // ✅ For efficient CO_ADMIN lookups in getUsage() and billing queries
-  @@index([emailHash])       // Index for encrypted email lookups
-}
-
-// Subscription details (Stripe)
-model Subscription {
-  id              String   @id @default(cuid())
-  churchId        String   @unique
-  stripeSubId     String?  @unique
-  plan            String   @default("starter") // starter, growth, pro
-  billingCycle    String   @default("monthly") // monthly, annual
-  status          String   @default("active") // active, cancelled, past_due
-  currentPeriodStart DateTime?
-  currentPeriodEnd DateTime?
-  cancelledAt     DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  // Relations
-  church          Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
-
-  @@index([plan])
-  @@index([status])
-  @@index([billingCycle])
-  @@index([churchId, status])  // PHASE 1: Composite for active subscriptions lookup (87% query reduction)
-}
-
-// Planning Center Integration
-model PlanningCenterIntegration {
-  id                    String   @id @default(cuid())
-  churchId              String   @unique
-  organizationId        String   // PCO Organization ID
-  accessToken           String   // OAuth2 access token (encrypted in production)
-  refreshToken          String?  // OAuth2 refresh token for auto-renewal
-  expiresAt             DateTime? // When access token expires
-  isEnabled             Boolean  @default(true)
-  memberSyncEnabled     Boolean  @default(true)
-  serviceSyncEnabled    Boolean  @default(false) // For future: sync service schedules
-  syncStatus            String   @default("pending") // pending, active, failed
-  lastSyncAt            DateTime?
-  errorMessage          String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-
-  // Relations
-  church                Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
-
-  @@index([churchId])
-  @@index([isEnabled])
-  @@index([syncStatus])
-  @@index([lastSyncAt])
-}
-
-// SMS/MMS Conversations between church and members
-model Conversation {
-  id              String   @id @default(cuid())
-  churchId        String
-  memberId        String
-  lastMessageAt   DateTime?
-  status          String   @default("open")  // open, closed, archived
-  unreadCount     Int      @default(0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  // Relations
-  church          Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
-  member          Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  messages        ConversationMessage[]
-
-  @@unique([churchId, memberId])
-  @@index([churchId])
-  @@index([memberId])
-  @@index([lastMessageAt])
-  @@index([status])
-  @@index([churchId, lastMessageAt])  // PHASE 1: Composite for conversation list sorted by recency (20% faster)
-}
-
-// Individual SMS/MMS messages in conversations
-model ConversationMessage {
-  id              String   @id @default(cuid())
-  conversationId  String
-  memberId        String
-  content         String   // Text content (can be empty if media-only)
-  direction       String   // "inbound" (from member) | "outbound" (from leader)
-
-  // Telnyx tracking
-  providerMessageId String?  // Telnyx MMS ID for delivery tracking
-  deliveryStatus  String?    // "pending" | "delivered" | "failed"
-
-  // S3 Media fields (full quality, NO compression)
-  mediaUrl        String?    // S3 presigned URL (expires in 7 days)
-  mediaType       String?    // "image" | "video" | "audio" | "document"
-  mediaName       String?    // Original filename
-  mediaSizeBytes  Int?       // File size in bytes
-  mediaS3Key      String?    // S3 object key for retrieval/deletion
-  mediaMimeType   String?    // MIME type (image/jpeg, video/mp4, etc)
-  mediaWidth      Int?       // Image width in pixels
-  mediaHeight     Int?       // Image height in pixels
-  mediaDuration   Int?       // Video/audio duration in seconds
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  // Relations
-  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  member          Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
-
-  @@index([conversationId])
-  @@index([createdAt])
-  @@index([direction])
-  @@index([mediaType])
-  @@index([providerMessageId])
-  @@index([conversationId, createdAt])  // PHASE 1: Composite for sorted message list (15% faster loading)
-  // ✅ PHASE 1: Index for filtering messages by direction
-  // Supports: WHERE direction = ? AND conversationId = ? (used in conversation load)
-  @@index([direction, conversationId])
-}
-
-// Queue for SMS/MMS messages to be sent
-model MessageQueue {
-  id                    String   @id @default(cuid())
-  churchId              String
-  phone                 String   // E.164 format
-  content               String   // Text message content
-  mediaS3Url            String?  // S3 URL if sending media
-  conversationMessageId String?  // Link to conversation message
-  status                String   @default("pending")  // pending, sent, failed
-  retryCount            Int      @default(0)
-  lastError             String?
-  sentAt                DateTime?
-  failedAt              DateTime?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-
-  @@index([churchId])
-  @@index([status])
-  @@index([createdAt])
-}
-
-// Analytics events (PostHog backup)
-model AnalyticsEvent {
-  id        String   @id @default(cuid())
-  churchId  String?
-  eventName String
-  properties String? // JSON
-  createdAt DateTime @default(now())
-
-  @@index([churchId])
-  @@index([eventName])
-}
-
-// Chat conversations (public visitors or authenticated users)
-model ChatConversation {
-  id        String   @id @default(cuid())
-  churchId  String?  // null for public landing page visitors
-  adminId   String?  // null for public visitors
-  visitorId String?  // unique identifier for public visitors (from browser)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  messages  ChatMessage[]
-
-  @@index([churchId])
-  @@index([adminId])
-  @@index([visitorId])
-}
-
-// Individual chat messages
-model ChatMessage {
-  id              String   @id @default(cuid())
-  conversationId  String
-  role            String   // "user" or "assistant"
-  content         String
-  createdAt       DateTime @default(now())
-
-  // Relations
-  conversation    ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-
-  @@index([conversationId])
-}
-
-// Agent audit trail for tracking all agent invocations
-model AgentAudit {
-  id                String   @id @default(cuid())
-  agentType         String   // backend-engineer, security-analyst, etc.
-  eventType         String   // pull_request, push, workflow_run
-  githubPrNumber    Int?     // PR number if applicable
-  githubBranch      String?  // Branch name
-  status            String   // success, failed
-  findings          String   @default("[]") // JSON array
-  recommendations   String   @default("[]") // JSON array
-  severity          String?  // critical, high, medium, low, info
-  error             String?  // Error message if failed
-  createdAt         DateTime @default(now())
-
-  @@index([agentType])
-  @@index([eventType])
-  @@index([status])
-  @@index([severity])
-  @@index([createdAt])
-}
-
-// GDPR: Consent audit trail - track all consent changes
-model ConsentLog {
-  id        String   @id @default(cuid())
-  churchId  String
-  memberId  String?
-  adminId   String?
-  type      String   // smsMarketing, emailMarketing, dataProcessing, analytics
-  status    String   // granted, denied, withdrawn
-  reason    String?
-  source    String   // api, web_form, email_link, signup
-  createdAt DateTime @default(now())
-
-  @@index([churchId])
-  @@index([memberId])
-  @@index([adminId])
-  @@index([type])
-  @@index([createdAt])
-}
-
-// GDPR: Account deletion requests - track deletion with grace period
-model AccountDeletionRequest {
-  id                    String   @id @default(cuid())
-  churchId              String   @unique
-  initiatedBy           String   // Admin ID
-  confirmationToken     String   @unique
-  status                String   @default("pending") // pending, confirmed, cancelled
-  scheduledDeletionAt   DateTime
-  actualDeletionAt      DateTime?
-  reason                String?
-  cancelledAt           DateTime?
-  cancelledBy           String?
-  createdAt             DateTime @default(now())
-
-  @@index([churchId])
-  @@index([confirmationToken])
-  @@index([status])
-  @@index([scheduledDeletionAt])
-}
-
-// GDPR: Data exports - track exports for download
-model DataExport {
-  id            String   @id @default(cuid())
-  churchId      String
-  requestedBy   String   // Admin ID
-  status        String   @default("pending") // pending, completed, failed, expired
-  fileUrl       String?
-  fileSize      Int?
-  expiresAt     DateTime
-  errorMessage  String?
-  createdAt     DateTime @default(now())
-  completedAt   DateTime?
-
-  @@index([churchId])
-  @@index([expiresAt])
-  @@index([status])
-}
-
-// MFA: Admin multi-factor authentication settings
-model AdminMFA {
-  id              String   @id @default(cuid())
-  adminId         String   @unique
-  totpSecret      String   // Encrypted TOTP secret
-  mfaEnabled      Boolean  @default(false)
-  backupCodesUsed String   @default("[]") // JSON array of used code indices
-  enabledAt       DateTime?
-  disabledAt      DateTime?
-  lastVerifiedAt  DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  admin           Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
-
-  @@index([adminId])
-  @@index([mfaEnabled])
-}
-
-// MFA: Recovery codes for account recovery if phone is lost
-model MFARecoveryCode {
-  id          String   @id @default(cuid())
-  adminId     String
-  code        String   @unique // Hashed recovery code
-  index       Int      // Position in recovery codes list
-  usedAt      DateTime?
-  createdAt   DateTime @default(now())
-
-  @@unique([adminId, index])
-  @@index([adminId])
-  @@index([usedAt])
-}
-
-// NPS: Net Promoter Score survey for customer feedback
-model NPSSurvey {
-  id            String   @id @default(cuid())
-  churchId      String
-  responderId   String?  // Admin ID who responded (optional for anonymous)
-  score         Int      // 0-10 rating
-  category      String   // feedback, feature_request, bug, general, other
-  feedback      String?  // Optional written feedback
-  sentiment     String?  // positive, neutral, negative (auto-detected or manual)
-  followupEmail String?  // Email to send follow-up
-  followupSent  Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  respondedAt   DateTime @default(now())
-
-  church        Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
-
-  @@index([churchId])
-  @@index([score])
-  @@index([sentiment])
-  @@index([category])
-  @@index([createdAt])
-  @@index([responderId])
-}
-
-// Dead Letter Queue: Failed operations for later inspection and replay
-model DeadLetterQueue {
-  id               String                @id @default(cuid())
-  category         String                // SMS_SEND, WEBHOOK_INBOUND, SUBSCRIPTION_UPDATE, PAYMENT_PROCESS
-  churchId         String?               // Optional: church that operation belongs to
-  externalId       String?               // Optional: message ID, webhook ID, etc.
-  originalPayload  Json                  // Original operation payload
-  errorMessage     String                // Error that caused failure
-  errorStack       String?               // Stack trace for debugging
-  metadata         Json?                 // Custom metadata (recipientId, messageId, etc.)
-  status           String    @default("PENDING")  // PENDING, RESOLVED, DEAD_LETTER
-  retryCount       Int       @default(0)
-  firstAttemptAt   DateTime  @default(now())     // When first attempt failed
-  lastAttemptAt    DateTime  @default(now())     // When last attempt/inspection occurred
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-
-  @@index([status])
-  @@index([category])
-  @@index([churchId])
-  @@index([externalId])
-  @@index([createdAt])
-  @@index([retryCount])
-}
-
-// Onboarding Progress: Tracks completion of onboarding tasks
-model OnboardingProgress {
-  id        String   @id @default(cuid())
-  churchId  String
-  taskId    String   // create_branch, add_members, send_message
-  completed Boolean  @default(false)
-  completedAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  church    Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
-
-  @@unique([churchId, taskId])
-  @@index([churchId])
-  @@index([completed])
-  @@index([completedAt])
-}
-
-// ============================================================================
-// REGISTRY MODELS (Multi-Tenant Architecture)
-// ============================================================================
-//
-// Note: These models are used in the registry database (REGISTRY_DATABASE_URL)
-// They are NOT used in tenant databases
-//
-// Purpose: Central registry for tenant metadata and routing
-// - Tenant: Per-church database connection strings
-// - PhoneNumberRegistry: Maps phone numbers to tenants for SMS/MMS routing
-// - AdminEmailIndex: Maps admin emails to tenants for fast login lookup
-//
-// During runtime:
-// - Auth middleware uses getRegistryPrisma() to connect to registry database
-// - Queries these models to get tenant connection information
-// - Then creates tenant-specific PrismaClient for queries
-//
-// ============================================================================
-
-/// Central tenant record with database connection information
-///
-/// Each church/organization has ONE tenant record in the registry
-/// The tenant record points to their isolated PostgreSQL database
-///
-/// Flow:
-/// 1. Church signs up → new Tenant record created in registry
-/// 2. Separate PostgreSQL database created for that tenant
-/// 3. Tenant record stores connection string to their database
-/// 4. Auth middleware uses tenantId from JWT to look up database
-/// 5. Creates PrismaClient connected to tenant's isolated database
 model Tenant {
-  id                    String   @id @default(cuid()) // Same as churchId in JWT
-  name                  String                        // Church name
-  email                 String   @unique              // Primary admin email
+  id                    String   @id                   // Same as Church.id for 1:1 relationship
+  churchId              String   @unique              // Foreign key to Church
+
+  name                  String                        // Church name (denormalized for convenience)
+  email                 String   @unique              // Primary admin email (denormalized)
 
   // Database connection information (encrypted in production)
-  databaseUrl           String                        // Full connection string
+  databaseUrl           String                        // Full connection string to tenant's isolated database
   databaseHost          String                        // PostgreSQL hostname
   databasePort          Int      @default(5432)       // PostgreSQL port
   databaseName          String                        // Database name
@@ -691,7 +132,7 @@ model Tenant {
 
   // Tenant status lifecycle
   status                String   @default("active")   // active | suspended | archived | deleted
-  schemaVersion         String   @default("1.0.0")    // Schema version for migrations
+  schemaVersion         String   @default("1.0.0")    // Schema version for tenant database
 
   // Audit timestamps
   createdAt             DateTime @default(now())
@@ -699,14 +140,16 @@ model Tenant {
   lastAccessedAt        DateTime @default(now())      // For usage analytics
 
   // Relations
+  church                Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
   phoneNumbers          PhoneNumberRegistry[]
   adminEmails           AdminEmailIndex[]
 
   // Indexes for fast queries
-  @@index([telnyxPhoneNumber])    // Fast phone number lookup for incoming SMS/MMS
-  @@index([status])               // Find all active/suspended tenants
-  @@index([subscriptionPlan])      // Analytics on plan distribution
-  @@index([createdAt])            // Time-based analytics
+  @@index([churchId])                 // Fast lookup from Church to Tenant
+  @@index([telnyxPhoneNumber])        // Fast phone number lookup for incoming SMS/MMS
+  @@index([status])                   // Find all active/suspended tenants
+  @@index([subscriptionPlan])         // Analytics on plan distribution
+  @@index([createdAt])                // Time-based analytics
 }
 
 /// Maps phone numbers to tenants for incoming SMS/MMS routing

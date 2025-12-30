@@ -1,7 +1,8 @@
-import { PrismaClient } from '@prisma/client';
 import { PLANS, PlanName, PlanLimits } from '../config/plans.js';
 import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from './cache.service.js';
 import { getRegistryPrisma } from '../lib/tenant-prisma.js';
+import type { TenantPrismaClient } from '../lib/tenant-prisma.js';
+import { createCustomSpan, createDatabaseSpan } from '../utils/apm-instrumentation.js';
 
 /**
  * SMS billing service - tracks SMS costs and usage
@@ -19,27 +20,33 @@ export async function recordSMSUsage(
   status: 'sent' | 'failed' = 'sent',
   messageRecipientId?: string
 ): Promise<{ cost: number; success: boolean }> {
-  try {
-    // Don't record failed SMS as billable
-    if (status === 'failed') {
-      return {
-        cost: 0,
-        success: true,
-      };
-    }
+  return createCustomSpan(
+    'billing.record_sms_usage',
+    async () => {
+      try {
+        // Don't record failed SMS as billable
+        if (status === 'failed') {
+          return {
+            cost: 0,
+            success: true,
+          };
+        }
 
-    // For now, we'll track usage in-memory or via a simple table
-    // This allows us to calculate costs without a full migration
-    console.log(`[Billing] Recording SMS usage for tenant ${tenantId}: $${SMS_COST_PER_MESSAGE}`);
+        // For now, we'll track usage in-memory or via a simple table
+        // This allows us to calculate costs without a full migration
+        console.log(`[Billing] Recording SMS usage for tenant ${tenantId}: $${SMS_COST_PER_MESSAGE}`);
 
-    return {
-      cost: SMS_COST_PER_MESSAGE,
-      success: true,
-    };
-  } catch (error: any) {
-    console.error('Failed to record SMS usage:', error);
-    throw new Error(`Billing error: ${error.message}`);
-  }
+        return {
+          cost: SMS_COST_PER_MESSAGE,
+          success: true,
+        };
+      } catch (error: any) {
+        console.error('Failed to record SMS usage:', error);
+        throw new Error(`Billing error: ${error.message}`);
+      }
+    },
+    { tenantId, status }
+  );
 }
 
 /**
@@ -111,52 +118,63 @@ export function getSMSPricing() {
  * Get current plan for a tenant (cached)
  */
 export async function getCurrentPlan(tenantId: string): Promise<PlanName | 'trial'> {
-  try {
-    // Try cache first with AGGRESSIVE timeout (1 second)
-    try {
-      const cachePromise = getCached<string>(CACHE_KEYS.churchPlan(tenantId));
-      const timeoutPromise = new Promise<null>((_, reject) =>
-        setTimeout(() => {
-          console.error('[BILLING] getCurrentPlan cache timeout');
-          reject(new Error('Cache timeout'));
-        }, 1000) // 1 second timeout (AGGRESSIVE)
-      );
-      const cached = await Promise.race([cachePromise, timeoutPromise]);
-      if (cached) {
-        return cached as PlanName | 'trial';
+  return createCustomSpan(
+    'billing.get_current_plan',
+    async () => {
+      try {
+        // Try cache first with AGGRESSIVE timeout (1 second)
+        try {
+          const cachePromise = getCached<string>(CACHE_KEYS.churchPlan(tenantId));
+          const timeoutPromise = new Promise<null>((_, reject) =>
+            setTimeout(() => {
+              console.error('[BILLING] getCurrentPlan cache timeout');
+              reject(new Error('Cache timeout'));
+            }, 1000) // 1 second timeout (AGGRESSIVE)
+          );
+          const cached = await Promise.race([cachePromise, timeoutPromise]);
+          if (cached) {
+            return cached as PlanName | 'trial';
+          }
+        } catch (cacheError) {
+          console.error('[BILLING] Cache error in getCurrentPlan, returning trial immediately:', cacheError);
+          // Return trial immediately - don't try database
+          return 'trial';
+        }
+
+        // Cache miss or timeout, query registry database with AGGRESSIVE timeout (2 seconds)
+        const registryPrisma = getRegistryPrisma();
+        const dbPromise = createDatabaseSpan(
+          'SELECT',
+          'church',
+          () => registryPrisma.church.findUnique({
+            where: { id: tenantId },
+            select: { subscriptionStatus: true },
+          }),
+          { tenantId }
+        );
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => {
+            console.error('[BILLING] getCurrentPlan database query timeout');
+            reject(new Error('Database query timeout'));
+          }, 2000) // 2 second timeout (AGGRESSIVE)
+        );
+        const tenant = (await Promise.race([dbPromise, timeoutPromise])) as any;
+        const status = tenant?.subscriptionStatus as (PlanName | 'trial') | undefined;
+        const plan = status || 'trial';
+
+        // Store in cache (1 hour TTL) - non-blocking
+        setCached(CACHE_KEYS.churchPlan(tenantId), plan, CACHE_TTL.LONG).catch(err =>
+          console.warn('[BILLING] Failed to cache plan:', err)
+        );
+
+        return plan;
+      } catch (error) {
+        console.error('[BILLING] getCurrentPlan failed, returning trial:', error);
+        return 'trial';
       }
-    } catch (cacheError) {
-      console.error('[BILLING] Cache error in getCurrentPlan, returning trial immediately:', cacheError);
-      // Return trial immediately - don't try database
-      return 'trial';
-    }
-
-    // Cache miss or timeout, query registry database with AGGRESSIVE timeout (2 seconds)
-    const registryPrisma = getRegistryPrisma();
-    const dbPromise = registryPrisma.church.findUnique({
-      where: { id: tenantId },
-      select: { subscriptionStatus: true },
-    });
-    const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => {
-        console.error('[BILLING] getCurrentPlan database query timeout');
-        reject(new Error('Database query timeout'));
-      }, 2000) // 2 second timeout (AGGRESSIVE)
-    );
-    const tenant = (await Promise.race([dbPromise, timeoutPromise])) as any;
-    const status = tenant?.subscriptionStatus as (PlanName | 'trial') | undefined;
-    const plan = status || 'trial';
-
-    // Store in cache (1 hour TTL) - non-blocking
-    setCached(CACHE_KEYS.churchPlan(tenantId), plan, CACHE_TTL.LONG).catch(err =>
-      console.warn('[BILLING] Failed to cache plan:', err)
-    );
-
-    return plan;
-  } catch (error) {
-    console.error('[BILLING] getCurrentPlan failed, returning trial:', error);
-    return 'trial';
-  }
+    },
+    { tenantId }
+  );
 }
 
 /**
@@ -180,7 +198,7 @@ export function getPlanLimits(plan: PlanName | string): PlanLimits | null {
  * Get usage for a tenant (cached)
  * Cache for 30 minutes to reduce database load
  */
-export async function getUsage(tenantId: string, tenantPrisma: PrismaClient): Promise<Record<string, number>> {
+export async function getUsage(tenantId: string, tenantPrisma: TenantPrismaClient): Promise<Record<string, number>> {
   try {
     // Try cache first with AGGRESSIVE timeout (1 second)
     let cached: Record<string, number> | null = null;

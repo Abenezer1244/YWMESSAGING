@@ -16,7 +16,7 @@ export async function getMFAStatus(req: Request, res: Response) {
   try {
     const adminId = req.user!.adminId;
 
-    const status = await mfaService.getMFAStatus(adminId);
+    const status = await mfaService.getMFAStatus(adminId, req.prisma!);
 
     res.json({
       success: true,
@@ -89,7 +89,7 @@ export async function verifyMFASetup(req: Request, res: Response) {
     const adminId = req.user!.adminId;
     const { secret, code, email } = validationResult.data;
 
-    const result = await mfaService.enableMFA(adminId, secret, code, email);
+    const result = await mfaService.enableMFA(adminId, secret, code, email, req.prisma!);
 
     res.json({
       success: true,
@@ -129,7 +129,7 @@ export async function disableMFA(req: Request, res: Response) {
     const adminId = req.user!.adminId;
     const { code } = validationResult.data;
 
-    await mfaService.disableMFA(adminId, code);
+    await mfaService.disableMFA(adminId, code, req.prisma!);
 
     res.json({
       success: true,
@@ -154,7 +154,7 @@ export async function getRecoveryCodeStatus(req: Request, res: Response) {
   try {
     const adminId = req.user!.adminId;
 
-    const status = await mfaService.getRecoveryCodeStatus(adminId);
+    const status = await mfaService.getRecoveryCodeStatus(adminId, req.prisma!);
 
     res.json({
       success: true,
@@ -190,7 +190,7 @@ export async function regenerateRecoveryCodes(req: Request, res: Response) {
     const { code } = validationResult.data;
 
     // Verify current code first
-    const isValid = await mfaService.verifyTOTPCode(adminId, code);
+    const isValid = await mfaService.verifyTOTPCode(adminId, code, req.prisma!);
     if (!isValid) {
       return res.status(400).json({
         success: false,
@@ -198,7 +198,7 @@ export async function regenerateRecoveryCodes(req: Request, res: Response) {
       });
     }
 
-    const recoveryCodes = await mfaService.generateRecoveryCodes(adminId);
+    const recoveryCodes = await mfaService.generateRecoveryCodes(adminId, undefined, req.prisma!);
 
     res.json({
       success: true,

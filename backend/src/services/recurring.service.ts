@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { TenantPrismaClient } from '../lib/tenant-prisma.js';
 
 export interface CreateRecurringMessageData {
   name: string;
@@ -10,7 +10,7 @@ export interface CreateRecurringMessageData {
   timeOfDay: string; // HH:MM format
 }
 
-export async function getRecurringMessages(tenantId: string, tenantPrisma: PrismaClient) {
+export async function getRecurringMessages(tenantId: string, tenantPrisma: TenantPrismaClient) {
   return await tenantPrisma.recurringMessage.findMany({
     orderBy: { nextSendAt: 'asc' },
   });
@@ -18,7 +18,7 @@ export async function getRecurringMessages(tenantId: string, tenantPrisma: Prism
 
 export async function createRecurringMessage(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   data: CreateRecurringMessageData
 ) {
   const nextSendAt = calculateNextSendAt(
@@ -29,7 +29,6 @@ export async function createRecurringMessage(
 
   return await tenantPrisma.recurringMessage.create({
     data: {
-      churchId: tenantId,
       name: data.name,
       content: data.content,
       targetType: data.targetType,
@@ -45,7 +44,7 @@ export async function createRecurringMessage(
 
 export async function updateRecurringMessage(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   messageId: string,
   data: Partial<CreateRecurringMessageData>
 ) {
@@ -83,7 +82,7 @@ export async function updateRecurringMessage(
   });
 }
 
-export async function deleteRecurringMessage(tenantId: string, tenantPrisma: PrismaClient, messageId: string) {
+export async function deleteRecurringMessage(tenantId: string, tenantPrisma: TenantPrismaClient, messageId: string) {
   return await tenantPrisma.recurringMessage.delete({
     where: { id: messageId },
   });
@@ -91,7 +90,7 @@ export async function deleteRecurringMessage(tenantId: string, tenantPrisma: Pri
 
 export async function toggleRecurringMessage(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   messageId: string,
   isActive: boolean
 ) {
@@ -103,7 +102,7 @@ export async function toggleRecurringMessage(
 
 export async function updateNextSendAt(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   messageId: string,
   frequency: string,
   timeOfDay: string,

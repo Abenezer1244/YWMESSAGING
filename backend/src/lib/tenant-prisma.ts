@@ -28,14 +28,28 @@
  * ============================================================================
  */
 
-import { PrismaClient } from '@prisma/client';
+// ============================================================================
+// CRITICAL: Import from CORRECT Prisma clients
+// ============================================================================
+// - Registry schema (@prisma/client): Only has registry models (Church, Tenant, PhoneNumberRegistry, AdminEmailIndex)
+// - Tenant schema (.prisma/client-tenant): Has all tenant-specific models (Member, Message, etc.)
+//
+// We need both types:
+// - RegistryPrismaClient: For church metadata, tenant registry, admin emails
+// - TenantPrismaClient: For member, message, conversation, etc.
+import { PrismaClient as RegistryPrismaClient } from '@prisma/client';
+import { PrismaClient as TenantPrismaClient } from '../../node_modules/.prisma/client-tenant/index.js';
+
+// Export types for services to use
+export type { TenantPrismaClient };
+export type { RegistryPrismaClient };
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
 interface TenantClientCacheEntry {
-  client: PrismaClient;
+  client: TenantPrismaClient;
   createdAt: number;
   lastAccessedAt: number;
   accessCount: number;
@@ -73,7 +87,7 @@ const IDLE_CHECK_INTERVAL = 5 * 60 * 1000;
 const tenantClients = new Map<string, TenantClientCacheEntry>();
 
 // Singleton registry database client
-let registryPrismaInstance: PrismaClient | null = null;
+let registryPrismaInstance: RegistryPrismaClient | null = null;
 
 // Idle timeout cleanup job
 let idleCleanupInterval: NodeJS.Timeout | null = null;
@@ -89,7 +103,7 @@ let isShuttingDown = false;
  * Get or create the registry database Prisma client (singleton)
  * Registry stores tenant metadata, phone number mappings, admin email index
  */
-export function getRegistryPrisma(): PrismaClient {
+export function getRegistryPrisma(): RegistryPrismaClient {
   if (registryPrismaInstance) {
     return registryPrismaInstance;
   }
@@ -104,7 +118,7 @@ export function getRegistryPrisma(): PrismaClient {
 
   console.log('[Registry] Creating registry database connection');
 
-  registryPrismaInstance = new PrismaClient({
+  registryPrismaInstance = new RegistryPrismaClient({
     datasources: {
       db: {
         url: registryDatabaseUrl,
@@ -136,7 +150,7 @@ export function getRegistryPrisma(): PrismaClient {
  * 4. Cache for future requests
  * 5. Update last accessed timestamp
  */
-export async function getTenantPrisma(tenantId: string): Promise<PrismaClient> {
+export async function getTenantPrisma(tenantId: string): Promise<TenantPrismaClient> {
   // Validate input
   if (!tenantId || typeof tenantId !== 'string') {
     throw new Error(`Invalid tenantId: ${tenantId}`);
@@ -197,7 +211,7 @@ export async function getTenantPrisma(tenantId: string): Promise<PrismaClient> {
     `(${connectionInfo.databaseName}) - Cache size: ${tenantClients.size}/${MAX_CACHED_CLIENTS}`
   );
 
-  const tenantPrisma = new PrismaClient({
+  const tenantPrisma = new TenantPrismaClient({
     datasources: {
       db: {
         url: connectionInfo.databaseUrl,

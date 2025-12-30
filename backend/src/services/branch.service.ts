@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { TenantPrismaClient } from '../lib/tenant-prisma.js';
 import { getPlan } from '../config/plans.js';
 
 export interface CreateBranchInput {
@@ -19,7 +19,7 @@ export interface UpdateBranchInput {
 /**
  * Get all branches for a tenant
  */
-export async function getBranches(tenantId: string, tenantPrisma: PrismaClient) {
+export async function getBranches(tenantId: string, tenantPrisma: TenantPrismaClient) {
   const branches = await tenantPrisma.branch.findMany({
     orderBy: { createdAt: 'asc' },
   });
@@ -42,7 +42,7 @@ export async function getBranches(tenantId: string, tenantPrisma: PrismaClient) 
  */
 export async function createBranch(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   input: CreateBranchInput
 ) {
   // Get current branch count
@@ -60,7 +60,6 @@ export async function createBranch(
 
   const branch = await tenantPrisma.branch.create({
     data: {
-      churchId: tenantId,
       name: input.name,
       address: input.address,
       phone: input.phone,
@@ -86,7 +85,7 @@ export async function createBranch(
  */
 export async function updateBranch(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   branchId: string,
   input: UpdateBranchInput
 ) {
@@ -126,7 +125,7 @@ export async function updateBranch(
  * Delete a branch
  * Cannot delete if it's the only branch
  */
-export async function deleteBranch(tenantId: string, tenantPrisma: PrismaClient, branchId: string) {
+export async function deleteBranch(tenantId: string, tenantPrisma: TenantPrismaClient, branchId: string) {
   // Verify branch exists
   const branch = await tenantPrisma.branch.findUnique({
     where: { id: branchId },

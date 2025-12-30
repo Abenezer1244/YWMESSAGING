@@ -1,4 +1,4 @@
-import { prisma } from '../lib/prisma.js';
+import { getRegistryPrisma, getTenantPrisma, TenantPrismaClient } from '../lib/tenant-prisma.js';
 import crypto from 'crypto';
 
 /**
@@ -15,6 +15,9 @@ import crypto from 'crypto';
  */
 export async function exportChurchData(churchId: string) {
   try {
+    const registryPrisma = getRegistryPrisma();
+    const tenantPrisma = await getTenantPrisma(churchId);
+
     const [
       church,
       admins,
@@ -24,32 +27,22 @@ export async function exportChurchData(churchId: string) {
       conversations,
       subscriptions,
     ] = await Promise.all([
-      prisma.church.findUnique({
+      registryPrisma.church.findUnique({
         where: { id: churchId },
       }),
-      prisma.admin.findMany({
-        where: { churchId },
-      }),
-      prisma.branch.findMany({
-        where: { churchId },
-      }),
-      prisma.message.findMany({
-        where: { churchId },
+      tenantPrisma.admin.findMany({}),
+      tenantPrisma.branch.findMany({}),
+      tenantPrisma.message.findMany({
         include: { recipients: true },
       }),
-      prisma.messageTemplate.findMany({
-        where: { churchId },
-      }),
-      prisma.conversation.findMany({
-        where: { churchId },
+      tenantPrisma.messageTemplate.findMany({}),
+      tenantPrisma.conversation.findMany({
         include: {
           messages: true,
-          member: true, // Include member data through conversations
+          member: true,
         },
       }),
-      prisma.subscription.findMany({
-        where: { churchId },
-      }),
+      tenantPrisma.subscription.findMany({}),
     ]);
 
     return {
@@ -59,7 +52,7 @@ export async function exportChurchData(churchId: string) {
       branches,
       messages,
       templates,
-      conversations, // Members are included within conversations
+      conversations,
       subscriptions,
     };
   } catch (error) {
@@ -73,10 +66,11 @@ export async function exportChurchData(churchId: string) {
  */
 export async function createDataExport(churchId: string, adminId: string) {
   try {
+    const tenantPrisma = await getTenantPrisma(churchId);
+
     // Check if recent export exists (within 1 hour)
-    const recentExport = await prisma.dataExport.findFirst({
+    const recentExport = await tenantPrisma.dataExport.findFirst({
       where: {
-        churchId,
         status: 'completed',
         createdAt: {
           gte: new Date(Date.now() - 60 * 60 * 1000), // 1 hour ago
@@ -101,15 +95,13 @@ export async function createDataExport(churchId: string, adminId: string) {
 
     // Create export record
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-    const exportRecord = await prisma.dataExport.create({
+    const exportRecord = await tenantPrisma.dataExport.create({
       data: {
-        churchId,
         requestedBy: adminId,
         status: 'completed',
         fileSize: Buffer.byteLength(jsonData),
         expiresAt,
         completedAt: new Date(),
-        fileUrl: `/api/gdpr/export/${churchId}.json`, // Virtual URL, data stored in memory/temp
       },
     });
 
@@ -160,9 +152,11 @@ export async function requestAccountDeletion(
   reason?: string
 ) {
   try {
+    const tenantPrisma = await getTenantPrisma(churchId);
+
     // Check if deletion already pending
-    const existing = await prisma.accountDeletionRequest.findUnique({
-      where: { churchId },
+    const existing = await tenantPrisma.accountDeletionRequest.findFirst({
+      orderBy: { createdAt: 'desc' },
     });
 
     if (existing && existing.status === 'pending') {
@@ -175,9 +169,8 @@ export async function requestAccountDeletion(
     // Schedule deletion for 30 days from now
     const scheduledDeletionAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
-    const deletionRequest = await prisma.accountDeletionRequest.create({
+    const deletionRequest = await tenantPrisma.accountDeletionRequest.create({
       data: {
-        churchId,
         initiatedBy: adminId,
         confirmationToken,
         scheduledDeletionAt,
@@ -208,16 +201,16 @@ export async function cancelAccountDeletion(
   adminId: string
 ) {
   try {
-    const deletionRequest = await prisma.accountDeletionRequest.findUnique({
-      where: { churchId },
-    });
+    const tenantPrisma = await getTenantPrisma(churchId);
+
+    const deletionRequest = await tenantPrisma.accountDeletionRequest.findFirst({});
 
     if (!deletionRequest || deletionRequest.status !== 'pending') {
       throw new Error('No pending deletion request found');
     }
 
-    await prisma.accountDeletionRequest.update({
-      where: { churchId },
+    await tenantPrisma.accountDeletionRequest.update({
+      where: { id: deletionRequest.id },
       data: {
         status: 'cancelled',
         cancelledAt: new Date(),
@@ -235,16 +228,17 @@ export async function cancelAccountDeletion(
 /**
  * Confirm and execute account deletion
  * Requires valid confirmation token
- * Uses transaction to ensure atomic deletion of all church data
+ * Deletes all tenant data first, then registry data
  */
 export async function confirmAccountDeletion(
   churchId: string,
   confirmationToken: string
 ) {
   try {
-    const deletionRequest = await prisma.accountDeletionRequest.findUnique({
-      where: { churchId },
-    });
+    const registryPrisma = getRegistryPrisma();
+    const tenantPrisma = await getTenantPrisma(churchId);
+
+    const deletionRequest = await tenantPrisma.accountDeletionRequest.findFirst({});
 
     if (!deletionRequest) {
       throw new Error('Deletion request not found');
@@ -259,114 +253,36 @@ export async function confirmAccountDeletion(
       throw new Error('Invalid confirmation token');
     }
 
-    // Use transaction to ensure atomic deletion
-    // All deletes must succeed or all fail together
-    await prisma.$transaction(async (tx) => {
-      // Step 1: Update deletion request status BEFORE deleting church
-      // This ensures we have an audit trail even if church is deleted
-      await tx.accountDeletionRequest.update({
-        where: { id: deletionRequest.id },
-        data: {
-          status: 'confirmed',
-          actualDeletionAt: new Date(),
-        },
-      });
-
-      // Step 2: Delete all church data
-      // Prisma's onDelete: Cascade will automatically delete related records:
-      // - Branches (and their Groups and GroupMembers cascade)
-      // - Messages (and their MessageRecipients cascade)
-      // - MessageTemplates
-      // - Subscriptions
-      // - Conversations (and their ConversationMessages cascade)
-      // - Admins (and their AdminMFA cascade)
-      // - Numbers
-      // - Webhooks
-      // - etc.
-
-      // Delete in order of dependencies to avoid constraint issues:
-      // 1. Delete records that depend on Church directly
-      await tx.messageQueue.deleteMany({
-        where: { churchId },
-      });
-
-      // Note: numberPool and webhook models removed - schema doesn't define these
-      // await tx.numberPool.deleteMany({
-      //   where: { churchId },
-      // });
-
-      // Note: webhook model removed - cascading deletes should handle this
-      // await tx.webhook.deleteMany({
-      //   where: { churchId },
-      // });
-
-      // Note: consentLog model may not exist - safely skip if not in schema
-      try {
-        await (tx as any).consentLog.deleteMany({
-          where: { churchId },
-        });
-      } catch {
-        // consentLog may not exist in schema, skip silently
-      }
-
-      // 2. Delete records that depend on Conversation
-      await tx.conversationMessage.deleteMany({
-        where: {
-          conversation: { churchId },
-        },
-      });
-
-      // 3. Delete records that depend on Message
-      await tx.messageRecipient.deleteMany({
-        where: {
-          message: { churchId },
-        },
-      });
-
-      // 4. Delete main entities (cascade handles sub-entities)
-      await tx.conversation.deleteMany({
-        where: { churchId },
-      });
-
-      await tx.message.deleteMany({
-        where: { churchId },
-      });
-
-      await tx.messageTemplate.deleteMany({
-        where: { churchId },
-      });
-
-      await tx.subscription.deleteMany({
-        where: { churchId },
-      });
-
-      // 5. Delete organizational structure
-      // Delete branches (cascade handles members)
-      await tx.branch.deleteMany({
-        where: { churchId },
-      });
-
-      // 6. Delete admins (cascade handles AdminMFA)
-      await tx.adminMFA.deleteMany({
-        where: {
-          admin: { churchId },
-        },
-      });
-
-      await tx.admin.deleteMany({
-        where: { churchId },
-      });
-
-      // 7. Finally delete the church
-      await tx.church.delete({
-        where: { id: churchId },
-      });
-
-      // Log deletion for audit trail
-      console.log(
-        `✅ GDPR Deletion Complete: Church ${churchId} deleted at ${new Date().toISOString()}`
-      );
+    // Step 1: Mark deletion request as confirmed in registry
+    await tenantPrisma.accountDeletionRequest.update({
+      where: { id: deletionRequest.id },
+      data: {
+        status: 'confirmed',
+        actualDeletionAt: new Date(),
+      },
     });
+
+    // Step 2: Delete all tenant data (each in tenant database)
+    // Delete in order of dependencies to avoid constraint issues
+    await tenantPrisma.messageQueue.deleteMany({});
+    await tenantPrisma.conversationMessage.deleteMany({});
+    await tenantPrisma.messageRecipient.deleteMany({});
+    await tenantPrisma.conversation.deleteMany({});
+    await tenantPrisma.message.deleteMany({});
+    await tenantPrisma.messageTemplate.deleteMany({});
+    await tenantPrisma.subscription.deleteMany({});
+    await tenantPrisma.branch.deleteMany({});
+    await tenantPrisma.adminMFA.deleteMany({});
+    await tenantPrisma.admin.deleteMany({});
+
+    // Step 3: Delete registry data
+    await registryPrisma.church.delete({
+      where: { id: churchId },
+    });
+
+    console.log(
+      `✅ GDPR Deletion Complete: Church ${churchId} deleted at ${new Date().toISOString()}`
+    );
 
     return {
       message: 'Account deleted successfully',
@@ -384,6 +300,8 @@ export async function confirmAccountDeletion(
  */
 export async function getConsentStatus(churchId: string) {
   try {
+    const tenantPrisma = await getTenantPrisma(churchId);
+
     // Get latest consent for each type
     const consentTypes = [
       'smsMarketing',
@@ -394,9 +312,8 @@ export async function getConsentStatus(churchId: string) {
     const consents: any = {};
 
     for (const type of consentTypes) {
-      const latestConsent = await prisma.consentLog.findFirst({
+      const latestConsent = await tenantPrisma.consentLog.findFirst({
         where: {
-          churchId,
           type,
         },
         orderBy: { createdAt: 'desc' },
@@ -429,15 +346,16 @@ export async function updateConsent(
   reason?: string
 ) {
   try {
+    const tenantPrisma = await getTenantPrisma(churchId);
+
     // Validate consent type
     const validTypes = ['smsMarketing', 'emailMarketing', 'dataProcessing', 'analytics'];
     if (!validTypes.includes(type)) {
       throw new Error(`Invalid consent type: ${type}`);
     }
 
-    const log = await prisma.consentLog.create({
+    const log = await tenantPrisma.consentLog.create({
       data: {
-        churchId,
         type,
         status,
         reason,
@@ -462,9 +380,10 @@ export async function updateConsent(
  */
 export async function getConsentHistory(churchId: string, type?: string) {
   try {
-    const logs = await prisma.consentLog.findMany({
+    const tenantPrisma = await getTenantPrisma(churchId);
+
+    const logs = await tenantPrisma.consentLog.findMany({
       where: {
-        churchId,
         ...(type && { type }),
       },
       orderBy: { createdAt: 'desc' },
@@ -479,11 +398,13 @@ export async function getConsentHistory(churchId: string, type?: string) {
 }
 
 /**
- * Clean up expired exports (run periodically)
+ * Clean up expired exports (run periodically per church)
  */
-export async function cleanupExpiredExports() {
+export async function cleanupExpiredExports(churchId: string) {
   try {
-    const result = await prisma.dataExport.updateMany({
+    const tenantPrisma = await getTenantPrisma(churchId);
+
+    const result = await tenantPrisma.dataExport.updateMany({
       where: {
         expiresAt: { lte: new Date() },
         status: 'completed',
@@ -502,12 +423,14 @@ export async function cleanupExpiredExports() {
 }
 
 /**
- * Clean up expired deletion requests (run periodically)
+ * Clean up expired deletion requests (run periodically per church)
  */
-export async function cleanupExpiredDeletionRequests() {
+export async function cleanupExpiredDeletionRequests(churchId: string) {
   try {
+    const tenantPrisma = await getTenantPrisma(churchId);
+
     // Auto-confirm deletion requests that have passed the scheduled date
-    const expiredRequests = await prisma.accountDeletionRequest.findMany({
+    const expiredRequests = await tenantPrisma.accountDeletionRequest.findMany({
       where: {
         status: 'pending',
         scheduledDeletionAt: { lte: new Date() },
@@ -516,10 +439,10 @@ export async function cleanupExpiredDeletionRequests() {
 
     for (const request of expiredRequests) {
       try {
-        await confirmAccountDeletion(request.churchId, request.confirmationToken);
+        await confirmAccountDeletion(churchId, request.confirmationToken);
       } catch (error) {
         console.error(
-          `Failed to auto-delete church ${request.churchId}:`,
+          `Failed to auto-delete church ${churchId}:`,
           error
         );
       }

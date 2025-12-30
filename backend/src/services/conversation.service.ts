@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { TenantPrismaClient } from '../lib/tenant-prisma.js';
 import * as telnyxService from './telnyx.service.js';
 import { decrypt, decryptPhoneSafe } from '../utils/encryption.utils.js';
 import { getCached, setCached, invalidateCache } from './cache.service.js';
@@ -10,7 +10,7 @@ import { getCached, setCached, invalidateCache } from './cache.service.js';
  */
 export async function getConversations(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   options: {
     status?: string;
     page?: number;
@@ -113,7 +113,7 @@ export async function getConversations(
  */
 export async function getConversation(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   conversationId: string,
   options: {
     page?: number;
@@ -209,7 +209,7 @@ export async function getConversation(
  */
 async function broadcastOutboundToMembers(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   content: string
 ): Promise<void> {
   try {
@@ -284,7 +284,7 @@ async function broadcastOutboundToMembers(
  */
 export async function createReply(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   conversationId: string,
   content: string
 ): Promise<any> {
@@ -338,7 +338,7 @@ export async function createReply(
  */
 export async function createReplyWithMedia(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   conversationId: string,
   content: string | undefined,
   mediaData: {
@@ -413,7 +413,7 @@ export async function createReplyWithMedia(
  */
 export async function markAsRead(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   conversationId: string
 ): Promise<void> {
   try {
@@ -442,7 +442,7 @@ export async function markAsRead(
  */
 export async function updateStatus(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   conversationId: string,
   status: 'open' | 'closed' | 'archived'
 ): Promise<void> {
@@ -475,7 +475,7 @@ export async function updateStatus(
  */
 export async function deleteConversation(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   conversationId: string
 ): Promise<void> {
   try {

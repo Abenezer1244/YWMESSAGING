@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { prisma } from '../lib/prisma.js';
+import { getRegistryPrisma } from '../lib/tenant-prisma.js';
 import { telnyxCircuitBreaker } from '../utils/circuit-breaker.js';
 
 const TELNYX_BASE_URL = 'https://api.telnyx.com/v2';
@@ -167,7 +167,7 @@ export async function sendSMS(
   churchId: string
 ): Promise<{ messageSid: string; success: boolean }> {
   // Get church Telnyx credentials and 10DLC brand info
-  const church = await prisma.church.findUnique({
+  const church = await getRegistryPrisma().church.findUnique({
     where: { id: churchId },
     select: {
       telnyxPhoneNumber: true,
@@ -375,7 +375,7 @@ export async function purchasePhoneNumber(
     }
 
     // Save to database
-    await prisma.church.update({
+    await getRegistryPrisma().church.update({
       where: { id: churchId },
       data: {
         telnyxPhoneNumber: purchasedNumber.phone_number,
@@ -410,7 +410,7 @@ export async function purchasePhoneNumber(
 export async function getPhoneNumberDetails(numberSid: string, churchId: string): Promise<any> {
   try {
     // SECURITY: Verify phone number belongs to this church
-    const church = await prisma.church.findUnique({
+    const church = await getRegistryPrisma().church.findUnique({
       where: { id: churchId },
       select: { telnyxNumberSid: true },
     });
@@ -465,7 +465,7 @@ export async function releasePhoneNumber(
     if (options?.softDelete) {
       // Soft-delete: Archive the number, keep conversation history
       console.log(`[PHONE_RELEASE] Soft-deleting number for church ${churchId} (30-day recovery window)`);
-      await prisma.church.update({
+      await getRegistryPrisma().church.update({
         where: { id: churchId },
         data: {
           telnyxNumberStatus: 'archived',
@@ -481,7 +481,7 @@ export async function releasePhoneNumber(
     } else {
       // Hard-delete: Clear all phone data (for cleanup after recovery window expires)
       console.log(`[PHONE_RELEASE] Hard-deleting number for church ${churchId}`);
-      await prisma.church.update({
+      await getRegistryPrisma().church.update({
         where: { id: churchId },
         data: {
           telnyxPhoneNumber: null,

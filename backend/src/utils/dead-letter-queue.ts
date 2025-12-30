@@ -11,9 +11,7 @@
  * - PAYMENT_PROCESS: Failed payment operations
  */
 
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { TenantPrismaClient, getRegistryPrisma, getTenantPrisma } from '../lib/tenant-prisma.js';
 
 export type DLQCategory = 'SMS_SEND' | 'WEBHOOK_INBOUND' | 'SUBSCRIPTION_UPDATE' | 'PAYMENT_PROCESS';
 
@@ -45,9 +43,9 @@ interface DLQEntry {
  * }
  * ```
  */
-export async function addToDLQ(entry: DLQEntry): Promise<string> {
+export async function addToDLQ(tenantPrisma: TenantPrismaClient, entry: DLQEntry): Promise<string> {
   try {
-    const dlqRecord = await prisma.deadLetterQueue.create({
+    const dlqRecord = await tenantPrisma.deadLetterQueue.create({
       data: {
         category: entry.category,
         externalId: entry.externalId,
@@ -75,16 +73,19 @@ export async function addToDLQ(entry: DLQEntry): Promise<string> {
 /**
  * List pending dead letter queue items
  */
-export async function listPendingDLQ(options?: {
-  category?: DLQCategory;
-  limit?: number;
-  offset?: number;
-}) {
+export async function listPendingDLQ(
+  tenantPrisma: TenantPrismaClient,
+  options?: {
+    category?: DLQCategory;
+    limit?: number;
+    offset?: number;
+  }
+) {
   const limit = options?.limit || 20;
   const offset = options?.offset || 0;
 
   const [items, total] = await Promise.all([
-    prisma.deadLetterQueue.findMany({
+    tenantPrisma.deadLetterQueue.findMany({
       where: {
         status: 'PENDING',
         ...(options?.category && { category: options.category }),
@@ -93,7 +94,7 @@ export async function listPendingDLQ(options?: {
       take: limit,
       skip: offset,
     }),
-    prisma.deadLetterQueue.count({
+    tenantPrisma.deadLetterQueue.count({
       where: {
         status: 'PENDING',
         ...(options?.category && { category: options.category }),
@@ -115,8 +116,8 @@ export async function listPendingDLQ(options?: {
 /**
  * Get a specific DLQ item
  */
-export async function getDLQItem(id: string) {
-  return prisma.deadLetterQueue.findUnique({
+export async function getDLQItem(tenantPrisma: TenantPrismaClient, id: string) {
+  return tenantPrisma.deadLetterQueue.findUnique({
     where: { id },
   });
 }
@@ -125,13 +126,14 @@ export async function getDLQItem(id: string) {
  * Mark a DLQ item as resolved (successful replay)
  */
 export async function resolveDLQItem(
+  tenantPrisma: TenantPrismaClient,
   id: string,
   metadata?: Record<string, any>
 ) {
-  const item = await getDLQItem(id);
+  const item = await getDLQItem(tenantPrisma, id);
   const currentMetadata = (item?.metadata as any) || {};
 
-  return prisma.deadLetterQueue.update({
+  return tenantPrisma.deadLetterQueue.update({
     where: { id },
     data: {
       status: 'RESOLVED',
@@ -148,13 +150,14 @@ export async function resolveDLQItem(
  * Mark a DLQ item as dead (permanently failed)
  */
 export async function deadLetterDLQItem(
+  tenantPrisma: TenantPrismaClient,
   id: string,
   reason: string
 ) {
-  const item = await getDLQItem(id);
+  const item = await getDLQItem(tenantPrisma, id);
   const currentMetadata = (item?.metadata as any) || {};
 
-  return prisma.deadLetterQueue.update({
+  return tenantPrisma.deadLetterQueue.update({
     where: { id },
     data: {
       status: 'DEAD_LETTER',
@@ -170,8 +173,8 @@ export async function deadLetterDLQItem(
 /**
  * Increment retry count for a DLQ item
  */
-export async function incrementDLQRetryCount(id: string) {
-  return prisma.deadLetterQueue.update({
+export async function incrementDLQRetryCount(tenantPrisma: TenantPrismaClient, id: string) {
+  return tenantPrisma.deadLetterQueue.update({
     where: { id },
     data: {
       retryCount: {
@@ -185,8 +188,8 @@ export async function incrementDLQRetryCount(id: string) {
 /**
  * Delete a DLQ item
  */
-export async function deleteDLQItem(id: string) {
-  return prisma.deadLetterQueue.delete({
+export async function deleteDLQItem(tenantPrisma: TenantPrismaClient, id: string) {
+  return tenantPrisma.deadLetterQueue.delete({
     where: { id },
   });
 }
@@ -194,16 +197,16 @@ export async function deleteDLQItem(id: string) {
 /**
  * Get DLQ statistics
  */
-export async function getDLQStats() {
+export async function getDLQStats(tenantPrisma: TenantPrismaClient) {
   const [total, pending, resolved, deadLetter] = await Promise.all([
-    prisma.deadLetterQueue.count(),
-    prisma.deadLetterQueue.count({ where: { status: 'PENDING' } }),
-    prisma.deadLetterQueue.count({ where: { status: 'RESOLVED' } }),
-    prisma.deadLetterQueue.count({ where: { status: 'DEAD_LETTER' } }),
+    tenantPrisma.deadLetterQueue.count(),
+    tenantPrisma.deadLetterQueue.count({ where: { status: 'PENDING' } }),
+    tenantPrisma.deadLetterQueue.count({ where: { status: 'RESOLVED' } }),
+    tenantPrisma.deadLetterQueue.count({ where: { status: 'DEAD_LETTER' } }),
   ]);
 
   // Count by category
-  const byCategory = await prisma.deadLetterQueue.groupBy({
+  const byCategory = await tenantPrisma.deadLetterQueue.groupBy({
     by: ['category'],
     _count: true,
   });
@@ -220,13 +223,14 @@ export async function getDLQStats() {
 }
 
 /**
- * Clear old DLQ items (older than specified days)
+ * Clear old DLQ items (older than specified days) for a specific church/tenant
  */
-export async function clearOldDLQItems(olderThanDays: number) {
+export async function clearOldDLQItems(churchId: string, olderThanDays: number) {
+  const tenantPrisma = await getTenantPrisma(churchId);
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
 
-  const result = await prisma.deadLetterQueue.deleteMany({
+  const result = await tenantPrisma.deadLetterQueue.deleteMany({
     where: {
       createdAt: {
         lt: cutoffDate,

@@ -172,7 +172,16 @@
       "Bash(timeout 90 npm run build:*)",
       "Bash(xargs:*)",
       "Bash(cut:*)",
-      "Bash(timeout 30 npm run build:*)"
+      "Bash(timeout 30 npm run build:*)",
+      "Bash(timeout 25 bash -c \"sleep 12 && curl -s http://localhost:5173 > /dev/null && echo ''Frontend is ready'' || echo ''Frontend not ready yet''\")",
+      "Bash(1)",
+      "Bash(NODE_ENV=test timeout 20 npx tsx:*)",
+      "Bash(timeout 15 npx tsx:*)",
+      "Bash(timeout 20 npm run build:*)",
+      "Bash(timeout 12 node:*)",
+      "Bash(timeout 20 npm run dev)",
+      "Bash(timeout 45 npx playwright install:*)",
+      "Bash(timeout 60 npx tsx:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,8 +1,7 @@
-import { PrismaClient } from '@prisma/client';
 import { hashPassword } from '../utils/password.utils.js';
 import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from './cache.service.js';
 import { encrypt, hashForSearch } from '../utils/encryption.utils.js';
-import { getRegistryPrisma } from '../lib/tenant-prisma.js';
+import { getRegistryPrisma, TenantPrismaClient } from '../lib/tenant-prisma.js';
 
 export interface UpdateChurchInput {
   name?: string;
@@ -88,7 +87,7 @@ export async function getChurchProfile(tenantId: string) {
 /**
  * Get all co-admins for a tenant - cached for 30 minutes
  */
-export async function getCoAdmins(tenantId: string, tenantPrisma: PrismaClient) {
+export async function getCoAdmins(tenantId: string, tenantPrisma: TenantPrismaClient) {
   try {
     // Try cache first
     const cacheKey = `church:${tenantId}:coadmins`;
@@ -125,7 +124,7 @@ export async function getCoAdmins(tenantId: string, tenantPrisma: PrismaClient) 
 /**
  * Remove a co-admin
  */
-export async function removeCoAdmin(tenantId: string, tenantPrisma: PrismaClient, adminId: string) {
+export async function removeCoAdmin(tenantId: string, tenantPrisma: TenantPrismaClient, adminId: string) {
   try {
     // Verify admin exists and is co-admin
     const admin = await tenantPrisma.admin.findUnique({
@@ -245,7 +244,7 @@ export async function getActivityLogCount(tenantId: string): Promise<number> {
  */
 export async function inviteCoAdmin(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   email: string,
   firstName: string,
   lastName: string
@@ -273,7 +272,6 @@ export async function inviteCoAdmin(
     // Create new co-admin
     const newAdmin = await tenantPrisma.admin.create({
       data: {
-        churchId: tenantId,
         email,
         encryptedEmail,
         emailHash,

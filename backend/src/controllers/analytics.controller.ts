@@ -3,14 +3,13 @@ import * as statsService from '../services/stats.service.js';
 
 export async function getMessageStats(req: Request, res: Response) {
   try {
-    const churchId = req.user?.churchId;
-    if (!churchId) {
+    if (!req.prisma) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
     const days = req.query.days ? parseInt(req.query.days as string) : 30;
 
-    const stats = await statsService.getMessageStats(churchId, days);
+    const stats = await statsService.getMessageStats(req.prisma, days);
     res.json(stats);
   } catch (error: any) {
     console.error('Error fetching message stats:', error.message || error);
@@ -20,12 +19,11 @@ export async function getMessageStats(req: Request, res: Response) {
 
 export async function getBranchStats(req: Request, res: Response) {
   try {
-    const churchId = req.user?.churchId;
-    if (!churchId) {
+    if (!req.prisma) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const stats = await statsService.getBranchStats(churchId);
+    const stats = await statsService.getBranchStats(req.prisma);
     res.json(stats);
   } catch (error: any) {
     console.error('Error fetching branch stats:', error.message || error);
@@ -35,12 +33,11 @@ export async function getBranchStats(req: Request, res: Response) {
 
 export async function getSummaryStats(req: Request, res: Response) {
   try {
-    const churchId = req.user?.churchId;
-    if (!churchId) {
+    if (!req.prisma) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const stats = await statsService.getSummaryStats(churchId);
+    const stats = await statsService.getSummaryStats(req.prisma);
     res.json(stats);
   } catch (error: any) {
     console.error('Error fetching summary stats:', error.message || error);

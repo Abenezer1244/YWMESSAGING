@@ -1,8 +1,6 @@
 import { Request, Response } from 'express';
 import { checkAndMigrateToPer10DLC } from '../jobs/10dlc-registration.js';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma.js';
 
 /**
  * Scheduler Status for monitoring

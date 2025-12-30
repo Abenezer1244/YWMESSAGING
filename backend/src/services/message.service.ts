@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import type { TenantPrismaClient } from '../lib/tenant-prisma.js';
+import { createCustomSpan, createDatabaseSpan } from '../utils/apm-instrumentation.js';
 
 export interface ResolveRecipientsOptions {
   targetType: 'individual' | 'all';
@@ -17,48 +18,64 @@ export interface CreateMessageData {
  */
 export async function resolveRecipients(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   options: ResolveRecipientsOptions
 ): Promise<Array<{ id: string; phone: string }>> {
-  const members = new Map<string, { id: string; phone: string }>();
+  return createCustomSpan(
+    'message.resolve_recipients',
+    async () => {
+      const members = new Map<string, { id: string; phone: string }>();
 
-  try {
-    if (options.targetType === 'individual' && options.targetIds?.length === 1) {
-      // Single member
-      const member = await tenantPrisma.member.findUnique({
-        where: { id: options.targetIds[0] },
-        select: { id: true, phone: true, optInSms: true },
-      });
+      try {
+        if (options.targetType === 'individual' && options.targetIds?.length === 1) {
+          // Single member
+          const member = await createDatabaseSpan(
+            'SELECT',
+            'member',
+            () => tenantPrisma.member.findUnique({
+              where: { id: options.targetIds![0] },
+              select: { id: true, phone: true, optInSms: true },
+            }),
+            { tenantId, targetType: 'individual' }
+          );
 
-      if (member && member.optInSms) {
-        members.set(member.phone, { id: member.id, phone: member.phone });
-      }
-    } else if (options.targetType === 'all') {
-      // Get all members through conversations
-      const conversations = await tenantPrisma.conversation.findMany({
-        select: {
-          member: {
-            select: {
-              id: true,
-              phone: true,
-              optInSms: true,
-            },
-          },
-        },
-      });
+          if (member && member.optInSms) {
+            members.set(member.phone, { id: member.id, phone: member.phone });
+          }
+        } else if (options.targetType === 'all') {
+          // Get all members through conversations
+          const conversations = await createDatabaseSpan(
+            'SELECT',
+            'conversation',
+            () => tenantPrisma.conversation.findMany({
+              select: {
+                member: {
+                  select: {
+                    id: true,
+                    phone: true,
+                    optInSms: true,
+                  },
+                },
+              },
+            }),
+            { tenantId, targetType: 'all' }
+          );
 
-      for (const conv of conversations) {
-        const member = conv.member;
-        if (member.optInSms) {
-          members.set(member.phone, { id: member.id, phone: member.phone });
+          for (const conv of conversations) {
+            const member = conv.member;
+            if (member.optInSms) {
+              members.set(member.phone, { id: member.id, phone: member.phone });
+            }
+          }
         }
+      } catch (error) {
+        throw new Error(`Failed to resolve recipients: ${(error as Error).message}`);
       }
-    }
-  } catch (error) {
-    throw new Error(`Failed to resolve recipients: ${(error as Error).message}`);
-  }
 
-  return Array.from(members.values());
+      return Array.from(members.values());
+    },
+    { tenantId, targetType: options.targetType }
+  );
 }
 
 /**
@@ -66,48 +83,63 @@ export async function resolveRecipients(
  */
 export async function createMessage(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   data: CreateMessageData
 ): Promise<any> {
-  // Resolve recipients
-  const recipients = await resolveRecipients(tenantId, tenantPrisma, {
-    targetType: data.targetType,
-    targetIds: data.targetIds,
-  });
+  return createCustomSpan(
+    'message.create',
+    async () => {
+      // Resolve recipients
+      const recipients = await resolveRecipients(tenantId, tenantPrisma, {
+        targetType: data.targetType,
+        targetIds: data.targetIds,
+      });
 
-  if (recipients.length === 0) {
-    throw new Error('No valid recipients found');
-  }
+      if (recipients.length === 0) {
+        throw new Error('No valid recipients found');
+      }
 
-  // Create message record
-  const message = await tenantPrisma.message.create({
-    data: {
-      churchId: tenantId,
-      content: data.content,
-      targetType: data.targetType,
-      targetIds: JSON.stringify(data.targetIds || []),
-      totalRecipients: recipients.length,
-      status: 'pending',
+      // Create message record
+      const message = await createDatabaseSpan(
+        'INSERT',
+        'message',
+        () => tenantPrisma.message.create({
+          data: {
+            content: data.content,
+            targetType: data.targetType,
+            targetIds: JSON.stringify(data.targetIds || []),
+            totalRecipients: recipients.length,
+            status: 'pending',
+          },
+        }),
+        { tenantId, recipientCount: recipients.length }
+      );
+
+      // Create message recipient records in batch (not one-by-one)
+      await createDatabaseSpan(
+        'INSERT',
+        'messageRecipient',
+        () => tenantPrisma.messageRecipient.createMany({
+          data: recipients.map((recipient) => ({
+            messageId: message.id,
+            memberId: recipient.id,
+            status: 'pending',
+          })),
+        }),
+        { tenantId, recordCount: recipients.length }
+      );
+
+      return {
+        id: message.id,
+        content: message.content,
+        targetType: message.targetType,
+        totalRecipients: message.totalRecipients,
+        status: message.status,
+        createdAt: message.createdAt,
+      };
     },
-  });
-
-  // Create message recipient records in batch (not one-by-one)
-  await tenantPrisma.messageRecipient.createMany({
-    data: recipients.map((recipient) => ({
-      messageId: message.id,
-      memberId: recipient.id,
-      status: 'pending',
-    })),
-  });
-
-  return {
-    id: message.id,
-    content: message.content,
-    targetType: message.targetType,
-    totalRecipients: message.totalRecipients,
-    status: message.status,
-    createdAt: message.createdAt,
-  };
+    { tenantId, targetType: data.targetType, contentLength: data.content.length }
+  );
 }
 
 /**
@@ -115,7 +147,7 @@ export async function createMessage(
  */
 export async function getMessageHistory(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   options: {
     page?: number;
     limit?: number;
@@ -168,7 +200,7 @@ export async function getMessageHistory(
 /**
  * Get single message details with recipients
  */
-export async function getMessageDetails(tenantId: string, tenantPrisma: PrismaClient, messageId: string): Promise<any> {
+export async function getMessageDetails(tenantId: string, tenantPrisma: TenantPrismaClient, messageId: string): Promise<any> {
   const message = await tenantPrisma.message.findUnique({
     where: { id: messageId },
     include: {
@@ -207,7 +239,7 @@ export async function getMessageDetails(tenantId: string, tenantPrisma: PrismaCl
 /**
  * Update message delivery stats
  */
-export async function updateMessageStats(tenantId: string, tenantPrisma: PrismaClient, messageId: string): Promise<void> {
+export async function updateMessageStats(tenantId: string, tenantPrisma: TenantPrismaClient, messageId: string): Promise<void> {
   const stats = await tenantPrisma.messageRecipient.groupBy({
     by: ['status'],
     where: { messageId },
@@ -243,7 +275,7 @@ export async function updateMessageStats(tenantId: string, tenantPrisma: PrismaC
  */
 export async function updateRecipientStatus(
   tenantId: string,
-  tenantPrisma: PrismaClient,
+  tenantPrisma: TenantPrismaClient,
   recipientId: string,
   status: 'delivered' | 'failed',
   messageId: string,

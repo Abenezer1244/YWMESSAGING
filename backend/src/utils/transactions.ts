@@ -1,6 +1,6 @@
-import { PrismaClient, Prisma } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma.js';
+import { Prisma } from '@prisma/client';
+import type { PrismaClient } from '@prisma/client';
 
 /**
  * Transaction Isolation Levels
@@ -23,6 +23,7 @@ export type IsolationLevel =
  * Execute a transaction with SERIALIZABLE isolation
  * Use for: Financial transactions, payment processing, critical updates
  * Performance: Slower but ensures no anomalies
+ * Note: Services using tenantPrisma should call tenantPrisma.$transaction directly
  */
 export async function withSerializableTransaction<T>(
   callback: (tx: PrismaClient) => Promise<T>
@@ -38,6 +39,7 @@ export async function withSerializableTransaction<T>(
  * Execute a transaction with REPEATABLE_READ isolation
  * Use for: Group operations, member updates, batch operations
  * Performance: Medium - prevents non-repeatable reads
+ * Note: Services using tenantPrisma should call tenantPrisma.$transaction directly
  */
 export async function withRepeatableReadTransaction<T>(
   callback: (tx: PrismaClient) => Promise<T>
@@ -53,6 +55,7 @@ export async function withRepeatableReadTransaction<T>(
  * Execute a transaction with READ_COMMITTED isolation (default)
  * Use for: Simple operations, single entity updates
  * Performance: Fastest but allows non-repeatable reads
+ * Note: Services using tenantPrisma should call tenantPrisma.$transaction directly
  */
 export async function withReadCommittedTransaction<T>(
   callback: (tx: PrismaClient) => Promise<T>
@@ -93,6 +96,7 @@ export function logTransactionError(transactionName: string, error: Error): void
 
 /**
  * Helper for safely executing a transaction with error logging
+ * Note: Works with registry prisma. Services using tenantPrisma should call tenantPrisma.$transaction directly
  */
 export async function executeTransaction<T>(
   name: string,

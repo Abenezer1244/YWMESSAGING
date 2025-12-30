@@ -1,8 +1,9 @@
-import { prisma } from '../lib/prisma.js';
+import { TenantPrismaClient } from '../lib/tenant-prisma.js';
 
 /**
  * Onboarding Service - Tracks and verifies onboarding task completion
  * Each task is verified against actual data (e.g., branch was created, members were added)
+ * PHASE 5: Multi-tenant refactoring - uses tenantPrisma for tenant-scoped queries
  */
 
 type TaskId = 'create_branch' | 'add_members' | 'send_message';
@@ -16,9 +17,11 @@ interface OnboardingStatus {
 /**
  * Get all onboarding progress for a church
  */
-export async function getOnboardingProgress(churchId: string): Promise<OnboardingStatus[]> {
-  const progress = await prisma.onboardingProgress.findMany({
-    where: { churchId },
+export async function getOnboardingProgress(
+  tenantId: string,
+  tenantPrisma: TenantPrismaClient
+): Promise<OnboardingStatus[]> {
+  const progress = await tenantPrisma.onboardingProgress.findMany({
     select: {
       taskId: true,
       completed: true,
@@ -44,11 +47,12 @@ export async function getOnboardingProgress(churchId: string): Promise<Onboardin
  * Checks if the task has actually been completed before marking it done
  */
 export async function completeOnboardingTask(
-  churchId: string,
+  tenantId: string,
+  tenantPrisma: TenantPrismaClient,
   taskId: TaskId
 ): Promise<{ success: boolean; message: string }> {
   // Verify the task has actually been completed
-  const isCompleted = await verifyTaskCompletion(churchId, taskId);
+  const isCompleted = await verifyTaskCompletion(tenantId, tenantPrisma, taskId);
 
   if (!isCompleted) {
     return {
@@ -58,15 +62,14 @@ export async function completeOnboardingTask(
   }
 
   // Upsert the onboarding progress record
-  await prisma.onboardingProgress.upsert({
-    where: { churchId_taskId: { churchId, taskId } },
+  await tenantPrisma.onboardingProgress.upsert({
+    where: { taskId },
     update: {
       completed: true,
       completedAt: new Date(),
       updatedAt: new Date(),
     },
     create: {
-      churchId,
       taskId,
       completed: true,
       completedAt: new Date(),
@@ -83,27 +86,25 @@ export async function completeOnboardingTask(
  * Verify that a task has actually been completed
  * This checks the actual data in the database
  */
-async function verifyTaskCompletion(churchId: string, taskId: TaskId): Promise<boolean> {
+async function verifyTaskCompletion(
+  tenantId: string,
+  tenantPrisma: TenantPrismaClient,
+  taskId: TaskId
+): Promise<boolean> {
   switch (taskId) {
     case 'create_branch':
       // Check if church has at least one branch
-      const branchCount = await prisma.branch.count({
-        where: { churchId },
-      });
+      const branchCount = await tenantPrisma.branch.count();
       return branchCount > 0;
 
     case 'add_members':
       // Check if church has at least one conversation (which requires a member)
-      const conversationCount = await prisma.conversation.count({
-        where: { churchId },
-      });
+      const conversationCount = await tenantPrisma.conversation.count();
       return conversationCount > 0;
 
     case 'send_message':
       // Check if church has sent at least one message
-      const messageCount = await prisma.message.count({
-        where: { churchId },
-      });
+      const messageCount = await tenantPrisma.message.count();
       return messageCount > 0;
 
     default:
@@ -114,8 +115,11 @@ async function verifyTaskCompletion(churchId: string, taskId: TaskId): Promise<b
 /**
  * Get onboarding progress percentage
  */
-export async function getOnboardingProgressPercentage(churchId: string): Promise<number> {
-  const progress = await getOnboardingProgress(churchId);
+export async function getOnboardingProgressPercentage(
+  tenantId: string,
+  tenantPrisma: TenantPrismaClient
+): Promise<number> {
+  const progress = await getOnboardingProgress(tenantId, tenantPrisma);
   const completedCount = progress.filter(p => p.completed).length;
   return Math.round((completedCount / progress.length) * 100);
 }
@@ -123,21 +127,27 @@ export async function getOnboardingProgressPercentage(churchId: string): Promise
 /**
  * Check if onboarding is fully complete
  */
-export async function isOnboardingComplete(churchId: string): Promise<boolean> {
-  const progress = await getOnboardingProgress(churchId);
+export async function isOnboardingComplete(
+  tenantId: string,
+  tenantPrisma: TenantPrismaClient
+): Promise<boolean> {
+  const progress = await getOnboardingProgress(tenantId, tenantPrisma);
   return progress.every(p => p.completed);
 }
 
 /**
  * Get summary of onboarding status
  */
-export async function getOnboardingSummary(churchId: string): Promise<{
+export async function getOnboardingSummary(
+  tenantId: string,
+  tenantPrisma: TenantPrismaClient
+): Promise<{
   completedTasks: TaskId[];
   remainingTasks: TaskId[];
   percentageComplete: number;
   isComplete: boolean;
 }> {
-  const progress = await getOnboardingProgress(churchId);
+  const progress = await getOnboardingProgress(tenantId, tenantPrisma);
   const completedTasks = progress.filter(p => p.completed).map(p => p.taskId);
   const remainingTasks = progress.filter(p => !p.completed).map(p => p.taskId);
 

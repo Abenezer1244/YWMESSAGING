@@ -6,9 +6,11 @@
  * 2. Automatically retries linking with exponential backoff
  * 3. Logs results for monitoring and alerting
  * 4. Notifies support if linking fails after max retries
+ *
+ * PHASE 5: Multi-tenant refactoring - uses registryPrisma for church registry lookups
  */
 
-import { prisma } from '../lib/prisma.js';
+import { getRegistryPrisma } from '../lib/tenant-prisma.js';
 import { linkPhoneNumberToMessagingProfile, LinkingResult } from './telnyx.service.js';
 
 // Configuration for linking recovery
@@ -39,6 +41,7 @@ interface RecoveryResult {
  * Run this periodically (e.g., every 5 minutes) via cron or scheduled task
  */
 export async function verifyAndRecoverPhoneLinkings(): Promise<RecoveryResult[]> {
+  const registryPrisma = getRegistryPrisma();
   const startTime = Date.now();
   const results: RecoveryResult[] = [];
 
@@ -46,7 +49,7 @@ export async function verifyAndRecoverPhoneLinkings(): Promise<RecoveryResult[]>
     console.log(`${LINKING_RECOVERY_CONFIG.LOG_TAG} Starting phone linking recovery job`);
 
     // Step 1: Find all churches with pending or failed linking status
-    const churchesNeedingRecovery = await prisma.church.findMany({
+    const churchesNeedingRecovery = await registryPrisma.church.findMany({
       where: {
         telnyxPhoneNumber: { not: null },
         telnyxPhoneLinkingStatus: {
@@ -113,7 +116,7 @@ export async function verifyAndRecoverPhoneLinkings(): Promise<RecoveryResult[]>
         const newStatus = linkingResult.success ? 'linked' : 'failed';
         const newRetryCount = linkingResult.success ? 0 : church.telnyxPhoneLinkingRetryCount + 1;
 
-        const updated = await prisma.church.update({
+        const updated = await registryPrisma.church.update({
           where: { id: church.id },
           data: {
             telnyxPhoneLinkingStatus: newStatus,
@@ -206,7 +209,8 @@ export async function getPhoneLinkingStatus(churchId: string): Promise<{
   error: string | null;
   canRetry: boolean;
 }> {
-  const church = await prisma.church.findUnique({
+  const registryPrisma = getRegistryPrisma();
+  const church = await registryPrisma.church.findUnique({
     where: { id: churchId },
     select: {
       telnyxPhoneLinkingStatus: true,
@@ -236,7 +240,8 @@ export async function getPhoneLinkingStatus(churchId: string): Promise<{
  * Resets retry count so recovery job will attempt immediately
  */
 export async function manuallyRetryPhoneLinking(churchId: string): Promise<void> {
-  await prisma.church.update({
+  const registryPrisma = getRegistryPrisma();
+  await registryPrisma.church.update({
     where: { id: churchId },
     data: {
       telnyxPhoneLinkingStatus: 'pending',

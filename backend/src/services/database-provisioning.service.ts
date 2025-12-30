@@ -73,10 +73,11 @@ export async function provisionTenantDatabase(tenantId: string): Promise<string>
 /**
  * Run Prisma migrations on a tenant database
  * Applies the tenant schema to the newly created database
+ * Uses Prisma db push to apply the tenant-schema.prisma to the database
  */
 export async function runTenantMigrations(tenantDatabaseUrl: string): Promise<void> {
   try {
-    // Create a temporary Prisma client for this database
+    // Create a temporary Prisma client for this database to verify connection
     const tempPrisma = new PrismaClient({
       datasources: {
         db: { url: tenantDatabaseUrl },
@@ -84,23 +85,45 @@ export async function runTenantMigrations(tenantDatabaseUrl: string): Promise<vo
     });
 
     try {
-      // Run a simple query to verify connection works
+      // Verify connection works
       await tempPrisma.$executeRaw`SELECT 1`;
       console.log('✅ Tenant database connection verified');
-
-      // In production, you would run migrations here using:
-      // - prisma migrate deploy (if using migrations)
-      // - prisma db push (if using push to db)
-      // For now, we rely on the schema being automatically applied
-
-      // TODO: Implement proper migration strategy
-      // This might be:
-      // 1. Using prisma migrate deploy with a separate migrations directory
-      // 2. Using prisma db push
-      // 3. Running raw SQL initialization script
-
     } finally {
       await tempPrisma.$disconnect();
+    }
+
+    // Run prisma db push with tenant schema to initialize all tables
+    // This applies the tenant-schema.prisma to the database
+    const { execSync } = require('child_process');
+    const path = require('path');
+
+    try {
+      console.log('⏳ Running Prisma migrations (tenant schema)...');
+
+      // Set environment variable for Prisma to use tenant database
+      const env = {
+        ...process.env,
+        TENANT_DATABASE_URL: tenantDatabaseUrl,
+        NODE_ENV: process.env.NODE_ENV || 'development',
+      };
+
+      // Run prisma db push with tenant schema
+      // This will create all tables from tenant-schema.prisma
+      execSync(
+        'npx prisma db push --schema=prisma/tenant-schema.prisma --skip-generate',
+        {
+          env,
+          stdio: 'pipe', // Capture output to avoid cluttering logs
+          cwd: process.cwd(),
+        }
+      );
+
+      console.log('✅ Tenant schema migrations completed');
+    } catch (execError: any) {
+      // Log the actual error output
+      const errorMessage = execError.stderr?.toString() || execError.stdout?.toString() || execError.message;
+      console.error('Migration command output:', errorMessage);
+      throw new Error(`Prisma migrations failed: ${errorMessage}`);
     }
   } catch (error: any) {
     console.error('Failed to run tenant migrations:', error);

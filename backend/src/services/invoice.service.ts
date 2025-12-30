@@ -1,4 +1,4 @@
-import { prisma } from '../lib/prisma.js';
+import { getTenantPrisma } from '../lib/tenant-prisma.js';
 
 export interface Invoice {
   id: string;
@@ -52,9 +52,8 @@ export async function createInvoice(
 export async function getInvoices(churchId: string): Promise<Invoice[]> {
   try {
     // For MVP, return mock invoices
-    const subscription = await prisma.subscription.findUnique({
-      where: { churchId },
-    });
+    const tenantPrisma = await getTenantPrisma(churchId);
+    const subscription = await tenantPrisma.subscription.findFirst({});
 
     if (!subscription) {
       return [];

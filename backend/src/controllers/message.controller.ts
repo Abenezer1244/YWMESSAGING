@@ -1,16 +1,14 @@
 import { Request, Response } from 'express';
+import { prisma } from '../lib/prisma.js';
 import * as messageService from '../services/message.service.js';
 import * as telnyxService from '../services/telnyx.service.js';
 import * as websocketService from '../services/websocket.service.js';
-import { PrismaClient } from '@prisma/client';
 import { decrypt, decryptPhoneSafe } from '../utils/encryption.utils.js';
 import { sendMessageSchema, getMessageHistorySchema } from '../lib/validation/schemas.js';
 import { safeValidate } from '../lib/validation/schemas.js';
 import { withRetry, TELNYX_RETRY_CONFIG } from '../utils/retry.js';
 import { smsQueue } from '../jobs/queue.js';
 import crypto from 'crypto';
-
-const prisma = new PrismaClient();
 
 
 /**
@@ -52,7 +50,7 @@ export async function sendMessage(req: Request, res: Response) {
     // 🔔 Emit WebSocket event: Message sent (broadcasting to all users in this church)
     (async () => {
       try {
-        const recipients = await prisma.messageRecipient.findMany({
+        const recipients = await tenantPrisma.messageRecipient.findMany({
           where: { messageId: message.id },
         });
         websocketService.broadcastMessageSent(churchId!, message.id, recipients.length);
@@ -66,7 +64,7 @@ export async function sendMessage(req: Request, res: Response) {
     (async () => {
       try {
         // Get all recipients for this message
-        const recipients = await prisma.messageRecipient.findMany({
+        const recipients = await tenantPrisma.messageRecipient.findMany({
           where: { messageId: message.id },
           include: { member: true },
         });
@@ -113,7 +111,7 @@ export async function sendMessage(req: Request, res: Response) {
                 TELNYX_RETRY_CONFIG
               );
 
-              await prisma.messageRecipient.update({
+              await tenantPrisma.messageRecipient.update({
                 where: { id: recipient.id },
                 data: {
                   providerMessageId: result.messageSid,
@@ -125,7 +123,7 @@ export async function sendMessage(req: Request, res: Response) {
             }
           } catch (error: any) {
             // Mark as failed but continue with other recipients
-            await prisma.messageRecipient.update({
+            await tenantPrisma.messageRecipient.update({
               where: { id: recipient.id },
               data: {
                 status: 'failed',
@@ -249,71 +247,18 @@ export async function getMessageDetails(req: Request, res: Response) {
 /**
  * POST /api/webhooks/telnyx/status
  * Webhook for Telnyx delivery status updates (DLR - Delivery Receipt)
- * Telnyx sends event-based webhooks without signature validation on HTTPS
+ *
+ * FIXME: This function is deprecated. The active webhook handler is in conversation.controller.ts
+ * This handler cannot work in database-per-tenant architecture without a WebhookMessageMapping table
+ * in the registry to map providerMessageId -> tenantId.
+ *
+ * Routes use conversation.controller.handleTelnyxWebhook instead.
  */
 export async function handleTelnyxWebhook(req: Request, res: Response) {
   try {
-    const { type, data } = req.body;
-
-    // Only process message delivery receipts
-    if (type !== 'message.dlr') {
-      return res.status(200).json({ received: true });
-    }
-
-    const payload = data?.payload?.[0];
-    if (!payload || !payload.id) {
-      return res.status(400).json({ error: 'Payload with message ID required' });
-    }
-
-    const messageId = payload.id;
-    const telnyxStatus = payload.status;
-
-    // Find recipient by Telnyx message ID
-    const recipient = await prisma.messageRecipient.findFirst({
-      where: { providerMessageId: messageId },
-      include: {
-        message: {
-          include: { church: true },
-        },
-      },
-    });
-
-    if (!recipient) {
-      // Message ID not found, just acknowledge webhook
-      console.log(`Telnyx webhook: Message ID ${messageId} not found in database`);
-      return res.status(200).json({ received: true });
-    }
-
-    // Map Telnyx status to our status
-    let status: 'delivered' | 'failed' | null = null;
-
-    if (telnyxStatus === 'delivered') {
-      status = 'delivered';
-    } else if (
-      telnyxStatus === 'failed' ||
-      telnyxStatus === 'undelivered' ||
-      telnyxStatus === 'bounced'
-    ) {
-      status = 'failed';
-    } else {
-      // pending, queued, etc. - don't update yet
-      return res.status(200).json({ received: true });
-    }
-
-    if (status) {
-      // Update recipient status
-      const tenantId = recipient.message.churchId;
-      const { getTenantPrisma } = await import('../lib/tenant-prisma.js');
-      const tenantPrisma = await getTenantPrisma(tenantId);
-
-      await messageService.updateRecipientStatus(tenantId, tenantPrisma, recipient.id, status, recipient.message.id, {
-        failureReason: payload.error_message || undefined,
-      });
-
-      console.log(`Telnyx webhook: Updated message ${messageId} to ${status}`);
-    }
-
-    res.json({ received: true });
+    console.log('[DEPRECATED] message.controller.handleTelnyxWebhook called - use conversation.controller version');
+    // Just acknowledge the webhook
+    res.status(200).json({ received: true });
   } catch (error) {
     console.error('Error processing Telnyx webhook:', error);
     res.status(500).json({ error: 'Failed to process webhook' });

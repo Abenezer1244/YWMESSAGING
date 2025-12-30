@@ -3,7 +3,7 @@
  * Handles survey submission, analytics, and feedback collection
  */
 
-import { prisma } from '../lib/prisma.js';
+import { getTenantPrisma } from '../lib/tenant-prisma.js';
 import * as cacheService from './cache.service.js';
 
 // ============================================================================
@@ -19,7 +19,6 @@ export interface NPSSurveyInput {
 
 export interface NPSSurveyResponse {
   id: string;
-  churchId: string;
   score: number;
   category: string;
   sentiment: string | null;
@@ -80,9 +79,9 @@ export async function submitNPSSurvey(
   }
 
   // Create survey response
-  const survey = await prisma.nPSSurvey.create({
+  const tenantPrisma = await getTenantPrisma(churchId);
+  const survey = await tenantPrisma.nPSSurvey.create({
     data: {
-      churchId,
       responderId,
       score: input.score,
       category: input.category,
@@ -97,7 +96,6 @@ export async function submitNPSSurvey(
 
   return {
     id: survey.id,
-    churchId: survey.churchId,
     score: survey.score,
     category: survey.category,
     sentiment: survey.sentiment,
@@ -123,9 +121,9 @@ export async function getNPSAnalytics(
   // Get surveys from last N days
   const cutoffDate = new Date(Date.now() - daysBack * 24 * 60 * 60 * 1000);
 
-  const surveys = await prisma.nPSSurvey.findMany({
+  const tenantPrisma = await getTenantPrisma(churchId);
+  const surveys = await tenantPrisma.nPSSurvey.findMany({
     where: {
-      churchId,
       createdAt: { gte: cutoffDate },
     },
   });
@@ -218,8 +216,8 @@ export async function getRecentSurveys(
   limit: number = 20,
   offset: number = 0
 ): Promise<NPSSurveyResponse[]> {
-  const surveys = await prisma.nPSSurvey.findMany({
-    where: { churchId },
+  const tenantPrisma = await getTenantPrisma(churchId);
+  const surveys = await tenantPrisma.nPSSurvey.findMany({
     orderBy: { createdAt: 'desc' },
     take: limit,
     skip: offset,
@@ -227,7 +225,6 @@ export async function getRecentSurveys(
 
   return surveys.map((survey) => ({
     id: survey.id,
-    churchId: survey.churchId,
     score: survey.score,
     category: survey.category,
     sentiment: survey.sentiment,
@@ -245,9 +242,9 @@ export async function getNPSByCategory(
 ): Promise<Record<string, number>> {
   const cutoffDate = new Date(Date.now() - daysBack * 24 * 60 * 60 * 1000);
 
-  const surveys = await prisma.nPSSurvey.findMany({
+  const tenantPrisma = await getTenantPrisma(churchId);
+  const surveys = await tenantPrisma.nPSSurvey.findMany({
     where: {
-      churchId,
       createdAt: { gte: cutoffDate },
     },
   });
@@ -332,13 +329,15 @@ export async function invalidateNPSCache(churchId: string): Promise<void> {
  * (Placeholder - integrate with Resend email service)
  */
 export async function sendFollowupEmail(
+  churchId: string,
   surveyId: string,
   email: string,
   message: string
 ): Promise<void> {
   // TODO: Integrate with Resend email service
   // For now, just mark as sent in database
-  await prisma.nPSSurvey.update({
+  const tenantPrisma = await getTenantPrisma(churchId);
+  await tenantPrisma.nPSSurvey.update({
     where: { id: surveyId },
     data: { followupSent: true },
   });

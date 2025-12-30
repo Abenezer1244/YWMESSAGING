@@ -1,6 +1,6 @@
-import { prisma } from '../lib/prisma.js';
 import { queryCacheMonitor, CACHE_CONFIG } from './query-cache-monitor.service.js';
 import { getCachedWithFallback, CACHE_KEYS, CACHE_TTL } from './cache.service.js';
+import type { TenantPrismaClient } from '../lib/tenant-prisma.js';
 
 // Type definitions for stats
 interface MessageStats {
@@ -32,10 +32,10 @@ interface BranchStat {
  * After: Database-side aggregation (2-3 queries only)
  */
 export async function getMessageStats(
-  churchId: string,
+  tenantPrisma: TenantPrismaClient,
   days: number = 30
 ): Promise<MessageStats> {
-  const cacheKey = `${CACHE_CONFIG.STATS_QUERIES.prefix}${churchId}:${days}d`;
+  const cacheKey = `${CACHE_CONFIG.STATS_QUERIES.prefix}stats:${days}d`;
 
   // ✅ Use Redis cache to avoid repeated database queries
   return queryCacheMonitor.getOrFetch<MessageStats>({
@@ -47,11 +47,10 @@ export async function getMessageStats(
         startDate.setDate(startDate.getDate() - days);
 
         // ✅ Single aggregation query instead of loading all messages + recipients
-        const stats = await prisma.messageRecipient.groupBy({
+        const stats = await tenantPrisma.messageRecipient.groupBy({
           by: ['status'],
           where: {
             message: {
-              churchId,
               createdAt: { gte: startDate },
             },
           },
@@ -61,9 +60,8 @@ export async function getMessageStats(
         });
 
       // ✅ Count total messages
-      const totalMessages = await prisma.message.count({
+      const totalMessages = await tenantPrisma.message.count({
         where: {
-          churchId,
           createdAt: { gte: startDate },
         },
       });
@@ -89,15 +87,14 @@ export async function getMessageStats(
 
       // ✅ Get daily stats - using raw query for efficiency
       // Group recipients by message date and status
-      const dailyRecipients = await prisma.$queryRaw`
+      const dailyRecipients = await tenantPrisma.$queryRaw`
         SELECT
           DATE(m."createdAt") as date,
           mr.status,
           COUNT(*) as count
         FROM "MessageRecipient" mr
         JOIN "Message" m ON mr."messageId" = m.id
-        WHERE m."churchId" = ${churchId}
-          AND m."createdAt" >= ${startDate}
+        WHERE m."createdAt" >= ${startDate}
         GROUP BY DATE(m."createdAt"), mr.status
         ORDER BY DATE(m."createdAt")
       ` as Array<{ date: string; status: string; count: number }>;
@@ -151,15 +148,15 @@ export async function getMessageStats(
  * After: 2 queries total (21x improvement)
  * ✅ CACHED: 10-minute TTL to reduce repeated database hits
  */
-export async function getBranchStats(churchId: string): Promise<BranchStat[]> {
-  const cacheKey = `${CACHE_CONFIG.BRANCH_STATS.prefix}${churchId}`;
+export async function getBranchStats(tenantPrisma: TenantPrismaClient): Promise<BranchStat[]> {
+  const cacheKey = `${CACHE_CONFIG.BRANCH_STATS.prefix}branch-stats`;
 
   // ✅ Use Redis cache for branch stats (less volatile data)
   return queryCacheMonitor.getOrFetch<BranchStat[]>({
     key: cacheKey,
     ttl: CACHE_CONFIG.BRANCH_STATS.TTL,
     fetchFn: async () => {
-      return getBranchStatsUncached(churchId);
+      return getBranchStatsUncached(tenantPrisma);
     },
   });
 }
@@ -168,11 +165,10 @@ export async function getBranchStats(churchId: string): Promise<BranchStat[]> {
  * Internal uncached version of getBranchStats
  * Called by cached wrapper
  */
-async function getBranchStatsUncached(churchId: string): Promise<BranchStat[]> {
+async function getBranchStatsUncached(tenantPrisma: TenantPrismaClient): Promise<BranchStat[]> {
   try {
     // ✅ Query 1: Get all branches for this church
-    const branches = await prisma.branch.findMany({
-      where: { churchId },
+    const branches = await tenantPrisma.branch.findMany({
       select: {
         id: true,
         name: true,
@@ -182,7 +178,7 @@ async function getBranchStatsUncached(churchId: string): Promise<BranchStat[]> {
     // ✅ Query 2: Get message stats - count messages sent to each branch
     // For now, count all messages sent to this church (simplified approach)
     // TODO: Later improve to check if branch ID is in targetIds JSON array
-    const messageStats = await prisma.$queryRaw<Array<{
+    const messageStats = await tenantPrisma.$queryRaw<Array<{
       branch_id: string;
       message_count: number;
       delivered_count: number;
@@ -192,9 +188,8 @@ async function getBranchStatsUncached(churchId: string): Promise<BranchStat[]> {
         COUNT(DISTINCT m.id) as message_count,
         COALESCE(SUM(CASE WHEN mr.status = 'delivered' THEN 1 ELSE 0 END), 0) as delivered_count
       FROM "Branch" b
-      LEFT JOIN "Message" m ON m."churchId" = b."churchId"
+      LEFT JOIN "Message" m ON b.id = ANY(m."branchIds")
       LEFT JOIN "MessageRecipient" mr ON mr."messageId" = m.id
-      WHERE b."churchId" = ${churchId}
       GROUP BY b.id
     `;
 
@@ -249,27 +244,26 @@ async function getBranchStatsUncached(churchId: string): Promise<BranchStat[]> {
  *
  * Impact: 300 requests/minute × 5 min TTL = Only 1 DB query per 300 requests
  */
-export async function getSummaryStats(churchId: string) {
+export async function getSummaryStats(tenantPrisma: TenantPrismaClient) {
   return getCachedWithFallback(
-    CACHE_KEYS.churchStats(churchId),
+    CACHE_KEYS.churchStats('summary'),
     async () => {
       // ✅ FIX: Count unique members who received messages from this church
       // Member model has no churchId field, so we count through MessageRecipient with efficient SQL
-      const memberCountResult = await prisma.$queryRaw<Array<{ count: number }>>`
+      const memberCountResult = await tenantPrisma.$queryRaw<Array<{ count: number }>>`
         SELECT COUNT(DISTINCT mr."memberId") as count
         FROM "MessageRecipient" mr
         JOIN "Message" m ON mr."messageId" = m.id
-        WHERE m."churchId" = ${churchId}
       `;
 
       const memberCount = memberCountResult[0]?.count || 0;
 
       const [messages, branches] = await Promise.all([
-        prisma.message.count({ where: { churchId } }),
-        prisma.branch.count({ where: { churchId } }),
+        tenantPrisma.message.count({}),
+        tenantPrisma.branch.count({}),
       ]);
 
-      const messageStats = await getMessageStats(churchId, 30);
+      const messageStats = await getMessageStats(tenantPrisma, 30);
 
       return {
         totalMessages: messages,

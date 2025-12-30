@@ -40,7 +40,7 @@ export async function getPlanningCenterStatus(req: Request, res: Response) {
       });
     }
 
-    const status = await planningCenterService.getPlanningCenterStatus(churchId);
+    const status = await planningCenterService.getPlanningCenterStatus(req.prisma!);
 
     if (!status) {
       return res.json({
@@ -101,8 +101,8 @@ export async function connectPlanningCenter(req: Request, res: Response) {
 
     // Connect to Planning Center
     const integration = await planningCenterService.connectPlanningCenter(
-      churchId,
       accessToken,
+      req.prisma!,
       refreshToken,
       expiresIn
     );
@@ -139,7 +139,7 @@ export async function syncPlanningCenterMembers(req: Request, res: Response) {
     }
 
     // Trigger member sync
-    const result = await planningCenterService.syncPlanningCenterMembers(churchId);
+    const result = await planningCenterService.syncPlanningCenterMembers(req.prisma!);
 
     res.json({
       success: result.success,
@@ -175,7 +175,7 @@ export async function disconnectPlanningCenter(req: Request, res: Response) {
       });
     }
 
-    await planningCenterService.disconnectPlanningCenter(churchId);
+    await planningCenterService.disconnectPlanningCenter(req.prisma!);
 
     res.json({
       success: true,
@@ -206,7 +206,7 @@ export async function validatePlanningCenterConnection(req: Request, res: Respon
       });
     }
 
-    const validation = await planningCenterService.validatePlanningCenterSetup(churchId);
+    const validation = await planningCenterService.validatePlanningCenterSetup(req.prisma!);
 
     res.json({
       success: validation.valid,

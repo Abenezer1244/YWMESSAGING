@@ -7,6 +7,7 @@ import { safeValidate } from '../lib/validation/schemas.js';
 import { revokeAccessToken, revokeRefreshToken } from '../services/token-revocation.service.js';
 import * as mfaService from '../services/mfa.service.js';
 import { prisma } from '../lib/prisma.js';
+import { getTenantPrisma } from '../lib/tenant-prisma.js';
 
 /**
  * POST /api/auth/register
@@ -104,7 +105,8 @@ export async function loginHandler(req: Request, res: Response): Promise<void> {
     const result = await login({ email, password });
 
     // ✅ SECURITY: Check if MFA is enabled
-    const mfaRecord = await prisma.adminMFA.findUnique({
+    const tenantPrisma = await getTenantPrisma(result.tenantId);
+    const mfaRecord = await tenantPrisma.adminMFA.findUnique({
       where: { adminId: result.adminId },
     });
 
@@ -393,12 +395,15 @@ export async function verifyMFAHandler(req: Request, res: Response): Promise<voi
     const adminId = payload.adminId;
     const tenantId = payload.churchId;
 
+    // Get tenant Prisma client for MFA verification
+    const tenantPrisma = await getTenantPrisma(tenantId);
+
     // ✅ SECURITY: Verify TOTP code first
-    let isValidCode = await mfaService.verifyTOTPCode(adminId, code);
+    let isValidCode = await mfaService.verifyTOTPCode(adminId, code, tenantPrisma);
 
     // If TOTP verification fails, try recovery code
     if (!isValidCode) {
-      isValidCode = await mfaService.verifyRecoveryCode(adminId, code);
+      isValidCode = await mfaService.verifyRecoveryCode(adminId, code, tenantPrisma);
     }
 
     if (!isValidCode) {
@@ -407,7 +412,7 @@ export async function verifyMFAHandler(req: Request, res: Response): Promise<voi
     }
 
     // ✅ SECURITY: Get admin data
-    const admin = await prisma.admin.findUnique({
+    const admin = await tenantPrisma.admin.findUnique({
       where: { id: adminId },
     });
 
@@ -521,8 +526,9 @@ export async function completeWelcome(req: Request, res: Response): Promise<void
 
     const { userRole } = validationResult.data as any;
 
-    // Update admin record
-    const updatedAdmin = await prisma.admin.update({
+    // Update admin record in tenant database
+    const tenantPrisma = await getTenantPrisma(tenantId);
+    const updatedAdmin = await tenantPrisma.admin.update({
       where: { id: req.user.adminId },
       data: {
         welcomeCompleted: true,
