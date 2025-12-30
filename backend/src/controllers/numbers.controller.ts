@@ -1,11 +1,10 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { AccessTokenPayload } from '../utils/jwt.utils.js';
+import { prisma } from '../lib/prisma.js';
 import {
   searchAvailableNumbers,
   purchasePhoneNumber,
   releasePhoneNumber,
-  getPhoneNumberDetails,
   validateTelnyxApiKey,
   createWebhook,
   linkPhoneNumberToMessagingProfile,
@@ -16,8 +15,6 @@ import {
   getCustomer,
 } from '../services/stripe.service.js';
 import Stripe from 'stripe';
-
-const prisma = new PrismaClient();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2022-11-15',
 });

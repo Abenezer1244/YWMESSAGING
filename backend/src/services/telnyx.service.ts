@@ -405,9 +405,25 @@ export async function purchasePhoneNumber(
 
 /**
  * Get details about a phone number owned by the account
+ * SECURITY: Validates that the phone number belongs to the specified church
  */
-export async function getPhoneNumberDetails(numberSid: string): Promise<any> {
+export async function getPhoneNumberDetails(numberSid: string, churchId: string): Promise<any> {
   try {
+    // SECURITY: Verify phone number belongs to this church
+    const church = await prisma.church.findUnique({
+      where: { id: churchId },
+      select: { telnyxNumberSid: true },
+    });
+
+    if (!church) {
+      throw new Error('Church not found');
+    }
+
+    // SECURITY: Ensure the numberSid matches the church's phone number
+    if (church.telnyxNumberSid !== numberSid) {
+      throw new Error('Phone number does not belong to this church');
+    }
+
     const client = getTelnyxClient();
     const response = await client.get(`/phone_numbers/${numberSid}`);
     return response.data?.data;
