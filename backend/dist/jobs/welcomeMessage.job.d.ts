@@ -1,6 +1,8 @@
 /**
  * Send welcome message when a member is added to a church
- * Note: Group functionality has been removed
+ * PHASE 5: Multi-tenant refactoring
+ * - Uses tenantPrisma for member (tenant-scoped)
+ * - Uses registryPrisma for church (shared registry)
  */
 export declare function sendWelcomeMessage(memberId: string, churchId: string): Promise<void>;
 /**

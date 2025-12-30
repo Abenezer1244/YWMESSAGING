@@ -32,7 +32,6 @@ export async function createBranch(tenantId, tenantPrisma, input) {
     }
     const branch = await tenantPrisma.branch.create({
         data: {
-            churchId: tenantId,
             name: input.name,
             address: input.address,
             phone: input.phone,

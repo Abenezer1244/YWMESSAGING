@@ -557,15 +557,55 @@ export async function handleTelnyxWebhook(req, res) {
         const messageId = payload.id;
         const telnyxStatus = payload.status;
         console.log(`📨 Telnyx DLR: message=${messageId}, status=${telnyxStatus}`);
-        // Try to find message across all tenant databases
-        // Since we don't know which tenant this message belongs to, we need a registry lookup
-        // For now, search in a shared analytics or use provider message ID lookup
-        // This is a limitation of the webhook approach - we may need to add provider message tracking to registry
-        // Find message by Telnyx ID (search requires access to tenant)
-        // For MVP, we'll return success without updating since we can't determine tenant from just the message ID
-        console.log(`⏭️ Delivery receipt received for message ${messageId} status=${telnyxStatus}`);
-        // In production, implement a way to track provider message IDs to tenant mapping
-        // For now, acknowledge receipt
+        // SECURITY: Map Telnyx status to our status
+        let status = null;
+        if (telnyxStatus === 'delivered') {
+            status = 'delivered';
+        }
+        else if (telnyxStatus === 'failed' ||
+            telnyxStatus === 'undelivered' ||
+            telnyxStatus === 'bounced') {
+            status = 'failed';
+        }
+        if (!status) {
+            // Status not relevant for our system (pending, queued, etc.)
+            console.log(`⏭️ Ignoring Telnyx status ${telnyxStatus} for message ${messageId}`);
+            return res.json({ received: true });
+        }
+        // SECURITY: Search all active tenant databases for this message
+        // This is necessary because DLR webhooks only contain the Telnyx message ID
+        // and we need to find which tenant database has this message
+        // For efficiency, we look up the registry first to get a list of all churches
+        const registryPrisma = getRegistryPrisma();
+        const churches = await registryPrisma.church.findMany({
+            select: { id: true },
+        });
+        let updated = false;
+        for (const church of churches) {
+            try {
+                const tenantPrisma = await getTenantPrisma(church.id);
+                const conversationMessage = await tenantPrisma.conversationMessage.findFirst({
+                    where: { providerMessageId: messageId },
+                });
+                if (conversationMessage) {
+                    // Found it! Update the message status
+                    await tenantPrisma.conversationMessage.update({
+                        where: { id: conversationMessage.id },
+                        data: { deliveryStatus: status },
+                    });
+                    console.log(`✅ Updated delivery status for message ${messageId} to ${status} in tenant ${church.id}`);
+                    updated = true;
+                    break;
+                }
+            }
+            catch (error) {
+                // Log but continue to next tenant
+                console.warn(`⚠️ Error searching tenant ${church.id} for message ${messageId}: ${error.message}`);
+            }
+        }
+        if (!updated) {
+            console.log(`⏭️ Message ${messageId} not found in any tenant database`);
+        }
         return res.json({ received: true });
     }
     catch (error) {

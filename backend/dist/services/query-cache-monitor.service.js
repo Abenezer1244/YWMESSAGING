@@ -1,5 +1,5 @@
 import { redisClient } from '../config/redis.config.js';
-import { prisma } from '../lib/prisma.js';
+import { getRegistryPrisma } from '../lib/tenant-prisma.js';
 // Cache configuration by query type
 export const CACHE_CONFIG = {
     // Stats queries - frequently accessed, moderate data changes
@@ -129,7 +129,8 @@ class QueryCacheMonitor {
     async getConnectionPoolHealth() {
         try {
             // Try to execute a simple query to verify connectivity
-            await prisma.$queryRaw `SELECT 1`;
+            const registryPrisma = getRegistryPrisma();
+            await registryPrisma.$queryRaw `SELECT 1`;
             // Get pool statistics from Prisma's internal state
             // Note: This is a simplified check - actual pool stats depend on PrismaClient implementation
             const poolInfo = {

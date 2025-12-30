@@ -27,12 +27,15 @@
  * }
  * ============================================================================
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient as RegistryPrismaClient } from '@prisma/client';
+import { PrismaClient as TenantPrismaClient } from '../../node_modules/.prisma/client-tenant/index.js';
+export type { TenantPrismaClient };
+export type { RegistryPrismaClient };
 /**
  * Get or create the registry database Prisma client (singleton)
  * Registry stores tenant metadata, phone number mappings, admin email index
  */
-export declare function getRegistryPrisma(): PrismaClient;
+export declare function getRegistryPrisma(): RegistryPrismaClient;
 /**
  * Get or create a Prisma client for a specific tenant
  *
@@ -43,7 +46,7 @@ export declare function getRegistryPrisma(): PrismaClient;
  * 4. Cache for future requests
  * 5. Update last accessed timestamp
  */
-export declare function getTenantPrisma(tenantId: string): Promise<PrismaClient>;
+export declare function getTenantPrisma(tenantId: string): Promise<TenantPrismaClient>;
 /**
  * Disconnect all tenant database clients (graceful shutdown)
  * Called on SIGTERM/SIGINT signals

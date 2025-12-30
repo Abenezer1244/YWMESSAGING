@@ -93,8 +93,9 @@ export declare function purchasePhoneNumber(phoneNumber: string, churchId: strin
 }>;
 /**
  * Get details about a phone number owned by the account
+ * SECURITY: Validates that the phone number belongs to the specified church
  */
-export declare function getPhoneNumberDetails(numberSid: string): Promise<any>;
+export declare function getPhoneNumberDetails(numberSid: string, churchId: string): Promise<any>;
 /**
  * Release/delete a phone number with soft-delete support
  *

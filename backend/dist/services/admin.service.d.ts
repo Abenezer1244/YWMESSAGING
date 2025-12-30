@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { TenantPrismaClient } from '../lib/tenant-prisma.js';
 export interface UpdateChurchInput {
     name?: string;
     email?: string;
@@ -72,11 +72,11 @@ export declare function getChurchProfile(tenantId: string): Promise<{} | null>;
 /**
  * Get all co-admins for a tenant - cached for 30 minutes
  */
-export declare function getCoAdmins(tenantId: string, tenantPrisma: PrismaClient): Promise<{}>;
+export declare function getCoAdmins(tenantId: string, tenantPrisma: TenantPrismaClient): Promise<{}>;
 /**
  * Remove a co-admin
  */
-export declare function removeCoAdmin(tenantId: string, tenantPrisma: PrismaClient, adminId: string): Promise<void>;
+export declare function removeCoAdmin(tenantId: string, tenantPrisma: TenantPrismaClient, adminId: string): Promise<void>;
 /**
  * Log an activity
  */
@@ -105,14 +105,14 @@ export declare function getActivityLogCount(tenantId: string): Promise<number>;
 /**
  * Invite a co-admin (create new co-admin account)
  */
-export declare function inviteCoAdmin(tenantId: string, tenantPrisma: PrismaClient, email: string, firstName: string, lastName: string): Promise<{
+export declare function inviteCoAdmin(tenantId: string, tenantPrisma: TenantPrismaClient, email: string, firstName: string, lastName: string): Promise<{
     admin: {
         id: string;
         email: string;
         role: string;
+        createdAt: Date;
         firstName: string;
         lastName: string;
-        createdAt: Date;
     };
     tempPassword: string;
 }>;

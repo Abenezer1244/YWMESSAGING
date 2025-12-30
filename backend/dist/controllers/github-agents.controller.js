@@ -210,9 +210,9 @@ async function handlePullRequestEvent(payload) {
         );
         console.log(`\n✅ All agents completed. Processing results...`);
         console.log(`   Successful responses: ${responses.length}/${agents.length}`);
-        // Store audit trail for each agent response
+        // Store audit trail for each agent response (no churchId for GitHub webhook events)
         for (const response of responses) {
-            await storeAgentAudit(response.agentType, 'pull_request', { pr }, response, 'success');
+            await storeAgentAudit(undefined, response.agentType, 'pull_request', { pr }, response, 'success');
         }
         // Always attempt to post findings, even if some agents failed
         const repoOwner = pr.base?.repo?.owner?.login || 'unknown';
@@ -286,9 +286,9 @@ async function handlePushEvent(payload) {
         );
         console.log(`\n✅ All agents completed. Post-merge analysis done.`);
         console.log(`   Successful responses: ${responses.length}/${agents.length}`);
-        // Store audit trail for each agent response
+        // Store audit trail for each agent response (no churchId for GitHub webhook events)
         for (const response of responses) {
-            await storeAgentAudit(response.agentType, 'push', { after, pusher }, response, 'success');
+            await storeAgentAudit(undefined, response.agentType, 'push', { after, pusher }, response, 'success');
         }
         // Send Slack notification with results
         const severityCounts = {
@@ -344,9 +344,9 @@ async function handleWorkflowRunEvent(payload) {
         );
         console.log(`\n✅ Workflow analysis completed.`);
         console.log(`   Successful responses: ${responses.length}/${agents.length}`);
-        // Store audit trail for each agent response
+        // Store audit trail for each agent response (no churchId for GitHub webhook events)
         for (const response of responses) {
-            await storeAgentAudit(response.agentType, 'workflow_run', { workflow }, response, 'success');
+            await storeAgentAudit(undefined, response.agentType, 'workflow_run', { workflow }, response, 'success');
         }
         // Post to associated PR if workflow is linked to one
         if (responses.length > 0 && payload.pull_requests?.length > 0) {

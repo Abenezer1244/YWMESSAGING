@@ -48,11 +48,12 @@ app.use((req, res, next) => {
   // Determine timeout based on endpoint type
   let timeoutMs = 10000; // Default: 10 seconds for normal requests
 
-  // Bulk operations need more time (CSV import, batch operations, etc.)
-  // Increased to 90 seconds to handle 120+ member imports with database operations
+  // Bulk operations and provisioning need more time (CSV import, batch operations, registration)
+  // Registration: Database provisioning + migrations takes ~20-30 seconds
+  // Imports: Increased to 90 seconds to handle 120+ member imports with database operations
   // (60 seconds was not enough when database is under load)
-  if (req.path?.includes('/import') || req.path?.includes('/batch')) {
-    timeoutMs = 90000; // 90 seconds for import/batch operations
+  if (req.path?.includes('/import') || req.path?.includes('/batch') || req.path?.includes('/auth/register')) {
+    timeoutMs = 90000; // 90 seconds for long-running operations
   }
 
 

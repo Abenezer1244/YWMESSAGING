@@ -27,7 +27,17 @@
  * }
  * ============================================================================
  */
-import { PrismaClient } from '@prisma/client';
+// ============================================================================
+// CRITICAL: Import from CORRECT Prisma clients
+// ============================================================================
+// - Registry schema (@prisma/client): Only has registry models (Church, Tenant, PhoneNumberRegistry, AdminEmailIndex)
+// - Tenant schema (.prisma/client-tenant): Has all tenant-specific models (Member, Message, etc.)
+//
+// We need both types:
+// - RegistryPrismaClient: For church metadata, tenant registry, admin emails
+// - TenantPrismaClient: For member, message, conversation, etc.
+import { PrismaClient as RegistryPrismaClient } from '@prisma/client';
+import { PrismaClient as TenantPrismaClient } from '../../node_modules/.prisma/client-tenant/index.js';
 // ============================================================================
 // CACHE CONFIGURATION
 // ============================================================================
@@ -66,7 +76,7 @@ export function getRegistryPrisma() {
             'Required for multi-tenant registry database.');
     }
     console.log('[Registry] Creating registry database connection');
-    registryPrismaInstance = new PrismaClient({
+    registryPrismaInstance = new RegistryPrismaClient({
         datasources: {
             db: {
                 url: registryDatabaseUrl,
@@ -143,7 +153,7 @@ export async function getTenantPrisma(tenantId) {
     // ============================================
     console.log(`[Tenant] Creating database connection for tenant ${tenantId} ` +
         `(${connectionInfo.databaseName}) - Cache size: ${tenantClients.size}/${MAX_CACHED_CLIENTS}`);
-    const tenantPrisma = new PrismaClient({
+    const tenantPrisma = new TenantPrismaClient({
         datasources: {
             db: {
                 url: connectionInfo.databaseUrl,
@@ -187,30 +197,53 @@ export async function getTenantPrisma(tenantId) {
 // INTERNAL HELPERS
 // ============================================================================
 /**
- * Fetch tenant connection info from registry database (MVP: uses default database)
+ * Fetch tenant connection info from registry database
+ *
+ * Production-ready: Looks up tenant metadata in registry database
+ * Returns database connection string for that specific tenant
  */
 async function getTenantConnectionInfo(tenantId) {
-    // MVP: Uses default DATABASE_URL for all tenants
-    // In production, registry database would store per-tenant connection strings
+    // Production: Look up tenant in registry database
+    // Registry stores per-tenant database connection strings and metadata
     const registryPrisma = getRegistryPrisma();
-    // Validate tenant exists
-    const tenant = await registryPrisma.church.findUnique({
+    if (!registryPrisma) {
+        throw new Error('Registry database not configured (REGISTRY_DATABASE_URL not set). ' +
+            'Cannot connect to tenant database without registry.');
+    }
+    // Query registry for tenant connection information
+    const tenant = await registryPrisma.tenant.findUnique({
         where: { id: tenantId },
         select: {
             id: true,
+            databaseUrl: true,
+            databaseHost: true,
+            databasePort: true,
+            databaseName: true,
+            status: true,
+            schemaVersion: true,
         },
     });
     if (!tenant) {
-        throw new Error(`Tenant ${tenantId} not found`);
+        throw new Error(`Tenant ${tenantId} not found in registry. ` +
+            'Tenant has been deleted or does not exist.');
+    }
+    if (tenant.status !== 'active') {
+        throw new Error(`Tenant ${tenantId} is not active (status: ${tenant.status}). ` +
+            'Please contact support.');
+    }
+    // Validate required connection information
+    if (!tenant.databaseUrl) {
+        throw new Error(`Tenant ${tenantId} has invalid database URL in registry. ` +
+            'Database provisioning may have failed.');
     }
     return {
         tenantId: tenant.id,
-        databaseUrl: process.env.DATABASE_URL || '',
-        databaseHost: process.env.DATABASE_HOST || 'localhost',
-        databasePort: parseInt(process.env.DATABASE_PORT || '5432'),
-        databaseName: process.env.DATABASE_NAME || 'koinonia',
-        status: 'active',
-        schemaVersion: '1.0.0',
+        databaseUrl: tenant.databaseUrl,
+        databaseHost: tenant.databaseHost,
+        databasePort: tenant.databasePort,
+        databaseName: tenant.databaseName,
+        status: tenant.status,
+        schemaVersion: tenant.schemaVersion,
     };
 }
 /**

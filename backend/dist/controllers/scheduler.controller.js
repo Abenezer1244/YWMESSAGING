@@ -1,6 +1,5 @@
 import { checkAndMigrateToPer10DLC } from '../jobs/10dlc-registration.js';
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma.js';
 let metrics = {
     lastRun: null,
     churchesApprovedThisRun: 0,

@@ -11,7 +11,7 @@ router.use(authenticateToken);
 router.get('/progress', async (req, res) => {
     try {
         const churchId = req.user.churchId;
-        const progress = await getOnboardingProgress(churchId);
+        const progress = await getOnboardingProgress(churchId, req.prisma);
         res.json({ success: true, data: progress });
     }
     catch (error) {
@@ -29,7 +29,7 @@ router.get('/progress', async (req, res) => {
 router.get('/percentage', async (req, res) => {
     try {
         const churchId = req.user.churchId;
-        const percentage = await getOnboardingProgressPercentage(churchId);
+        const percentage = await getOnboardingProgressPercentage(churchId, req.prisma);
         res.json({ success: true, data: { percentage } });
     }
     catch (error) {
@@ -47,7 +47,7 @@ router.get('/percentage', async (req, res) => {
 router.get('/summary', async (req, res) => {
     try {
         const churchId = req.user.churchId;
-        const summary = await getOnboardingSummary(churchId);
+        const summary = await getOnboardingSummary(churchId, req.prisma);
         res.json({ success: true, data: summary });
     }
     catch (error) {
@@ -75,7 +75,7 @@ router.post('/complete/:taskId', async (req, res) => {
                 error: `Invalid task ID. Must be one of: ${validTasks.join(', ')}`,
             });
         }
-        const result = await completeOnboardingTask(churchId, taskId);
+        const result = await completeOnboardingTask(churchId, req.prisma, taskId);
         if (!result.success) {
             return res.status(400).json({
                 success: false,
@@ -83,7 +83,7 @@ router.post('/complete/:taskId', async (req, res) => {
             });
         }
         // Get updated summary
-        const summary = await getOnboardingSummary(churchId);
+        const summary = await getOnboardingSummary(churchId, req.prisma);
         res.json({
             success: true,
             message: result.message,

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@prisma/client';
 /**
  * Transaction Isolation Levels
  *
@@ -14,18 +14,21 @@ export type IsolationLevel = 'ReadUncommitted' | 'ReadCommitted' | 'RepeatableRe
  * Execute a transaction with SERIALIZABLE isolation
  * Use for: Financial transactions, payment processing, critical updates
  * Performance: Slower but ensures no anomalies
+ * Note: Services using tenantPrisma should call tenantPrisma.$transaction directly
  */
 export declare function withSerializableTransaction<T>(callback: (tx: PrismaClient) => Promise<T>): Promise<T>;
 /**
  * Execute a transaction with REPEATABLE_READ isolation
  * Use for: Group operations, member updates, batch operations
  * Performance: Medium - prevents non-repeatable reads
+ * Note: Services using tenantPrisma should call tenantPrisma.$transaction directly
  */
 export declare function withRepeatableReadTransaction<T>(callback: (tx: PrismaClient) => Promise<T>): Promise<T>;
 /**
  * Execute a transaction with READ_COMMITTED isolation (default)
  * Use for: Simple operations, single entity updates
  * Performance: Fastest but allows non-repeatable reads
+ * Note: Services using tenantPrisma should call tenantPrisma.$transaction directly
  */
 export declare function withReadCommittedTransaction<T>(callback: (tx: PrismaClient) => Promise<T>): Promise<T>;
 /**
@@ -42,6 +45,7 @@ export declare function logTransactionComplete(transactionName: string): void;
 export declare function logTransactionError(transactionName: string, error: Error): void;
 /**
  * Helper for safely executing a transaction with error logging
+ * Note: Works with registry prisma. Services using tenantPrisma should call tenantPrisma.$transaction directly
  */
 export declare function executeTransaction<T>(name: string, isolationLevel: IsolationLevel, callback: (tx: PrismaClient) => Promise<T>): Promise<T>;
 //# sourceMappingURL=transactions.d.ts.map

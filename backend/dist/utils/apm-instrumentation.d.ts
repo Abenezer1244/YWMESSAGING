@@ -23,7 +23,7 @@
  * });
  * ```
  */
-import tracer from './tracer.js';
+import tracer from '../config/datadog.config.js';
 interface SpanContext {
     [key: string]: any;
 }

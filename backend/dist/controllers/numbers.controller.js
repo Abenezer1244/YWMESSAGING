@@ -1,8 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import { searchAvailableNumbers, purchasePhoneNumber, releasePhoneNumber, validateTelnyxApiKey, createWebhook, linkPhoneNumberToMessagingProfile, } from '../services/telnyx.service.js';
 import { createPhoneNumberSetupPaymentIntent, verifyPaymentIntent, } from '../services/stripe.service.js';
 import Stripe from 'stripe';
-const prisma = new PrismaClient();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
     apiVersion: '2022-11-15',
 });

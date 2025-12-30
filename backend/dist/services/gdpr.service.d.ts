@@ -61,7 +61,6 @@ export declare function exportChurchData(churchId: string): Promise<{
     } | null;
     admins: {
         id: string;
-        churchId: string;
         email: string;
         encryptedEmail: string | null;
         emailHash: string | null;
@@ -79,7 +78,6 @@ export declare function exportChurchData(churchId: string): Promise<{
     }[];
     branches: {
         id: string;
-        churchId: string;
         name: string;
         address: string | null;
         phone: string | null;
@@ -101,7 +99,6 @@ export declare function exportChurchData(churchId: string): Promise<{
         }[];
     } & {
         id: string;
-        churchId: string;
         content: string;
         status: string;
         targetType: string;
@@ -114,7 +111,6 @@ export declare function exportChurchData(churchId: string): Promise<{
     })[];
     templates: {
         id: string;
-        churchId: string;
         name: string;
         content: string;
         category: string;
@@ -159,7 +155,6 @@ export declare function exportChurchData(churchId: string): Promise<{
         }[];
     } & {
         id: string;
-        churchId: string;
         memberId: string;
         lastMessageAt: Date | null;
         status: string;
@@ -169,7 +164,6 @@ export declare function exportChurchData(churchId: string): Promise<{
     })[];
     subscriptions: {
         id: string;
-        churchId: string;
         stripeSubId: string | null;
         plan: string;
         billingCycle: string;
@@ -213,7 +207,7 @@ export declare function cancelAccountDeletion(churchId: string, adminId: string)
 /**
  * Confirm and execute account deletion
  * Requires valid confirmation token
- * Uses transaction to ensure atomic deletion of all church data
+ * Deletes all tenant data first, then registry data
  */
 export declare function confirmAccountDeletion(churchId: string, confirmationToken: string): Promise<{
     message: string;
@@ -242,7 +236,6 @@ export declare function updateConsent(churchId: string, type: string, status: 'g
  */
 export declare function getConsentHistory(churchId: string, type?: string): Promise<{
     id: string;
-    churchId: string;
     memberId: string | null;
     adminId: string | null;
     type: string;
@@ -252,11 +245,11 @@ export declare function getConsentHistory(churchId: string, type?: string): Prom
     createdAt: Date;
 }[]>;
 /**
- * Clean up expired exports (run periodically)
+ * Clean up expired exports (run periodically per church)
  */
-export declare function cleanupExpiredExports(): Promise<import(".prisma/client").Prisma.BatchPayload>;
+export declare function cleanupExpiredExports(churchId: string): Promise<import(".prisma/client-tenant").Prisma.BatchPayload>;
 /**
- * Clean up expired deletion requests (run periodically)
+ * Clean up expired deletion requests (run periodically per church)
  */
-export declare function cleanupExpiredDeletionRequests(): Promise<number>;
+export declare function cleanupExpiredDeletionRequests(churchId: string): Promise<number>;
 //# sourceMappingURL=gdpr.service.d.ts.map

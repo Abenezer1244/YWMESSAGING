@@ -15,16 +15,16 @@ export declare const RegisterSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     email: string;
     password: string;
+    churchName: string;
     firstName: string;
     lastName: string;
-    churchName: string;
     churchPhone?: string | undefined;
 }, {
     email: string;
     password: string;
+    churchName: string;
     firstName: string;
     lastName: string;
-    churchName: string;
     churchPhone?: string | undefined;
 }>;
 export declare const LoginSchema: z.ZodObject<{
@@ -92,14 +92,14 @@ export declare const CreateContactSchema: z.ZodObject<{
     phone: z.ZodString;
     email: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    phone: string;
     firstName: string;
     lastName: string;
+    phone: string;
     email?: string | undefined;
 }, {
-    phone: string;
     firstName: string;
     lastName: string;
+    phone: string;
     email?: string | undefined;
 }>;
 export declare const UpdateContactSchema: z.ZodObject<{
@@ -109,14 +109,14 @@ export declare const UpdateContactSchema: z.ZodObject<{
     email: z.ZodOptional<z.ZodOptional<z.ZodString>>;
 }, "strip", z.ZodTypeAny, {
     email?: string | undefined;
-    phone?: string | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
+    phone?: string | undefined;
 }, {
     email?: string | undefined;
-    phone?: string | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
+    phone?: string | undefined;
 }>;
 export declare const SubscribeSchema: z.ZodObject<{
     planId: z.ZodEnum<["starter", "professional", "enterprise"]>;
@@ -161,16 +161,16 @@ export declare const registerSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     email: string;
     password: string;
+    churchName: string;
     firstName: string;
     lastName: string;
-    churchName: string;
     churchPhone?: string | undefined;
 }, {
     email: string;
     password: string;
+    churchName: string;
     firstName: string;
     lastName: string;
-    churchName: string;
     churchPhone?: string | undefined;
 }>;
 export declare const loginSchema: z.ZodObject<{
@@ -238,14 +238,14 @@ export declare const createContactSchema: z.ZodObject<{
     phone: z.ZodString;
     email: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    phone: string;
     firstName: string;
     lastName: string;
+    phone: string;
     email?: string | undefined;
 }, {
-    phone: string;
     firstName: string;
     lastName: string;
+    phone: string;
     email?: string | undefined;
 }>;
 export declare const updateContactSchema: z.ZodObject<{
@@ -255,14 +255,14 @@ export declare const updateContactSchema: z.ZodObject<{
     email: z.ZodOptional<z.ZodOptional<z.ZodString>>;
 }, "strip", z.ZodTypeAny, {
     email?: string | undefined;
-    phone?: string | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
+    phone?: string | undefined;
 }, {
     email?: string | undefined;
-    phone?: string | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
+    phone?: string | undefined;
 }>;
 export declare const subscribeSchema: z.ZodObject<{
     planId: z.ZodEnum<["starter", "professional", "enterprise"]>;
@@ -303,10 +303,10 @@ export declare const GetConversationsSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     limit: number;
     page: number;
-    status?: "open" | "closed" | "archived" | undefined;
+    status?: "archived" | "open" | "closed" | undefined;
 }, {
     limit?: string | undefined;
-    status?: "open" | "closed" | "archived" | undefined;
+    status?: "archived" | "open" | "closed" | undefined;
     page?: string | undefined;
 }>;
 export declare const ReplyToConversationSchema: z.ZodObject<{
@@ -326,9 +326,9 @@ export declare const ReplyWithMediaSchema: z.ZodObject<{
 export declare const UpdateConversationStatusSchema: z.ZodObject<{
     status: z.ZodEnum<["open", "closed", "archived"]>;
 }, "strip", z.ZodTypeAny, {
-    status: "open" | "closed" | "archived";
+    status: "archived" | "open" | "closed";
 }, {
-    status: "open" | "closed" | "archived";
+    status: "archived" | "open" | "closed";
 }>;
 export declare const ConversationParamSchema: z.ZodObject<{
     conversationId: z.ZodString;

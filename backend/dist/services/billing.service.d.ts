@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client';
 import { PlanName, PlanLimits } from '../config/plans.js';
+import type { TenantPrismaClient } from '../lib/tenant-prisma.js';
 /**
  * Record SMS usage for billing purposes
  * Called after an SMS is successfully sent
@@ -40,7 +40,7 @@ export declare function getPlanLimits(plan: PlanName | string): PlanLimits | nul
  * Get usage for a tenant (cached)
  * Cache for 30 minutes to reduce database load
  */
-export declare function getUsage(tenantId: string, tenantPrisma: PrismaClient): Promise<Record<string, number>>;
+export declare function getUsage(tenantId: string, tenantPrisma: TenantPrismaClient): Promise<Record<string, number>>;
 /**
  * Check if tenant is on trial
  */

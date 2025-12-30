@@ -13,7 +13,7 @@ const router = Router();
  */
 router.get('/stats', authenticateToken, isAdmin, async (req, res) => {
     try {
-        const stats = await dlqService.getDLQStats();
+        const stats = await dlqService.getDLQStats(req.prisma);
         res.json({
             success: true,
             data: stats,
@@ -33,8 +33,8 @@ router.get('/stats', authenticateToken, isAdmin, async (req, res) => {
  */
 router.get('/pending', authenticateToken, isAdmin, async (req, res) => {
     try {
-        const { category, churchId, limit, offset } = req.query;
-        const result = await dlqService.listPendingDLQ({
+        const { category, limit, offset } = req.query;
+        const result = await dlqService.listPendingDLQ(req.prisma, {
             category: category,
             limit: limit ? parseInt(limit) : undefined,
             offset: offset ? parseInt(offset) : undefined,
@@ -59,7 +59,7 @@ router.get('/pending', authenticateToken, isAdmin, async (req, res) => {
 router.get('/:id', authenticateToken, isAdmin, async (req, res) => {
     try {
         const { id } = req.params;
-        const item = await dlqService.getDLQItem(id);
+        const item = await dlqService.getDLQItem(req.prisma, id);
         if (!item) {
             return res.status(404).json({
                 success: false,
@@ -86,14 +86,14 @@ router.post('/:id/resolve', authenticateToken, isAdmin, async (req, res) => {
     try {
         const { id } = req.params;
         const { metadata } = req.body;
-        const item = await dlqService.getDLQItem(id);
+        const item = await dlqService.getDLQItem(req.prisma, id);
         if (!item) {
             return res.status(404).json({
                 success: false,
                 error: 'DLQ item not found',
             });
         }
-        await dlqService.resolveDLQItem(id, metadata);
+        await dlqService.resolveDLQItem(req.prisma, id, metadata);
         res.json({
             success: true,
             message: 'DLQ item marked as resolved',
@@ -120,14 +120,14 @@ router.post('/:id/dead-letter', authenticateToken, isAdmin, async (req, res) => 
                 error: 'Reason is required',
             });
         }
-        const item = await dlqService.getDLQItem(id);
+        const item = await dlqService.getDLQItem(req.prisma, id);
         if (!item) {
             return res.status(404).json({
                 success: false,
                 error: 'DLQ item not found',
             });
         }
-        await dlqService.deadLetterDLQItem(id, reason);
+        await dlqService.deadLetterDLQItem(req.prisma, id, reason);
         res.json({
             success: true,
             message: 'DLQ item marked as dead letter',
@@ -147,14 +147,14 @@ router.post('/:id/dead-letter', authenticateToken, isAdmin, async (req, res) => 
 router.delete('/:id', authenticateToken, isAdmin, async (req, res) => {
     try {
         const { id } = req.params;
-        const item = await dlqService.getDLQItem(id);
+        const item = await dlqService.getDLQItem(req.prisma, id);
         if (!item) {
             return res.status(404).json({
                 success: false,
                 error: 'DLQ item not found',
             });
         }
-        await dlqService.deleteDLQItem(id);
+        await dlqService.deleteDLQItem(req.prisma, id);
         res.json({
             success: true,
             message: 'DLQ item deleted',

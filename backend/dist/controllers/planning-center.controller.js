@@ -31,7 +31,7 @@ export async function getPlanningCenterStatus(req, res) {
                 error: 'Unauthorized',
             });
         }
-        const status = await planningCenterService.getPlanningCenterStatus(churchId);
+        const status = await planningCenterService.getPlanningCenterStatus(req.prisma);
         if (!status) {
             return res.json({
                 success: true,
@@ -85,7 +85,7 @@ export async function connectPlanningCenter(req, res) {
         }
         const { accessToken, refreshToken, expiresIn } = validationResult.data;
         // Connect to Planning Center
-        const integration = await planningCenterService.connectPlanningCenter(churchId, accessToken, refreshToken, expiresIn);
+        const integration = await planningCenterService.connectPlanningCenter(accessToken, req.prisma, refreshToken, expiresIn);
         res.json({
             success: true,
             data: {
@@ -116,7 +116,7 @@ export async function syncPlanningCenterMembers(req, res) {
             });
         }
         // Trigger member sync
-        const result = await planningCenterService.syncPlanningCenterMembers(churchId);
+        const result = await planningCenterService.syncPlanningCenterMembers(req.prisma);
         res.json({
             success: result.success,
             data: {
@@ -149,7 +149,7 @@ export async function disconnectPlanningCenter(req, res) {
                 error: 'Unauthorized',
             });
         }
-        await planningCenterService.disconnectPlanningCenter(churchId);
+        await planningCenterService.disconnectPlanningCenter(req.prisma);
         res.json({
             success: true,
             data: {
@@ -177,7 +177,7 @@ export async function validatePlanningCenterConnection(req, res) {
                 error: 'Unauthorized',
             });
         }
-        const validation = await planningCenterService.validatePlanningCenterSetup(churchId);
+        const validation = await planningCenterService.validatePlanningCenterSetup(req.prisma);
         res.json({
             success: validation.valid,
             data: {

@@ -1,8 +1,7 @@
 import Bull from 'bull';
-import { PrismaClient } from '@prisma/client';
+import { getTenantPrisma } from '../lib/tenant-prisma.js';
 import * as telnyxService from '../services/telnyx.service.js';
 import * as telnyxMMSService from '../services/telnyx-mms.service.js';
-const prisma = new PrismaClient();
 const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
 // ✅ PHASE 1: SMS queue re-enabled for improved reliability and throughput
 // Queues are created when ENABLE_QUEUES=true (set in .env or deployment config)
@@ -72,11 +71,12 @@ if (smsQueue) {
             console.log(`   To: ${phone}`);
             console.log(`   Content: ${content.substring(0, 50)}...`);
             console.log(`   Attempt: ${job.attemptsMade + 1}/${job.opts.attempts}`);
+            const tenantPrisma = await getTenantPrisma(churchId);
             // Send via Telnyx
             const result = await telnyxService.sendSMS(phone, content, churchId);
             // Update messageRecipient with Telnyx ID (for new broadcast messages)
             if (recipientId) {
-                await prisma.messageRecipient.update({
+                await tenantPrisma.messageRecipient.update({
                     where: { id: recipientId },
                     data: {
                         providerMessageId: result.messageSid,
@@ -88,7 +88,7 @@ if (smsQueue) {
             }
             // Update conversationMessage with Telnyx ID (for legacy conversation messages)
             if (conversationMessageId) {
-                await prisma.conversationMessage.update({
+                await tenantPrisma.conversationMessage.update({
                     where: { id: conversationMessageId },
                     data: {
                         providerMessageId: result.messageSid,
@@ -100,7 +100,7 @@ if (smsQueue) {
             }
             // Update legacy messageQueue status if present
             if (queueId) {
-                await prisma.messageQueue.update({
+                await tenantPrisma.messageQueue.update({
                     where: { id: queueId },
                     data: {
                         status: 'sent',
@@ -115,9 +115,10 @@ if (smsQueue) {
         }
         catch (error) {
             console.error(`❌ SMS job ${job.id} failed (attempt ${job.attemptsMade + 1}): ${error.message}`);
+            const tenantPrisma = await getTenantPrisma(job.data.churchId);
             // Update messageRecipient status on final failure
             if (recipientId && job.attemptsMade + 1 >= job.opts.attempts) {
-                await prisma.messageRecipient.update({
+                await tenantPrisma.messageRecipient.update({
                     where: { id: recipientId },
                     data: {
                         status: 'failed',
@@ -130,7 +131,7 @@ if (smsQueue) {
             }
             // Update legacy queue with error
             if (queueId) {
-                await prisma.messageQueue.update({
+                await tenantPrisma.messageQueue.update({
                     where: { id: queueId },
                     data: {
                         status: 'failed',
@@ -159,11 +160,12 @@ if (mmsQueue) {
             if (mediaS3Url) {
                 console.log(`   Media: ${mediaS3Url.substring(0, 80)}...`);
             }
+            const tenantPrisma = await getTenantPrisma(churchId);
             // Send via Telnyx (with media attachment)
             const result = await telnyxMMSService.sendMMS(phone, content, churchId, mediaS3Url);
             // Update message with Telnyx ID
             if (conversationMessageId) {
-                await prisma.conversationMessage.update({
+                await tenantPrisma.conversationMessage.update({
                     where: { id: conversationMessageId },
                     data: {
                         providerMessageId: result.messageSid,
@@ -172,7 +174,7 @@ if (mmsQueue) {
                 });
             }
             // Update queue status
-            await prisma.messageQueue.update({
+            await tenantPrisma.messageQueue.update({
                 where: {
                     id: job.data.queueId || conversationMessageId,
                 },
@@ -188,9 +190,10 @@ if (mmsQueue) {
         }
         catch (error) {
             console.error(`❌ MMS job failed: ${error.message}`);
+            const tenantPrisma = await getTenantPrisma(job.data.churchId);
             // Update queue with error
             if (job.data.queueId) {
-                await prisma.messageQueue.update({
+                await tenantPrisma.messageQueue.update({
                     where: { id: job.data.queueId },
                     data: {
                         status: 'failed',

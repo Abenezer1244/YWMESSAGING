@@ -181,7 +181,13 @@
       "Bash(timeout 12 node:*)",
       "Bash(timeout 20 npm run dev)",
       "Bash(timeout 45 npx playwright install:*)",
-      "Bash(timeout 60 npx tsx:*)"
+      "Bash(timeout 60 npx tsx:*)",
+      "Bash(DATABASE_URL=\"postgresql://connect_yw_user:RkFG9qz5nL5wF22BuKEYngvLhsHVyfgP@dpg-d41af09r0fns73c9i010-a.oregon-postgres.render.com/connect_yw_production\" node:*)",
+      "Bash(DATABASE_URL=\"postgresql://connect_yw_user:RkFG9qz5nL5wF22BuKEYngvLhsHVyfgP@dpg-d41af09r0fns73c9i010-a/connect_yw_production\" node:*)",
+      "Bash(DATABASE_URL=\"postgresql://connect_yw_user:RkFG9qz5nL5wF22BuKEYngvLhsHVyfgP@dpg-d41af09r0fns73c9i010-a.oregon-postgres.render.com/connect_yw_production?sslmode=require\" node:*)",
+      "Bash(export DATABASE_URL=\"postgresql://connect_yw_user:RkFG9qz5nL5wF22BuKEYngvLhsHVyfgP@dpg-d41af09r0fns73c9i010-a.oregon-postgres.render.com/connect_yw_production?sslmode=require&connection_limit=30&pool_timeout=45\")",
+      "Bash(timeout 35 node:*)",
+      "Bash(__NEW_LINE__ curl -s -X POST http://localhost:3000/api/auth/register )"
     ],
     "deny": [],
     "ask": []

@@ -36,7 +36,7 @@ export declare function invokeMultipleAgents(agents: string[], request: AgentInv
 /**
  * Store agent invocation in audit trail
  */
-export declare function storeAgentAudit(agentType: string, eventType: string, githubData: any, response: AgentResponse | null, status: 'success' | 'failed', error?: string): Promise<void>;
+export declare function storeAgentAudit(churchId: string | undefined, agentType: string, eventType: string, githubData: any, response: AgentResponse | null, status: 'success' | 'failed', error?: string): Promise<void>;
 /**
  * Format agent responses for display
  */

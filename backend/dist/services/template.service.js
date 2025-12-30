@@ -6,7 +6,6 @@ export async function getTemplates(tenantId, tenantPrisma) {
 export async function createTemplate(tenantId, tenantPrisma, data) {
     return await tenantPrisma.messageTemplate.create({
         data: {
-            churchId: tenantId,
             name: data.name,
             content: data.content,
             category: data.category,

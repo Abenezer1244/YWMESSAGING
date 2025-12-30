@@ -1,4 +1,4 @@
-export declare function getOrCreateConversation(userId?: string, visitorId?: string): Promise<string>;
-export declare function sendChatMessage(conversationId: string, userMessage: string): Promise<string>;
-export declare function getConversationHistory(conversationId: string): Promise<any[]>;
+export declare function getOrCreateConversation(churchId: string, userId?: string, visitorId?: string): Promise<string>;
+export declare function sendChatMessage(churchId: string, conversationId: string, userMessage: string): Promise<string>;
+export declare function getConversationHistory(churchId: string, conversationId: string): Promise<any[]>;
 //# sourceMappingURL=chat.service.d.ts.map

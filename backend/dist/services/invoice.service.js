@@ -1,4 +1,4 @@
-import { prisma } from '../lib/prisma.js';
+import { getTenantPrisma } from '../lib/tenant-prisma.js';
 /**
  * Create an invoice record
  */
@@ -30,9 +30,8 @@ export async function createInvoice(churchId, amount, plan, stripeInvoiceId) {
 export async function getInvoices(churchId) {
     try {
         // For MVP, return mock invoices
-        const subscription = await prisma.subscription.findUnique({
-            where: { churchId },
-        });
+        const tenantPrisma = await getTenantPrisma(churchId);
+        const subscription = await tenantPrisma.subscription.findFirst({});
         if (!subscription) {
             return [];
         }

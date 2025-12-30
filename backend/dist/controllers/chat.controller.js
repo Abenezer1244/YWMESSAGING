@@ -6,18 +6,23 @@ import { getOrCreateConversation, sendChatMessage, getConversationHistory } from
 export async function handleChatMessage(req, res) {
     try {
         const { message, conversationId, visitorId } = req.body;
+        const churchId = req.tenantId;
         if (!message || !message.trim()) {
             res.status(400).json({ error: 'Message is required' });
+            return;
+        }
+        if (!churchId) {
+            res.status(400).json({ error: 'Church context required' });
             return;
         }
         // Get or create conversation
         let convId = conversationId;
         if (!convId) {
             const userId = req.user?.adminId;
-            convId = await getOrCreateConversation(userId, visitorId);
+            convId = await getOrCreateConversation(churchId, userId, visitorId);
         }
         // Send message and get response
-        const assistantResponse = await sendChatMessage(convId, message);
+        const assistantResponse = await sendChatMessage(churchId, convId, message);
         res.status(200).json({
             success: true,
             data: {
@@ -38,11 +43,16 @@ export async function handleChatMessage(req, res) {
 export async function getChatHistory(req, res) {
     try {
         const { conversationId } = req.params;
+        const churchId = req.tenantId;
         if (!conversationId) {
             res.status(400).json({ error: 'Conversation ID is required' });
             return;
         }
-        const messages = await getConversationHistory(conversationId);
+        if (!churchId) {
+            res.status(400).json({ error: 'Church context required' });
+            return;
+        }
+        const messages = await getConversationHistory(churchId, conversationId);
         res.status(200).json({
             success: true,
             data: messages,
@@ -60,8 +70,13 @@ export async function getChatHistory(req, res) {
 export async function createConversation(req, res) {
     try {
         const { visitorId } = req.body;
+        const churchId = req.tenantId;
+        if (!churchId) {
+            res.status(400).json({ error: 'Church context required' });
+            return;
+        }
         const userId = req.user?.adminId;
-        const conversationId = await getOrCreateConversation(userId, visitorId);
+        const conversationId = await getOrCreateConversation(churchId, userId, visitorId);
         res.status(201).json({
             success: true,
             data: { conversationId },

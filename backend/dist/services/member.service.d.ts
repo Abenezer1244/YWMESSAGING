@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { TenantPrismaClient } from '../lib/tenant-prisma.js';
 export interface CreateMemberData {
     firstName: string;
     lastName: string;
@@ -16,7 +16,7 @@ export interface UpdateMemberData {
 /**
  * Get all members with pagination and search
  */
-export declare function getMembers(tenantId: string, tenantPrisma: PrismaClient, options?: {
+export declare function getMembers(tenantId: string, tenantPrisma: TenantPrismaClient, options?: {
     page?: number;
     limit?: number;
     search?: string;
@@ -25,9 +25,9 @@ export declare function getMembers(tenantId: string, tenantPrisma: PrismaClient,
         phone: string;
         id: string;
         email: string | null;
+        createdAt: Date;
         firstName: string;
         lastName: string;
-        createdAt: Date;
         optInSms: boolean;
     }[];
     pagination: {
@@ -40,7 +40,7 @@ export declare function getMembers(tenantId: string, tenantPrisma: PrismaClient,
 /**
  * Add single member
  */
-export declare function addMember(tenantId: string, tenantPrisma: PrismaClient, data: CreateMemberData): Promise<{
+export declare function addMember(tenantId: string, tenantPrisma: TenantPrismaClient, data: CreateMemberData): Promise<{
     id: any;
     firstName: any;
     lastName: any;
@@ -56,7 +56,7 @@ export declare function addMember(tenantId: string, tenantPrisma: PrismaClient, 
  * Before: 500 queries (2-5 per member in loop)
  * After: 3 queries (1 for fetch existing, 1 for create members, 1 for success)
  */
-export declare function importMembers(tenantId: string, tenantPrisma: PrismaClient, membersData: Array<{
+export declare function importMembers(tenantId: string, tenantPrisma: TenantPrismaClient, membersData: Array<{
     firstName: string;
     lastName: string;
     phone: string;
@@ -72,7 +72,7 @@ export declare function importMembers(tenantId: string, tenantPrisma: PrismaClie
 /**
  * Update member
  */
-export declare function updateMember(tenantId: string, tenantPrisma: PrismaClient, memberId: string, data: UpdateMemberData): Promise<{
+export declare function updateMember(tenantId: string, tenantPrisma: TenantPrismaClient, memberId: string, data: UpdateMemberData): Promise<{
     id: string;
     firstName: string;
     lastName: string;
@@ -84,7 +84,7 @@ export declare function updateMember(tenantId: string, tenantPrisma: PrismaClien
 /**
  * Delete a member
  */
-export declare function deleteMember(tenantId: string, tenantPrisma: PrismaClient, memberId: string): Promise<{
+export declare function deleteMember(tenantId: string, tenantPrisma: TenantPrismaClient, memberId: string): Promise<{
     id: string;
     firstName: string;
     lastName: string;

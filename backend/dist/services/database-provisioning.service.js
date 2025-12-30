@@ -5,6 +5,7 @@
  * Each tenant (church) gets its own isolated PostgreSQL database
  */
 import { PrismaClient } from '@prisma/client';
+import { execSync } from 'child_process';
 /**
  * Provision a new tenant database
  * Creates a new database on the PostgreSQL server and returns the connection string
@@ -18,12 +19,12 @@ export async function provisionTenantDatabase(tenantId) {
             throw new Error('DATABASE_URL not configured');
         }
         // Extract connection details from base URL
-        // Format: postgresql://user:password@host:port/database
-        const urlMatch = baseUrl.match(/postgresql:\/\/([^:]+):([^@]+)@([^:]+):(\d+)/);
+        // Format: postgresql://user:password@host:port/database or postgresql://user:password@host/database (default port 5432)
+        const urlMatch = baseUrl.match(/postgresql:\/\/([^:]+):([^@]+)@([^:/?]+):?(\d+)?/);
         if (!urlMatch) {
             throw new Error('Invalid DATABASE_URL format');
         }
-        const [, user, password, host, port] = urlMatch;
+        const [, user, password, host, port = '5432'] = urlMatch;
         // Create a admin connection to the server to create the new database
         const adminUrl = `postgresql://${user}:${password}@${host}:${port}/postgres`;
         const adminPrisma = new PrismaClient({
@@ -62,31 +63,48 @@ export async function provisionTenantDatabase(tenantId) {
 /**
  * Run Prisma migrations on a tenant database
  * Applies the tenant schema to the newly created database
+ * Uses Prisma db push to apply the tenant-schema.prisma to the database
  */
 export async function runTenantMigrations(tenantDatabaseUrl) {
     try {
-        // Create a temporary Prisma client for this database
+        // Create a temporary Prisma client for this database to verify connection
         const tempPrisma = new PrismaClient({
             datasources: {
                 db: { url: tenantDatabaseUrl },
             },
         });
         try {
-            // Run a simple query to verify connection works
+            // Verify connection works
             await tempPrisma.$executeRaw `SELECT 1`;
             console.log('✅ Tenant database connection verified');
-            // In production, you would run migrations here using:
-            // - prisma migrate deploy (if using migrations)
-            // - prisma db push (if using push to db)
-            // For now, we rely on the schema being automatically applied
-            // TODO: Implement proper migration strategy
-            // This might be:
-            // 1. Using prisma migrate deploy with a separate migrations directory
-            // 2. Using prisma db push
-            // 3. Running raw SQL initialization script
         }
         finally {
             await tempPrisma.$disconnect();
+        }
+        // Run prisma db push with tenant schema to initialize all tables
+        // This applies the tenant-schema.prisma to the database
+        try {
+            console.log('⏳ Running Prisma migrations (tenant schema)...');
+            // Set environment variable for Prisma to use tenant database
+            const env = {
+                ...process.env,
+                TENANT_DATABASE_URL: tenantDatabaseUrl,
+                NODE_ENV: process.env.NODE_ENV || 'development',
+            };
+            // Run prisma db push with tenant schema
+            // This will create all tables from tenant-schema.prisma
+            execSync('npx prisma db push --schema=prisma/tenant-schema.prisma --skip-generate', {
+                env,
+                stdio: 'pipe', // Capture output to avoid cluttering logs
+                cwd: process.cwd(),
+            });
+            console.log('✅ Tenant schema migrations completed');
+        }
+        catch (execError) {
+            // Log the actual error output
+            const errorMessage = execError.stderr?.toString() || execError.stdout?.toString() || execError.message;
+            console.error('Migration command output:', errorMessage);
+            throw new Error(`Prisma migrations failed: ${errorMessage}`);
         }
     }
     catch (error) {
@@ -107,11 +125,12 @@ export async function deleteTenantDatabase(tenantId) {
             throw new Error('DATABASE_URL not configured');
         }
         // Extract connection details from base URL
-        const urlMatch = baseUrl.match(/postgresql:\/\/([^:]+):([^@]+)@([^:]+):(\d+)/);
+        // Format: postgresql://user:password@host:port/database or postgresql://user:password@host/database (default port 5432)
+        const urlMatch = baseUrl.match(/postgresql:\/\/([^:]+):([^@]+)@([^:/?]+):?(\d+)?/);
         if (!urlMatch) {
             throw new Error('Invalid DATABASE_URL format');
         }
-        const [, user, password, host, port] = urlMatch;
+        const [, user, password, host, port = '5432'] = urlMatch;
         // Create a admin connection to drop the database
         const adminUrl = `postgresql://${user}:${password}@${host}:${port}/postgres`;
         const adminPrisma = new PrismaClient({
@@ -152,11 +171,12 @@ export async function tenantDatabaseExists(tenantId) {
             throw new Error('DATABASE_URL not configured');
         }
         // Extract connection details from base URL
-        const urlMatch = baseUrl.match(/postgresql:\/\/([^:]+):([^@]+)@([^:]+):(\d+)/);
+        // Format: postgresql://user:password@host:port/database or postgresql://user:password@host/database (default port 5432)
+        const urlMatch = baseUrl.match(/postgresql:\/\/([^:]+):([^@]+)@([^:/?]+):?(\d+)?/);
         if (!urlMatch) {
             throw new Error('Invalid DATABASE_URL format');
         }
-        const [, user, password, host, port] = urlMatch;
+        const [, user, password, host, port = '5432'] = urlMatch;
         // Create a admin connection to check the database
         const adminUrl = `postgresql://${user}:${password}@${host}:${port}/postgres`;
         const adminPrisma = new PrismaClient({

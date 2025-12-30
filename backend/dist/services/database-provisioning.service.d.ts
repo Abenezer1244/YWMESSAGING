@@ -12,6 +12,7 @@ export declare function provisionTenantDatabase(tenantId: string): Promise<strin
 /**
  * Run Prisma migrations on a tenant database
  * Applies the tenant schema to the newly created database
+ * Uses Prisma db push to apply the tenant-schema.prisma to the database
  */
 export declare function runTenantMigrations(tenantDatabaseUrl: string): Promise<void>;
 /**

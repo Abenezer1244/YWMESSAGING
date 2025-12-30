@@ -7,6 +7,7 @@
 import { Router } from 'express';
 import { checkDatabaseHealth } from '../lib/prisma.js';
 import { redisClient } from '../config/redis.config.js';
+import { createCustomSpan, createDatabaseSpan } from '../utils/apm-instrumentation.js';
 const router = Router();
 /**
  * GET /health
@@ -108,6 +109,56 @@ router.get('/health/live', (req, res) => {
         uptime: process.uptime(),
         timestamp: new Date().toISOString(),
     });
+});
+/**
+ * GET /health/apm-diagnostic
+ * APM diagnostic endpoint - exercises tracing for verification
+ * Makes test spans and checks if Datadog APM is initialized
+ */
+router.get('/health/apm-diagnostic', async (req, res) => {
+    return createCustomSpan('health.apm_diagnostic', async () => {
+        try {
+            const results = {
+                timestamp: new Date().toISOString(),
+                spans: [],
+            };
+            // Test custom span
+            results.spans.push({
+                name: 'custom_test_span',
+                status: 'created',
+            });
+            // Test database span
+            try {
+                const dbHealthy = await createDatabaseSpan('SELECT', 'test', async () => {
+                    return await checkDatabaseHealth();
+                }, { test: 'apm_diagnostic' });
+                results.spans.push({
+                    name: 'database_test_span',
+                    status: dbHealthy ? 'success' : 'failed',
+                });
+            }
+            catch (error) {
+                results.spans.push({
+                    name: 'database_test_span',
+                    status: 'error',
+                    error: error.message,
+                });
+            }
+            results.message = 'APM diagnostic complete - traces should appear in Datadog';
+            results.next_step = 'Check Datadog dashboard: APM > Services > koinonia-sms-backend';
+            return res.json({
+                apm_diagnostic: results,
+                status: 'ok',
+            });
+        }
+        catch (error) {
+            console.error('APM diagnostic failed:', error);
+            return res.status(500).json({
+                error: error.message,
+                status: 'failed',
+            });
+        }
+    }, { type: 'diagnostic' });
 });
 export default router;
 //# sourceMappingURL=health.routes.js.map

@@ -1,11 +1,10 @@
 import { Router } from 'express';
 import crypto from 'crypto';
-import { PrismaClient } from '@prisma/client';
+import { getRegistryPrisma, getTenantPrisma } from '../lib/tenant-prisma.js';
 import Stripe from 'stripe';
 import { handleTelnyxInboundMMS, handleTelnyxWebhook } from '../controllers/conversation.controller.js';
 import { handleTelnyx10DLCWebhook } from '../jobs/10dlc-webhooks.js';
 const router = Router();
-const prisma = new PrismaClient();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
     apiVersion: '2022-11-15',
 });
@@ -149,8 +148,9 @@ export async function handleStripeWebhook(req, res) {
 async function handlePaymentSucceeded(invoice) {
     try {
         const stripeCustomerId = invoice.customer;
+        const registryPrisma = getRegistryPrisma();
         // Find church by Stripe customer ID
-        const church = await prisma.church.findFirst({
+        const church = await registryPrisma.church.findFirst({
             where: { stripeCustomerId },
         });
         if (!church) {
@@ -158,7 +158,7 @@ async function handlePaymentSucceeded(invoice) {
             return;
         }
         // Update church subscription status
-        await prisma.church.update({
+        await registryPrisma.church.update({
             where: { id: church.id },
             data: {
                 subscriptionStatus: 'active',
@@ -176,8 +176,9 @@ async function handlePaymentSucceeded(invoice) {
 async function handlePaymentFailed(invoice) {
     try {
         const stripeCustomerId = invoice.customer;
+        const registryPrisma = getRegistryPrisma();
         // Find church by Stripe customer ID
-        const church = await prisma.church.findFirst({
+        const church = await registryPrisma.church.findFirst({
             where: { stripeCustomerId },
         });
         if (!church) {
@@ -185,7 +186,7 @@ async function handlePaymentFailed(invoice) {
             return;
         }
         // Update church subscription status
-        await prisma.church.update({
+        await registryPrisma.church.update({
             where: { id: church.id },
             data: {
                 subscriptionStatus: 'past_due',
@@ -204,17 +205,19 @@ async function handleSubscriptionUpdated(subscription) {
     try {
         const stripeCustomerId = subscription.customer;
         const stripeSubId = subscription.id;
+        const registryPrisma = getRegistryPrisma();
         // Find church by Stripe customer ID
-        const church = await prisma.church.findFirst({
+        const church = await registryPrisma.church.findFirst({
             where: { stripeCustomerId },
         });
         if (!church) {
             console.log('⚠️ Church not found for Stripe customer');
             return;
         }
-        // Update subscription record
-        await prisma.subscription.update({
-            where: { churchId: church.id },
+        // Get tenant-scoped database client for subscription update
+        const tenantPrisma = await getTenantPrisma(church.id);
+        // Update subscription record (subscription is in tenant schema, one per tenant)
+        await tenantPrisma.subscription.updateMany({
             data: {
                 stripeSubId,
                 status: subscription.status,
@@ -233,25 +236,27 @@ async function handleSubscriptionUpdated(subscription) {
 async function handleSubscriptionDeleted(subscription) {
     try {
         const stripeCustomerId = subscription.customer;
+        const registryPrisma = getRegistryPrisma();
         // Find church by Stripe customer ID
-        const church = await prisma.church.findFirst({
+        const church = await registryPrisma.church.findFirst({
             where: { stripeCustomerId },
         });
         if (!church) {
             console.log('⚠️ Church not found for Stripe customer');
             return;
         }
-        // Update subscription record
-        await prisma.subscription.update({
-            where: { churchId: church.id },
+        // Get tenant-scoped database client for subscription update
+        const tenantPrisma = await getTenantPrisma(church.id);
+        // Update subscription record (subscription is in tenant schema, one per tenant)
+        await tenantPrisma.subscription.updateMany({
             data: {
                 status: 'cancelled',
                 cancelledAt: new Date(),
                 updatedAt: new Date(),
             },
         });
-        // Update church status back to trial
-        await prisma.church.update({
+        // Update church status back to cancelled
+        await registryPrisma.church.update({
             where: { id: church.id },
             data: {
                 subscriptionStatus: 'cancelled',

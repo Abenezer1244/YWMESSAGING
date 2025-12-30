@@ -11,8 +11,6 @@
  * Authentication: OAuth2 Bearer Token or Personal Access Token
  */
 import axios from 'axios';
-import { prisma } from '../lib/prisma.js';
-import { getCached, setCached, invalidateCache, CACHE_KEYS, CACHE_TTL } from './cache.service.js';
 const PCO_API_BASE = 'https://api.planningcenteronline.com/v2';
 // ============================================================================
 // Planning Center API Client
@@ -149,7 +147,7 @@ class PlanningCenterClient {
  * Connect Planning Center to a church (OAuth2)
  * Stores credentials securely in database
  */
-export async function connectPlanningCenter(churchId, accessToken, refreshToken, expiresIn) {
+export async function connectPlanningCenter(accessToken, tenantPrisma, refreshToken, expiresIn) {
     try {
         const client = new PlanningCenterClient(accessToken);
         // Verify connection and get organization ID
@@ -162,35 +160,36 @@ export async function connectPlanningCenter(churchId, accessToken, refreshToken,
         const expiresAt = expiresIn
             ? new Date(Date.now() + expiresIn * 1000)
             : new Date(Date.now() + 3600 * 1000); // Default 1 hour
-        // Store in database
-        const integration = await prisma.planningCenterIntegration.upsert({
-            where: { churchId },
-            update: {
-                accessToken,
-                refreshToken: refreshToken || undefined,
-                expiresAt,
-                organizationId,
-                isEnabled: true,
-                syncStatus: 'active',
-                errorMessage: null,
-            },
-            create: {
-                churchId,
-                accessToken,
-                refreshToken: refreshToken || '',
-                expiresAt,
-                organizationId,
-                isEnabled: true,
-                syncStatus: 'active',
-                memberSyncEnabled: true,
-                serviceSyncEnabled: true,
-            },
-        });
-        // Invalidate cache
-        await invalidateCache(CACHE_KEYS.churchAll(churchId));
-        console.log(`[Planning Center] Connected church ${churchId} to organization ${organizationId}`);
+        // Store in database (upsert first record - one integration per church/tenant)
+        const existing = await tenantPrisma.planningCenterIntegration.findFirst();
+        const integration = existing
+            ? await tenantPrisma.planningCenterIntegration.update({
+                where: { id: existing.id },
+                data: {
+                    accessToken,
+                    refreshToken: refreshToken || undefined,
+                    expiresAt,
+                    organizationId,
+                    isEnabled: true,
+                    syncStatus: 'active',
+                    errorMessage: null,
+                },
+            })
+            : await tenantPrisma.planningCenterIntegration.create({
+                data: {
+                    accessToken,
+                    refreshToken: refreshToken || '',
+                    expiresAt,
+                    organizationId,
+                    isEnabled: true,
+                    syncStatus: 'active',
+                    memberSyncEnabled: true,
+                    serviceSyncEnabled: true,
+                },
+            });
+        // Cache will expire naturally
+        console.log(`[Planning Center] Connected to organization ${organizationId}`);
         return {
-            churchId: integration.churchId,
             accessToken: integration.accessToken,
             refreshToken: integration.refreshToken || undefined,
             expiresAt: integration.expiresAt || undefined,
@@ -211,21 +210,10 @@ export async function connectPlanningCenter(churchId, accessToken, refreshToken,
 /**
  * Get Planning Center integration status
  */
-export async function getPlanningCenterStatus(churchId) {
+export async function getPlanningCenterStatus(tenantPrisma) {
     try {
-        // Try cache first
-        const cached = await getCached(CACHE_KEYS.planningCenterStatus(churchId));
-        if (cached) {
-            return cached;
-        }
-        const integration = await prisma.planningCenterIntegration.findUnique({
-            where: { churchId },
-        });
-        if (integration) {
-            await setCached(CACHE_KEYS.planningCenterStatus(churchId), integration, CACHE_TTL.MEDIUM);
-        }
+        const integration = await tenantPrisma.planningCenterIntegration.findFirst();
         return integration ? {
-            churchId: integration.churchId,
             accessToken: integration.accessToken,
             refreshToken: integration.refreshToken || undefined,
             expiresAt: integration.expiresAt || undefined,
@@ -247,7 +235,7 @@ export async function getPlanningCenterStatus(churchId) {
  * Sync members from Planning Center into YW Messaging
  * Creates or updates Member records
  */
-export async function syncPlanningCenterMembers(churchId) {
+export async function syncPlanningCenterMembers(tenantPrisma) {
     const startTime = Date.now();
     const result = {
         success: false,
@@ -258,24 +246,24 @@ export async function syncPlanningCenterMembers(churchId) {
         duration: 0,
     };
     try {
-        const integration = await getPlanningCenterStatus(churchId);
+        const integration = await getPlanningCenterStatus(tenantPrisma);
         if (!integration || !integration.isEnabled || !integration.memberSyncEnabled) {
             throw new Error('Planning Center integration not enabled for member sync');
         }
         const client = new PlanningCenterClient(integration.accessToken);
         const people = await client.getPeople(integration.organizationId);
-        console.log(`[Planning Center] Syncing ${people.length} members for church ${churchId}`);
+        console.log(`[Planning Center] Syncing ${people.length} members`);
         for (const person of people) {
             try {
                 // Create or update member in YW Messaging
-                const existingMember = await prisma.member.findFirst({
+                const existingMember = await tenantPrisma.member.findFirst({
                     where: {
                         phone: person.phone,
                     },
                 });
                 if (existingMember) {
                     // Update existing member
-                    await prisma.member.update({
+                    await tenantPrisma.member.update({
                         where: { id: existingMember.id },
                         data: {
                             firstName: person.firstName,
@@ -287,7 +275,7 @@ export async function syncPlanningCenterMembers(churchId) {
                 }
                 else if (person.phone) {
                     // Create new member (must have phone number)
-                    const newMember = await prisma.member.create({
+                    const newMember = await tenantPrisma.member.create({
                         data: {
                             firstName: person.firstName,
                             lastName: person.lastName,
@@ -296,9 +284,8 @@ export async function syncPlanningCenterMembers(churchId) {
                         },
                     });
                     // Create a conversation to link member to church
-                    await prisma.conversation.create({
+                    await tenantPrisma.conversation.create({
                         data: {
-                            churchId,
                             memberId: newMember.id,
                         },
                     });
@@ -315,32 +302,36 @@ export async function syncPlanningCenterMembers(churchId) {
             }
         }
         // Update last sync time
-        await prisma.planningCenterIntegration.update({
-            where: { churchId },
-            data: {
-                lastSyncAt: new Date(),
-                syncStatus: 'active',
-                errorMessage: null,
-            },
-        });
+        const latestIntegration = await tenantPrisma.planningCenterIntegration.findFirst();
+        if (latestIntegration) {
+            await tenantPrisma.planningCenterIntegration.update({
+                where: { id: latestIntegration.id },
+                data: {
+                    lastSyncAt: new Date(),
+                    syncStatus: 'active',
+                    errorMessage: null,
+                },
+            });
+        }
         result.success = true;
         result.duration = Date.now() - startTime;
         console.log(`[Planning Center] Sync complete: ${result.itemsCreated} created, ${result.itemsUpdated} updated, ${result.itemsFailed} failed`);
-        // Invalidate cache
-        await invalidateCache(CACHE_KEYS.churchAll(churchId));
         return result;
     }
     catch (error) {
         result.duration = Date.now() - startTime;
         result.error = error.message;
         // Update integration status to failed
-        await prisma.planningCenterIntegration.update({
-            where: { churchId },
-            data: {
-                syncStatus: 'failed',
-                errorMessage: error.message,
-            },
-        }).catch(() => { }); // Ignore if integration doesn't exist
+        const integration = await tenantPrisma.planningCenterIntegration.findFirst().catch(() => null);
+        if (integration) {
+            await tenantPrisma.planningCenterIntegration.update({
+                where: { id: integration.id },
+                data: {
+                    syncStatus: 'failed',
+                    errorMessage: error.message,
+                },
+            }).catch(() => { }); // Ignore if integration doesn't exist
+        }
         console.error(`[Planning Center] Sync failed: ${error.message}`);
         return result;
     }
@@ -349,20 +340,21 @@ export async function syncPlanningCenterMembers(churchId) {
  * Disconnect Planning Center from a church
  * Revokes access token and disables integration
  */
-export async function disconnectPlanningCenter(churchId) {
+export async function disconnectPlanningCenter(tenantPrisma) {
     try {
-        await prisma.planningCenterIntegration.update({
-            where: { churchId },
-            data: {
-                isEnabled: false,
-                accessToken: '', // Clear token
-                syncStatus: 'pending',
-            },
-        });
-        // Invalidate cache
-        await invalidateCache(CACHE_KEYS.churchAll(churchId));
-        await invalidateCache(CACHE_KEYS.planningCenterStatus(churchId));
-        console.log(`[Planning Center] Disconnected church ${churchId}`);
+        const integration = await tenantPrisma.planningCenterIntegration.findFirst();
+        if (integration) {
+            await tenantPrisma.planningCenterIntegration.update({
+                where: { id: integration.id },
+                data: {
+                    isEnabled: false,
+                    accessToken: '', // Clear token
+                    syncStatus: 'pending',
+                },
+            });
+        }
+        // Cache will expire naturally (no churchId available for cache keys)
+        console.log(`[Planning Center] Disconnected`);
     }
     catch (error) {
         console.error(`[Planning Center] Failed to disconnect: ${error.message}`);
@@ -381,9 +373,9 @@ function isTokenExpired(expiresAt) {
 /**
  * Validate Planning Center integration setup
  */
-export async function validatePlanningCenterSetup(churchId) {
+export async function validatePlanningCenterSetup(tenantPrisma) {
     try {
-        const integration = await getPlanningCenterStatus(churchId);
+        const integration = await tenantPrisma.planningCenterIntegration.findFirst();
         if (!integration || !integration.isEnabled) {
             return { valid: false, error: 'Planning Center not connected' };
         }

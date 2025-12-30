@@ -1,11 +1,11 @@
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import crypto from 'crypto';
-import { prisma } from '../lib/prisma.js';
 import { encrypt, decrypt } from '../utils/encryption.utils.js';
 /**
  * MFA Service - Multi-Factor Authentication using TOTP
  * Implements Google Authenticator compatible TOTP with recovery codes
+ * PHASE 5: Multi-tenant refactoring - uses tenantPrisma for tenant-scoped queries
  */
 const RECOVERY_CODE_COUNT = 10;
 const RECOVERY_CODE_LENGTH = 8;
@@ -39,7 +39,7 @@ export async function generateMFASecret(email) {
 /**
  * Enable MFA for an admin
  */
-export async function enableMFA(adminId, totpSecret, verifyCode, email) {
+export async function enableMFA(adminId, totpSecret, verifyCode, email, tenantPrisma) {
     try {
         // Verify the code with the secret first
         const isValid = speakeasy.totp.verify({
@@ -52,14 +52,14 @@ export async function enableMFA(adminId, totpSecret, verifyCode, email) {
             throw new Error('Invalid verification code');
         }
         // Check if MFA already exists
-        let mfaRecord = await prisma.adminMFA.findUnique({
+        let mfaRecord = await tenantPrisma.adminMFA.findUnique({
             where: { adminId },
         });
         // Encrypt the secret before storing
         const encryptedSecret = encrypt(totpSecret);
         if (!mfaRecord) {
             // Create new MFA record
-            mfaRecord = await prisma.adminMFA.create({
+            mfaRecord = await tenantPrisma.adminMFA.create({
                 data: {
                     adminId,
                     totpSecret: encryptedSecret,
@@ -70,7 +70,7 @@ export async function enableMFA(adminId, totpSecret, verifyCode, email) {
         }
         else {
             // Update existing record
-            mfaRecord = await prisma.adminMFA.update({
+            mfaRecord = await tenantPrisma.adminMFA.update({
                 where: { adminId },
                 data: {
                     totpSecret: encryptedSecret,
@@ -80,7 +80,7 @@ export async function enableMFA(adminId, totpSecret, verifyCode, email) {
             });
         }
         // Generate recovery codes
-        const recoveryCodes = await generateRecoveryCodes(adminId);
+        const recoveryCodes = await generateRecoveryCodes(adminId, RECOVERY_CODE_COUNT, tenantPrisma);
         return {
             mfaEnabled: true,
             recoveryCodes,
@@ -95,9 +95,9 @@ export async function enableMFA(adminId, totpSecret, verifyCode, email) {
 /**
  * Verify TOTP code
  */
-export async function verifyTOTPCode(adminId, code) {
+export async function verifyTOTPCode(adminId, code, tenantPrisma) {
     try {
-        const mfaRecord = await prisma.adminMFA.findUnique({
+        const mfaRecord = await tenantPrisma.adminMFA.findUnique({
             where: { adminId },
         });
         if (!mfaRecord || !mfaRecord.mfaEnabled) {
@@ -114,7 +114,7 @@ export async function verifyTOTPCode(adminId, code) {
         });
         if (isValid) {
             // Update last verified timestamp
-            await prisma.adminMFA.update({
+            await tenantPrisma.adminMFA.update({
                 where: { adminId },
                 data: { lastVerifiedAt: new Date() },
             });
@@ -129,16 +129,16 @@ export async function verifyTOTPCode(adminId, code) {
 /**
  * Verify recovery code
  */
-export async function verifyRecoveryCode(adminId, code) {
+export async function verifyRecoveryCode(adminId, code, tenantPrisma) {
     try {
-        const mfaRecord = await prisma.adminMFA.findUnique({
+        const mfaRecord = await tenantPrisma.adminMFA.findUnique({
             where: { adminId },
         });
         if (!mfaRecord || !mfaRecord.mfaEnabled) {
             throw new Error('MFA not enabled for this admin');
         }
         // Find unused recovery code
-        const recoveryCode = await prisma.mFARecoveryCode.findFirst({
+        const recoveryCode = await tenantPrisma.mFARecoveryCode.findFirst({
             where: {
                 adminId,
                 code, // Hash will be computed in the query
@@ -149,7 +149,7 @@ export async function verifyRecoveryCode(adminId, code) {
             return false;
         }
         // Mark as used
-        await prisma.mFARecoveryCode.update({
+        await tenantPrisma.mFARecoveryCode.update({
             where: { id: recoveryCode.id },
             data: { usedAt: new Date() },
         });
@@ -157,7 +157,7 @@ export async function verifyRecoveryCode(adminId, code) {
         const usedIndices = JSON.parse(mfaRecord.backupCodesUsed || '[]');
         if (!usedIndices.includes(recoveryCode.index)) {
             usedIndices.push(recoveryCode.index);
-            await prisma.adminMFA.update({
+            await tenantPrisma.adminMFA.update({
                 where: { adminId },
                 data: { backupCodesUsed: JSON.stringify(usedIndices) },
             });
@@ -172,15 +172,15 @@ export async function verifyRecoveryCode(adminId, code) {
 /**
  * Disable MFA
  */
-export async function disableMFA(adminId, verifyCode) {
+export async function disableMFA(adminId, verifyCode, tenantPrisma) {
     try {
         // Verify current code first
-        const isValid = await verifyTOTPCode(adminId, verifyCode);
+        const isValid = await verifyTOTPCode(adminId, verifyCode, tenantPrisma);
         if (!isValid) {
             throw new Error('Invalid verification code');
         }
         // Disable MFA
-        await prisma.adminMFA.update({
+        await tenantPrisma.adminMFA.update({
             where: { adminId },
             data: {
                 mfaEnabled: false,
@@ -188,7 +188,7 @@ export async function disableMFA(adminId, verifyCode) {
             },
         });
         // Delete recovery codes
-        await prisma.mFARecoveryCode.deleteMany({
+        await tenantPrisma.mFARecoveryCode.deleteMany({
             where: { adminId },
         });
         console.log(`✅ MFA disabled for admin ${adminId}`);
@@ -201,9 +201,9 @@ export async function disableMFA(adminId, verifyCode) {
 /**
  * Get MFA status
  */
-export async function getMFAStatus(adminId) {
+export async function getMFAStatus(adminId, tenantPrisma) {
     try {
-        const mfaRecord = await prisma.adminMFA.findUnique({
+        const mfaRecord = await tenantPrisma.adminMFA.findUnique({
             where: { adminId },
         });
         if (!mfaRecord) {
@@ -231,7 +231,7 @@ export async function getMFAStatus(adminId) {
 /**
  * Generate recovery codes
  */
-export async function generateRecoveryCodes(adminId, count = RECOVERY_CODE_COUNT) {
+export async function generateRecoveryCodes(adminId, count = RECOVERY_CODE_COUNT, tenantPrisma) {
     try {
         // Generate codes
         const codes = [];
@@ -240,13 +240,13 @@ export async function generateRecoveryCodes(adminId, count = RECOVERY_CODE_COUNT
             codes.push(`${code.slice(0, 4)}-${code.slice(4)}`);
         }
         // Delete old codes
-        await prisma.mFARecoveryCode.deleteMany({
+        await tenantPrisma.mFARecoveryCode.deleteMany({
             where: { adminId },
         });
         // Store new codes (hashed)
         const codePromises = codes.map((code, index) => {
             const hashedCode = crypto.createHash('sha256').update(code).digest('hex');
-            return prisma.mFARecoveryCode.create({
+            return tenantPrisma.mFARecoveryCode.create({
                 data: {
                     adminId,
                     code: hashedCode,
@@ -256,7 +256,7 @@ export async function generateRecoveryCodes(adminId, count = RECOVERY_CODE_COUNT
         });
         await Promise.all(codePromises);
         // Reset used codes tracking
-        await prisma.adminMFA.update({
+        await tenantPrisma.adminMFA.update({
             where: { adminId },
             data: { backupCodesUsed: '[]' },
         });
@@ -270,9 +270,9 @@ export async function generateRecoveryCodes(adminId, count = RECOVERY_CODE_COUNT
 /**
  * Get recovery code status
  */
-export async function getRecoveryCodeStatus(adminId) {
+export async function getRecoveryCodeStatus(adminId, tenantPrisma) {
     try {
-        const mfaRecord = await prisma.adminMFA.findUnique({
+        const mfaRecord = await tenantPrisma.adminMFA.findUnique({
             where: { adminId },
         });
         if (!mfaRecord) {

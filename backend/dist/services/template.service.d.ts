@@ -1,12 +1,11 @@
-import { PrismaClient } from '@prisma/client';
+import type { TenantPrismaClient } from '../lib/tenant-prisma.js';
 export interface CreateTemplateData {
     name: string;
     content: string;
     category: string;
 }
-export declare function getTemplates(tenantId: string, tenantPrisma: PrismaClient): Promise<{
+export declare function getTemplates(tenantId: string, tenantPrisma: TenantPrismaClient): Promise<{
     id: string;
-    churchId: string;
     name: string;
     content: string;
     category: string;
@@ -15,9 +14,8 @@ export declare function getTemplates(tenantId: string, tenantPrisma: PrismaClien
     createdAt: Date;
     updatedAt: Date;
 }[]>;
-export declare function createTemplate(tenantId: string, tenantPrisma: PrismaClient, data: CreateTemplateData): Promise<{
+export declare function createTemplate(tenantId: string, tenantPrisma: TenantPrismaClient, data: CreateTemplateData): Promise<{
     id: string;
-    churchId: string;
     name: string;
     content: string;
     category: string;
@@ -26,9 +24,8 @@ export declare function createTemplate(tenantId: string, tenantPrisma: PrismaCli
     createdAt: Date;
     updatedAt: Date;
 }>;
-export declare function updateTemplate(tenantId: string, tenantPrisma: PrismaClient, templateId: string, data: Partial<CreateTemplateData>): Promise<{
+export declare function updateTemplate(tenantId: string, tenantPrisma: TenantPrismaClient, templateId: string, data: Partial<CreateTemplateData>): Promise<{
     id: string;
-    churchId: string;
     name: string;
     content: string;
     category: string;
@@ -37,9 +34,8 @@ export declare function updateTemplate(tenantId: string, tenantPrisma: PrismaCli
     createdAt: Date;
     updatedAt: Date;
 }>;
-export declare function deleteTemplate(tenantId: string, tenantPrisma: PrismaClient, templateId: string): Promise<{
+export declare function deleteTemplate(tenantId: string, tenantPrisma: TenantPrismaClient, templateId: string): Promise<{
     id: string;
-    churchId: string;
     name: string;
     content: string;
     category: string;
@@ -48,9 +44,8 @@ export declare function deleteTemplate(tenantId: string, tenantPrisma: PrismaCli
     createdAt: Date;
     updatedAt: Date;
 }>;
-export declare function incrementUsageCount(tenantId: string, tenantPrisma: PrismaClient, templateId: string): Promise<{
+export declare function incrementUsageCount(tenantId: string, tenantPrisma: TenantPrismaClient, templateId: string): Promise<{
     id: string;
-    churchId: string;
     name: string;
     content: string;
     category: string;

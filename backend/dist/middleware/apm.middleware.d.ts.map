@@ -1,0 +1,1 @@
+{"version":3,"file":"apm.middleware.d.ts","sourceRoot":"","sources":["../../src/middleware/apm.middleware.ts"],"names":[],"mappings":"AAAA;;;;;;;;;GASG;AAEH,OAAO,EAAE,OAAO,EAAE,QAAQ,EAAE,YAAY,EAAE,MAAM,SAAS,CAAC;AAG1D;;;GAGG;AACH,wBAAgB,aAAa,CAAC,GAAG,EAAE,OAAO,EAAE,GAAG,EAAE,QAAQ,EAAE,IAAI,EAAE,YAAY,GAAG,IAAI,CAuDnF;AAED,eAAe,aAAa,CAAC"}

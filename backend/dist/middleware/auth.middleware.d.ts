@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { AccessTokenPayload } from '../utils/jwt.utils.js';
+import { TenantPrismaClient } from '../lib/tenant-prisma.js';
 declare global {
     namespace Express {
         interface Request {
             user?: AccessTokenPayload;
             tenantId?: string;
-            prisma?: PrismaClient;
+            prisma?: TenantPrismaClient;
         }
     }
 }

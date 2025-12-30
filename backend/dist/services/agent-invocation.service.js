@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { prisma } from '../lib/prisma.js';
+import { getTenantPrisma } from '../lib/tenant-prisma.js';
 import { analysisCache } from './analysis-cache.service.js';
 import { executeToolCall, buildToolsArray, logMcpStats, } from './mcp-integration.service.js';
 /**
@@ -327,10 +327,16 @@ export async function invokeMultipleAgents(agents, request, parallel = true, ena
 /**
  * Store agent invocation in audit trail
  */
-export async function storeAgentAudit(agentType, eventType, githubData, response, status, error) {
+export async function storeAgentAudit(churchId, agentType, eventType, githubData, response, status, error) {
     try {
+        // Skip audit logging if churchId not provided (for system-wide GitHub webhooks)
+        if (!churchId) {
+            console.log(`⏭️ Skipping audit logging (no churchId provided)`);
+            return;
+        }
         // Store in database for audit trail and compliance tracking
-        await prisma.agentAudit.create({
+        const tenantPrisma = await getTenantPrisma(churchId);
+        await tenantPrisma.agentAudit.create({
             data: {
                 agentType,
                 eventType,

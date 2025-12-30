@@ -10,7 +10,6 @@ export interface NPSSurveyInput {
 }
 export interface NPSSurveyResponse {
     id: string;
-    churchId: string;
     score: number;
     category: string;
     sentiment: string | null;
@@ -61,5 +60,5 @@ export declare function invalidateNPSCache(churchId: string): Promise<void>;
  * Send followup email to survey respondent
  * (Placeholder - integrate with Resend email service)
  */
-export declare function sendFollowupEmail(surveyId: string, email: string, message: string): Promise<void>;
+export declare function sendFollowupEmail(churchId: string, surveyId: string, email: string, message: string): Promise<void>;
 //# sourceMappingURL=nps.service.d.ts.map

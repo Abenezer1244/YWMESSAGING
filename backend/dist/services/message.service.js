@@ -1,85 +1,89 @@
+import { createCustomSpan, createDatabaseSpan } from '../utils/apm-instrumentation.js';
 /**
  * Resolve recipients based on target type
  * Returns unique opted-in members by phone number
  */
 export async function resolveRecipients(tenantId, tenantPrisma, options) {
-    const members = new Map();
-    try {
-        if (options.targetType === 'individual' && options.targetIds?.length === 1) {
-            // Single member
-            const member = await tenantPrisma.member.findUnique({
-                where: { id: options.targetIds[0] },
-                select: { id: true, phone: true, optInSms: true },
-            });
-            if (member && member.optInSms) {
-                members.set(member.phone, { id: member.id, phone: member.phone });
-            }
-        }
-        else if (options.targetType === 'all') {
-            // Get all members through conversations
-            const conversations = await tenantPrisma.conversation.findMany({
-                select: {
-                    member: {
-                        select: {
-                            id: true,
-                            phone: true,
-                            optInSms: true,
-                        },
-                    },
-                },
-            });
-            for (const conv of conversations) {
-                const member = conv.member;
-                if (member.optInSms) {
+    return createCustomSpan('message.resolve_recipients', async () => {
+        const members = new Map();
+        try {
+            if (options.targetType === 'individual' && options.targetIds?.length === 1) {
+                // Single member
+                const member = await createDatabaseSpan('SELECT', 'member', () => tenantPrisma.member.findUnique({
+                    where: { id: options.targetIds[0] },
+                    select: { id: true, phone: true, optInSms: true },
+                }), { tenantId, targetType: 'individual' });
+                if (member && member.optInSms) {
                     members.set(member.phone, { id: member.id, phone: member.phone });
                 }
             }
+            else if (options.targetType === 'all') {
+                // Get all members through conversations
+                const conversations = await createDatabaseSpan('SELECT', 'conversation', () => tenantPrisma.conversation.findMany({
+                    select: {
+                        member: {
+                            select: {
+                                id: true,
+                                phone: true,
+                                optInSms: true,
+                            },
+                        },
+                    },
+                }), { tenantId, targetType: 'all' });
+                for (const conv of conversations) {
+                    const member = conv.member;
+                    if (member.optInSms) {
+                        members.set(member.phone, { id: member.id, phone: member.phone });
+                    }
+                }
+            }
         }
-    }
-    catch (error) {
-        throw new Error(`Failed to resolve recipients: ${error.message}`);
-    }
-    return Array.from(members.values());
+        catch (error) {
+            throw new Error(`Failed to resolve recipients: ${error.message}`);
+        }
+        return Array.from(members.values());
+    }, { tenantId, targetType: options.targetType });
 }
 /**
  * Create message record
  */
 export async function createMessage(tenantId, tenantPrisma, data) {
-    // Resolve recipients
-    const recipients = await resolveRecipients(tenantId, tenantPrisma, {
-        targetType: data.targetType,
-        targetIds: data.targetIds,
-    });
-    if (recipients.length === 0) {
-        throw new Error('No valid recipients found');
-    }
-    // Create message record
-    const message = await tenantPrisma.message.create({
-        data: {
-            churchId: tenantId,
-            content: data.content,
+    return createCustomSpan('message.create', async () => {
+        // Resolve recipients
+        const recipients = await resolveRecipients(tenantId, tenantPrisma, {
             targetType: data.targetType,
-            targetIds: JSON.stringify(data.targetIds || []),
-            totalRecipients: recipients.length,
-            status: 'pending',
-        },
-    });
-    // Create message recipient records in batch (not one-by-one)
-    await tenantPrisma.messageRecipient.createMany({
-        data: recipients.map((recipient) => ({
-            messageId: message.id,
-            memberId: recipient.id,
-            status: 'pending',
-        })),
-    });
-    return {
-        id: message.id,
-        content: message.content,
-        targetType: message.targetType,
-        totalRecipients: message.totalRecipients,
-        status: message.status,
-        createdAt: message.createdAt,
-    };
+            targetIds: data.targetIds,
+        });
+        if (recipients.length === 0) {
+            throw new Error('No valid recipients found');
+        }
+        // Create message record
+        const message = await createDatabaseSpan('INSERT', 'message', () => tenantPrisma.message.create({
+            data: {
+                content: data.content,
+                targetType: data.targetType,
+                targetIds: JSON.stringify(data.targetIds || []),
+                totalRecipients: recipients.length,
+                status: 'pending',
+            },
+        }), { tenantId, recipientCount: recipients.length });
+        // Create message recipient records in batch (not one-by-one)
+        await createDatabaseSpan('INSERT', 'messageRecipient', () => tenantPrisma.messageRecipient.createMany({
+            data: recipients.map((recipient) => ({
+                messageId: message.id,
+                memberId: recipient.id,
+                status: 'pending',
+            })),
+        }), { tenantId, recordCount: recipients.length });
+        return {
+            id: message.id,
+            content: message.content,
+            targetType: message.targetType,
+            totalRecipients: message.totalRecipients,
+            status: message.status,
+            createdAt: message.createdAt,
+        };
+    }, { tenantId, targetType: data.targetType, contentLength: data.content.length });
 }
 /**
  * Get message history with pagination

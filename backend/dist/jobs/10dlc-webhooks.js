@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { getRegistryPrisma } from '../lib/tenant-prisma.js';
 import { createCampaignAsync } from './10dlc-registration.js';
-const prisma = new PrismaClient();
 /**
  * Handle webhook events from Telnyx for 10DLC brand/campaign status updates
  * These webhooks are triggered automatically when approval status changes
@@ -56,7 +55,8 @@ async function handleBrandUpdate(payload) {
         }
         console.log(`🏷️  Brand Update: brandId=${brandId}, status=${brandIdentityStatus || 'N/A'}, eventType=${eventType}`);
         // Find church with this brand - handle not found gracefully
-        const church = await prisma.church.findFirst({
+        const registryPrisma = getRegistryPrisma();
+        const church = await registryPrisma.church.findFirst({
             where: { dlcBrandId: brandId },
             select: { id: true, name: true, dlcStatus: true },
         });
@@ -76,7 +76,7 @@ async function handleBrandUpdate(payload) {
             if (eventType === 'BRAND_ADD') {
                 // Brand just created, awaiting verification
                 console.log(`✅ Brand created: ${brandName || 'Unknown'}`);
-                await prisma.church.update({
+                await registryPrisma.church.update({
                     where: { id: church.id },
                     data: {
                         dlcStatus: 'pending',
@@ -93,7 +93,7 @@ async function handleBrandUpdate(payload) {
                 if (brandIdentityStatus === 'VERIFIED') {
                     // Brand is fully verified and ready to use
                     console.log(`✅ Brand verified and ready! Setting up campaign...`);
-                    await prisma.church.update({
+                    await registryPrisma.church.update({
                         where: { id: church.id },
                         data: {
                             dlcStatus: 'brand_verified',
@@ -112,7 +112,7 @@ async function handleBrandUpdate(payload) {
                 else if (brandIdentityStatus === 'UNVERIFIED') {
                     // Brand created but not yet verified
                     console.log(`⏳ Brand awaiting verification...`);
-                    await prisma.church.update({
+                    await registryPrisma.church.update({
                         where: { id: church.id },
                         data: {
                             dlcStatus: 'pending',
@@ -123,7 +123,7 @@ async function handleBrandUpdate(payload) {
                 else if (brandIdentityStatus === 'FAILED') {
                     // Brand verification failed
                     console.error(`❌ Brand verification failed for ${church.name}`);
-                    await prisma.church.update({
+                    await registryPrisma.church.update({
                         where: { id: church.id },
                         data: {
                             dlcStatus: 'rejected',
@@ -190,7 +190,8 @@ async function handleCampaignUpdate(payload) {
         }
         console.log(`📢 Campaign Update: campaignId=${campaignId}, status=${campaignStatus}, eventType=${eventType}`);
         // Find church with this brand
-        const church = await prisma.church.findFirst({
+        const registryPrisma = getRegistryPrisma();
+        const church = await registryPrisma.church.findFirst({
             where: { dlcBrandId: brandId },
             select: { id: true, name: true, telnyxPhoneNumber: true },
         });
@@ -203,7 +204,7 @@ async function handleCampaignUpdate(payload) {
         if (campaignStatus === 'MNO_PROVISIONED') {
             console.log(`✅ Campaign APPROVED and PROVISIONED! Ready to send messages!`);
             try {
-                await prisma.church.update({
+                await registryPrisma.church.update({
                     where: { id: church.id },
                     data: {
                         dlcStatus: 'approved',
@@ -230,7 +231,7 @@ async function handleCampaignUpdate(payload) {
             const reasons = payload.failureReasons || payload.reason || 'Unknown reason';
             console.log(`❌ Campaign rejected at ${campaignStatus} stage: ${reasons}`);
             try {
-                await prisma.church.update({
+                await registryPrisma.church.update({
                     where: { id: church.id },
                     data: {
                         dlcStatus: 'rejected',
@@ -264,7 +265,7 @@ async function handleCampaignUpdate(payload) {
             console.log(`   Church: ${church.name} (${church.id})`);
             console.log(`   Progress: Awaiting next approval stage...`);
             try {
-                await prisma.church.update({
+                await registryPrisma.church.update({
                     where: { id: church.id },
                     data: {
                         dlcStatus: 'campaign_pending',
@@ -312,7 +313,8 @@ async function handleCampaignSuspension(payload) {
             return;
         }
         // Find church with this campaign
-        const church = await prisma.church.findFirst({
+        const registryPrisma = getRegistryPrisma();
+        const church = await registryPrisma.church.findFirst({
             where: { dlcCampaignId: campaignId },
             select: { id: true, name: true, dlcStatus: true },
         });
@@ -326,7 +328,7 @@ async function handleCampaignSuspension(payload) {
             console.warn(`   Action needed: Re-assign phone number to reactivate`);
             console.warn(`   Note: First assignment might fail, second will succeed`);
             try {
-                await prisma.church.update({
+                await registryPrisma.church.update({
                     where: { id: church.id },
                     data: {
                         dlcCampaignSuspended: true,
@@ -371,7 +373,8 @@ async function handlePhoneNumberUpdate(payload) {
             return;
         }
         // Find church with this phone number
-        const church = await prisma.church.findFirst({
+        const registryPrisma = getRegistryPrisma();
+        const church = await registryPrisma.church.findFirst({
             where: { telnyxPhoneNumber: phoneNumber },
             select: { id: true, name: true },
         });
@@ -385,7 +388,7 @@ async function handlePhoneNumberUpdate(payload) {
                 console.log(`✅ Phone number ${phoneNumber} successfully assigned to campaign ${campaignId}`);
                 try {
                     // Update church with phone number assignment details
-                    await prisma.church.update({
+                    await registryPrisma.church.update({
                         where: { id: church.id },
                         data: {
                             dlcNumberAssignedAt: new Date(),
@@ -413,7 +416,7 @@ async function handlePhoneNumberUpdate(payload) {
                 console.log(`❌ Phone number assignment failed`);
                 const reasons = payload.reasons?.join('; ') || payload.reason || 'Unknown error';
                 try {
-                    await prisma.church.update({
+                    await registryPrisma.church.update({
                         where: { id: church.id },
                         data: {
                             dlcRejectionReason: `Number assignment failed: ${reasons}`,
@@ -435,7 +438,7 @@ async function handlePhoneNumberUpdate(payload) {
             // Phone number removed from campaign
             console.log(`🗑️ Phone number ${phoneNumber} removed from campaign`);
             try {
-                await prisma.church.update({
+                await registryPrisma.church.update({
                     where: { id: church.id },
                     data: {
                         dlcNumberAssignedAt: null,

@@ -1,1 +1,1 @@
-{"version":3,"file":"datadog.config.d.ts","sourceRoot":"","sources":["../../src/config/datadog.config.ts"],"names":[],"mappings":"AAAA;;;;GAIG;AAEH,OAAO,MAAM,MAAM,UAAU,CAAC;AAE9B;;;GAGG;AACH,wBAAgB,WAAW,IAAI,IAAI,CA+BlC;AAED;;;GAGG;AACH,OAAO,EAAE,MAAM,EAAE,CAAC;AAClB,eAAe,MAAM,CAAC"}
+{"version":3,"file":"datadog.config.d.ts","sourceRoot":"","sources":["../../src/config/datadog.config.ts"],"names":[],"mappings":"AAAA;;;;GAIG;AAEH,OAAO,MAAM,MAAM,UAAU,CAAC;AAE9B;;;GAGG;AACH,wBAAgB,WAAW,IAAI,IAAI,CAkClC;AAED;;;GAGG;AACH,OAAO,EAAE,MAAM,EAAE,CAAC;AAClB,eAAe,MAAM,CAAC"}

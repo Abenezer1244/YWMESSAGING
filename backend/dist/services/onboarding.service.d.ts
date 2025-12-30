@@ -1,6 +1,8 @@
+import { TenantPrismaClient } from '../lib/tenant-prisma.js';
 /**
  * Onboarding Service - Tracks and verifies onboarding task completion
  * Each task is verified against actual data (e.g., branch was created, members were added)
+ * PHASE 5: Multi-tenant refactoring - uses tenantPrisma for tenant-scoped queries
  */
 type TaskId = 'create_branch' | 'add_members' | 'send_message';
 interface OnboardingStatus {
@@ -11,27 +13,27 @@ interface OnboardingStatus {
 /**
  * Get all onboarding progress for a church
  */
-export declare function getOnboardingProgress(churchId: string): Promise<OnboardingStatus[]>;
+export declare function getOnboardingProgress(tenantId: string, tenantPrisma: TenantPrismaClient): Promise<OnboardingStatus[]>;
 /**
  * Verify and mark a task as completed
  * Checks if the task has actually been completed before marking it done
  */
-export declare function completeOnboardingTask(churchId: string, taskId: TaskId): Promise<{
+export declare function completeOnboardingTask(tenantId: string, tenantPrisma: TenantPrismaClient, taskId: TaskId): Promise<{
     success: boolean;
     message: string;
 }>;
 /**
  * Get onboarding progress percentage
  */
-export declare function getOnboardingProgressPercentage(churchId: string): Promise<number>;
+export declare function getOnboardingProgressPercentage(tenantId: string, tenantPrisma: TenantPrismaClient): Promise<number>;
 /**
  * Check if onboarding is fully complete
  */
-export declare function isOnboardingComplete(churchId: string): Promise<boolean>;
+export declare function isOnboardingComplete(tenantId: string, tenantPrisma: TenantPrismaClient): Promise<boolean>;
 /**
  * Get summary of onboarding status
  */
-export declare function getOnboardingSummary(churchId: string): Promise<{
+export declare function getOnboardingSummary(tenantId: string, tenantPrisma: TenantPrismaClient): Promise<{
     completedTasks: TaskId[];
     remainingTasks: TaskId[];
     percentageComplete: number;

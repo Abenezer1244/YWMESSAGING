@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { prisma } from '../lib/prisma.js';
+import { getRegistryPrisma } from '../lib/tenant-prisma.js';
 import { telnyxCircuitBreaker } from '../utils/circuit-breaker.js';
 const TELNYX_BASE_URL = 'https://api.telnyx.com/v2';
 // ============================================================================
@@ -76,7 +76,7 @@ function getTelnyxClient() {
  */
 export async function sendSMS(to, message, churchId) {
     // Get church Telnyx credentials and 10DLC brand info
-    const church = await prisma.church.findUnique({
+    const church = await getRegistryPrisma().church.findUnique({
         where: { id: churchId },
         select: {
             telnyxPhoneNumber: true,
@@ -251,7 +251,7 @@ export async function purchasePhoneNumber(phoneNumber, churchId, connectionId, m
             throw new Error('No phone number returned from Telnyx order');
         }
         // Save to database
-        await prisma.church.update({
+        await getRegistryPrisma().church.update({
             where: { id: churchId },
             data: {
                 telnyxPhoneNumber: purchasedNumber.phone_number,
@@ -280,9 +280,22 @@ export async function purchasePhoneNumber(phoneNumber, churchId, connectionId, m
 }
 /**
  * Get details about a phone number owned by the account
+ * SECURITY: Validates that the phone number belongs to the specified church
  */
-export async function getPhoneNumberDetails(numberSid) {
+export async function getPhoneNumberDetails(numberSid, churchId) {
     try {
+        // SECURITY: Verify phone number belongs to this church
+        const church = await getRegistryPrisma().church.findUnique({
+            where: { id: churchId },
+            select: { telnyxNumberSid: true },
+        });
+        if (!church) {
+            throw new Error('Church not found');
+        }
+        // SECURITY: Ensure the numberSid matches the church's phone number
+        if (church.telnyxNumberSid !== numberSid) {
+            throw new Error('Phone number does not belong to this church');
+        }
         const client = getTelnyxClient();
         const response = await client.get(`/phone_numbers/${numberSid}`);
         return response.data?.data;
@@ -314,7 +327,7 @@ export async function releasePhoneNumber(numberSid, churchId, options) {
         if (options?.softDelete) {
             // Soft-delete: Archive the number, keep conversation history
             console.log(`[PHONE_RELEASE] Soft-deleting number for church ${churchId} (30-day recovery window)`);
-            await prisma.church.update({
+            await getRegistryPrisma().church.update({
                 where: { id: churchId },
                 data: {
                     telnyxNumberStatus: 'archived',
@@ -331,7 +344,7 @@ export async function releasePhoneNumber(numberSid, churchId, options) {
         else {
             // Hard-delete: Clear all phone data (for cleanup after recovery window expires)
             console.log(`[PHONE_RELEASE] Hard-deleting number for church ${churchId}`);
-            await prisma.church.update({
+            await getRegistryPrisma().church.update({
                 where: { id: churchId },
                 data: {
                     telnyxPhoneNumber: null,

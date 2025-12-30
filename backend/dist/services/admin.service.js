@@ -209,7 +209,6 @@ export async function inviteCoAdmin(tenantId, tenantPrisma, email, firstName, la
         // Create new co-admin
         const newAdmin = await tenantPrisma.admin.create({
             data: {
-                churchId: tenantId,
                 email,
                 encryptedEmail,
                 emailHash,

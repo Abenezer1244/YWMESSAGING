@@ -1,39 +1,41 @@
-import { prisma } from '../lib/prisma.js';
+import { getTenantPrisma } from '../lib/tenant-prisma.js';
 import { generateChatResponse } from './openai.service.js';
-export async function getOrCreateConversation(userId, visitorId) {
+export async function getOrCreateConversation(churchId, userId, visitorId) {
+    const tenantPrisma = await getTenantPrisma(churchId);
     // For authenticated users
     if (userId) {
-        const existingConversation = await prisma.chatConversation.findFirst({
+        const existingConversation = await tenantPrisma.chatConversation.findFirst({
             where: { adminId: userId },
             orderBy: { updatedAt: 'desc' },
         });
         if (existingConversation) {
             return existingConversation.id;
         }
-        const conversation = await prisma.chatConversation.create({
+        const conversation = await tenantPrisma.chatConversation.create({
             data: { adminId: userId },
         });
         return conversation.id;
     }
     // For public visitors
     if (visitorId) {
-        const existingConversation = await prisma.chatConversation.findFirst({
+        const existingConversation = await tenantPrisma.chatConversation.findFirst({
             where: { visitorId },
             orderBy: { updatedAt: 'desc' },
         });
         if (existingConversation) {
             return existingConversation.id;
         }
-        const conversation = await prisma.chatConversation.create({
+        const conversation = await tenantPrisma.chatConversation.create({
             data: { visitorId },
         });
         return conversation.id;
     }
     throw new Error('userId or visitorId required');
 }
-export async function sendChatMessage(conversationId, userMessage) {
+export async function sendChatMessage(churchId, conversationId, userMessage) {
+    const tenantPrisma = await getTenantPrisma(churchId);
     // Save user message
-    await prisma.chatMessage.create({
+    await tenantPrisma.chatMessage.create({
         data: {
             conversationId,
             role: 'user',
@@ -41,7 +43,7 @@ export async function sendChatMessage(conversationId, userMessage) {
         },
     });
     // Get conversation history
-    const messages = await prisma.chatMessage.findMany({
+    const messages = await tenantPrisma.chatMessage.findMany({
         where: { conversationId },
         orderBy: { createdAt: 'asc' },
     });
@@ -51,7 +53,7 @@ export async function sendChatMessage(conversationId, userMessage) {
         content: m.content,
     })));
     // Save assistant message
-    await prisma.chatMessage.create({
+    await tenantPrisma.chatMessage.create({
         data: {
             conversationId,
             role: 'assistant',
@@ -59,14 +61,15 @@ export async function sendChatMessage(conversationId, userMessage) {
         },
     });
     // Update conversation timestamp
-    await prisma.chatConversation.update({
+    await tenantPrisma.chatConversation.update({
         where: { id: conversationId },
         data: { updatedAt: new Date() },
     });
     return assistantResponse;
 }
-export async function getConversationHistory(conversationId) {
-    return prisma.chatMessage.findMany({
+export async function getConversationHistory(churchId, conversationId) {
+    const tenantPrisma = await getTenantPrisma(churchId);
+    return tenantPrisma.chatMessage.findMany({
         where: { conversationId },
         orderBy: { createdAt: 'asc' },
     });

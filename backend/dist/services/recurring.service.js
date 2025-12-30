@@ -7,7 +7,6 @@ export async function createRecurringMessage(tenantId, tenantPrisma, data) {
     const nextSendAt = calculateNextSendAt(data.frequency, data.timeOfDay, data.dayOfWeek);
     return await tenantPrisma.recurringMessage.create({
         data: {
-            churchId: tenantId,
             name: data.name,
             content: data.content,
             targetType: data.targetType,

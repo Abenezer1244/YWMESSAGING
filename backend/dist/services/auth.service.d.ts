@@ -35,7 +35,19 @@ export interface LoginResponse {
 }
 /**
  * Register a new church and admin
- * Uses single-database setup for MVP
+ * PHASE 4: Database-per-tenant provisioning
+ *
+ * Flow:
+ * 1. Generate tenantId
+ * 2. Validate email not in use
+ * 3. Provision new PostgreSQL database for tenant
+ * 4. Run tenant schema migrations
+ * 5. Create Church in registry
+ * 6. Create Tenant record in registry (links to new database)
+ * 7. Create Admin in registry
+ * 8. Create AdminEmailIndex for fast email lookup
+ * 9. Create Admin in tenant database
+ * 10. Generate tokens
  */
 export declare function registerChurch(input: RegisterInput): Promise<RegisterResponse>;
 /**

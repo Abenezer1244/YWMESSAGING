@@ -33,6 +33,7 @@ import { etagMiddleware } from './middleware/etag.middleware.js';
 import AppError, { getSafeErrorMessage, getStatusCode } from './utils/app-error.js';
 import { loggerMiddleware } from './utils/logger.js';
 import { initializeSession } from './config/session.config.js';
+import apmMiddleware from './middleware/apm.middleware.js';
 const app = express();
 // Disable Express's built-in ETag generation (we implement our own)
 app.set('etag', false);
@@ -43,11 +44,12 @@ app.set('etag', false);
 app.use((req, res, next) => {
     // Determine timeout based on endpoint type
     let timeoutMs = 10000; // Default: 10 seconds for normal requests
-    // Bulk operations need more time (CSV import, batch operations, etc.)
-    // Increased to 90 seconds to handle 120+ member imports with database operations
+    // Bulk operations and provisioning need more time (CSV import, batch operations, registration)
+    // Registration: Database provisioning + migrations takes ~20-30 seconds
+    // Imports: Increased to 90 seconds to handle 120+ member imports with database operations
     // (60 seconds was not enough when database is under load)
-    if (req.path?.includes('/import') || req.path?.includes('/batch')) {
-        timeoutMs = 90000; // 90 seconds for import/batch operations
+    if (req.path?.includes('/import') || req.path?.includes('/batch') || req.path?.includes('/auth/register')) {
+        timeoutMs = 90000; // 90 seconds for long-running operations
     }
     const requestTimeout = setTimeout(() => {
         if (!res.headersSent) {
@@ -67,6 +69,9 @@ app.use((req, res, next) => {
     });
     next();
 });
+// ✅ MONITORING: Add APM middleware for Datadog tracing
+// Must be early in the middleware chain to capture all requests
+app.use(apmMiddleware);
 // ✅ SECURITY: Initialize Sentry for error tracking and monitoring
 // Must be done as early as possible in the application lifecycle
 initSentry();

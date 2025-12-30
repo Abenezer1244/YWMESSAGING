@@ -21,7 +21,7 @@ const options = {
   port: 3000,
   path: '/api/auth/register',
   method: 'POST',
-  timeout: 30000,
+  timeout: 90000,
   headers: {
     'Content-Type': 'application/json',
     'Content-Length': data.length
@@ -42,10 +42,11 @@ const req = http.request(options, async (res) => {
     try {
       const json = JSON.parse(body);
 
-      if (res.statusCode === 200 && json.tenantId) {
+      if ((res.statusCode === 200 || res.statusCode === 201) && json.data?.church?.id) {
         console.log('✅ REGISTRATION SUCCESSFUL!\n');
-        console.log(`  TenantId: ${json.tenantId}`);
-        console.log(`  AccessToken: ${json.accessToken ? 'Generated ✓' : 'Missing ✗'}`);
+        const tenantId = json.data?.church?.id || json.tenantId;
+        console.log(`  TenantId: ${tenantId}`);
+        console.log(`  AccessToken: ${json.data?.accessToken || json.accessToken ? 'Generated ✓' : 'Missing ✗'}`);
 
         // Verify database was created
         await new Promise(resolve => setTimeout(resolve, 2000));
@@ -53,7 +54,7 @@ const req = http.request(options, async (res) => {
         const client = new Client({ connectionString: DATABASE_URL });
         await client.connect();
 
-        const dbName = `tenant_${json.tenantId}`;
+        const dbName = `tenant_${tenantId}`;
         const result = await client.query(
           "SELECT datname FROM pg_database WHERE datname = $1",
           [dbName]
@@ -96,12 +97,13 @@ const req = http.request(options, async (res) => {
 });
 
 req.on('error', (e) => {
-  console.error('❌ Request Error:', e.message);
+  console.error('❌ Request Error:', e.message || JSON.stringify(e));
+  console.error('Full error:', e);
   process.exit(1);
 });
 
 req.on('timeout', () => {
-  console.error('❌ Request timed out after 30s');
+  console.error('❌ Request timed out after 90s');
   req.destroy();
   process.exit(1);
 });

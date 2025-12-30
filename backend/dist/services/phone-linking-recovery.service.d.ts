@@ -6,6 +6,8 @@
  * 2. Automatically retries linking with exponential backoff
  * 3. Logs results for monitoring and alerting
  * 4. Notifies support if linking fails after max retries
+ *
+ * PHASE 5: Multi-tenant refactoring - uses registryPrisma for church registry lookups
  */
 import { LinkingResult } from './telnyx.service.js';
 /**

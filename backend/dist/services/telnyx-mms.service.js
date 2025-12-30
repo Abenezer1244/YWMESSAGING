@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { prisma } from '../lib/prisma.js';
+import { getRegistryPrisma, getTenantPrisma } from '../lib/tenant-prisma.js';
 import * as s3MediaService from './s3-media.service.js';
 import { formatToE164 } from '../utils/phone.utils.js';
 import { hashForSearch, encrypt, decryptPhoneSafe } from '../utils/encryption.utils.js';
@@ -42,10 +42,10 @@ export async function findOrCreateMemberByPhone(churchId, phone) {
     }
     const phoneHash = hashForSearch(formattedPhone);
     try {
+        const tenantPrisma = await getTenantPrisma(churchId);
         // Try to find existing member with this phone (check if conversation exists for this church)
-        const existingConversation = await prisma.conversation.findFirst({
+        const existingConversation = await tenantPrisma.conversation.findFirst({
             where: {
-                churchId,
                 member: {
                     phoneHash,
                 },
@@ -60,7 +60,7 @@ export async function findOrCreateMemberByPhone(churchId, phone) {
         }
         // Create new member for unknown caller
         console.log(`📱 Creating new member for phone: ${formattedPhone}`);
-        const newMember = await prisma.member.create({
+        const newMember = await tenantPrisma.member.create({
             data: {
                 firstName: '',
                 lastName: 'Congregation Member',
@@ -83,8 +83,9 @@ export async function findOrCreateMemberByPhone(churchId, phone) {
  */
 export async function sendMMS(to, message, churchId, mediaS3Url) {
     try {
+        const registryPrisma = getRegistryPrisma();
         // Get church Telnyx number and 10DLC brand info
-        const church = await prisma.church.findUnique({
+        const church = await registryPrisma.church.findUnique({
             where: { id: churchId },
             select: {
                 telnyxPhoneNumber: true,
@@ -174,19 +175,18 @@ export async function sendMMS(to, message, churchId, mediaS3Url) {
 export async function handleInboundMMS(churchId, senderPhone, messageText, mediaUrls, telnyxMessageId) {
     try {
         console.log(`📱 Inbound MMS: ${senderPhone} → Church (${mediaUrls.length} media files)`);
+        const tenantPrisma = await getTenantPrisma(churchId);
         // 1. Find or create member by phone
         const member = await findOrCreateMemberByPhone(churchId, senderPhone);
         // 2. Find or create conversation
-        let conversation = await prisma.conversation.findFirst({
+        let conversation = await tenantPrisma.conversation.findFirst({
             where: {
-                churchId,
                 memberId: member.id,
             },
         });
         if (!conversation) {
-            conversation = await prisma.conversation.create({
+            conversation = await tenantPrisma.conversation.create({
                 data: {
-                    churchId,
                     memberId: member.id,
                     lastMessageAt: new Date(),
                 },
@@ -199,7 +199,7 @@ export async function handleInboundMMS(churchId, senderPhone, messageText, media
         // 3. Create message for text content (if any)
         const messageIds = [];
         if (messageText) {
-            const textMessage = await prisma.conversationMessage.create({
+            const textMessage = await tenantPrisma.conversationMessage.create({
                 data: {
                     conversationId: conversation.id,
                     memberId: member.id,
@@ -220,7 +220,7 @@ export async function handleInboundMMS(churchId, senderPhone, messageText, media
                 // Download from Telnyx and upload to S3
                 const uploadResult = await s3MediaService.downloadAndUploadMedia(mediaUrl, conversation.id, fileName);
                 // Create message record for media
-                const mediaMessage = await prisma.conversationMessage.create({
+                const mediaMessage = await tenantPrisma.conversationMessage.create({
                     data: {
                         conversationId: conversation.id,
                         memberId: member.id,
@@ -247,7 +247,7 @@ export async function handleInboundMMS(churchId, senderPhone, messageText, media
             }
         }
         // 5. Update conversation last message time
-        await prisma.conversation.update({
+        await tenantPrisma.conversation.update({
             where: { id: conversation.id },
             data: { lastMessageAt: new Date() },
         });
@@ -274,11 +274,9 @@ export async function handleInboundMMS(churchId, senderPhone, messageText, media
  */
 export async function broadcastInboundToMembers(churchId, senderMemberId, messageText, mediaType) {
     try {
+        const tenantPrisma = await getTenantPrisma(churchId);
         // Get all members through conversations (members don't have churchId anymore)
-        const conversations = await prisma.conversation.findMany({
-            where: {
-                churchId,
-            },
+        const conversations = await tenantPrisma.conversation.findMany({
             select: {
                 member: {
                     select: {
@@ -294,7 +292,7 @@ export async function broadcastInboundToMembers(churchId, senderMemberId, messag
             .map(conv => conv.member)
             .filter(member => member.optInSms);
         // Get sender info (phone + name)
-        const sender = await prisma.member.findUnique({
+        const sender = await tenantPrisma.member.findUnique({
             where: { id: senderMemberId },
             select: { firstName: true, phone: true },
         });
@@ -327,23 +325,19 @@ export async function broadcastInboundToMembers(churchId, senderMemberId, messag
                 const result = await sendMMS(decryptedPhone, displayMessage, churchId);
                 // Save outbound message to conversation history
                 // First, find or create conversation between church and this member
-                const conversation = await prisma.conversation.upsert({
+                const conversation = await tenantPrisma.conversation.upsert({
                     where: {
-                        churchId_memberId: {
-                            churchId,
-                            memberId: member.id,
-                        }
+                        memberId: member.id,
                     },
                     update: {
                         lastMessageAt: new Date(),
                     },
                     create: {
-                        churchId,
                         memberId: member.id,
                     }
                 });
                 // Save the outbound message
-                await prisma.conversationMessage.create({
+                await tenantPrisma.conversationMessage.create({
                     data: {
                         conversationId: conversation.id,
                         memberId: member.id,
@@ -390,10 +384,10 @@ export async function getMemberByPhone(churchId, phone) {
     }
     const phoneHash = hashForSearch(formattedPhone);
     try {
+        const tenantPrisma = await getTenantPrisma(churchId);
         // Find member through conversation (members don't have churchId anymore)
-        const conversation = await prisma.conversation.findFirst({
+        const conversation = await tenantPrisma.conversation.findFirst({
             where: {
-                churchId,
                 member: {
                     phoneHash,
                 },

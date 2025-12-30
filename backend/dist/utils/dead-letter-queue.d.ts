@@ -10,6 +10,7 @@
  * - SUBSCRIPTION_UPDATE: Failed subscription status changes
  * - PAYMENT_PROCESS: Failed payment operations
  */
+import { TenantPrismaClient } from '../lib/tenant-prisma.js';
 export type DLQCategory = 'SMS_SEND' | 'WEBHOOK_INBOUND' | 'SUBSCRIPTION_UPDATE' | 'PAYMENT_PROCESS';
 interface DLQEntry {
     category: DLQCategory;
@@ -38,11 +39,11 @@ interface DLQEntry {
  * }
  * ```
  */
-export declare function addToDLQ(entry: DLQEntry): Promise<string>;
+export declare function addToDLQ(tenantPrisma: TenantPrismaClient, entry: DLQEntry): Promise<string>;
 /**
  * List pending dead letter queue items
  */
-export declare function listPendingDLQ(options?: {
+export declare function listPendingDLQ(tenantPrisma: TenantPrismaClient, options?: {
     category?: DLQCategory;
     limit?: number;
     offset?: number;
@@ -50,12 +51,11 @@ export declare function listPendingDLQ(options?: {
     items: {
         id: string;
         category: string;
-        churchId: string | null;
         externalId: string | null;
-        originalPayload: import(".prisma/client").Prisma.JsonValue;
+        originalPayload: import(".prisma/client-tenant").Prisma.JsonValue;
         errorMessage: string;
         errorStack: string | null;
-        metadata: import(".prisma/client").Prisma.JsonValue | null;
+        metadata: import(".prisma/client-tenant").Prisma.JsonValue | null;
         status: string;
         retryCount: number;
         firstAttemptAt: Date;
@@ -73,15 +73,14 @@ export declare function listPendingDLQ(options?: {
 /**
  * Get a specific DLQ item
  */
-export declare function getDLQItem(id: string): Promise<{
+export declare function getDLQItem(tenantPrisma: TenantPrismaClient, id: string): Promise<{
     id: string;
     category: string;
-    churchId: string | null;
     externalId: string | null;
-    originalPayload: import(".prisma/client").Prisma.JsonValue;
+    originalPayload: import(".prisma/client-tenant").Prisma.JsonValue;
     errorMessage: string;
     errorStack: string | null;
-    metadata: import(".prisma/client").Prisma.JsonValue | null;
+    metadata: import(".prisma/client-tenant").Prisma.JsonValue | null;
     status: string;
     retryCount: number;
     firstAttemptAt: Date;
@@ -92,15 +91,14 @@ export declare function getDLQItem(id: string): Promise<{
 /**
  * Mark a DLQ item as resolved (successful replay)
  */
-export declare function resolveDLQItem(id: string, metadata?: Record<string, any>): Promise<{
+export declare function resolveDLQItem(tenantPrisma: TenantPrismaClient, id: string, metadata?: Record<string, any>): Promise<{
     id: string;
     category: string;
-    churchId: string | null;
     externalId: string | null;
-    originalPayload: import(".prisma/client").Prisma.JsonValue;
+    originalPayload: import(".prisma/client-tenant").Prisma.JsonValue;
     errorMessage: string;
     errorStack: string | null;
-    metadata: import(".prisma/client").Prisma.JsonValue | null;
+    metadata: import(".prisma/client-tenant").Prisma.JsonValue | null;
     status: string;
     retryCount: number;
     firstAttemptAt: Date;
@@ -111,15 +109,14 @@ export declare function resolveDLQItem(id: string, metadata?: Record<string, any
 /**
  * Mark a DLQ item as dead (permanently failed)
  */
-export declare function deadLetterDLQItem(id: string, reason: string): Promise<{
+export declare function deadLetterDLQItem(tenantPrisma: TenantPrismaClient, id: string, reason: string): Promise<{
     id: string;
     category: string;
-    churchId: string | null;
     externalId: string | null;
-    originalPayload: import(".prisma/client").Prisma.JsonValue;
+    originalPayload: import(".prisma/client-tenant").Prisma.JsonValue;
     errorMessage: string;
     errorStack: string | null;
-    metadata: import(".prisma/client").Prisma.JsonValue | null;
+    metadata: import(".prisma/client-tenant").Prisma.JsonValue | null;
     status: string;
     retryCount: number;
     firstAttemptAt: Date;
@@ -130,15 +127,14 @@ export declare function deadLetterDLQItem(id: string, reason: string): Promise<{
 /**
  * Increment retry count for a DLQ item
  */
-export declare function incrementDLQRetryCount(id: string): Promise<{
+export declare function incrementDLQRetryCount(tenantPrisma: TenantPrismaClient, id: string): Promise<{
     id: string;
     category: string;
-    churchId: string | null;
     externalId: string | null;
-    originalPayload: import(".prisma/client").Prisma.JsonValue;
+    originalPayload: import(".prisma/client-tenant").Prisma.JsonValue;
     errorMessage: string;
     errorStack: string | null;
-    metadata: import(".prisma/client").Prisma.JsonValue | null;
+    metadata: import(".prisma/client-tenant").Prisma.JsonValue | null;
     status: string;
     retryCount: number;
     firstAttemptAt: Date;
@@ -149,15 +145,14 @@ export declare function incrementDLQRetryCount(id: string): Promise<{
 /**
  * Delete a DLQ item
  */
-export declare function deleteDLQItem(id: string): Promise<{
+export declare function deleteDLQItem(tenantPrisma: TenantPrismaClient, id: string): Promise<{
     id: string;
     category: string;
-    churchId: string | null;
     externalId: string | null;
-    originalPayload: import(".prisma/client").Prisma.JsonValue;
+    originalPayload: import(".prisma/client-tenant").Prisma.JsonValue;
     errorMessage: string;
     errorStack: string | null;
-    metadata: import(".prisma/client").Prisma.JsonValue | null;
+    metadata: import(".prisma/client-tenant").Prisma.JsonValue | null;
     status: string;
     retryCount: number;
     firstAttemptAt: Date;
@@ -168,7 +163,7 @@ export declare function deleteDLQItem(id: string): Promise<{
 /**
  * Get DLQ statistics
  */
-export declare function getDLQStats(): Promise<{
+export declare function getDLQStats(tenantPrisma: TenantPrismaClient): Promise<{
     total: number;
     pending: number;
     resolved: number;
@@ -176,8 +171,8 @@ export declare function getDLQStats(): Promise<{
     byCategory: any;
 }>;
 /**
- * Clear old DLQ items (older than specified days)
+ * Clear old DLQ items (older than specified days) for a specific church/tenant
  */
-export declare function clearOldDLQItems(olderThanDays: number): Promise<import(".prisma/client").Prisma.BatchPayload>;
+export declare function clearOldDLQItems(churchId: string, olderThanDays: number): Promise<import(".prisma/client-tenant").Prisma.BatchPayload>;
 export {};
 //# sourceMappingURL=dead-letter-queue.d.ts.map

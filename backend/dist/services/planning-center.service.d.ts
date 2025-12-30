@@ -10,6 +10,7 @@
  * Planning Center API: https://api.planningcenteronline.com/v2
  * Authentication: OAuth2 Bearer Token or Personal Access Token
  */
+import { TenantPrismaClient } from '../lib/tenant-prisma.js';
 /**
  * Planning Center OAuth2 credentials
  */
@@ -48,7 +49,6 @@ export interface PCOService {
  * Planning Center Integration config for a church
  */
 export interface PlanningCenterIntegration {
-    churchId: string;
     accessToken: string;
     refreshToken?: string;
     expiresAt?: Date;
@@ -76,25 +76,25 @@ export interface SyncResult {
  * Connect Planning Center to a church (OAuth2)
  * Stores credentials securely in database
  */
-export declare function connectPlanningCenter(churchId: string, accessToken: string, refreshToken?: string, expiresIn?: number): Promise<PlanningCenterIntegration>;
+export declare function connectPlanningCenter(accessToken: string, tenantPrisma: TenantPrismaClient, refreshToken?: string, expiresIn?: number): Promise<PlanningCenterIntegration>;
 /**
  * Get Planning Center integration status
  */
-export declare function getPlanningCenterStatus(churchId: string): Promise<PlanningCenterIntegration | null>;
+export declare function getPlanningCenterStatus(tenantPrisma: TenantPrismaClient): Promise<PlanningCenterIntegration | null>;
 /**
  * Sync members from Planning Center into YW Messaging
  * Creates or updates Member records
  */
-export declare function syncPlanningCenterMembers(churchId: string): Promise<SyncResult>;
+export declare function syncPlanningCenterMembers(tenantPrisma: TenantPrismaClient): Promise<SyncResult>;
 /**
  * Disconnect Planning Center from a church
  * Revokes access token and disables integration
  */
-export declare function disconnectPlanningCenter(churchId: string): Promise<void>;
+export declare function disconnectPlanningCenter(tenantPrisma: TenantPrismaClient): Promise<void>;
 /**
  * Validate Planning Center integration setup
  */
-export declare function validatePlanningCenterSetup(churchId: string): Promise<{
+export declare function validatePlanningCenterSetup(tenantPrisma: TenantPrismaClient): Promise<{
     valid: boolean;
     error?: string;
 }>;

@@ -1,3 +1,4 @@
+import type { TenantPrismaClient } from '../lib/tenant-prisma.js';
 interface MessageStats {
     totalMessages: number;
     deliveredCount: number;
@@ -24,7 +25,7 @@ interface BranchStat {
  * Before: 50,000+ recipient objects loaded into memory + JavaScript filtering
  * After: Database-side aggregation (2-3 queries only)
  */
-export declare function getMessageStats(churchId: string, days?: number): Promise<MessageStats>;
+export declare function getMessageStats(tenantPrisma: TenantPrismaClient, days?: number): Promise<MessageStats>;
 /**
  * Get statistics per branch
  * ✅ OPTIMIZED: Single query with aggregations instead of nested loops
@@ -32,7 +33,7 @@ export declare function getMessageStats(churchId: string, days?: number): Promis
  * After: 2 queries total (21x improvement)
  * ✅ CACHED: 10-minute TTL to reduce repeated database hits
  */
-export declare function getBranchStats(churchId: string): Promise<BranchStat[]>;
+export declare function getBranchStats(tenantPrisma: TenantPrismaClient): Promise<BranchStat[]>;
 /**
  * Get summary statistics
  */
@@ -47,7 +48,7 @@ export declare function getBranchStats(churchId: string): Promise<BranchStat[]>;
  *
  * Impact: 300 requests/minute × 5 min TTL = Only 1 DB query per 300 requests
  */
-export declare function getSummaryStats(churchId: string): Promise<{
+export declare function getSummaryStats(tenantPrisma: TenantPrismaClient): Promise<{
     totalMessages: number;
     averageDeliveryRate: number;
     totalMembers: number;
