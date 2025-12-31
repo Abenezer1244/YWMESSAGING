@@ -532,7 +532,7 @@ export async function releaseCurrentNumber(req: Request, res: Response) {
       select: { telnyxNumberSid: true, telnyxPhoneNumber: true },
     });
 
-    if (!church?.telnyxNumberSid) {
+    if (!church?.telnyxPhoneNumber) {
       return res.status(404).json({ error: 'No phone number to release' });
     }
 
@@ -557,10 +557,27 @@ export async function releaseCurrentNumber(req: Request, res: Response) {
     // Step 3: Soft-delete the number (30-day recovery window)
     console.log(`[DELETE_NUMBER] User ${adminId} requesting deletion of phone ${church.telnyxPhoneNumber} for church ${churchId}`);
 
-    await releasePhoneNumber(church.telnyxNumberSid, churchId, {
-      softDelete: true,
-      deletedBy: adminId,
-    });
+    // If number was purchased through app (has telnyxNumberSid), release from Telnyx
+    // If manually linked (no telnyxNumberSid), just clear from database
+    if (church.telnyxNumberSid) {
+      await releasePhoneNumber(church.telnyxNumberSid, churchId, {
+        softDelete: true,
+        deletedBy: adminId,
+      });
+    } else {
+      // Manually linked number - just clear from database
+      console.log(`[DELETE_NUMBER] Manually linked number, clearing from database only`);
+      await registryPrisma.church.update({
+        where: { id: churchId },
+        data: {
+          telnyxPhoneNumber: null,
+          telnyxNumberSid: null,
+          telnyxVerified: null,
+          telnyxWebhookId: null,
+          telnyxPurchasedAt: null,
+        },
+      });
+    }
 
     res.json({
       success: true,
