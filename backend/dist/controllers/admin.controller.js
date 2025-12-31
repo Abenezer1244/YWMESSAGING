@@ -377,16 +377,17 @@ export async function linkPhoneNumberHandler(req, res) {
             const webhook = await telnyxService.createWebhook(webhookUrl);
             webhookId = webhook.id;
             console.log(`✅ Webhook auto-created for tenant ${tenantId}: ${webhookId}`);
-            // Try to link the number to the messaging profile
-            try {
-                console.log(`📍 Attempting to link manually added number ${formattedPhone} to messaging profile ${webhookId}...`);
-                await telnyxService.linkPhoneNumberToMessagingProfile(formattedPhone, webhookId);
+            // Link the number to the messaging profile in the background (non-blocking)
+            // This can take 30+ seconds and we don't want to block the HTTP response
+            telnyxService.linkPhoneNumberToMessagingProfile(formattedPhone, webhookId)
+                .then(() => {
                 console.log(`✅ Manual number linking succeeded for ${formattedPhone}`);
-            }
-            catch (linkError) {
+            })
+                .catch((linkError) => {
                 console.warn(`⚠️ Manual number linking failed: ${linkError.message}`);
                 // Continue - might still work if number is configured correctly in Telnyx
-            }
+            });
+            console.log(`📍 Initiated background linking for ${formattedPhone} to messaging profile ${webhookId}`);
         }
         catch (webhookError) {
             console.warn(`⚠️ Webhook creation failed, but continuing: ${webhookError.message}`);
@@ -444,6 +445,11 @@ export async function linkPhoneNumberHandler(req, res) {
             phoneNumber: formattedPhone,
             webhookId: webhookId || 'manual',
         });
+        // Check if response was already sent by timeout middleware
+        if (res.headersSent) {
+            console.warn('⚠️ Response already sent (likely by timeout middleware), skipping response');
+            return;
+        }
         res.json({
             success: true,
             data: {
@@ -458,6 +464,11 @@ export async function linkPhoneNumberHandler(req, res) {
     }
     catch (error) {
         console.error('Failed to link phone number:', error);
+        // Check if response was already sent before sending error response
+        if (res.headersSent) {
+            console.warn('⚠️ Response already sent, cannot send error response');
+            return;
+        }
         const errorMessage = error.message;
         res.status(500).json({ error: errorMessage || 'Failed to link phone number' });
     }
