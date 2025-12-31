@@ -1,4 +1,4 @@
-import { prisma } from '../lib/prisma.js';
+import { getRegistryPrisma } from '../lib/tenant-prisma.js';
 import { searchAvailableNumbers, purchasePhoneNumber, releasePhoneNumber, validateTelnyxApiKey, createWebhook, linkPhoneNumberToMessagingProfile, } from '../services/telnyx.service.js';
 import { createPhoneNumberSetupPaymentIntent, verifyPaymentIntent, } from '../services/stripe.service.js';
 import Stripe from 'stripe';
@@ -65,9 +65,10 @@ export async function setupPaymentIntent(req, res) {
         if (!phoneNumberRegex.test(phoneNumber.replace(/[^\d]/g, ''))) {
             return res.status(400).json({ error: 'Invalid phone number format' });
         }
-        // Get church with Stripe customer ID
+        // Get church with Stripe customer ID (query registry database)
         console.log(`[setupPaymentIntent] Starting for church: ${churchId}`);
-        const church = await prisma.church.findUnique({
+        const registryPrisma = getRegistryPrisma();
+        const church = await registryPrisma.church.findUnique({
             where: { id: churchId },
             select: { stripeCustomerId: true, telnyxPhoneNumber: true },
         });
@@ -112,8 +113,9 @@ export async function confirmPayment(req, res) {
         if (!paymentIntentId || !paymentMethodId) {
             return res.status(400).json({ error: 'Missing payment details' });
         }
-        // Get church with Stripe customer ID
-        const church = await prisma.church.findUnique({
+        // Get church with Stripe customer ID (query registry database)
+        const registryPrisma = getRegistryPrisma();
+        const church = await registryPrisma.church.findUnique({
             where: { id: churchId },
             select: { stripeCustomerId: true },
         });
@@ -232,8 +234,9 @@ export async function purchaseNumber(req, res) {
         if (!paymentIntentId || typeof paymentIntentId !== 'string') {
             return res.status(400).json({ error: 'Payment intent ID is required' });
         }
-        // Get church with Stripe customer ID
-        const church = await prisma.church.findUnique({
+        // Get church with Stripe customer ID (query registry database)
+        const registryPrisma = getRegistryPrisma();
+        const church = await registryPrisma.church.findUnique({
             where: { id: churchId },
             select: { telnyxPhoneNumber: true, stripeCustomerId: true },
         });
@@ -296,9 +299,9 @@ export async function purchaseNumber(req, res) {
         else {
             console.error(`⚠️ Linking failed after both methods. Error: ${linkingResult.error?.code} - ${linkingResult.error?.message}`);
         }
-        // Update church with purchased phone number, webhook ID, and linking status
+        // Update church with purchased phone number, webhook ID, and linking status (in registry database)
         // Phase 2: Track linking status for automatic recovery
-        const updated = await prisma.church.update({
+        const updated = await registryPrisma.church.update({
             where: { id: churchId },
             data: {
                 telnyxPhoneNumber: phoneNumber,
@@ -386,7 +389,9 @@ export async function getCurrentNumber(req, res) {
         if (!churchId) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
-        const church = await prisma.church.findUnique({
+        // Query registry database (same as linkPhoneNumber uses)
+        const registryPrisma = getRegistryPrisma();
+        const church = await registryPrisma.church.findUnique({
             where: { id: churchId },
             select: {
                 telnyxPhoneNumber: true,
@@ -421,7 +426,9 @@ export async function releaseCurrentNumber(req, res) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
         const { confirm, confirmPhone } = req.body;
-        const church = await prisma.church.findUnique({
+        // Query registry database (same as linkPhoneNumber and getCurrentNumber use)
+        const registryPrisma = getRegistryPrisma();
+        const church = await registryPrisma.church.findUnique({
             where: { id: churchId },
             select: { telnyxNumberSid: true, telnyxPhoneNumber: true },
         });
