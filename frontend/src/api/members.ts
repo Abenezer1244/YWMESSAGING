@@ -43,6 +43,10 @@ export async function getMembers(
   if (options.limit) params.append('limit', options.limit.toString());
   if (options.search) params.append('search', options.search);
 
+  // CRITICAL FIX: Add cache buster to prevent browser from returning stale cached responses
+  // This ensures we always get fresh data from server, especially after adding/updating members
+  params.append('_t', Date.now().toString());
+
   const response = await client.get(`/members?${params.toString()}`);
   return response.data;
 }
