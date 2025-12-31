@@ -572,7 +572,7 @@ export async function releaseCurrentNumber(req: Request, res: Response) {
         data: {
           telnyxPhoneNumber: null,
           telnyxNumberSid: null,
-          telnyxVerified: null,
+          telnyxVerified: false,
           telnyxWebhookId: null,
           telnyxPurchasedAt: null,
         },
