@@ -189,15 +189,10 @@ async function getBranchStatsUncached(tenantPrisma) {
  */
 export async function getSummaryStats(tenantPrisma) {
     return getCachedWithFallback(CACHE_KEYS.churchStats('summary'), async () => {
-        // ✅ FIX: Count unique members who received messages from this church
-        // Member model has no churchId field, so we count through MessageRecipient with efficient SQL
-        const memberCountResult = await tenantPrisma.$queryRaw `
-        SELECT COUNT(DISTINCT mr."memberId") as count
-        FROM "MessageRecipient" mr
-        JOIN "Message" m ON mr."messageId" = m.id
-      `;
-        const memberCount = memberCountResult[0]?.count || 0;
-        const [messages, branches] = await Promise.all([
+        // ✅ FIX: Count all members in this tenant's database
+        // Simply count from Member table to get total member count
+        const [memberCount, messages, branches] = await Promise.all([
+            tenantPrisma.member.count({}),
             tenantPrisma.message.count({}),
             tenantPrisma.branch.count({}),
         ]);

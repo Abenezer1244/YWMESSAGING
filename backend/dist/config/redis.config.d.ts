@@ -284,4 +284,28 @@ export declare const redisClient: import("@redis/client").RedisClientType<{
 } & import("redis").RedisModules, import("redis").RedisFunctions, import("redis").RedisScripts>;
 export declare function connectRedis(timeoutMs?: number): Promise<boolean>;
 export declare function disconnectRedis(): Promise<void>;
+/**
+ * Check if Redis is currently available
+ * @returns true if Redis is connected and ready
+ */
+export declare function isRedisAvailable(): boolean;
+/**
+ * Check if Redis is permanently disabled (max retries exceeded)
+ * @returns true if in permanent fallback mode
+ */
+export declare function isRedisPermanentlyDisabled(): boolean;
+/**
+ * Execute a Redis operation with graceful fallback
+ * @param operation The Redis operation to execute
+ * @param fallbackValue Value to return if Redis is unavailable
+ * @param operationName Name of operation for logging
+ * @returns Result from Redis or fallback value
+ */
+export declare function executeRedisOperation<T>(operation: () => Promise<T>, fallbackValue: T, operationName?: string): Promise<T>;
+/**
+ * Execute a Redis operation that returns void with graceful fallback
+ * @param operation The Redis operation to execute
+ * @param operationName Name of operation for logging
+ */
+export declare function executeRedisVoidOperation(operation: () => Promise<void>, operationName?: string): Promise<void>;
 //# sourceMappingURL=redis.config.d.ts.map
