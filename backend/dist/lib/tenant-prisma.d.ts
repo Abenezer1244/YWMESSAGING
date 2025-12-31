@@ -53,13 +53,36 @@ export declare function getTenantPrisma(tenantId: string): Promise<TenantPrismaC
  */
 export declare function disconnectAllTenants(): Promise<void>;
 /**
+ * Get connection pool statistics for monitoring
+ * Returns comprehensive metrics about tenant connections
+ */
+export declare function getConnectionPoolStats(): {
+    registry: {
+        connected: boolean;
+    };
+    cache: {
+        currentSize: number;
+        maxSize: number;
+        utilization: string;
+    };
+    connections: {
+        totalCreated: number;
+        totalClosed: number;
+        totalEvicted: number;
+        currentlyOpen: number;
+        potentialLeaks: number;
+    };
+    config: {
+        maxCached: number;
+        idleTimeoutMinutes: number;
+        idleCheckIntervalMinutes: number;
+    };
+};
+/**
  * Health check for monitoring
  * Returns status of registry database and active tenant connections
  */
 export declare function getConnectionPoolStatus(): Promise<{
-    registry: string;
-    cachedTenants: number;
-    maxTenants: number;
     tenants: {
         tenantId: string;
         cachedSince: string;
@@ -67,9 +90,34 @@ export declare function getConnectionPoolStatus(): Promise<{
         accessCount: number;
         idleSeconds: number;
     }[];
+    registry: {
+        connected: boolean;
+    };
+    cache: {
+        currentSize: number;
+        maxSize: number;
+        utilization: string;
+    };
+    connections: {
+        totalCreated: number;
+        totalClosed: number;
+        totalEvicted: number;
+        currentlyOpen: number;
+        potentialLeaks: number;
+    };
+    config: {
+        maxCached: number;
+        idleTimeoutMinutes: number;
+        idleCheckIntervalMinutes: number;
+    };
 }>;
 /**
  * Clear all cached clients (for testing or manual cleanup)
  */
 export declare function clearAllCachedClients(): Promise<void>;
+/**
+ * Evict a specific tenant's cached client to force fresh queries
+ * Useful after write operations to ensure subsequent reads see latest data
+ */
+export declare function evictTenantClient(tenantId: string): Promise<void>;
 //# sourceMappingURL=tenant-prisma.d.ts.map

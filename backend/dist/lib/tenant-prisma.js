@@ -59,6 +59,10 @@ let registryPrismaInstance = null;
 let idleCleanupInterval = null;
 // Track if shutdown has been initiated
 let isShuttingDown = false;
+// Track total connections created (for monitoring)
+let totalConnectionsCreated = 0;
+let totalConnectionsEvicted = 0;
+let totalConnectionsClosed = 0;
 // ============================================================================
 // REGISTRY DATABASE (SINGLETON)
 // ============================================================================
@@ -127,7 +131,7 @@ export async function getTenantPrisma(tenantId) {
     // ============================================
     if (tenantClients.size >= MAX_CACHED_CLIENTS) {
         console.warn(`[Tenant] Cache at capacity (${MAX_CACHED_CLIENTS}). Evicting least recently used client.`);
-        evictLeastRecentlyUsed();
+        await evictLeastRecentlyUsed();
     }
     // ============================================
     // STEP 3: Fetch tenant info from registry
@@ -187,6 +191,12 @@ export async function getTenantPrisma(tenantId) {
         lastAccessedAt: now,
         accessCount: 1,
     });
+    totalConnectionsCreated++;
+    console.log(`[Tenant] Connection stats: ` +
+        `Created: ${totalConnectionsCreated}, ` +
+        `Cached: ${tenantClients.size}, ` +
+        `Evicted: ${totalConnectionsEvicted}, ` +
+        `Closed: ${totalConnectionsClosed}`);
     // Start idle cleanup job if not already running
     if (!idleCleanupInterval) {
         startIdleCleanupJob();
@@ -257,9 +267,22 @@ function decryptDatabaseUrl(encryptedUrl) {
     return encryptedUrl;
 }
 /**
- * Evict least recently used client from cache
+ * Disconnect a Prisma client with timeout to prevent hanging
+ * @param client The Prisma client to disconnect
+ * @param timeoutMs Timeout in milliseconds (default 5 seconds)
+ * @returns Promise that resolves when disconnected or times out
  */
-function evictLeastRecentlyUsed() {
+async function disconnectClientWithTimeout(client, timeoutMs = 5000) {
+    return Promise.race([
+        client.$disconnect(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Disconnect timeout')), timeoutMs)),
+    ]);
+}
+/**
+ * Evict least recently used client from cache
+ * Enhanced with proper async disconnect handling
+ */
+async function evictLeastRecentlyUsed() {
     let lruTenantId = null;
     let lruTimestamp = Infinity;
     // Find client with oldest lastAccessedAt
@@ -271,13 +294,23 @@ function evictLeastRecentlyUsed() {
     }
     if (lruTenantId) {
         const entry = tenantClients.get(lruTenantId);
-        console.log(`[Tenant] Evicting client for ${lruTenantId} ` +
-            `(last accessed ${Math.round((Date.now() - entry.lastAccessedAt) / 1000)}s ago)`);
-        // Disconnect client
-        entry.client.$disconnect().catch((error) => {
-            console.error(`[Tenant] Error disconnecting evicted client ${lruTenantId}:`, error);
-        });
+        const idleSeconds = Math.round((Date.now() - entry.lastAccessedAt) / 1000);
+        console.log(`[Tenant] Evicting LRU client for ${lruTenantId} ` +
+            `(idle: ${idleSeconds}s, accessed: ${entry.accessCount} times)`);
+        // Remove from cache first (prevent reuse during disconnect)
         tenantClients.delete(lruTenantId);
+        totalConnectionsEvicted++;
+        // Disconnect with timeout to prevent hanging
+        try {
+            await disconnectClientWithTimeout(entry.client, 5000);
+            totalConnectionsClosed++;
+            console.log(`[Tenant] Successfully disconnected ${lruTenantId}`);
+        }
+        catch (error) {
+            console.error(`[Tenant] Error disconnecting evicted client ${lruTenantId}:`, error instanceof Error ? error.message : error);
+            // Connection may be leaked, but we've removed it from cache
+            // The database will eventually close idle connections
+        }
     }
 }
 /**
@@ -286,28 +319,50 @@ function evictLeastRecentlyUsed() {
 function startIdleCleanupJob() {
     console.log('[Tenant] Starting idle client cleanup job (checks every 5 minutes)');
     idleCleanupInterval = setInterval(async () => {
-        const now = Date.now();
-        const idleCandidates = [];
-        // Find clients that haven't been accessed recently
-        for (const [tenantId, entry] of tenantClients.entries()) {
-            const idleTime = now - entry.lastAccessedAt;
-            if (idleTime > CLIENT_IDLE_TIMEOUT) {
-                idleCandidates.push(tenantId);
+        try {
+            const now = Date.now();
+            const idleCandidates = [];
+            // Find clients that haven't been accessed recently
+            for (const [tenantId, entry] of tenantClients.entries()) {
+                const idleTime = now - entry.lastAccessedAt;
+                if (idleTime > CLIENT_IDLE_TIMEOUT) {
+                    idleCandidates.push(tenantId);
+                }
+            }
+            // Disconnect idle clients
+            if (idleCandidates.length > 0) {
+                console.log(`[Tenant] Cleaning up ${idleCandidates.length} idle clients`);
+                // Disconnect in parallel with individual error handling
+                await Promise.allSettled(idleCandidates.map(async (tenantId) => {
+                    const entry = tenantClients.get(tenantId);
+                    if (!entry)
+                        return; // Already removed
+                    const idleMinutes = Math.round((now - entry.lastAccessedAt) / 60000);
+                    console.log(`[Tenant] Disconnecting idle client for ${tenantId} ` +
+                        `(idle: ${idleMinutes}min, accessed: ${entry.accessCount} times)`);
+                    // Remove from cache first
+                    tenantClients.delete(tenantId);
+                    totalConnectionsEvicted++;
+                    // Disconnect with timeout
+                    try {
+                        await disconnectClientWithTimeout(entry.client, 5000);
+                        totalConnectionsClosed++;
+                        console.log(`[Tenant] Idle client ${tenantId} disconnected successfully`);
+                    }
+                    catch (error) {
+                        console.error(`[Tenant] Error disconnecting idle client ${tenantId}:`, error instanceof Error ? error.message : error);
+                    }
+                }));
+                console.log(`[Tenant] Cleanup complete. Stats: ` +
+                    `Created: ${totalConnectionsCreated}, ` +
+                    `Cached: ${tenantClients.size}, ` +
+                    `Evicted: ${totalConnectionsEvicted}, ` +
+                    `Closed: ${totalConnectionsClosed}`);
             }
         }
-        // Disconnect idle clients
-        if (idleCandidates.length > 0) {
-            console.log(`[Tenant] Cleaning up ${idleCandidates.length} idle clients`);
-            for (const tenantId of idleCandidates) {
-                const entry = tenantClients.get(tenantId);
-                const idleMinutes = Math.round((now - entry.lastAccessedAt) / 60000);
-                console.log(`[Tenant] Disconnecting idle client for ${tenantId} ` +
-                    `(idle for ${idleMinutes} minutes, accessed ${entry.accessCount} times)`);
-                await entry.client.$disconnect().catch((error) => {
-                    console.error(`[Tenant] Error disconnecting idle client ${tenantId}:`, error);
-                });
-                tenantClients.delete(tenantId);
-            }
+        catch (error) {
+            console.error('[Tenant] Error in idle cleanup job:', error);
+            // Don't crash the cleanup job - continue on next interval
         }
     }, IDLE_CHECK_INTERVAL);
     // Don't keep the process alive just for cleanup
@@ -333,18 +388,23 @@ export async function disconnectAllTenants() {
         clearInterval(idleCleanupInterval);
         idleCleanupInterval = null;
     }
-    // Disconnect all tenant clients
+    // Disconnect all tenant clients with timeout
     const disconnectPromises = Array.from(tenantClients.entries()).map(async ([tenantId, entry]) => {
         try {
-            await entry.client.$disconnect();
+            await disconnectClientWithTimeout(entry.client, 10000); // 10s timeout for shutdown
+            totalConnectionsClosed++;
             console.log(`[Tenant] Disconnected ${tenantId}`);
         }
         catch (error) {
-            console.error(`[Tenant] Error disconnecting ${tenantId}:`, error);
+            console.error(`[Tenant] Error disconnecting ${tenantId}:`, error instanceof Error ? error.message : error);
         }
     });
     await Promise.all(disconnectPromises);
     tenantClients.clear();
+    console.log(`[Tenant] Final stats: ` +
+        `Created: ${totalConnectionsCreated}, ` +
+        `Closed: ${totalConnectionsClosed}, ` +
+        `Evicted: ${totalConnectionsEvicted}`);
     // Disconnect registry database
     if (registryPrismaInstance) {
         try {
@@ -360,14 +420,41 @@ export async function disconnectAllTenants() {
     process.exit(0);
 }
 /**
+ * Get connection pool statistics for monitoring
+ * Returns comprehensive metrics about tenant connections
+ */
+export function getConnectionPoolStats() {
+    return {
+        registry: {
+            connected: registryPrismaInstance !== null,
+        },
+        cache: {
+            currentSize: tenantClients.size,
+            maxSize: MAX_CACHED_CLIENTS,
+            utilization: `${Math.round((tenantClients.size / MAX_CACHED_CLIENTS) * 100)}%`,
+        },
+        connections: {
+            totalCreated: totalConnectionsCreated,
+            totalClosed: totalConnectionsClosed,
+            totalEvicted: totalConnectionsEvicted,
+            currentlyOpen: totalConnectionsCreated - totalConnectionsClosed,
+            potentialLeaks: Math.max(0, (totalConnectionsCreated - totalConnectionsClosed) - tenantClients.size),
+        },
+        config: {
+            maxCached: MAX_CACHED_CLIENTS,
+            idleTimeoutMinutes: CLIENT_IDLE_TIMEOUT / 60000,
+            idleCheckIntervalMinutes: IDLE_CHECK_INTERVAL / 60000,
+        },
+    };
+}
+/**
  * Health check for monitoring
  * Returns status of registry database and active tenant connections
  */
 export async function getConnectionPoolStatus() {
+    const stats = getConnectionPoolStats();
     return {
-        registry: registryPrismaInstance ? 'connected' : 'disconnected',
-        cachedTenants: tenantClients.size,
-        maxTenants: MAX_CACHED_CLIENTS,
+        ...stats,
         tenants: Array.from(tenantClients.entries()).map(([tenantId, entry]) => ({
             tenantId,
             cachedSince: new Date(entry.createdAt).toISOString(),
@@ -388,5 +475,31 @@ export async function clearAllCachedClients() {
         });
     }
     tenantClients.clear();
+}
+/**
+ * Evict a specific tenant's cached client to force fresh queries
+ * Useful after write operations to ensure subsequent reads see latest data
+ */
+export async function evictTenantClient(tenantId) {
+    const entry = tenantClients.get(tenantId);
+    if (!entry) {
+        console.log(`[Tenant] No cached client to evict for tenant ${tenantId}`);
+        return;
+    }
+    console.log(`[Tenant] Evicting cached client for tenant ${tenantId} (forcing fresh connection for next request)`);
+    // Remove from cache
+    tenantClients.delete(tenantId);
+    totalConnectionsEvicted++;
+    // CRITICAL FIX: Wait for disconnect to complete to prevent race condition
+    // where subsequent queries reuse the old cached client before disconnect finishes
+    try {
+        await disconnectClientWithTimeout(entry.client, 5000);
+        totalConnectionsClosed++;
+        console.log(`[Tenant] Successfully disconnected ${tenantId}`);
+    }
+    catch (error) {
+        console.error(`[Tenant] Error disconnecting client ${tenantId}:`, error instanceof Error ? error.message : error);
+        // Client is removed from cache, so won't be reused even if disconnect failed
+    }
 }
 //# sourceMappingURL=tenant-prisma.js.map
