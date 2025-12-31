@@ -1,0 +1,141 @@
+{
+  "summary": {
+    "total": 13,
+    "passed": 13,
+    "failed": 0,
+    "duration": 2597,
+    "passRate": "100.0"
+  },
+  "tests": [
+    {
+      "testNum": 1,
+      "name": "Create New Tenant",
+      "status": "PASS",
+      "duration": 24236,
+      "details": "Tenant created",
+      "data": {},
+      "timestamp": "2025-12-31T00:34:57.254Z"
+    },
+    {
+      "testNum": 2,
+      "name": "Create Recurring Message",
+      "status": "PASS",
+      "duration": 122,
+      "details": "Recurring message created in tenant database",
+      "data": {
+        "recurringMessageId": "cmjtaavle000ot5pu8hl5l7y1"
+      },
+      "timestamp": "2025-12-31T00:34:57.376Z"
+    },
+    {
+      "testNum": 3,
+      "name": "Read Recurring Messages",
+      "status": "PASS",
+      "duration": 116,
+      "details": "Recurring messages retrieved from tenant database",
+      "data": {
+        "count": 1
+      },
+      "timestamp": "2025-12-31T00:34:57.493Z"
+    },
+    {
+      "testNum": 4,
+      "name": "Update Recurring Message",
+      "status": "PASS",
+      "duration": 159,
+      "details": "Recurring message updated in tenant database",
+      "data": {},
+      "timestamp": "2025-12-31T00:34:57.652Z"
+    },
+    {
+      "testNum": 5,
+      "name": "Toggle Recurring Message",
+      "status": "PASS",
+      "duration": 199,
+      "details": "Recurring message toggled in tenant database",
+      "data": {},
+      "timestamp": "2025-12-31T00:34:57.851Z"
+    },
+    {
+      "testNum": 6,
+      "name": "Delete Recurring Message",
+      "status": "PASS",
+      "duration": 165,
+      "details": "Recurring message removed from tenant database",
+      "data": {},
+      "timestamp": "2025-12-31T00:34:58.016Z"
+    },
+    {
+      "testNum": 7,
+      "name": "Read Church Profile",
+      "status": "PASS",
+      "duration": 141,
+      "details": "Church profile retrieved (registry database)",
+      "data": {
+        "churchId": "ma3c2mae2hpicpar1gmkvnxs"
+      },
+      "timestamp": "2025-12-31T00:34:58.157Z"
+    },
+    {
+      "testNum": 8,
+      "name": "Update Church Profile",
+      "status": "PASS",
+      "duration": 195,
+      "details": "Church profile updated in registry database",
+      "data": {},
+      "timestamp": "2025-12-31T00:34:58.352Z"
+    },
+    {
+      "testNum": 9,
+      "name": "Read Co-Admins",
+      "status": "PASS",
+      "duration": 99,
+      "details": "Co-admins retrieved from tenant database",
+      "data": {
+        "count": 0
+      },
+      "timestamp": "2025-12-31T00:34:58.451Z"
+    },
+    {
+      "testNum": 10,
+      "name": "Read Activity Logs",
+      "status": "PASS",
+      "duration": 13,
+      "details": "Activity logs retrieved from tenant database",
+      "data": {
+        "count": 0
+      },
+      "timestamp": "2025-12-31T00:34:58.464Z"
+    },
+    {
+      "testNum": 11,
+      "name": "Read Message Stats",
+      "status": "PASS",
+      "duration": 325,
+      "details": "Message statistics retrieved from tenant database",
+      "data": {
+        "totalMessages": 0
+      },
+      "timestamp": "2025-12-31T00:34:58.789Z"
+    },
+    {
+      "testNum": 12,
+      "name": "Read Branch Stats",
+      "status": "PASS",
+      "duration": 202,
+      "details": "Branch stats API accessible (no branches yet)",
+      "data": {},
+      "timestamp": "2025-12-31T00:34:58.991Z"
+    },
+    {
+      "testNum": 13,
+      "name": "Read Summary Stats",
+      "status": "PASS",
+      "duration": 860,
+      "details": "Summary statistics retrieved from tenant database",
+      "data": {},
+      "timestamp": "2025-12-31T00:34:59.851Z"
+    }
+  ],
+  "timestamp": "2025-12-31T00:34:33.008Z"
+}
