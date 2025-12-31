@@ -571,22 +571,20 @@ export async function handleTelnyxInboundMMS(req: Request, res: Response) {
     }
 
     const phoneHash = hashForSearch(formattedPhone);
-    // Check if member has a conversation with this tenant (no churchId needed - tenant database isolation)
-    const isMember = await tenantPrisma.member.findFirst({
+    // ✅ SECURITY: Only allow messages from registered members
+    // Check if sender exists in member list (tenant database isolation)
+    const member = await tenantPrisma.member.findFirst({
       where: {
-        phoneHash,
-        conversations: {
-          some: {}  // Just check if they have ANY conversation in this tenant
-        }
+        phoneHash
       }
     });
 
-    if (!isMember) {
-      console.log(`🚫 Non-member attempted to message: ${senderPhone} to ${recipientPhone}`);
+    if (!member) {
+      console.log(`🚫 Non-member blocked from messaging: ${senderPhone} to ${recipientPhone}`);
 
-      // Send auto-reply to non-member
+      // Send auto-reply explaining they need to be added as a member
       try {
-        const replyMessage = `Hello! To communicate with ${tenant.name}, please ask the church leader to add you to the system.`;
+        const replyMessage = `Hello! To communicate with ${tenant.name}, please contact the church and ask to be added as a member. Only registered members can send messages.`;
 
         await sendSMS(
           senderPhone,           // to (sender's number)
@@ -602,7 +600,7 @@ export async function handleTelnyxInboundMMS(req: Request, res: Response) {
       return res.status(200).json({ received: true });
     }
 
-    console.log(`✅ Member verified: ${isMember.id} (${isMember.firstName} ${isMember.lastName})`);
+    console.log(`✅ Member verified: ${member.id} (${member.firstName} ${member.lastName})`);
 
     // Extract media URLs
     const mediaUrls = media?.map((m: any) => m.url) || [];
