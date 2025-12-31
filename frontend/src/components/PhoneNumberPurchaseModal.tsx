@@ -42,12 +42,22 @@ export default function PhoneNumberPurchaseModal({
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'declined' | 'failed'>('idle');
   const [paymentMessage, setPaymentMessage] = useState('');
+  const [isStripeLoading, setIsStripeLoading] = useState(false);
   const stripePromiseRef = useRef<Promise<Stripe | null> | null>(null);
 
   // ✅ PERF: Lazy-load Stripe library only when payment step is reached
   useEffect(() => {
     if (step === 'payment' && !stripePromiseRef.current) {
+      setIsStripeLoading(true);
       stripePromiseRef.current = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
+      // Wait for Stripe to load before rendering Elements
+      stripePromiseRef.current.then(() => {
+        setIsStripeLoading(false);
+      }).catch((error) => {
+        console.error('Failed to load Stripe:', error);
+        setIsStripeLoading(false);
+        toast.error('Failed to load payment system');
+      });
     }
   }, [step]);
 
@@ -462,17 +472,28 @@ export default function PhoneNumberPurchaseModal({
                 {/* Step 4: Payment */}
                 {step === 'payment' && selectedNumber && paymentIntentId && (
                   <motion.div variants={itemVariants} className="space-y-4">
-                    <Elements stripe={stripePromiseRef.current}>
-                      <StripePaymentForm
-                        amount={50} // $0.50 in cents (Stripe minimum)
-                        phoneNumber={selectedNumber.phoneNumber}
-                        paymentIntentId={paymentIntentId}
-                        onSuccess={handlePaymentSuccess}
-                        isLoading={isLoading}
-                        paymentStatus={paymentStatus}
-                        paymentMessage={paymentMessage}
-                      />
-                    </Elements>
+                    {isStripeLoading ? (
+                      <div className="flex flex-col items-center justify-center py-8">
+                        <Loader className="w-8 h-8 text-primary animate-spin mb-3" />
+                        <p className="text-sm text-muted-foreground">Loading payment system...</p>
+                      </div>
+                    ) : stripePromiseRef.current ? (
+                      <Elements stripe={stripePromiseRef.current}>
+                        <StripePaymentForm
+                          amount={50} // $0.50 in cents (Stripe minimum)
+                          phoneNumber={selectedNumber.phoneNumber}
+                          paymentIntentId={paymentIntentId}
+                          onSuccess={handlePaymentSuccess}
+                          isLoading={isLoading}
+                          paymentStatus={paymentStatus}
+                          paymentMessage={paymentMessage}
+                        />
+                      </Elements>
+                    ) : (
+                      <div className="text-center py-8 text-red-500">
+                        Failed to load payment system. Please try again.
+                      </div>
+                    )}
 
                     <Button
                       variant="secondary"
@@ -483,7 +504,7 @@ export default function PhoneNumberPurchaseModal({
                         setPaymentStatus('idle');
                         setPaymentMessage('');
                       }}
-                      disabled={isLoading}
+                      disabled={isLoading || isStripeLoading}
                     >
                       Back
                     </Button>
