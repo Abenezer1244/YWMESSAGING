@@ -1,4 +1,5 @@
 import type { TenantPrismaClient } from '../lib/tenant-prisma.js';
+import { evictTenantClient } from '../lib/tenant-prisma.js';
 import { formatToE164 } from '../utils/phone.utils.js';
 import { encrypt, decrypt, hashForSearch } from '../utils/encryption.utils.js';
 import { queueWelcomeMessage } from '../jobs/welcomeMessage.job.js';
@@ -114,7 +115,15 @@ async function fetchMembersPage(
  * Add single member
  */
 export async function addMember(tenantId: string, tenantPrisma: TenantPrismaClient, data: CreateMemberData) {
-  return addMemberInternal(tenantPrisma, data);
+  const member = await addMemberInternal(tenantPrisma, data);
+
+  // CRITICAL FIX: Force a query to ensure write is committed before returning
+  // This prevents read-after-write consistency issues where subsequent GET requests
+  // don't see the newly added member due to connection pool/replication lag
+  // Simple SELECT 1 forces the connection to wait for transaction commit
+  await tenantPrisma.$executeRaw`SELECT 1`;
+
+  return member;
 }
 
 /**
@@ -355,6 +364,9 @@ export async function importMembers(
   const totalTime = Date.now() - importStartTime;
   console.log(`[importMembers] COMPLETE - Total time: ${totalTime}ms, Imported: ${imported.length}, Failed: ${failed.length}`);
 
+  // Evict cached Prisma client after bulk write operation
+  await evictTenantClient(tenantId);
+
   return {
     imported: imported.length,
     failed: failed.length,
@@ -391,6 +403,9 @@ export async function updateMember(tenantId: string, tenantPrisma: TenantPrismaC
     data: updateData,
   });
 
+  // Evict cached Prisma client after write operation
+  await evictTenantClient(tenantId);
+
   return {
     id: updated.id,
     firstName: updated.firstName,
@@ -411,6 +426,9 @@ export async function deleteMember(tenantId: string, tenantPrisma: TenantPrismaC
   const deleteResult = await tenantPrisma.member.delete({
     where: { id: memberId },
   });
+
+  // Evict cached Prisma client after write operation
+  await evictTenantClient(tenantId);
 
   console.log(`[deleteMember] Member deleted successfully`);
   return deleteResult;
