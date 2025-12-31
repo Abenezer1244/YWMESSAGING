@@ -70,10 +70,11 @@ export function MembersPage() {
   }, [search, loadMembers]);
 
   const handleAddSuccess = async (newMember: Member) => {
-    setMembers(prevMembers => [newMember, ...prevMembers]);
-    setTotal(prevTotal => prevTotal + 1);
     setIsAddModalOpen(false);
     toast.success('Member added successfully');
+    // Reload members from database to ensure consistency
+    setPage(1);
+    await loadMembers(1, true);
   };
 
   const handleImportSuccess = () => {
