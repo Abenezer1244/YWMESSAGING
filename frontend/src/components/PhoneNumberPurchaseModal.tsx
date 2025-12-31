@@ -233,7 +233,7 @@ export default function PhoneNumberPurchaseModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 backdrop-blur-md"
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 backdrop-blur-md pointer-events-none"
         >
           <FocusTrap
             focusTrapOptions={{
@@ -246,7 +246,7 @@ export default function PhoneNumberPurchaseModal({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.92, y: 30 }}
               transition={{ duration: 0.4, ease: 'easeOut' }}
-              className="bg-background border border-border/50 rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden"
+              className="bg-background border border-border/50 rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden pointer-events-auto"
               role="dialog"
               aria-modal="true"
               aria-labelledby="phone-modal-title"

@@ -68,8 +68,8 @@ export function BranchFormModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 pointer-events-none">
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full pointer-events-auto">
         <div className="p-6">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
             {branch ? 'Edit Branch' : 'Create New Branch'}
