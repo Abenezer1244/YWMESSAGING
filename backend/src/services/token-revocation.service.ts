@@ -16,7 +16,12 @@
  * - Automatic cleanup via Redis TTL
  */
 
-import { redisClient } from '../config/redis.config.js';
+import {
+  redisClient,
+  isRedisAvailable,
+  executeRedisOperation,
+  executeRedisVoidOperation
+} from '../config/redis.config.js';
 import jwt from 'jsonwebtoken';
 
 // Redis key prefix for token blacklist
@@ -32,26 +37,16 @@ const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60; // 7 days (matches JWT refresh token
  * @param ttl Time-to-live in seconds (defaults to 15 minutes)
  */
 export async function revokeAccessToken(token: string, ttl: number = ACCESS_TOKEN_TTL): Promise<void> {
-  try {
-    // Extract token hash (first 32 chars is enough for collision avoidance)
-    const tokenHash = hashToken(token);
+  const tokenHash = hashToken(token);
+  const key = `${REVOKED_TOKEN_PREFIX}access:${tokenHash}`;
 
-    // Store in Redis with TTL matching token expiry
-    const key = `${REVOKED_TOKEN_PREFIX}access:${tokenHash}`;
-
-    // Add 5-second timeout for Redis write operation (prevent hanging on logout)
-    const setExPromise = redisClient.setEx(key, ttl, '1');
-    const timeoutPromise = new Promise<void>((_, reject) =>
-      setTimeout(() => reject(new Error('Redis operation timeout')), 5000)
-    );
-
-    await Promise.race([setExPromise, timeoutPromise]);
-    console.log(`🔐 Access token revoked (expires in ${ttl}s)`);
-  } catch (error) {
-    console.error('⚠️ Failed to revoke access token:', error);
-    // Don't throw - logout should complete even if revocation fails
-    // Token revocation is checked on next request with fail-secure
-  }
+  await executeRedisVoidOperation(
+    async () => {
+      await redisClient.setEx(key, ttl, '1');
+      console.log(`🔐 Access token revoked (expires in ${ttl}s)`);
+    },
+    'Revoke access token'
+  );
 }
 
 /**
@@ -62,25 +57,16 @@ export async function revokeAccessToken(token: string, ttl: number = ACCESS_TOKE
  * @param ttl Time-to-live in seconds (defaults to 7 days)
  */
 export async function revokeRefreshToken(token: string, ttl: number = REFRESH_TOKEN_TTL): Promise<void> {
-  try {
-    const tokenHash = hashToken(token);
+  const tokenHash = hashToken(token);
+  const key = `${REVOKED_TOKEN_PREFIX}refresh:${tokenHash}`;
 
-    // Store in Redis with TTL matching token expiry
-    const key = `${REVOKED_TOKEN_PREFIX}refresh:${tokenHash}`;
-
-    // Add 5-second timeout for Redis write operation (prevent hanging on logout)
-    const setExPromise = redisClient.setEx(key, ttl, '1');
-    const timeoutPromise = new Promise<void>((_, reject) =>
-      setTimeout(() => reject(new Error('Redis operation timeout')), 5000)
-    );
-
-    await Promise.race([setExPromise, timeoutPromise]);
-    console.log(`🔐 Refresh token revoked (expires in ${ttl}s)`);
-  } catch (error) {
-    console.error('⚠️ Failed to revoke refresh token:', error);
-    // Don't throw - logout should complete even if revocation fails
-    // Token revocation is checked on next request with fail-secure
-  }
+  await executeRedisVoidOperation(
+    async () => {
+      await redisClient.setEx(key, ttl, '1');
+      console.log(`🔐 Refresh token revoked (expires in ${ttl}s)`);
+    },
+    'Revoke refresh token'
+  );
 }
 
 /**
@@ -91,18 +77,14 @@ export async function revokeRefreshToken(token: string, ttl: number = REFRESH_TO
  * @param refreshToken The refresh token to revoke
  */
 export async function revokeAllTokens(accessToken: string, refreshToken: string): Promise<void> {
-  try {
-    // Revoke both tokens in parallel
-    await Promise.all([
-      revokeAccessToken(accessToken, ACCESS_TOKEN_TTL),
-      revokeRefreshToken(refreshToken, REFRESH_TOKEN_TTL),
-    ]);
+  // Revoke both tokens in parallel (errors handled gracefully by individual functions)
+  await Promise.all([
+    revokeAccessToken(accessToken, ACCESS_TOKEN_TTL),
+    revokeRefreshToken(refreshToken, REFRESH_TOKEN_TTL),
+  ]);
 
-    console.log('🔐 All tokens revoked (user logged out)');
-  } catch (error) {
-    console.error('❌ Failed to revoke all tokens:', error);
-    throw new Error('Logout failed: token revocation error');
-  }
+  console.log('🔐 All tokens revoked (user logged out)');
+  // Note: If Redis is unavailable, tokens will still expire via JWT TTL
 }
 
 /**
@@ -115,67 +97,27 @@ export async function revokeAllTokens(accessToken: string, refreshToken: string)
  * @returns true if token is revoked (blacklisted)
  */
 export async function isTokenRevoked(token: string, type: 'access' | 'refresh' = 'access'): Promise<boolean> {
-  try {
-    // ✅ SECURITY: If Redis is not connected, skip revocation check
-    // This is a fallback for when Redis is unavailable
-    // JWT expiration still provides security (tokens expire in 15 minutes)
-    if (!redisClient.isOpen) {
-      console.warn('⚠️  Redis unavailable - token revocation check skipped (JWT expiration provides security)');
-      // Return false (not revoked) to allow access
-      // Tokens still expire after JWT TTL (15 minutes for access, 7 days for refresh)
-      // This is better UX but less secure than fail-closed
-      return false;
-    }
-
-    const tokenHash = hashToken(token);
-    const key = `${REVOKED_TOKEN_PREFIX}${type}:${tokenHash}`;
-
-    console.log(`[TOKEN_REVOCATION] Checking key: ${key}, Redis open: ${redisClient.isOpen}, Token first 20: ${token.substring(0, 20)}`);
-
-    // Check if token exists in Redis blacklist WITH 1-SECOND TIMEOUT
-    let exists: number;
-    try {
-      // DIAGNOSTIC: Check if Redis connection is actually working
-      // Attempt a simple ping to verify Redis is responsive
-      try {
-        await Promise.race([
-          redisClient.ping(),
-          new Promise<void>((_, reject) => setTimeout(() => reject(new Error('Ping timeout')), 500))
-        ]);
-        console.log(`[TOKEN_REVOCATION] Redis ping successful`);
-      } catch (pingError: any) {
-        console.error(`[TOKEN_REVOCATION] Redis ping failed:`, pingError.message);
-        return false; // Fail-open if Redis is unresponsive
-      }
-
-      const redisPromise = redisClient.exists(key);
-      const timeoutPromise = new Promise<number>((_, reject) =>
-        setTimeout(() => reject(new Error('Token revocation check timeout')), 1000)
-      );
-
-      exists = await Promise.race([redisPromise, timeoutPromise]);
-    } catch (redisError: any) {
-      console.error('[TOKEN_REVOCATION] Redis operation failed:', redisError.message);
-      // If Redis call fails, allow access (fail-open)
-      return false;
-    }
-
-    console.log(`[TOKEN_REVOCATION] Key exists result: ${exists}, type: ${typeof exists}, key: ${key}`);
-
-    if (exists > 0) {
-      console.log(`⛔ Token revoked: ${type}`);
-      return true;
-    }
-
-    console.log(`[TOKEN_REVOCATION] ✅ Token NOT revoked for type: ${type}`);
-    return false;
-  } catch (error: any) {
-    console.error('❌ Failed to check token revocation (outer catch):', error.message);
-    // On Redis error/timeout, skip revocation check (allow access)
-    // Fallback relies on JWT expiration for security
-    console.error('[TOKEN_REVOCATION] ⚠️ Returning false (allowing access) due to Redis error');
+  // ✅ SECURITY: If Redis is not available, skip revocation check
+  // Fail-open strategy: Allow access but rely on JWT expiration for security
+  if (!isRedisAvailable()) {
+    // Tokens still expire after JWT TTL (15 min access, 7 days refresh)
     return false;
   }
+
+  const tokenHash = hashToken(token);
+  const key = `${REVOKED_TOKEN_PREFIX}${type}:${tokenHash}`;
+
+  // Use graceful Redis operation with timeout
+  const exists = await executeRedisOperation<number>(
+    async () => {
+      // Simple exists check without extra ping
+      return await redisClient.exists(key);
+    },
+    0, // Fallback: 0 means not revoked
+    `Token revocation check (${type})`
+  );
+
+  return exists > 0;
 }
 
 /**
@@ -187,16 +129,14 @@ export async function isTokenRevoked(token: string, type: 'access' | 'refresh' =
  * @returns TTL in seconds, -1 if not revoked, -2 if Redis error
  */
 export async function getTokenRevocationTTL(token: string, type: 'access' | 'refresh' = 'access'): Promise<number> {
-  try {
-    const tokenHash = hashToken(token);
-    const key = `${REVOKED_TOKEN_PREFIX}${type}:${tokenHash}`;
+  const tokenHash = hashToken(token);
+  const key = `${REVOKED_TOKEN_PREFIX}${type}:${tokenHash}`;
 
-    const ttl = await redisClient.ttl(key);
-    return ttl; // Returns TTL in seconds, -1 if not found, -2 if error
-  } catch (error) {
-    console.error('❌ Failed to get token revocation TTL:', error);
-    return -2;
-  }
+  return await executeRedisOperation<number>(
+    async () => await redisClient.ttl(key),
+    -2, // -2 indicates Redis error/unavailable
+    'Get token revocation TTL'
+  );
 }
 
 /**
@@ -206,23 +146,21 @@ export async function getTokenRevocationTTL(token: string, type: 'access' | 'ref
  * @returns Number of tokens cleared
  */
 export async function clearAllRevokedTokens(): Promise<number> {
-  try {
-    // Find all revoked token keys
-    const keys = await redisClient.keys(`${REVOKED_TOKEN_PREFIX}*`);
+  return await executeRedisOperation<number>(
+    async () => {
+      const keys = await redisClient.keys(`${REVOKED_TOKEN_PREFIX}*`);
 
-    if (keys.length === 0) {
-      return 0;
-    }
+      if (keys.length === 0) {
+        return 0;
+      }
 
-    // Delete all revoked token keys
-    const deletedCount = await redisClient.del(keys);
-
-    console.log(`🗑️  Cleared ${deletedCount} revoked tokens from Redis`);
-    return deletedCount;
-  } catch (error) {
-    console.error('❌ Failed to clear revoked tokens:', error);
-    return 0;
-  }
+      const deletedCount = await redisClient.del(keys);
+      console.log(`🗑️  Cleared ${deletedCount} revoked tokens from Redis`);
+      return deletedCount;
+    },
+    0, // Fallback: 0 tokens cleared
+    'Clear all revoked tokens'
+  );
 }
 
 /**
@@ -232,19 +170,20 @@ export async function clearAllRevokedTokens(): Promise<number> {
  * @returns { access: number, refresh: number, total: number }
  */
 export async function getRevocationStats(): Promise<{ access: number; refresh: number; total: number }> {
-  try {
-    const accessTokens = await redisClient.keys(`${REVOKED_TOKEN_PREFIX}access:*`);
-    const refreshTokens = await redisClient.keys(`${REVOKED_TOKEN_PREFIX}refresh:*`);
+  return await executeRedisOperation<{ access: number; refresh: number; total: number }>(
+    async () => {
+      const accessTokens = await redisClient.keys(`${REVOKED_TOKEN_PREFIX}access:*`);
+      const refreshTokens = await redisClient.keys(`${REVOKED_TOKEN_PREFIX}refresh:*`);
 
-    return {
-      access: accessTokens.length,
-      refresh: refreshTokens.length,
-      total: accessTokens.length + refreshTokens.length,
-    };
-  } catch (error) {
-    console.error('❌ Failed to get revocation stats:', error);
-    return { access: 0, refresh: 0, total: 0 };
-  }
+      return {
+        access: accessTokens.length,
+        refresh: refreshTokens.length,
+        total: accessTokens.length + refreshTokens.length,
+      };
+    },
+    { access: 0, refresh: 0, total: 0 }, // Fallback stats
+    'Get revocation stats'
+  );
 }
 
 /**

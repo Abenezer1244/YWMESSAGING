@@ -1,0 +1,165 @@
+{
+  "summary": {
+    "total": 8,
+    "passed": 8,
+    "failed": 0,
+    "warned": 0,
+    "passRate": "100.0",
+    "duration": 110138
+  },
+  "tests": [
+    {
+      "testNum": 1,
+      "name": "Registration Flow",
+      "status": "PASS",
+      "duration": 20538,
+      "details": "Database provisioning successful",
+      "data": {
+        "tenantId": "y95e1tcj5wsi7gqyxcfxftr8",
+        "databaseName": "tenant_y95e1tcj5wsi7gqyxcfxftr8"
+      },
+      "timestamp": "2025-12-30T23:49:40.482Z"
+    },
+    {
+      "testNum": 2,
+      "name": "Login & Tenant Resolution",
+      "status": "PASS",
+      "duration": 288,
+      "details": "Fast tenant resolution",
+      "data": {},
+      "timestamp": "2025-12-30T23:49:42.781Z"
+    },
+    {
+      "testNum": 3,
+      "name": "Multi-Tenant Data Isolation",
+      "status": "PASS",
+      "duration": 14087,
+      "details": "Separate databases verified",
+      "data": {
+        "tenant1DB": "tenant_y95e1tcj5wsi7gqyxcfxftr8",
+        "tenant2DB": "tenant_x85cxiti451lm0veo43afzyb"
+      },
+      "timestamp": "2025-12-30T23:49:58.883Z"
+    },
+    {
+      "testNum": 4,
+      "name": "Concurrent Operations",
+      "status": "PASS",
+      "duration": 63427,
+      "details": "Success rate: 100.0%",
+      "data": {
+        "successful": 5,
+        "failed": 0,
+        "totalTime": 63427
+      },
+      "timestamp": "2025-12-30T23:51:04.322Z"
+    },
+    {
+      "testNum": 5,
+      "name": "Connection Pool Management",
+      "status": "PASS",
+      "duration": 0,
+      "details": "No leaks observed",
+      "data": {
+        "totalCreated": 7,
+        "maxCache": 100,
+        "currentlyExpected": 7
+      },
+      "timestamp": "2025-12-30T23:51:06.329Z"
+    },
+    {
+      "testNum": 6,
+      "name": "Redis Graceful Degradation",
+      "status": "PASS",
+      "duration": 0,
+      "details": "Permanent fallback mode working correctly",
+      "data": {},
+      "timestamp": "2025-12-30T23:51:07.623Z"
+    },
+    {
+      "testNum": 7,
+      "name": "Error Handling",
+      "status": "PASS",
+      "duration": 46,
+      "details": "All error scenarios handled gracefully",
+      "data": {},
+      "timestamp": "2025-12-30T23:51:08.684Z"
+    },
+    {
+      "testNum": 8,
+      "name": "Production Environment",
+      "status": "PASS",
+      "duration": 0,
+      "details": "Configuration verified",
+      "data": {
+        "checks": [
+          {
+            "check": "Database",
+            "status": "PASS",
+            "details": "Render PostgreSQL"
+          },
+          {
+            "check": "Backend",
+            "status": "PASS",
+            "details": "Running on port 3000"
+          },
+          {
+            "check": "Redis",
+            "status": "PASS",
+            "details": "Fallback mode working"
+          },
+          {
+            "check": "Tenants",
+            "status": "PASS",
+            "details": "7 tenants"
+          }
+        ]
+      },
+      "timestamp": "2025-12-30T23:51:09.689Z"
+    }
+  ],
+  "tenants": [
+    {
+      "tenantId": "y95e1tcj5wsi7gqyxcfxftr8",
+      "email": "test-tenant-wyukevoezqf6lim35xc4waoz@e2etest.com",
+      "adminId": "cmjt8omsx0000t5putu39nfxu",
+      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbklkIjoiY21qdDhvbXN4MDAwMHQ1cHV0dTM5bmZ4dSIsImNodXJjaElkIjoieTk1ZTF0Y2o1d3NpN2dxeXhjZnhmdHI4Iiwicm9sZSI6IlBSSU1BUlkiLCJpYXQiOjE3NjcxMzg1NzksImV4cCI6MTc2NzEzOTQ3OX0.Q0obhrpAIGrRfXuzVMLUeeFuo-ycLESUBDRjeu90S2U",
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbklkIjoiY21qdDhvbXN4MDAwMHQ1cHV0dTM5bmZ4dSIsImNodXJjaElkIjoieTk1ZTF0Y2o1d3NpN2dxeXhjZnhmdHI4IiwiaWF0IjoxNzY3MTM4NTc5LCJleHAiOjE3Njc3NDMzNzl9.vT2KhR5wWUy84slhNgCY2TOCRqMJMl2L2Vt2ls6aKpk",
+      "churchName": "E2E Test Church 1767138559552"
+    },
+    {
+      "tenantId": "x85cxiti451lm0veo43afzyb",
+      "email": "test-tenant-tr3umvxy19ffmmg92g5trfac@e2etest.com",
+      "adminId": "cmjt8p11s0001t5pu2r7c131z",
+      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbklkIjoiY21qdDhwMTFzMDAwMXQ1cHUycjdjMTMxeiIsImNodXJjaElkIjoieDg1Y3hpdGk0NTFsbTB2ZW80M2FmenliIiwicm9sZSI6IlBSSU1BUlkiLCJpYXQiOjE3NjcxMzg1OTgsImV4cCI6MTc2NzEzOTQ5OH0.Z41y1xUTCIk6KJqOTg_h4n7k2bZhqWisQHZT1MsoolA",
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbklkIjoiY21qdDhwMTFzMDAwMXQ1cHUycjdjMTMxeiIsImNodXJjaElkIjoieDg1Y3hpdGk0NTFsbTB2ZW80M2FmenliIiwiaWF0IjoxNzY3MTM4NTk4LCJleHAiOjE3Njc3NDMzOTh9.vNkzdvtIb19wYr26uG8VXM8DTcYj01xMcrUP9fHWxzo",
+      "churchName": "E2E Test Church 2 1767138584797"
+    },
+    {
+      "tenantId": "saz76ye25jfs5r8lyium8u1p",
+      "email": "concurrent-0-a5zhnhjwbv1bee1des5r0rk4@e2etest.com",
+      "churchName": "Concurrent Church 1"
+    },
+    {
+      "tenantId": "f9e9jhs3048zfintgn1o3mhk",
+      "email": "concurrent-1-ou17i6ewpfnqo101gk2qp7m0@e2etest.com",
+      "churchName": "Concurrent Church 2"
+    },
+    {
+      "tenantId": "i3f33aflbj0789yovof5lwk2",
+      "email": "concurrent-2-k43rhgkhed10rap05ae96dap@e2etest.com",
+      "churchName": "Concurrent Church 3"
+    },
+    {
+      "tenantId": "k0ol9svpk3yr4o08ltyyom6l",
+      "email": "concurrent-3-pz9qdo1td7zr4nqojlosidtt@e2etest.com",
+      "churchName": "Concurrent Church 4"
+    },
+    {
+      "tenantId": "zo3iedaobqx7tp5j77emljb4",
+      "email": "concurrent-4-y945b4ocoi3u6hjkhztg43pq@e2etest.com",
+      "churchName": "Concurrent Church 5"
+    }
+  ],
+  "timestamp": "2025-12-30T23:51:09.690Z"
+}

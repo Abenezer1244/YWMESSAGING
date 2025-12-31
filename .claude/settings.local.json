@@ -187,7 +187,21 @@
       "Bash(DATABASE_URL=\"postgresql://connect_yw_user:RkFG9qz5nL5wF22BuKEYngvLhsHVyfgP@dpg-d41af09r0fns73c9i010-a.oregon-postgres.render.com/connect_yw_production?sslmode=require\" node:*)",
       "Bash(export DATABASE_URL=\"postgresql://connect_yw_user:RkFG9qz5nL5wF22BuKEYngvLhsHVyfgP@dpg-d41af09r0fns73c9i010-a.oregon-postgres.render.com/connect_yw_production?sslmode=require&connection_limit=30&pool_timeout=45\")",
       "Bash(timeout 35 node:*)",
-      "Bash(__NEW_LINE__ curl -s -X POST http://localhost:3000/api/auth/register )"
+      "Bash(__NEW_LINE__ curl -s -X POST http://localhost:3000/api/auth/register )",
+      "Bash(if [ -f \"C:\\\\Users\\\\Windows\\\\OneDrive - Seattle Colleges\\\\Desktop\\\\YWMESSAGING\\\\DEPLOYMENT_STATUS.md\" ])",
+      "Bash(then cat \"C:\\\\Users\\\\Windows\\\\OneDrive - Seattle Colleges\\\\Desktop\\\\YWMESSAGING\\\\DEPLOYMENT_STATUS.md\")",
+      "Bash(else echo \"No deployment status file\")",
+      "Bash(timeout 30 npx tsc:*)",
+      "Bash(timeout 25 bash -c \"sleep 10 && curl -s http://localhost:5173 > /dev/null && echo ''Frontend is ready'' || echo ''Frontend still not responding''\")",
+      "Bash(timeout 300 npm run dev)",
+      "Bash(timeout 40 bash -c \"sleep 20 && curl -s http://localhost:3000/api/health && echo '''' || echo ''Server still not responding''\")",
+      "Bash(timeout 500 npm run dev)",
+      "Bash(timeout 40 bash:*)",
+      "Bash(timeout 60 npx tsc:*)",
+      "Bash(timeout 90 npx playwright install:*)",
+      "Bash(timeout 20 npx tsx:*)",
+      "Bash(NODE_PATH=./node_modules timeout 20 node:*)",
+      "Bash(NODE_PATH=./node_modules node:*)"
     ],
     "deny": [],
     "ask": []

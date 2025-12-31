@@ -1,0 +1,143 @@
+{
+  "summary": {
+    "total": 10,
+    "passed": 10,
+    "failed": 0,
+    "passRate": "100.0",
+    "duration": 53255,
+    "phase1Passed": 2,
+    "phase5Passed": 8
+  },
+  "tests": [
+    {
+      "phase": "Phase 1",
+      "testNum": 1,
+      "name": "Registration",
+      "status": "PASS",
+      "duration": 25645,
+      "details": "Database provisioned",
+      "data": {
+        "tenantId": "y98r5zj6b4b7qfgxj6udle8n"
+      },
+      "timestamp": "2025-12-31T00:07:14.567Z"
+    },
+    {
+      "phase": "Phase 1",
+      "testNum": 2,
+      "name": "Second Tenant",
+      "status": "PASS",
+      "duration": 14711,
+      "details": "Isolated database created",
+      "data": {
+        "tenantId": "kde42t21mbufzl41jce4u7rp"
+      },
+      "timestamp": "2025-12-31T00:07:31.295Z"
+    },
+    {
+      "phase": "Phase 5",
+      "testNum": 3,
+      "name": "Create Member T1",
+      "status": "PASS",
+      "duration": 194,
+      "details": "Member created in tenant DB",
+      "data": {
+        "memberId": "cmjt9bn7a0009t5puxwp55t6y"
+      },
+      "timestamp": "2025-12-31T00:07:33.500Z"
+    },
+    {
+      "phase": "Phase 5",
+      "testNum": 4,
+      "name": "Read Members T1",
+      "status": "PASS",
+      "duration": 396,
+      "details": "Member retrieved from tenant DB",
+      "data": {
+        "count": 1
+      },
+      "timestamp": "2025-12-31T00:07:34.902Z"
+    },
+    {
+      "phase": "Phase 5",
+      "testNum": 5,
+      "name": "Create Member T2",
+      "status": "PASS",
+      "duration": 166,
+      "details": "Member created in separate tenant DB",
+      "data": {
+        "memberId": "cmjt9bp72000at5pulf9m1o3y"
+      },
+      "timestamp": "2025-12-31T00:07:36.082Z"
+    },
+    {
+      "phase": "Phase 5",
+      "testNum": 6,
+      "name": "Member Isolation",
+      "status": "PASS",
+      "duration": 452,
+      "details": "No cross-tenant access",
+      "data": {
+        "tenant1Count": 1,
+        "tenant2Count": 1
+      },
+      "timestamp": "2025-12-31T00:07:37.536Z"
+    },
+    {
+      "phase": "Phase 5",
+      "testNum": 7,
+      "name": "Create Branch T1",
+      "status": "PASS",
+      "duration": 181,
+      "details": "Branch created in tenant DB",
+      "data": {
+        "branchId": "cmjt9br7t000bt5pumowj7tvt"
+      },
+      "timestamp": "2025-12-31T00:07:38.733Z"
+    },
+    {
+      "phase": "Phase 5",
+      "testNum": 8,
+      "name": "Read Branches T1",
+      "status": "PASS",
+      "duration": 84,
+      "details": "Branch retrieved from tenant DB",
+      "data": {
+        "count": 1
+      },
+      "timestamp": "2025-12-31T00:07:39.831Z"
+    },
+    {
+      "phase": "Phase 5",
+      "testNum": 9,
+      "name": "Update Member T1",
+      "status": "PASS",
+      "duration": 153,
+      "details": "Member updated in tenant DB",
+      "data": {},
+      "timestamp": "2025-12-31T00:07:40.996Z"
+    },
+    {
+      "phase": "Phase 5",
+      "testNum": 10,
+      "name": "Delete Member T1",
+      "status": "PASS",
+      "duration": 161,
+      "details": "Member removed from tenant DB",
+      "data": {},
+      "timestamp": "2025-12-31T00:07:42.172Z"
+    }
+  ],
+  "tenants": [
+    {
+      "tenantId": "y98r5zj6b4b7qfgxj6udle8n",
+      "email": "tenant1-fgvkwvef2f5r5lrxmv5q9ok6@phase5test.com",
+      "churchName": "Phase 5 Tenant 1 - 1767139608923"
+    },
+    {
+      "tenantId": "kde42t21mbufzl41jce4u7rp",
+      "email": "tenant2-ieqlybykn12htcmmrliwn45f@phase5test.com",
+      "churchName": "Phase 5 Tenant 2 - 1767139636584"
+    }
+  ],
+  "timestamp": "2025-12-31T00:07:42.173Z"
+}

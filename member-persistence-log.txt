@@ -1,0 +1,987 @@
+(node:9792) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/Windows/OneDrive%20-%20Seattle%20Colleges/Desktop/YWMESSAGING/check-member-persistence.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\Users\Windows\OneDrive - Seattle Colleges\Desktop\YWMESSAGING\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+=== LOGGING IN ===
+✅ Logged in
+
+=== GOING TO MEMBERS PAGE ===
+
+[NETWORK] 200 GET https://api.koinoniasms.com/api/members?page=1&limit=25
+[RESPONSE] {
+  "success": true,
+  "data": [
+    {
+      "id": "cmjtf1yfg00icvys2ast5uoi3",
+      "firstName": "Test",
+      "lastName": "User1767149278396",
+      "phone": "+12025550199",
+      "email": "test1767149278396@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:47:59.116Z"
+    },
+    {
+      "id": "cmjtes4gp00iavys2544bnsio",
+      "firstName": "Sherri",
+      "lastName": "Duncan",
+      "phone": "+19068292731",
+      "email": "aanderson@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i9vys2r5w4n4qw",
+      "firstName": "Jessica",
+      "lastName": "Lewis",
+      "phone": "+17222467605",
+      "email": "gary41@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i8vys2sfjoscev",
+      "firstName": "Kelly",
+      "lastName": "Carpenter",
+      "phone": "+18466737781",
+      "email": "mbrown@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i7vys27h3w4fvr",
+      "firstName": "Daniel",
+      "lastName": "Goodman",
+      "phone": "+17306678130",
+      "email": "grahamnatalie@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i6vys2zenjpsbl",
+      "firstName": "Emily",
+      "lastName": "Hale",
+      "phone": "+18935019984",
+      "email": "christopherware@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i5vys2jipe83er",
+      "firstName": "Kristin",
+      "lastName": "Gibbs",
+      "phone": "+18255015625",
+      "email": "johnwarner@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i4vys2ga27ni98",
+      "firstName": "Joshua",
+      "lastName": "Klein",
+      "phone": "+19045544145",
+      "email": "laurie11@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i3vys2rwztjx4j",
+      "firstName": "Dean",
+      "lastName": "Freeman",
+      "phone": "+12104398253",
+      "email": "christopher18@example.net",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i2vys21f6w5ldp",
+      "firstName": "Brooke",
+      "lastName": "Livingston",
+      "phone": "+18064901635",
+      "email": "pauldillon@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i1vys241a82gvu",
+      "firstName": "Trevor",
+      "lastName": "Nelson",
+      "phone": "+17398328443",
+      "email": "yrangel@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i0vys2s1dpynrl",
+      "firstName": "Jessica",
+      "lastName": "Torres",
+      "phone": "+18316045500",
+      "email": "fmurray@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hzvys2921cbibu",
+      "firstName": "Michael",
+      "lastName": "Nguyen",
+      "phone": "+14705922448",
+      "email": "smithpeter@example.net",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hyvys2ytccjtlw",
+      "firstName": "Christian",
+      "lastName": "Watts",
+      "phone": "+18559105009",
+      "email": "brendaallen@example.net",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hxvys2sxr9jmqf",
+      "firstName": "Jasmine",
+      "lastName": "Porter",
+      "phone": "+12079717172",
+      "email": "qwilson@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hwvys2n16l6qjm",
+      "firstName": "Mary",
+      "lastName": "Tyler",
+      "phone": "+18549472444",
+      "email": "tracylynch@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hvvys2mplj3id0",
+      "firstName": "Dominique",
+      "lastName": "Bruce",
+      "phone": "+18933673791",
+      "email": "caldwellolivia@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00huvys2scq2wygc",
+      "firstName": "Ernest",
+      "lastName": "Cisneros",
+      "phone": "+14819072410",
+      "email": "robertjones@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00htvys2nzhcocbc",
+      "firstName": "Kelly",
+      "lastName": "Fernandez",
+      "phone": "+16822801485",
+      "email": "tinacooper@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hsvys2tndxt6nn",
+      "firstName": "Madeline",
+      "lastName": "Giles",
+      "phone": "+12222078109",
+      "email": "gregory61@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hrvys2e0yxv9ja",
+      "firstName": "Andre",
+      "lastName": "Long",
+      "phone": "+17517063579",
+      "email": "nancyyoung@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hqvys2zoedekmm",
+      "firstName": "Samantha",
+      "lastName": "Jones",
+      "phone": "+13715751923",
+      "email": "wfisher@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hpvys2567aouim",
+      "firstName": "William",
+      "lastName": "Wang",
+      "phone": "+14696818392",
+      "email": "jefferyhines@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hovys229k7hgo2",
+      "firstName": "Erica",
+      "lastName": "Thomas",
+      "phone": "+15779281789",
+      "email": "priceeric@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hnvys2h7f8d45k",
+      "firstName": "Scott",
+      "lastName": "Petty",
+      "phone": "+13094898133",
+      "email": "xstanley@example.net",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 25,
+    "total": 637,
+    "pages": 26
+  }
+}
+
+[NETWORK] 200 GET https://api.koinoniasms.com/api/members?page=1&limit=25
+[RESPONSE] {
+  "success": true,
+  "data": [
+    {
+      "id": "cmjtf1yfg00icvys2ast5uoi3",
+      "firstName": "Test",
+      "lastName": "User1767149278396",
+      "phone": "+12025550199",
+      "email": "test1767149278396@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:47:59.116Z"
+    },
+    {
+      "id": "cmjtes4gp00iavys2544bnsio",
+      "firstName": "Sherri",
+      "lastName": "Duncan",
+      "phone": "+19068292731",
+      "email": "aanderson@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i9vys2r5w4n4qw",
+      "firstName": "Jessica",
+      "lastName": "Lewis",
+      "phone": "+17222467605",
+      "email": "gary41@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i8vys2sfjoscev",
+      "firstName": "Kelly",
+      "lastName": "Carpenter",
+      "phone": "+18466737781",
+      "email": "mbrown@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i7vys27h3w4fvr",
+      "firstName": "Daniel",
+      "lastName": "Goodman",
+      "phone": "+17306678130",
+      "email": "grahamnatalie@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i6vys2zenjpsbl",
+      "firstName": "Emily",
+      "lastName": "Hale",
+      "phone": "+18935019984",
+      "email": "christopherware@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i5vys2jipe83er",
+      "firstName": "Kristin",
+      "lastName": "Gibbs",
+      "phone": "+18255015625",
+      "email": "johnwarner@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i4vys2ga27ni98",
+      "firstName": "Joshua",
+      "lastName": "Klein",
+      "phone": "+19045544145",
+      "email": "laurie11@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i3vys2rwztjx4j",
+      "firstName": "Dean",
+      "lastName": "Freeman",
+      "phone": "+12104398253",
+      "email": "christopher18@example.net",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i2vys21f6w5ldp",
+      "firstName": "Brooke",
+      "lastName": "Livingston",
+      "phone": "+18064901635",
+      "email": "pauldillon@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i1vys241a82gvu",
+      "firstName": "Trevor",
+      "lastName": "Nelson",
+      "phone": "+17398328443",
+      "email": "yrangel@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i0vys2s1dpynrl",
+      "firstName": "Jessica",
+      "lastName": "Torres",
+      "phone": "+18316045500",
+      "email": "fmurray@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hzvys2921cbibu",
+      "firstName": "Michael",
+      "lastName": "Nguyen",
+      "phone": "+14705922448",
+      "email": "smithpeter@example.net",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hyvys2ytccjtlw",
+      "firstName": "Christian",
+      "lastName": "Watts",
+      "phone": "+18559105009",
+      "email": "brendaallen@example.net",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hxvys2sxr9jmqf",
+      "firstName": "Jasmine",
+      "lastName": "Porter",
+      "phone": "+12079717172",
+      "email": "qwilson@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hwvys2n16l6qjm",
+      "firstName": "Mary",
+      "lastName": "Tyler",
+      "phone": "+18549472444",
+      "email": "tracylynch@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hvvys2mplj3id0",
+      "firstName": "Dominique",
+      "lastName": "Bruce",
+      "phone": "+18933673791",
+      "email": "caldwellolivia@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00huvys2scq2wygc",
+      "firstName": "Ernest",
+      "lastName": "Cisneros",
+      "phone": "+14819072410",
+      "email": "robertjones@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00htvys2nzhcocbc",
+      "firstName": "Kelly",
+      "lastName": "Fernandez",
+      "phone": "+16822801485",
+      "email": "tinacooper@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hsvys2tndxt6nn",
+      "firstName": "Madeline",
+      "lastName": "Giles",
+      "phone": "+12222078109",
+      "email": "gregory61@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hrvys2e0yxv9ja",
+      "firstName": "Andre",
+      "lastName": "Long",
+      "phone": "+17517063579",
+      "email": "nancyyoung@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hqvys2zoedekmm",
+      "firstName": "Samantha",
+      "lastName": "Jones",
+      "phone": "+13715751923",
+      "email": "wfisher@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hpvys2567aouim",
+      "firstName": "William",
+      "lastName": "Wang",
+      "phone": "+14696818392",
+      "email": "jefferyhines@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hovys229k7hgo2",
+      "firstName": "Erica",
+      "lastName": "Thomas",
+      "phone": "+15779281789",
+      "email": "priceeric@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hnvys2h7f8d45k",
+      "firstName": "Scott",
+      "lastName": "Petty",
+      "phone": "+13094898133",
+      "email": "xstanley@example.net",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 25,
+    "total": 637,
+    "pages": 26
+  }
+}
+✅ On members page
+
+=== ADDING MEMBER ===
+
+=== SUBMITTING FORM ===
+
+[NETWORK] 201 POST https://api.koinoniasms.com/api/members
+[RESPONSE] {
+  "success": true,
+  "data": {
+    "id": "cmjtf90b600idvys2hxtge3go",
+    "firstName": "Debug",
+    "lastName": "Test1767149607485",
+    "phone": "+12025550188",
+    "phoneHash": "da03700bc038e154e9f34ba9679af67b5fdf4e186620186d34aae446255f9858",
+    "email": "debug1767149607485@test.com",
+    "optInSms": true,
+    "createdAt": "2025-12-31T02:53:28.147Z"
+  }
+}
+✅ Form submitted
+
+=== RELOADING PAGE ===
+
+[NETWORK] 200 GET https://api.koinoniasms.com/api/members?page=1&limit=25
+[RESPONSE] {
+  "success": true,
+  "data": [
+    {
+      "id": "cmjtf1yfg00icvys2ast5uoi3",
+      "firstName": "Test",
+      "lastName": "User1767149278396",
+      "phone": "+12025550199",
+      "email": "test1767149278396@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:47:59.116Z"
+    },
+    {
+      "id": "cmjtes4gp00iavys2544bnsio",
+      "firstName": "Sherri",
+      "lastName": "Duncan",
+      "phone": "+19068292731",
+      "email": "aanderson@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i9vys2r5w4n4qw",
+      "firstName": "Jessica",
+      "lastName": "Lewis",
+      "phone": "+17222467605",
+      "email": "gary41@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i8vys2sfjoscev",
+      "firstName": "Kelly",
+      "lastName": "Carpenter",
+      "phone": "+18466737781",
+      "email": "mbrown@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i7vys27h3w4fvr",
+      "firstName": "Daniel",
+      "lastName": "Goodman",
+      "phone": "+17306678130",
+      "email": "grahamnatalie@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i6vys2zenjpsbl",
+      "firstName": "Emily",
+      "lastName": "Hale",
+      "phone": "+18935019984",
+      "email": "christopherware@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i5vys2jipe83er",
+      "firstName": "Kristin",
+      "lastName": "Gibbs",
+      "phone": "+18255015625",
+      "email": "johnwarner@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i4vys2ga27ni98",
+      "firstName": "Joshua",
+      "lastName": "Klein",
+      "phone": "+19045544145",
+      "email": "laurie11@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i3vys2rwztjx4j",
+      "firstName": "Dean",
+      "lastName": "Freeman",
+      "phone": "+12104398253",
+      "email": "christopher18@example.net",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i2vys21f6w5ldp",
+      "firstName": "Brooke",
+      "lastName": "Livingston",
+      "phone": "+18064901635",
+      "email": "pauldillon@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i1vys241a82gvu",
+      "firstName": "Trevor",
+      "lastName": "Nelson",
+      "phone": "+17398328443",
+      "email": "yrangel@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i0vys2s1dpynrl",
+      "firstName": "Jessica",
+      "lastName": "Torres",
+      "phone": "+18316045500",
+      "email": "fmurray@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hzvys2921cbibu",
+      "firstName": "Michael",
+      "lastName": "Nguyen",
+      "phone": "+14705922448",
+      "email": "smithpeter@example.net",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hyvys2ytccjtlw",
+      "firstName": "Christian",
+      "lastName": "Watts",
+      "phone": "+18559105009",
+      "email": "brendaallen@example.net",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hxvys2sxr9jmqf",
+      "firstName": "Jasmine",
+      "lastName": "Porter",
+      "phone": "+12079717172",
+      "email": "qwilson@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hwvys2n16l6qjm",
+      "firstName": "Mary",
+      "lastName": "Tyler",
+      "phone": "+18549472444",
+      "email": "tracylynch@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hvvys2mplj3id0",
+      "firstName": "Dominique",
+      "lastName": "Bruce",
+      "phone": "+18933673791",
+      "email": "caldwellolivia@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00huvys2scq2wygc",
+      "firstName": "Ernest",
+      "lastName": "Cisneros",
+      "phone": "+14819072410",
+      "email": "robertjones@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00htvys2nzhcocbc",
+      "firstName": "Kelly",
+      "lastName": "Fernandez",
+      "phone": "+16822801485",
+      "email": "tinacooper@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hsvys2tndxt6nn",
+      "firstName": "Madeline",
+      "lastName": "Giles",
+      "phone": "+12222078109",
+      "email": "gregory61@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hrvys2e0yxv9ja",
+      "firstName": "Andre",
+      "lastName": "Long",
+      "phone": "+17517063579",
+      "email": "nancyyoung@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hqvys2zoedekmm",
+      "firstName": "Samantha",
+      "lastName": "Jones",
+      "phone": "+13715751923",
+      "email": "wfisher@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hpvys2567aouim",
+      "firstName": "William",
+      "lastName": "Wang",
+      "phone": "+14696818392",
+      "email": "jefferyhines@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hovys229k7hgo2",
+      "firstName": "Erica",
+      "lastName": "Thomas",
+      "phone": "+15779281789",
+      "email": "priceeric@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hnvys2h7f8d45k",
+      "firstName": "Scott",
+      "lastName": "Petty",
+      "phone": "+13094898133",
+      "email": "xstanley@example.net",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 25,
+    "total": 637,
+    "pages": 26
+  }
+}
+
+[NETWORK] 200 GET https://api.koinoniasms.com/api/members?page=1&limit=25
+[RESPONSE] {
+  "success": true,
+  "data": [
+    {
+      "id": "cmjtf1yfg00icvys2ast5uoi3",
+      "firstName": "Test",
+      "lastName": "User1767149278396",
+      "phone": "+12025550199",
+      "email": "test1767149278396@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:47:59.116Z"
+    },
+    {
+      "id": "cmjtes4gp00iavys2544bnsio",
+      "firstName": "Sherri",
+      "lastName": "Duncan",
+      "phone": "+19068292731",
+      "email": "aanderson@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i9vys2r5w4n4qw",
+      "firstName": "Jessica",
+      "lastName": "Lewis",
+      "phone": "+17222467605",
+      "email": "gary41@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i8vys2sfjoscev",
+      "firstName": "Kelly",
+      "lastName": "Carpenter",
+      "phone": "+18466737781",
+      "email": "mbrown@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i7vys27h3w4fvr",
+      "firstName": "Daniel",
+      "lastName": "Goodman",
+      "phone": "+17306678130",
+      "email": "grahamnatalie@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i6vys2zenjpsbl",
+      "firstName": "Emily",
+      "lastName": "Hale",
+      "phone": "+18935019984",
+      "email": "christopherware@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i5vys2jipe83er",
+      "firstName": "Kristin",
+      "lastName": "Gibbs",
+      "phone": "+18255015625",
+      "email": "johnwarner@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i4vys2ga27ni98",
+      "firstName": "Joshua",
+      "lastName": "Klein",
+      "phone": "+19045544145",
+      "email": "laurie11@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i3vys2rwztjx4j",
+      "firstName": "Dean",
+      "lastName": "Freeman",
+      "phone": "+12104398253",
+      "email": "christopher18@example.net",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i2vys21f6w5ldp",
+      "firstName": "Brooke",
+      "lastName": "Livingston",
+      "phone": "+18064901635",
+      "email": "pauldillon@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i1vys241a82gvu",
+      "firstName": "Trevor",
+      "lastName": "Nelson",
+      "phone": "+17398328443",
+      "email": "yrangel@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00i0vys2s1dpynrl",
+      "firstName": "Jessica",
+      "lastName": "Torres",
+      "phone": "+18316045500",
+      "email": "fmurray@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hzvys2921cbibu",
+      "firstName": "Michael",
+      "lastName": "Nguyen",
+      "phone": "+14705922448",
+      "email": "smithpeter@example.net",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hyvys2ytccjtlw",
+      "firstName": "Christian",
+      "lastName": "Watts",
+      "phone": "+18559105009",
+      "email": "brendaallen@example.net",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hxvys2sxr9jmqf",
+      "firstName": "Jasmine",
+      "lastName": "Porter",
+      "phone": "+12079717172",
+      "email": "qwilson@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hwvys2n16l6qjm",
+      "firstName": "Mary",
+      "lastName": "Tyler",
+      "phone": "+18549472444",
+      "email": "tracylynch@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hvvys2mplj3id0",
+      "firstName": "Dominique",
+      "lastName": "Bruce",
+      "phone": "+18933673791",
+      "email": "caldwellolivia@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00huvys2scq2wygc",
+      "firstName": "Ernest",
+      "lastName": "Cisneros",
+      "phone": "+14819072410",
+      "email": "robertjones@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00htvys2nzhcocbc",
+      "firstName": "Kelly",
+      "lastName": "Fernandez",
+      "phone": "+16822801485",
+      "email": "tinacooper@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hsvys2tndxt6nn",
+      "firstName": "Madeline",
+      "lastName": "Giles",
+      "phone": "+12222078109",
+      "email": "gregory61@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hrvys2e0yxv9ja",
+      "firstName": "Andre",
+      "lastName": "Long",
+      "phone": "+17517063579",
+      "email": "nancyyoung@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hqvys2zoedekmm",
+      "firstName": "Samantha",
+      "lastName": "Jones",
+      "phone": "+13715751923",
+      "email": "wfisher@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hpvys2567aouim",
+      "firstName": "William",
+      "lastName": "Wang",
+      "phone": "+14696818392",
+      "email": "jefferyhines@example.com",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hovys229k7hgo2",
+      "firstName": "Erica",
+      "lastName": "Thomas",
+      "phone": "+15779281789",
+      "email": "priceeric@example.org",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    },
+    {
+      "id": "cmjtes4gp00hnvys2h7f8d45k",
+      "firstName": "Scott",
+      "lastName": "Petty",
+      "phone": "+13094898133",
+      "email": "xstanley@example.net",
+      "optInSms": true,
+      "createdAt": "2025-12-31T02:40:20.364Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 25,
+    "total": 637,
+    "pages": 26
+  }
+}
+✅ Page reloaded
+
+=== CHECK COMPLETE ===
+Review the network logs above to see if the member was saved to DB

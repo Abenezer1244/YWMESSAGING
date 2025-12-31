@@ -1,0 +1,99 @@
+{
+  "testTenants": [
+    {
+      "tenantId": "aa611v7s31itdvtpa4u4h1fe",
+      "churchId": "aa611v7s31itdvtpa4u4h1fe",
+      "churchName": "Verification Church 1767143957817",
+      "databaseName": "tenant_aa611v7s31itdvtpa4u4h1fe",
+      "status": "active",
+      "createdAt": "2025-12-31T01:19:41.544Z"
+    },
+    {
+      "tenantId": "jk986yed35w3ritppnqtybe3",
+      "churchId": "jk986yed35w3ritppnqtybe3",
+      "churchName": "Verification Church 1767142305901",
+      "databaseName": "tenant_jk986yed35w3ritppnqtybe3",
+      "status": "active",
+      "createdAt": "2025-12-31T00:52:11.549Z"
+    },
+    {
+      "tenantId": "xwvmqbw66jycx5h6difq8f3p",
+      "churchId": "xwvmqbw66jycx5h6difq8f3p",
+      "churchName": "Stress Test Church 3",
+      "databaseName": "tenant_xwvmqbw66jycx5h6difq8f3p",
+      "status": "active",
+      "createdAt": "2025-12-30T23:20:39.265Z"
+    }
+  ],
+  "productionTenants": [
+    {
+      "tenantId": "ma3c2mae2hpicpar1gmkvnxs",
+      "churchId": "ma3c2mae2hpicpar1gmkvnxs",
+      "churchName": "Updated Church Name",
+      "databaseName": "tenant_ma3c2mae2hpicpar1gmkvnxs",
+      "status": "active",
+      "createdAt": "2025-12-31T00:34:56.213Z"
+    },
+    {
+      "tenantId": "kde42t21mbufzl41jce4u7rp",
+      "churchId": "kde42t21mbufzl41jce4u7rp",
+      "churchName": "Phase 5 Tenant 2 - 1767139636584",
+      "databaseName": "tenant_kde42t21mbufzl41jce4u7rp",
+      "status": "active",
+      "createdAt": "2025-12-31T00:07:30.511Z"
+    },
+    {
+      "tenantId": "y98r5zj6b4b7qfgxj6udle8n",
+      "churchId": "y98r5zj6b4b7qfgxj6udle8n",
+      "churchName": "Phase 5 Tenant 1 - 1767139608923",
+      "databaseName": "tenant_y98r5zj6b4b7qfgxj6udle8n",
+      "status": "active",
+      "createdAt": "2025-12-31T00:07:13.701Z"
+    },
+    {
+      "tenantId": "i3f33aflbj0789yovof5lwk2",
+      "churchId": "i3f33aflbj0789yovof5lwk2",
+      "churchName": "Concurrent Church 3",
+      "databaseName": "tenant_i3f33aflbj0789yovof5lwk2",
+      "status": "active",
+      "createdAt": "2025-12-30T23:51:03.613Z"
+    },
+    {
+      "tenantId": "zo3iedaobqx7tp5j77emljb4",
+      "churchId": "zo3iedaobqx7tp5j77emljb4",
+      "churchName": "Concurrent Church 5",
+      "databaseName": "tenant_zo3iedaobqx7tp5j77emljb4",
+      "status": "active",
+      "createdAt": "2025-12-30T23:51:03.591Z"
+    },
+    {
+      "tenantId": "k0ol9svpk3yr4o08ltyyom6l",
+      "churchId": "k0ol9svpk3yr4o08ltyyom6l",
+      "churchName": "Concurrent Church 4",
+      "databaseName": "tenant_k0ol9svpk3yr4o08ltyyom6l",
+      "status": "active",
+      "createdAt": "2025-12-30T23:51:03.421Z"
+    },
+    {
+      "tenantId": "f9e9jhs3048zfintgn1o3mhk",
+      "churchId": "f9e9jhs3048zfintgn1o3mhk",
+      "churchName": "Concurrent Church 2",
+      "databaseName": "tenant_f9e9jhs3048zfintgn1o3mhk",
+      "status": "active",
+      "createdAt": "2025-12-30T23:51:03.369Z"
+    },
+    {
+      "tenantId": "saz76ye25jfs5r8lyium8u1p",
+      "churchId": "saz76ye25jfs5r8lyium8u1p",
+      "churchName": "Concurrent Church 1",
+      "databaseName": "tenant_saz76ye25jfs5r8lyium8u1p",
+      "status": "active",
+      "createdAt": "2025-12-30T23:50:38.757Z"
+    }
+  ],
+  "summary": {
+    "testCount": 3,
+    "productionCount": 8,
+    "totalCount": 11
+  }
+}

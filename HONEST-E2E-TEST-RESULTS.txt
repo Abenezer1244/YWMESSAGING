@@ -1,0 +1,221 @@
+[34m
+🚀 STARTING END-TO-END TESTS FOR DATABASE-PER-TENANT ARCHITECTURE[0m
+[34m================================================================================[0m
+[34m
+📡 Checking if backend server is running...[0m
+[32m✅ Backend server is running[0m
+[34m
+================================================================================[0m
+[34mTEST 1: Register First Church (Database Provisioning)[0m
+[34m================================================================================[0m
+[36m
+📝 Registering church with:[0m
+[36m   Email: test-church-1-qyuhlg340wrk0gpvrnl8mzhv@e2etest.com[0m
+[36m   Church Name: E2E Test Church 1[0m
+[31m
+❌ TEST 1: Register First Church (Database Provisioning): FAIL[0m
+[36m   Error: read ECONNRESET[0m
+[31m
+💥 FATAL ERROR: read ECONNRESET[0m
+AxiosError: read ECONNRESET
+    at AxiosError.from (C:\Users\Windows\OneDrive - Seattle Colleges\Desktop\YWMESSAGING\node_modules\axios\dist\node\axios.cjs:913:14)
+    at RedirectableRequest.handleRequestError (C:\Users\Windows\OneDrive - Seattle Colleges\Desktop\YWMESSAGING\node_modules\axios\dist\node\axios.cjs:3513:25)
+    at RedirectableRequest.emit (node:events:530:35)
+    at eventHandlers.<computed> (C:\Users\Windows\OneDrive - Seattle Colleges\Desktop\YWMESSAGING\node_modules\follow-redirects\index.js:49:24)
+    at ClientRequest.emit (node:events:518:28)
+    at emitErrorEvent (node:_http_client:104:11)
+    at Socket.socketErrorListener (node:_http_client:518:5)
+    at Socket.emit (node:events:518:28)
+    at emitErrorNT (node:internal/streams/destroy:170:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:129:3)
+    at Axios.request (C:\Users\Windows\OneDrive - Seattle Colleges\Desktop\YWMESSAGING\node_modules\axios\dist\node\axios.cjs:4726:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async test1_registerFirstChurch (C:\Users\Windows\OneDrive - Seattle Colleges\Desktop\YWMESSAGING\test-database-per-tenant-e2e.js:83:22)
+    at async runTests (C:\Users\Windows\OneDrive - Seattle Colleges\Desktop\YWMESSAGING\test-database-per-tenant-e2e.js:669:5) {
+  syscall: 'read',
+  code: 'ECONNRESET',
+  errno: -4077,
+  config: {
+    transitional: {
+      silentJSONParsing: true,
+      forcedJSONParsing: true,
+      clarifyTimeoutError: false
+    },
+    adapter: [ 'xhr', 'http', 'fetch' ],
+    transformRequest: [ [Function: transformRequest] ],
+    transformResponse: [ [Function: transformResponse] ],
+    timeout: 90000,
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+    maxContentLength: -1,
+    maxBodyLength: -1,
+    env: { FormData: [Function [FormData]], Blob: [class Blob] },
+    validateStatus: [Function: validateStatus],
+    headers: Object [AxiosHeaders] {
+      Accept: 'application/json, text/plain, */*',
+      'Content-Type': 'application/json',
+      'User-Agent': 'axios/1.13.1',
+      'Content-Length': '160',
+      'Accept-Encoding': 'gzip, compress, deflate, br'
+    },
+    method: 'post',
+    url: 'http://localhost:3000/api/auth/register',
+    data: '{"email":"test-church-1-qyuhlg340wrk0gpvrnl8mzhv@e2etest.com","password":"TestPass123!","firstName":"Test","lastName":"Admin1","churchName":"E2E Test Church 1"}',
+    allowAbsoluteUrls: true
+  },
+  request: <ref *1> Writable {
+    _events: {
+      close: undefined,
+      error: [Function: handleRequestError],
+      prefinish: undefined,
+      finish: undefined,
+      drain: undefined,
+      response: [Function: handleResponse],
+      socket: [Array],
+      timeout: undefined,
+      abort: undefined
+    },
+    _writableState: WritableState {
+      highWaterMark: 16384,
+      length: 0,
+      corked: 0,
+      onwrite: [Function: bound onwrite],
+      writelen: 0,
+      bufferedIndex: 0,
+      pendingcb: 0,
+      [Symbol(kState)]: 17580812,
+      [Symbol(kBufferedValue)]: null
+    },
+    _maxListeners: undefined,
+    _options: {
+      maxRedirects: 21,
+      maxBodyLength: Infinity,
+      protocol: 'http:',
+      path: '/api/auth/register',
+      method: 'POST',
+      headers: [Object: null prototype],
+      agents: [Object],
+      auth: undefined,
+      family: undefined,
+      beforeRedirect: [Function: dispatchBeforeRedirect],
+      beforeRedirects: [Object],
+      http2Options: undefined,
+      hostname: 'localhost',
+      port: '3000',
+      agent: undefined,
+      nativeProtocols: [Object],
+      pathname: '/api/auth/register'
+    },
+    _ended: true,
+    _ending: true,
+    _redirectCount: 0,
+    _redirects: [],
+    _requestBodyLength: 160,
+    _requestBodyBuffers: [ [Object] ],
+    _eventsCount: 3,
+    _onNativeResponse: [Function (anonymous)],
+    _currentRequest: ClientRequest {
+      _events: [Object: null prototype],
+      _eventsCount: 7,
+      _maxListeners: undefined,
+      outputData: [],
+      outputSize: 0,
+      writable: true,
+      destroyed: false,
+      _last: false,
+      chunkedEncoding: false,
+      shouldKeepAlive: true,
+      maxRequestsOnConnectionReached: false,
+      _defaultKeepAlive: true,
+      useChunkedEncodingByDefault: true,
+      sendDate: false,
+      _removedConnection: false,
+      _removedContLen: false,
+      _removedTE: false,
+      strictContentLength: false,
+      _contentLength: 160,
+      _hasBody: true,
+      _trailer: '',
+      finished: true,
+      _headerSent: true,
+      _closed: false,
+      _header: 'POST /api/auth/register HTTP/1.1\r\n' +
+        'Accept: application/json, text/plain, */*\r\n' +
+        'Content-Type: application/json\r\n' +
+        'User-Agent: axios/1.13.1\r\n' +
+        'Content-Length: 160\r\n' +
+        'Accept-Encoding: gzip, compress, deflate, br\r\n' +
+        'Host: localhost:3000\r\n' +
+        'Connection: keep-alive\r\n' +
+        '\r\n',
+      _keepAliveTimeout: 0,
+      _onPendingData: [Function: nop],
+      agent: [Agent],
+      socketPath: undefined,
+      method: 'POST',
+      maxHeaderSize: undefined,
+      insecureHTTPParser: undefined,
+      joinDuplicateHeaders: undefined,
+      path: '/api/auth/register',
+      _ended: false,
+      res: null,
+      aborted: false,
+      timeoutCb: [Function: emitRequestTimeout],
+      upgradeOrConnect: false,
+      parser: null,
+      maxHeadersCount: null,
+      reusedSocket: true,
+      host: 'localhost',
+      protocol: 'http:',
+      _redirectable: [Circular *1],
+      [Symbol(shapeMode)]: false,
+      [Symbol(kCapture)]: false,
+      [Symbol(kBytesWritten)]: 0,
+      [Symbol(kNeedDrain)]: false,
+      [Symbol(corked)]: 0,
+      [Symbol(kChunkedBuffer)]: [],
+      [Symbol(kChunkedLength)]: 0,
+      [Symbol(kSocket)]: [Socket],
+      [Symbol(kOutHeaders)]: [Object: null prototype],
+      [Symbol(errored)]: null,
+      [Symbol(kHighWaterMark)]: 16384,
+      [Symbol(kRejectNonStandardBodyWrites)]: false,
+      [Symbol(kUniqueHeaders)]: null
+    },
+    _currentUrl: 'http://localhost:3000/api/auth/register',
+    _timeout: null,
+    [Symbol(shapeMode)]: true,
+    [Symbol(kCapture)]: false
+  },
+  [cause]: Error: read ECONNRESET
+      at TCP.onStreamRead (node:internal/stream_base_commons:216:20) {
+    errno: -4077,
+    code: 'ECONNRESET',
+    syscall: 'read'
+  }
+}
+[34m
+
+================================================================================[0m
+[34mFINAL E2E TEST REPORT - DATABASE-PER-TENANT ARCHITECTURE[0m
+[34m================================================================================[0m
+[36m
+⏱️  Total Duration: 12.89 seconds[0m
+[32m📊 Tests Passed: 0[0m
+[31m📊 Tests Failed: 1[0m
+[33m📊 Warnings: 0[0m
+[31m
+❌ FAILED TESTS:[0m
+[31m   • TEST 1: Register First Church (Database Provisioning)[0m
+[36m     Error: read ECONNRESET[0m
+[32m
+✅ PASSED TESTS:[0m
+[36m
+📦 TEST DATA CREATED:[0m
+[33m
+📈 PASS RATE: 0.0%[0m
+[33m
+⚠️  SOME TESTS FAILED - REVIEW RESULTS ABOVE[0m
+[34m
+================================================================================
+[0m

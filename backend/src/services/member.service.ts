@@ -123,6 +123,9 @@ export async function addMember(tenantId: string, tenantPrisma: TenantPrismaClie
   // Simple SELECT 1 forces the connection to wait for transaction commit
   await tenantPrisma.$executeRaw`SELECT 1`;
 
+  // Invalidate dashboard stats cache so member count updates immediately
+  await invalidateCache(CACHE_KEYS.churchStats(tenantId));
+
   return member;
 }
 
@@ -367,6 +370,9 @@ export async function importMembers(
   // Evict cached Prisma client after bulk write operation
   await evictTenantClient(tenantId);
 
+  // Invalidate dashboard stats cache so member count updates immediately
+  await invalidateCache(CACHE_KEYS.churchStats(tenantId));
+
   return {
     imported: imported.length,
     failed: failed.length,
@@ -429,6 +435,9 @@ export async function deleteMember(tenantId: string, tenantPrisma: TenantPrismaC
 
   // Evict cached Prisma client after write operation
   await evictTenantClient(tenantId);
+
+  // Invalidate dashboard stats cache so member count updates immediately
+  await invalidateCache(CACHE_KEYS.churchStats(tenantId));
 
   console.log(`[deleteMember] Member deleted successfully`);
   return deleteResult;

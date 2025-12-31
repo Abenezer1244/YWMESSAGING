@@ -187,8 +187,8 @@ async function getBranchStatsUncached(tenantPrisma) {
  *
  * Impact: 300 requests/minute × 5 min TTL = Only 1 DB query per 300 requests
  */
-export async function getSummaryStats(tenantPrisma) {
-    return getCachedWithFallback(CACHE_KEYS.churchStats('summary'), async () => {
+export async function getSummaryStats(tenantPrisma, tenantId) {
+    return getCachedWithFallback(CACHE_KEYS.churchStats(tenantId), async () => {
         // ✅ FIX: Count all members in this tenant's database
         // Simply count from Member table to get total member count
         const [memberCount, messages, branches] = await Promise.all([

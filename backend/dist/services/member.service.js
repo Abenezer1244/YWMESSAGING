@@ -1,6 +1,7 @@
 import { evictTenantClient } from '../lib/tenant-prisma.js';
 import { formatToE164 } from '../utils/phone.utils.js';
 import { encrypt, decrypt, hashForSearch } from '../utils/encryption.utils.js';
+import { invalidateCache, CACHE_KEYS } from './cache.service.js';
 /**
  * Get all members with pagination and search
  */
@@ -79,6 +80,8 @@ export async function addMember(tenantId, tenantPrisma, data) {
     // don't see the newly added member due to connection pool/replication lag
     // Simple SELECT 1 forces the connection to wait for transaction commit
     await tenantPrisma.$executeRaw `SELECT 1`;
+    // Invalidate dashboard stats cache so member count updates immediately
+    await invalidateCache(CACHE_KEYS.churchStats(tenantId));
     return member;
 }
 /**
@@ -284,6 +287,8 @@ export async function importMembers(tenantId, tenantPrisma, membersData) {
     console.log(`[importMembers] COMPLETE - Total time: ${totalTime}ms, Imported: ${imported.length}, Failed: ${failed.length}`);
     // Evict cached Prisma client after bulk write operation
     await evictTenantClient(tenantId);
+    // Invalidate dashboard stats cache so member count updates immediately
+    await invalidateCache(CACHE_KEYS.churchStats(tenantId));
     return {
         imported: imported.length,
         failed: failed.length,
@@ -340,6 +345,8 @@ export async function deleteMember(tenantId, tenantPrisma, memberId) {
     });
     // Evict cached Prisma client after write operation
     await evictTenantClient(tenantId);
+    // Invalidate dashboard stats cache so member count updates immediately
+    await invalidateCache(CACHE_KEYS.churchStats(tenantId));
     console.log(`[deleteMember] Member deleted successfully`);
     return deleteResult;
 }

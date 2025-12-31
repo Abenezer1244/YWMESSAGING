@@ -12,11 +12,11 @@ const router = express.Router();
 // All branch routes require authentication
 router.use(authenticateToken);
 
-// Get all branches for a church
-router.get('/churches/:churchId/branches', listBranches);
+// Get all branches (tenant context from JWT)
+router.get('/', listBranches);
 
-// Create a new branch
-router.post('/churches/:churchId/branches', createBranchHandler);
+// Create a new branch (tenant context from JWT)
+router.post('/', createBranchHandler);
 
 // Update a branch
 router.put('/:branchId', updateBranchHandler);

@@ -48,7 +48,7 @@ export declare function getBranchStats(tenantPrisma: TenantPrismaClient): Promis
  *
  * Impact: 300 requests/minute × 5 min TTL = Only 1 DB query per 300 requests
  */
-export declare function getSummaryStats(tenantPrisma: TenantPrismaClient): Promise<{
+export declare function getSummaryStats(tenantPrisma: TenantPrismaClient, tenantId: string): Promise<{
     totalMessages: number;
     averageDeliveryRate: number;
     totalMembers: number;

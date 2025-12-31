@@ -33,11 +33,11 @@ export async function getBranchStats(req: Request, res: Response) {
 
 export async function getSummaryStats(req: Request, res: Response) {
   try {
-    if (!req.prisma) {
+    if (!req.prisma || !req.tenantId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const stats = await statsService.getSummaryStats(req.prisma);
+    const stats = await statsService.getSummaryStats(req.prisma, req.tenantId);
     res.json(stats);
   } catch (error: any) {
     console.error('Error fetching summary stats:', error.message || error);

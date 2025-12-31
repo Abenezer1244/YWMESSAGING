@@ -21,7 +21,7 @@ export function MembersPage() {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [deletingMemberId, setDeletingMemberId] = useState(null);
-    const limit = 50;
+    const limit = 25;
     const pages = Math.ceil(total / limit);
     const loadMembers = useCallback(async (pageNum = 1, updateTotal = true) => {
         try {
@@ -62,10 +62,11 @@ export function MembersPage() {
         return () => clearTimeout(searchTimer);
     }, [search, loadMembers]);
     const handleAddSuccess = async (newMember) => {
-        setMembers(prevMembers => [newMember, ...prevMembers]);
-        setTotal(prevTotal => prevTotal + 1);
         setIsAddModalOpen(false);
         toast.success('Member added successfully');
+        // Reload members from database to ensure consistency
+        setPage(1);
+        await loadMembers(1, true);
     };
     const handleImportSuccess = () => {
         setIsImportModalOpen(false);

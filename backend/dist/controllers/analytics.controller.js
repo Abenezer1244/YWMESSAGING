@@ -28,10 +28,10 @@ export async function getBranchStats(req, res) {
 }
 export async function getSummaryStats(req, res) {
     try {
-        if (!req.prisma) {
+        if (!req.prisma || !req.tenantId) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
-        const stats = await statsService.getSummaryStats(req.prisma);
+        const stats = await statsService.getSummaryStats(req.prisma, req.tenantId);
         res.json(stats);
     }
     catch (error) {
