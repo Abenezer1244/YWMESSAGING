@@ -1,5 +1,6 @@
 import { getRegistryPrisma } from '../lib/tenant-prisma.js';
 import axios from 'axios';
+import { getEIN } from '../services/ein.service.js';
 
 /**
  * Telnyx Error Code Mapping
@@ -309,6 +310,30 @@ export async function registerPersonal10DLCAsync(
       validatedEntityType = 'NON_PROFIT'; // Default to NON_PROFIT for churches
     }
 
+    // 🔒 SECURITY: Decrypt EIN for Telnyx API call
+    // EIN is stored encrypted in database, must decrypt before sending to Telnyx
+    // This is the ONLY place where decrypted EIN exists in memory
+    let decryptedEIN: string | null = null;
+    try {
+      decryptedEIN = await getEIN(churchId, 'SYSTEM', '10DLC_REGISTRATION');
+      if (!decryptedEIN) {
+        throw new Error('EIN not found or could not be decrypted');
+      }
+      console.log(`🔓 [10DLC_REGISTRATION] Decrypted EIN for Telnyx API call`);
+    } catch (error: any) {
+      console.error(`❌ Failed to decrypt EIN for church ${churchId}:`, error);
+      await registryPrisma.church.update({
+        where: { id: churchId },
+        data: {
+          dlcStatus: 'rejected',
+          dlcRejectionReason: 'Failed to decrypt EIN. Please re-enter EIN in settings.',
+        },
+      }).catch(err => {
+        console.error('Failed to update church status:', err);
+      });
+      return;
+    }
+
     const brandResponse = await retryWithBackoff(async () => {
       return await client.post('/10dlc/brand', {
         // Required fields
@@ -320,7 +345,7 @@ export async function registerPersonal10DLCAsync(
         companyName: church.name,
 
         // 10DLC Required Fields (per Telnyx form)
-        ein: church.ein,
+        ein: decryptedEIN, // ✅ Decrypted EIN (only in memory, sent over HTTPS)
         ...(church.brandPhoneNumber && { phone: church.brandPhoneNumber }), // Optional in Telnyx API but we provide it
         ...(church.streetAddress && { street: church.streetAddress }),
         ...(church.city && { city: church.city }),
@@ -354,6 +379,9 @@ export async function registerPersonal10DLCAsync(
     }
 
     console.log(`✅ Brand registered with Telnyx: ${brandId}`);
+
+    // 🧹 SECURITY: Clear decrypted EIN from memory immediately after use
+    decryptedEIN = null;
 
     // Store brand ID and mark as pending
     await registryPrisma.church.update({

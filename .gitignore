@@ -7,6 +7,10 @@ node_modules/
 .env
 .env.local
 .env.*.local
+.env.backup-*
+
+# Security - NEVER commit these files
+ENCRYPTION-KEY-RECOVERY.md
 
 # IDE
 .vscode/

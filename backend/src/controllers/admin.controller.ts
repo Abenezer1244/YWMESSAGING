@@ -12,6 +12,7 @@ import {
 } from '../services/admin.service.js';
 import * as telnyxService from '../services/telnyx.service.js';
 import { getTenantPrisma, getRegistryPrisma } from '../lib/tenant-prisma.js';
+import { storeEIN, getEINMasked, hasEIN } from '../services/ein.service.js';
 
 declare global {
   namespace Express {
@@ -150,6 +151,19 @@ export async function updateProfileHandler(req: Request, res: Response) {
       vertical,
     } = req.body;
 
+    const adminId = req.user?.adminId || 'unknown';
+
+    // SECURITY: Handle EIN separately with encryption
+    if (ein) {
+      try {
+        await storeEIN(tenantId, ein, adminId, 'ADMIN_UPDATE');
+        console.log(`✅ [ADMIN_CONTROLLER] EIN encrypted and stored for church ${tenantId}`);
+      } catch (error) {
+        console.error(`❌ [ADMIN_CONTROLLER] Failed to encrypt EIN:`, error);
+        return res.status(400).json({ error: 'Invalid EIN format. Must be 9 digits.' });
+      }
+    }
+
     const updated = await updateChurchProfile(tenantId, {
       name,
       email,
@@ -157,7 +171,7 @@ export async function updateProfileHandler(req: Request, res: Response) {
       // 10DLC Delivery Option
       wantsPremiumDelivery,
       // 10DLC Brand Information
-      ein,
+      // ein is NOT passed here - handled separately above for security
       brandPhoneNumber,
       streetAddress,
       city,
@@ -168,11 +182,12 @@ export async function updateProfileHandler(req: Request, res: Response) {
       vertical,
     });
 
-    // Log activity
-    await logActivity(tenantId, req.user?.adminId || '', 'Update Profile', {
+    // Log activity (NEVER log actual EIN - only masked version)
+    const einMasked = ein ? await getEINMasked(tenantId) : undefined;
+    await logActivity(tenantId, adminId, 'Update Profile', {
       name,
       email,
-      ein,
+      einMasked, // ✅ Only log masked EIN (XX-XXX5678)
       city,
       state,
     });
@@ -181,7 +196,9 @@ export async function updateProfileHandler(req: Request, res: Response) {
     // If church opted-in to premium 10DLC, trigger registration if they have required fields
     // If church wants shared brand, skip 10DLC registration
 
-    const has10DLCFields = ein && brandPhoneNumber && streetAddress && city && state && postalCode;
+    // Check if church has all required 10DLC fields (including encrypted EIN)
+    const churchHasEIN = await hasEIN(tenantId);
+    const has10DLCFields = churchHasEIN && brandPhoneNumber && streetAddress && city && state && postalCode;
     const registryPrisma = getRegistryPrisma();
 
     if (wantsPremiumDelivery === false && updated.dlcStatus === 'pending') {

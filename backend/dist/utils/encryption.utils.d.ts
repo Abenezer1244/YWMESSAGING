@@ -41,4 +41,40 @@ export declare function createSignature(message: string, secret: string): string
  * Verify HMAC signature with constant-time comparison
  */
 export declare function verifySignature(message: string, signature: string, secret: string): boolean;
+/**
+ * ============================================================================
+ * EIN-SPECIFIC ENCRYPTION UTILITIES
+ * ============================================================================
+ *
+ * SECURITY: EIN (Employer Identification Number) is highly sensitive PII
+ * - 9-digit federal tax ID used by IRS
+ * - Can be used for identity theft, fraudulent tax returns, credit fraud
+ * - Must be encrypted at rest and masked in UI
+ * - Access must be audited
+ */
+/**
+ * Encrypt EIN for secure storage
+ * Uses existing AES-256-GCM encryption
+ */
+export declare function encryptEIN(ein: string): string;
+/**
+ * Decrypt EIN from database
+ * Uses existing AES-256-GCM decryption
+ */
+export declare function decryptEIN(encryptedEIN: string): string;
+/**
+ * Create searchable hash of EIN (for validation without decryption)
+ * Uses SHA-256 hash for consistency checking
+ */
+export declare function hashEIN(ein: string): string;
+/**
+ * Safely decrypt EIN, handling both encrypted and plain text formats
+ * Legacy data may have plain text EINs before encryption was added
+ */
+export declare function decryptEINSafe(einData: string): string;
+/**
+ * Mask EIN for display in logs/UI
+ * Shows only last 4 digits: XX-XXX5678
+ */
+export declare function maskEIN(ein: string): string;
 //# sourceMappingURL=encryption.utils.d.ts.map

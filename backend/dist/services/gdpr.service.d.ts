@@ -46,6 +46,10 @@ export declare function exportChurchData(churchId: string): Promise<{
         wantsPremiumDelivery: boolean;
         deliveryRate: number;
         ein: string | null;
+        einHash: string | null;
+        einEncryptedAt: Date | null;
+        einAccessedAt: Date | null;
+        einAccessedBy: string | null;
         brandPhoneNumber: string | null;
         streetAddress: string | null;
         city: string | null;

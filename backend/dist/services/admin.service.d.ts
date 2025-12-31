@@ -52,6 +52,10 @@ export declare function updateChurchProfile(tenantId: string, input: UpdateChurc
     wantsPremiumDelivery: boolean;
     deliveryRate: number;
     ein: string | null;
+    einHash: string | null;
+    einEncryptedAt: Date | null;
+    einAccessedAt: Date | null;
+    einAccessedBy: string | null;
     brandPhoneNumber: string | null;
     streetAddress: string | null;
     city: string | null;

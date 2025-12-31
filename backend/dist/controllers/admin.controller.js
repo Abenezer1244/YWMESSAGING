@@ -1,6 +1,7 @@
 import { updateChurchProfile, getChurchProfile, getCoAdmins, removeCoAdmin, inviteCoAdmin, logActivity, getActivityLogs, getActivityLogCount, } from '../services/admin.service.js';
 import * as telnyxService from '../services/telnyx.service.js';
 import { getTenantPrisma, getRegistryPrisma } from '../lib/tenant-prisma.js';
+import { storeEIN, getEINMasked, hasEIN } from '../services/ein.service.js';
 /**
  * GET /api/admin/profile
  * Get church profile
@@ -111,6 +112,18 @@ export async function updateProfileHandler(req, res) {
         wantsPremiumDelivery, 
         // 10DLC Brand Information
         ein, brandPhoneNumber, streetAddress, city, state, postalCode, website, entityType, vertical, } = req.body;
+        const adminId = req.user?.adminId || 'unknown';
+        // SECURITY: Handle EIN separately with encryption
+        if (ein) {
+            try {
+                await storeEIN(tenantId, ein, adminId, 'ADMIN_UPDATE');
+                console.log(`✅ [ADMIN_CONTROLLER] EIN encrypted and stored for church ${tenantId}`);
+            }
+            catch (error) {
+                console.error(`❌ [ADMIN_CONTROLLER] Failed to encrypt EIN:`, error);
+                return res.status(400).json({ error: 'Invalid EIN format. Must be 9 digits.' });
+            }
+        }
         const updated = await updateChurchProfile(tenantId, {
             name,
             email,
@@ -118,7 +131,7 @@ export async function updateProfileHandler(req, res) {
             // 10DLC Delivery Option
             wantsPremiumDelivery,
             // 10DLC Brand Information
-            ein,
+            // ein is NOT passed here - handled separately above for security
             brandPhoneNumber,
             streetAddress,
             city,
@@ -128,18 +141,21 @@ export async function updateProfileHandler(req, res) {
             entityType,
             vertical,
         });
-        // Log activity
-        await logActivity(tenantId, req.user?.adminId || '', 'Update Profile', {
+        // Log activity (NEVER log actual EIN - only masked version)
+        const einMasked = ein ? await getEINMasked(tenantId) : undefined;
+        await logActivity(tenantId, adminId, 'Update Profile', {
             name,
             email,
-            ein,
+            einMasked, // ✅ Only log masked EIN (XX-XXX5678)
             city,
             state,
         });
         // 🔄 Handle delivery tier selection (Shared Brand vs Premium 10DLC)
         // If church opted-in to premium 10DLC, trigger registration if they have required fields
         // If church wants shared brand, skip 10DLC registration
-        const has10DLCFields = ein && brandPhoneNumber && streetAddress && city && state && postalCode;
+        // Check if church has all required 10DLC fields (including encrypted EIN)
+        const churchHasEIN = await hasEIN(tenantId);
+        const has10DLCFields = churchHasEIN && brandPhoneNumber && streetAddress && city && state && postalCode;
         const registryPrisma = getRegistryPrisma();
         if (wantsPremiumDelivery === false && updated.dlcStatus === 'pending') {
             // Church explicitly chose shared brand - set status and skip 10DLC
@@ -401,6 +417,7 @@ export async function linkPhoneNumberHandler(req, res) {
         });
         // Update tenant with phone number and webhook ID
         // Initialize 10DLC fields: start with shared brand for immediate use
+        console.log(`[linkPhoneNumber] Updating registry database for tenantId: ${tenantId} with phone: ${formattedPhone}`);
         const updated = await registryPrisma.church.update({
             where: { id: tenantId },
             data: {
@@ -422,6 +439,11 @@ export async function linkPhoneNumberHandler(req, res) {
                 usingSharedBrand: true,
                 deliveryRate: true,
             },
+        });
+        console.log(`[linkPhoneNumber] ✅ Successfully saved phone number to registry database:`, {
+            tenantId: updated.id,
+            phone: updated.telnyxPhoneNumber,
+            webhookId: updated.telnyxWebhookId,
         });
         // Only trigger 10DLC registration if tenant opted-in to premium delivery
         if (tenant?.wantsPremiumDelivery) {

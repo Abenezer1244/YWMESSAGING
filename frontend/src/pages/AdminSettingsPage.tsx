@@ -38,6 +38,7 @@ export function AdminSettingsPage() {
   const [currentPhoneNumber, setCurrentPhoneNumber] = useState<string | null>(null);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [isLoadingNumber, setIsLoadingNumber] = useState(false);
+  const [showEIN, setShowEIN] = useState(false); // 🔒 SECURITY: EIN masking state
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -408,18 +409,32 @@ export function AdminSettingsPage() {
                             Required for SMS messaging approval. Fill in your church's legal information.
                           </p>
 
-                          {/* EIN */}
+                          {/* EIN - MASKED by default for security */}
                           <div className="mb-6">
-                            <Input
-                              label="EIN (Employer Identification Number)"
-                              type="text"
-                              value={formData.ein}
-                              onChange={(e) =>
-                                setFormData({ ...formData, ein: e.target.value })
-                              }
-                              placeholder="123456789"
-                              required
-                            />
+                            <div className="relative">
+                              <Input
+                                label="EIN (Employer Identification Number)"
+                                type={showEIN ? "text" : "password"}
+                                value={formData.ein}
+                                onChange={(e) => {
+                                  // Only allow digits, max 9 characters
+                                  const value = e.target.value.replace(/\D/g, '').slice(0, 9);
+                                  setFormData({ ...formData, ein: value });
+                                }}
+                                placeholder={showEIN ? "123456789" : "•••••••••"}
+                                maxLength={9}
+                                required
+                                helperText="9-digit federal tax ID. This information is encrypted and stored securely."
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowEIN(!showEIN)}
+                                className="absolute right-3 top-9 text-sm text-blue-600 hover:text-blue-800 focus:outline-none"
+                                aria-label={showEIN ? "Hide EIN" : "Show EIN"}
+                              >
+                                {showEIN ? '🔒 Hide' : '👁️ Show'}
+                              </button>
+                            </div>
                           </div>
 
                           {/* Brand Phone Number */}

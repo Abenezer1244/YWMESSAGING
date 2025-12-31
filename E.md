@@ -1,186 +1,265 @@
-
-Search
-Search
-
-Dec 29, 12:24 PM - 12:28 PM
-PST
-
-
-
-==> Downloading cache...
-==> Cloning from https://github.com/Abenezer1244/YWMESSAGING
-==> Checking out commit 06a45ac506c9d5bbaa4ae9e10bffe6680e290127 in branch main
-==> Downloaded 686MB in 3s. Extraction took 14s.
-==> Requesting Node.js version >=18.0.0
-==> Using Node.js version 25.2.1 via /opt/render/project/src/package.json
-==> Docs on specifying a Node.js version: https://render.com/docs/node-version
-==> Running build command 'npm ci --production=false && npm run build'...
-added 2214 packages, and audited 2217 packages in 46s
-296 packages are looking for funding
-  run `npm fund` for details
-18 vulnerabilities (6 low, 1 moderate, 11 high)
-To address issues that do not require attention, run:
-  npm audit fix
-To address all issues (including breaking changes), run:
-  npm audit fix --force
-Run `npm audit` for details.
-> koinonia-sms@0.1.0 build
-> npm run build --workspaces
-> koinonia-sms-backend@0.1.0 build
-> prisma generate && tsc
-Prisma schema loaded from prisma/schema.prisma
-✔ Generated Prisma Client (v5.13.0) to ./node_modules/@prisma/client in 230ms
-Start using Prisma Client in Node.js (See: https://pris.ly/d/client)
-```
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient()
-```
-or start using Prisma Client at the edge (See: https://pris.ly/d/accelerate)
-```
-import { PrismaClient } from '@prisma/client/edge'
-const prisma = new PrismaClient()
-```
-See other ways of importing Prisma Client: http://pris.ly/d/importing-client
-┌────────────────────────────────────────────────────────────────┐
-│  Supercharge your Prisma Client with global database caching,  │
-│  scalable connection pooling and real-time database events.    │
-│  Explore Prisma Accelerate: https://pris.ly/cli/-accelerate    │
-│  Explore Prisma Pulse: https://pris.ly/cli/-pulse              │
-└────────────────────────────────────────────────────────────────┘
-src/lib/tenant-prisma.ts(257,39): error TS2339: Property 'tenant' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
-src/services/phone-registry.service.ts(54,48): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
-src/services/phone-registry.service.ts(70,41): error TS2339: Property 'tenant' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
-src/services/phone-registry.service.ts(114,48): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
-src/services/phone-registry.service.ts(130,26): error TS2339: Property 'tenant' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
-src/services/phone-registry.service.ts(165,48): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
-src/services/phone-registry.service.ts(206,41): error TS2339: Property 'tenant' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
-src/services/phone-registry.service.ts(230,48): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
-src/services/phone-registry.service.ts(256,47): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
-src/services/phone-registry.service.ts(295,48): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
-src/services/phone-registry.service.ts(317,33): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
-npm error Lifecycle script `build` failed with error:
-npm error code 2
-npm error path /opt/render/project/src/backend
-npm error workspace koinonia-sms-backend@0.1.0
-npm error location /opt/render/project/src/backend
-npm error command failed
-npm error command sh -c prisma generate && tsc
-> koinonia-sms-frontend@0.1.0 build
-> tsc && npx vite build
-vite v7.1.12 building for production...
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-transforming...
-✓ 2880 modules transformed.
-rendering chunks...
-computing gzip size...
-dist/index.html                                        1.30 kB │ gzip:   0.61 kB
-dist/assets/css/index-BlEd3H25.css                    87.56 kB │ gzip:  14.74 kB
-dist/assets/js/analytics-BjEJjmEs.js                   0.36 kB │ gzip:   0.23 kB
-dist/assets/js/billing-B8VHwF5e.js                     0.49 kB │ gzip:   0.23 kB
-dist/assets/js/themeColors-Cduerava.js                 0.52 kB │ gzip:   0.27 kB
-dist/assets/js/designTokens-BhFJIg83.js                0.53 kB │ gzip:   0.36 kB
-dist/assets/js/useBreakpoint-D_gF-sG6.js               0.59 kB │ gzip:   0.37 kB
-dist/assets/js/LineChartImpl-CiewmSrD.js               0.63 kB │ gzip:   0.40 kB
-dist/assets/js/BackButton-CD9BMhs9.js                  0.66 kB │ gzip:   0.45 kB
-dist/assets/js/messages-SG8SMC7_.js                    0.68 kB │ gzip:   0.38 kB
-dist/assets/js/BarChartImpl-ribzZB_-.js                0.72 kB │ gzip:   0.44 kB
-dist/assets/js/SoftButton-BT31kdh0.js                  0.89 kB │ gzip:   0.52 kB
-dist/assets/js/MobileTable-D0LwGODm.js                 2.99 kB │ gzip:   1.02 kB
-dist/assets/js/AnimatedBlobs-CcUmiRey.js               3.24 kB │ gzip:   1.09 kB
-dist/assets/js/TemplateFormModal-CHKBpnB4.js           3.64 kB │ gzip:   1.21 kB
-dist/assets/js/TemplatesPage-Cq_t8zxI.js               3.96 kB │ gzip:   1.59 kB
-dist/assets/js/LoginPage-CdgpJPfn.js                   4.38 kB │ gzip:   1.96 kB
-dist/assets/js/MessageHistoryPage-XJHn2aDS.js          5.03 kB │ gzip:   1.91 kB
-dist/assets/js/SendMessagePage-CxgAxDvj.js             5.10 kB │ gzip:   1.86 kB
-dist/assets/js/PrivacyPage-CQX7qSs6.js                 5.88 kB │ gzip:   1.55 kB
-dist/assets/js/SoftLayout-D9pgB24F.js                  6.08 kB │ gzip:   2.00 kB
-dist/assets/js/BlogPage-pOM1ye0Q.js                    6.10 kB │ gzip:   2.13 kB
-dist/assets/js/TermsPage-DZC6uQGt.js                   6.38 kB │ gzip:   1.87 kB
-dist/assets/js/BillingPage-BPuP1eDX.js                 6.62 kB │ gzip:   1.99 kB
-dist/assets/js/ContactPage-u3fCYE6i.js                 6.68 kB │ gzip:   1.91 kB
-dist/assets/js/CookiePolicyPage-CZZdBhTt.js            6.71 kB │ gzip:   1.75 kB
-dist/assets/js/AboutPage-7YTrDT82.js                   6.77 kB │ gzip:   2.11 kB
-dist/assets/js/CheckoutPage-B8rVcYck.js                7.09 kB │ gzip:   2.45 kB
-dist/assets/js/SubscribePage-DgDTm2PC.js               7.41 kB │ gzip:   2.48 kB
-dist/assets/js/BranchesPage-CxHR5yD3.js                7.47 kB │ gzip:   2.42 kB
-dist/assets/js/RegisterPage-Dr30YZHx.js                7.57 kB │ gzip:   2.51 kB
-dist/assets/js/ChatWidget-7xH0P2Ws.js                  8.08 kB │ gzip:   2.25 kB
-dist/assets/js/CareersPage-vyjEtXUr.js                 8.53 kB │ gzip:   2.40 kB
-dist/assets/js/SecurityPage-BKNEFX6a.js                9.10 kB │ gzip:   2.02 kB
-dist/assets/js/RecurringMessagesPage-30f-Vgb1.js       9.25 kB │ gzip:   2.81 kB
-dist/assets/js/react-stripe.esm-Bb9JIkK3.js           11.23 kB │ gzip:   4.20 kB
-dist/assets/js/PhoneNumberPurchaseModal-DO0JoCz0.js   12.10 kB │ gzip:   4.08 kB
-dist/assets/js/MembersPage-DKBXdEkp.js                13.10 kB │ gzip:   4.08 kB
-dist/assets/js/ConversationsPage-BD0JpbCr.js          18.28 kB │ gzip:   5.90 kB
-dist/assets/js/index.esm-BdG2FjqQ.js                  22.38 kB │ gzip:   8.28 kB
-dist/assets/js/focus-trap-react-Ch0l227q.js           25.80 kB │ gzip:   8.03 kB
-dist/assets/js/DashboardPage-CJChz489.js              26.09 kB │ gzip:   7.84 kB
-dist/assets/js/AnalyticsPage-YHC2x7MI.js              32.62 kB │ gzip:   9.85 kB
-dist/assets/js/AdminSettingsPage-BJYW780y.js          33.57 kB │ gzip:   8.26 kB
-dist/assets/js/vendor-utils-DZXJUmYg.js               47.35 kB │ gzip:  18.43 kB
-dist/assets/js/LandingPage-DqbUzzao.js                51.54 kB │ gzip:  10.25 kB
-dist/assets/js/vendor-ui-DmDBw7yB.js                 117.57 kB │ gzip:  37.95 kB
-dist/assets/js/vendor-react-GajVb7Yi.js              159.43 kB │ gzip:  51.99 kB
-dist/assets/js/index-BS7Ba6WZ.js                     208.63 kB │ gzip:  68.05 kB
-dist/assets/js/vendor-charts-D9m5HzY1.js             394.60 kB │ gzip: 102.47 kB
-✓ built in 17.96s
-==> Build failed 😞
-==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
-
-==> Downloading cache...
-==> Cloning from https://github.com/Abenezer1244/YWMESSAGING
-==> Checking out commit 06a45ac506c9d5bbaa4ae9e10bffe6680e290127 in branch main
-==> Downloaded 519MB in 3s. Extraction took 11s.
-==> Using Node.js version 22.16.0 (default)
-==> Docs on specifying a Node.js version: https://render.com/docs/node-version
-==> Running build command 'npm install && npm run build'...
-up to date, audited 821 packages in 4s
-63 packages are looking for funding
-  run `npm fund` for details
-5 vulnerabilities (3 low, 2 high)
-To address issues that do not require attention, run:
-  npm audit fix
-To address all issues (including breaking changes), run:
-  npm audit fix --force
-Run `npm audit` for details.
-> koinonia-sms-backend@0.1.0 build
-> prisma generate && tsc
-Prisma schema loaded from prisma/schema.prisma
-✔ Generated Prisma Client (v5.13.0) to ./node_modules/@prisma/client in 326ms
-Start using Prisma Client in Node.js (See: https://pris.ly/d/client)
-```
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient()
-```
-or start using Prisma Client at the edge (See: https://pris.ly/d/accelerate)
-```
-import { PrismaClient } from '@prisma/client/edge'
-const prisma = new PrismaClient()
-```
-See other ways of importing Prisma Client: http://pris.ly/d/importing-client
-┌────────────────────────────────────────────────────────────────┐
-│  Supercharge your Prisma Client with global database caching,  │
-│  scalable connection pooling and real-time database events.    │
-│  Explore Prisma Accelerate: https://pris.ly/cli/-accelerate    │
-│  Explore Prisma Pulse: https://pris.ly/cli/-pulse              │
-└────────────────────────────────────────────────────────────────┘
-src/lib/tenant-prisma.ts(257,39): error TS2339: Property 'tenant' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
-src/services/phone-registry.service.ts(54,48): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
-src/services/phone-registry.service.ts(70,41): error TS2339: Property 'tenant' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
-src/services/phone-registry.service.ts(114,48): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
-src/services/phone-registry.service.ts(130,26): error TS2339: Property 'tenant' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
-src/services/phone-registry.service.ts(165,48): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
-src/services/phone-registry.service.ts(206,41): error TS2339: Property 'tenant' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
-src/services/phone-registry.service.ts(230,48): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
-src/services/phone-registry.service.ts(256,47): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
-src/services/phone-registry.service.ts(295,48): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
-src/services/phone-registry.service.ts(317,33): error TS2339: Property 'phoneNumberRegistry' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
-npm error Lifecycle script `build` failed with error:
-npm error code 2
-npm error path /opt/render/project/src/backend
-npm error workspace koinonia-sms-backend@0.1.0
-npm error location /opt/render/project/src/backend
-npm error command failed
-npm error command sh -c prisma generate && tsc
-==> Build failed 😞
-==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+[OPTIONS]
+api.koinoniasms.com/api/analytics/summary?_t=1767174842442 clientIP="174.227.51.27" requestID="ebf183de-3adc-4001" responseTimeMS=3 responseBytes=1369 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0"
+[GET]
+api.koinoniasms.com/api/analytics/messages?days=7 clientIP="174.227.51.27" requestID="646e59c0-c390-4ac6" responseTimeMS=270 responseBytes=1383 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0"
+[GET]
+api.koinoniasms.com/api/onboarding/progress clientIP="174.227.51.27" requestID="7be4a85f-2e7a-4da8" responseTimeMS=185 responseBytes=1383 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0"
+[GET]
+api.koinoniasms.com/api/analytics/summary?_t=1767174842442 clientIP="174.227.51.27" requestID="189bdc17-48b6-4aec" responseTimeMS=561 responseBytes=1548 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0"
+[GET]
+api.koinoniasms.com/api/billing/trial clientIP="174.227.51.27" requestID="fb7dbe2f-e819-446e" responseTimeMS=4 responseBytes=1381 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0"
+{"timestamp":"2025-12-31T09:54:03.735Z","level":"INFO","message":"Response sent","context":{"method":"GET","path":"/summary","status":200,"durationMs":559},"correlationId":"1767174843176-j2tf077jc"}
+💾 Cached: stats:stats:30d (TTL: 300s, Query: 175ms)
+[GET]
+api.koinoniasms.com/api/members?page=1&limit=25&_t=1767174844083 clientIP="174.227.51.27" requestID="5b03bea0-6bdb-4ce9" responseTimeMS=34 responseBytes=1720 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0"
+[OPTIONS]
+api.koinoniasms.com/api/members?page=1&limit=25&_t=1767174844083 clientIP="174.227.51.27" requestID="11cb03a2-1638-46d4" responseTimeMS=1 responseBytes=1369 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0"
+[OPTIONS]
+api.koinoniasms.com/api/members?page=1&limit=25&_t=1767174843579 clientIP="174.227.51.27" requestID="3241b87b-0da6-47ca" responseTimeMS=2 responseBytes=1369 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0"
+[GET]
+api.koinoniasms.com/api/members?page=1&limit=25&_t=1767174843579 clientIP="174.227.51.27" requestID="cbe9d816-75ab-4453" responseTimeMS=62 responseBytes=1720 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0"
+{"timestamp":"2025-12-31T09:54:04.296Z","level":"INFO","message":"Incoming request","context":{"method":"GET","path":"/api/members","ip":"108.162.246.71","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0"},"correlationId":"1767174844296-ci5imlnzf"}
+[AUTH] Token revocation check - token: eyJhbGciOiJIUzI1NiIs..., revoked: false
+[AUTH] ✅ Token revocation check passed for user: cmjti044p00026y94oiuvawyn
+[AUTH] Getting tenant database connection for tenant: ya23bbv59uzg9sidq855hoqg
+[AUTH] ✅ Request authenticated - Admin: cmjti044p00026y94oiuvawyn, Tenant: ya23bbv59uzg9sidq855hoqg, Role: PRIMARY
+[listMembers] GET REQUEST: page=1, limit=25, search=undefined
+[listMembers] Returning 2 members
+{"timestamp":"2025-12-31T09:54:04.357Z","level":"INFO","message":"Response sent","context":{"method":"GET","path":"/","status":200,"durationMs":61},"correlationId":"1767174844296-ci5imlnzf"}
+{"timestamp":"2025-12-31T09:54:04.817Z","level":"INFO","message":"Incoming request","context":{"method":"GET","path":"/api/members","ip":"108.162.246.71","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0"},"correlationId":"1767174844817-67fhavxtx"}
+[AUTH] Token revocation check - token: eyJhbGciOiJIUzI1NiIs..., revoked: false
+[AUTH] ✅ Token revocation check passed for user: cmjti044p00026y94oiuvawyn
+[AUTH] Getting tenant database connection for tenant: ya23bbv59uzg9sidq855hoqg
+[AUTH] ✅ Request authenticated - Admin: cmjti044p00026y94oiuvawyn, Tenant: ya23bbv59uzg9sidq855hoqg, Role: PRIMARY
+[listMembers] GET REQUEST: page=1, limit=25, search=undefined
+[listMembers] Returning 2 members
+{"timestamp":"2025-12-31T09:54:04.848Z","level":"INFO","message":"Response sent","context":{"method":"GET","path":"/","status":200,"durationMs":31},"correlationId":"1767174844817-67fhavxtx"}
+{"timestamp":"2025-12-31T09:54:58.657Z","level":"INFO","message":"Incoming request","context":{"method":"POST","path":"/api/webhooks/telnyx/mms","ip":"104.23.160.46","userAgent":"telnyx-webhooks"},"correlationId":"1767174898657-u40zoipf8"}
+📋 Webhook Signature Debug:
+   Timestamp: 1767174898
+   Payload length: 1710
+   Signed message length: 1721
+✅ ED25519 signature verified successfully
+✅ Webhook signature verified (ED25519) - processing inbound MMS
+🔔 WEBHOOK RECEIVED: {
+  "data": {
+    "event_type": "message.received",
+    "id": "00b0e315-ba64-450f-893b-afc668a81bfd",
+    "occurred_at": "2025-12-31T09:54:58.506+00:00",
+    "payload": {
+      "autoresponse_type": null,
+      "cc": [],
+      "completed_at": null,
+      "cost": {
+        "amount": "0.0040",
+        "currency": "USD"
+      },
+      "cost_breakdown": {
+        "carrier_fee": {
+          "amount": "0.00000",
+          "currency": "USD"
+        },
+        "rate": {
+          "amount": "0.00400",
+          "currency": "USD"
+        }
+      },
+      "direction": "inbound",
+      "encoding": "GSM-7",
+      "errors": [],
+      "from": {
+        "carrier": "",
+        "line_type": "Wireline",
+        "phone_number": "+12064664353"
+      },
+      "id": "707c1359-3073-40b0-8754-e025db4fef8c",
+      "is_spam": false,
+      "media": [],
+      "messaging_profile_id": "40019a80-d883-4618-953b-dad1610b39f4",
+      "organization_id": "784ae4a9-73e4-4bb8-8501-d9ed1fca9cde",
+      "parts": 1,
+      "received_at": "2025-12-31T09:54:58.397+00:00",
+      "record_type": "message",
+      "sent_at": null,
+      "subject": "",
+      "tags": [],
+      "text": "The only",
+      "to": [
+        {
+          "carrier": "Telnyx",
+          "line_type": "Wireless",
+          "phone_number": "+13252295147",
+          "status": "webhook_delivered"
+        }
+      ],
+      "type": "SMS",
+      "valid_until": null,
+      "webhook_failover_url": "https://api.koinoniasms.com/api/webhooks/telnyx/mms",
+      "webhook_url": "https://api.koinoniasms.com/api/webhooks/telnyx/mms"
+    },
+    "record_type": "event"
+  },
+  "meta": {
+    "attempt": 1,
+    "delivered_to": "https://api.koinoniasms.com/api/webhooks/telnyx/mms"
+  }
+}
+🔍 Looking for tenant with telnyxPhoneNumber: +13252295147
+📨 Telnyx MMS webhook: from=+12064664353, to=+13252295147, media=0
+🔐 Verifying member: +12064664353 for tenant ya23bbv59uzg9sidq855hoqg
+✅ Member verified: cmjtmirwu0001epejgp02012w (Text Me)
+✅ Processing MMS for tenant: ALLMIGHTY GOD CHURCH (ya23bbv59uzg9sidq855hoqg)
+📱 Inbound MMS: +12064664353 → Church (0 media files)
+💬 Using existing conversation: cmjttn2e40005sueqm1kaek4w
+[POST]
+api.koinoniasms.com/api/webhooks/telnyx/mms clientIP="192.76.120.143" requestID="5f7319fb-ba1f-4b42" responseTimeMS=1172 responseBytes=1344 userAgent="telnyx-webhooks"
+📝 Created text message: cmjtub2tm001jsueq1c1hog6x
+📢 Broadcasting to 1 members: Text: The only
+📤 Sending SMS: from +13252295147 to +14257729189
+   Brand: shared (65% delivery rate)
+   Message: "Text: The only"
+✅ SMS accepted by Telnyx: 40319b73-d507-45dd-a2a0-70674524d7ea
+   Status: undefined, Recipient: +14257729189
+   ✓ Sent to Abenezer
+✅ Broadcast sent to 1 members
+✅ Inbound MMS processed: cmjttn2e40005sueqm1kaek4w (1 messages)
+✅ MMS processed: conversation=cmjttn2e40005sueqm1kaek4w, messages=1
+{"timestamp":"2025-12-31T09:54:59.825Z","level":"INFO","message":"Response sent","context":{"method":"POST","path":"/webhooks/telnyx/mms","status":200,"durationMs":1167},"correlationId":"1767174898657-u40zoipf8"}
+{"timestamp":"2025-12-31T09:54:59.997Z","level":"INFO","message":"Incoming request","context":{"method":"POST","path":"/api/webhooks/telnyx/status","ip":"172.70.34.120","userAgent":"telnyx-webhooks"},"correlationId":"1767174899997-nnisyicl7"}
+📋 Webhook Signature Debug:
+   Timestamp: 1767174899
+   Payload length: 1837
+   Signed message length: 1848
+✅ ED25519 signature verified successfully
+✅ Delivery receipt webhook signature verified (ED25519) - processing
+{"timestamp":"2025-12-31T09:54:59.998Z","level":"INFO","message":"Response sent","context":{"method":"POST","path":"/webhooks/telnyx/status","status":200,"durationMs":1},"correlationId":"1767174899997-nnisyicl7"}
+[POST]
+api.koinoniasms.com/api/webhooks/telnyx/status clientIP="192.76.120.143" requestID="6182a18f-1564-4160" responseTimeMS=5 responseBytes=1344 userAgent="telnyx-webhooks"
+[POST]
+api.koinoniasms.com/api/webhooks/telnyx/status clientIP="192.76.120.135" requestID="e5994b5f-1b11-4cee" responseTimeMS=4 responseBytes=1344 userAgent="telnyx-webhooks"
+{"timestamp":"2025-12-31T09:55:00.181Z","level":"INFO","message":"Incoming request","context":{"method":"POST","path":"/api/webhooks/telnyx/status","ip":"172.70.126.87","userAgent":"telnyx-webhooks"},"correlationId":"1767174900181-o1wzato7h"}
+📋 Webhook Signature Debug:
+   Timestamp: 1767174899
+   Payload length: 2191
+   Signed message length: 2202
+✅ ED25519 signature verified successfully
+✅ Delivery receipt webhook signature verified (ED25519) - processing
+{"timestamp":"2025-12-31T09:55:00.182Z","level":"INFO","message":"Response sent","context":{"method":"POST","path":"/webhooks/telnyx/status","status":200,"durationMs":1},"correlationId":"1767174900181-o1wzato7h"}
+✅ Acquired lock for job: phone-linking-recovery (TTL: 60000ms)
+[PHONE_LINKING_RECOVERY] Starting phone linking recovery job
+[PHONE_LINKING_RECOVERY] Found 0 churches needing recovery
+[PHONE_LINKING_RECOVERY] 0 churches ready for retry (respecting backoff)
+[PHONE_LINKING_RECOVERY] Recovery job completed. Processed: 0 churches. Duration: 29ms
+[PHONE_LINKING_RECOVERY] Summary: 0 succeeded, 0 failed, 0 need manual intervention
+✅ Released lock for job: phone-linking-recovery
+{"timestamp":"2025-12-31T09:55:05.091Z","level":"INFO","message":"Incoming request","context":{"method":"POST","path":"/api/webhooks/telnyx/mms","ip":"172.68.174.93","userAgent":"telnyx-webhooks"},"correlationId":"1767174905091-t9m8mh52e"}
+📋 Webhook Signature Debug:
+   Timestamp: 1767174905
+   Payload length: 1726
+   Signed message length: 1737
+✅ ED25519 signature verified successfully
+✅ Webhook signature verified (ED25519) - processing inbound MMS
+🔔 WEBHOOK RECEIVED: {
+  "data": {
+    "event_type": "message.received",
+    "id": "71d8d1dd-c75a-4e0c-a3c9-604636872d12",
+    "occurred_at": "2025-12-31T09:55:05.004+00:00",
+    "payload": {
+      "autoresponse_type": null,
+      "cc": [],
+      "completed_at": null,
+      "cost": {
+        "amount": "0.0040",
+        "currency": "USD"
+      },
+      "cost_breakdown": {
+        "carrier_fee": {
+          "amount": "0.00000",
+          "currency": "USD"
+        },
+        "rate": {
+          "amount": "0.00400",
+          "currency": "USD"
+        }
+      },
+      "direction": "inbound",
+      "encoding": "GSM-7",
+      "errors": [],
+      "from": {
+        "carrier": "Verizon Wireless",
+        "line_type": "Wireless",
+        "phone_number": "+14257729189"
+      },
+      "id": "f5c5996c-6312-4af0-9cfd-f80c76771ca6",
+      "is_spam": false,
+      "media": [],
+      "messaging_profile_id": "40019a80-d883-4618-953b-dad1610b39f4",
+      "organization_id": "784ae4a9-73e4-4bb8-8501-d9ed1fca9cde",
+      "parts": 1,
+      "received_at": "2025-12-31T09:55:04.939+00:00",
+      "record_type": "message",
+      "sent_at": null,
+      "subject": "",
+      "tags": [],
+      "text": "The New ",
+      "to": [
+        {
+          "carrier": "Telnyx",
+          "line_type": "Wireless",
+          "phone_number": "+13252295147",
+          "status": "webhook_delivered"
+        }
+      ],
+[POST]
+api.koinoniasms.com/api/webhooks/telnyx/mms clientIP="192.76.120.135" requestID="96963199-0527-4e4f" responseTimeMS=724 responseBytes=1344 userAgent="telnyx-webhooks"
+      "type": "SMS",
+      "valid_until": null,
+      "webhook_failover_url": "https://api.koinoniasms.com/api/webhooks/telnyx/mms",
+      "webhook_url": "https://api.koinoniasms.com/api/webhooks/telnyx/mms"
+    },
+    "record_type": "event"
+  },
+  "meta": {
+    "attempt": 1,
+    "delivered_to": "https://api.koinoniasms.com/api/webhooks/telnyx/mms"
+  }
+}
+🔍 Looking for tenant with telnyxPhoneNumber: +13252295147
+📨 Telnyx MMS webhook: from=+14257729189, to=+13252295147, media=0
+🔐 Verifying member: +14257729189 for tenant ya23bbv59uzg9sidq855hoqg
+✅ Member verified: cmjtmhzo80000epejmqafltvm (Abenezer Girma)
+✅ Processing MMS for tenant: ALLMIGHTY GOD CHURCH (ya23bbv59uzg9sidq855hoqg)
+📱 Inbound MMS: +14257729189 → Church (0 media files)
+💬 Using existing conversation: cmjttn1md0001sueqnp6wpv0y
+📝 Created text message: cmjtub7oa001psueqbsc5881s
+📢 Broadcasting to 1 members: Abenezer: The New 
+📤 Sending SMS: from +13252295147 to +12064664353
+   Brand: shared (65% delivery rate)
+   Message: "Abenezer: The New "
+✅ SMS accepted by Telnyx: 40319b73-d51e-4fba-827d-7b8fd2dcd33a
+   Status: undefined, Recipient: +12064664353
+   ✓ Sent to Text
+✅ Broadcast sent to 1 members
+✅ Inbound MMS processed: cmjttn1md0001sueqnp6wpv0y (1 messages)
+✅ MMS processed: conversation=cmjttn1md0001sueqnp6wpv0y, messages=1
+{"timestamp":"2025-12-31T09:55:05.812Z","level":"INFO","message":"Response sent","context":{"method":"POST","path":"/webhooks/telnyx/mms","status":200,"durationMs":721},"correlationId":"1767174905091-t9m8mh52e"}
+[POST]
+api.koinoniasms.com/api/webhooks/telnyx/status clientIP="192.76.120.135" requestID="ccba73a5-a7eb-4e3f" responseTimeMS=4 responseBytes=1344 userAgent="telnyx-webhooks"
+[POST]
+api.koinoniasms.com/api/webhooks/telnyx/status clientIP="192.76.120.135" requestID="6dcf4c9e-be08-44bc" responseTimeMS=5 responseBytes=1344 userAgent="telnyx-webhooks"
+{"timestamp":"2025-12-31T09:55:06.036Z","level":"INFO","message":"Incoming request","context":{"method":"POST","path":"/api/webhooks/telnyx/status","ip":"172.69.58.177","userAgent":"telnyx-webhooks"},"correlationId":"1767174906036-njhox4tpr"}
+📋 Webhook Signature Debug:
+   Timestamp: 1767174905
+   Payload length: 1812
+   Signed message length: 1823
+✅ ED25519 signature verified successfully
+✅ Delivery receipt webhook signature verified (ED25519) - processing
+{"timestamp":"2025-12-31T09:55:06.037Z","level":"INFO","message":"Response sent","context":{"method":"POST","path":"/webhooks/telnyx/status","status":200,"durationMs":1},"correlationId":"1767174906036-njhox4tpr"}
+{"timestamp":"2025-12-31T09:55:06.250Z","level":"INFO","message":"Incoming request","context":{"method":"POST","path":"/api/webhooks/telnyx/status","ip":"172.68.174.217","userAgent":"telnyx-webhooks"},"correlationId":"1767174906250-b77c7vsle"}
+📋 Webhook Signature Debug:
+   Timestamp: 1767174906
+   Payload length: 1849
+   Signed message length: 1860
+✅ ED25519 signature verified successfully
+✅ Delivery receipt webhook signature verified (ED25519) - processing
+{"timestamp":"2025-12-31T09:55:06.251Z","level":"INFO","message":"Response sent","context":{"method":"POST","path":"/webhooks/telnyx/status","st

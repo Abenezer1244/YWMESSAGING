@@ -389,24 +389,33 @@ export async function getCurrentNumber(req, res) {
         if (!churchId) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
+        console.log(`[getCurrentNumber] Querying registry database for churchId: ${churchId}`);
         // Query registry database (same as linkPhoneNumber uses)
         const registryPrisma = getRegistryPrisma();
         const church = await registryPrisma.church.findUnique({
             where: { id: churchId },
             select: {
+                id: true,
                 telnyxPhoneNumber: true,
                 telnyxNumberSid: true,
                 telnyxVerified: true,
                 telnyxPurchasedAt: true,
             },
         });
+        console.log(`[getCurrentNumber] Found church:`, {
+            id: church?.id,
+            hasPhone: !!church?.telnyxPhoneNumber,
+            phone: church?.telnyxPhoneNumber || 'none',
+        });
         if (!church?.telnyxPhoneNumber) {
+            console.log(`[getCurrentNumber] No phone number found for church ${churchId}`);
             return res.status(404).json({ error: 'No phone number configured' });
         }
+        console.log(`[getCurrentNumber] Returning phone number: ${church.telnyxPhoneNumber}`);
         res.json({ success: true, data: church });
     }
     catch (error) {
-        console.error('Failed to get current number:', error);
+        console.error('[getCurrentNumber] ERROR:', error);
         res.status(500).json({ error: 'Failed to get current number' });
     }
 }
@@ -432,7 +441,7 @@ export async function releaseCurrentNumber(req, res) {
             where: { id: churchId },
             select: { telnyxNumberSid: true, telnyxPhoneNumber: true },
         });
-        if (!church?.telnyxNumberSid) {
+        if (!church?.telnyxPhoneNumber) {
             return res.status(404).json({ error: 'No phone number to release' });
         }
         // Step 1: Validate confirmation (safety check)
@@ -453,10 +462,28 @@ export async function releaseCurrentNumber(req, res) {
         }
         // Step 3: Soft-delete the number (30-day recovery window)
         console.log(`[DELETE_NUMBER] User ${adminId} requesting deletion of phone ${church.telnyxPhoneNumber} for church ${churchId}`);
-        await releasePhoneNumber(church.telnyxNumberSid, churchId, {
-            softDelete: true,
-            deletedBy: adminId,
-        });
+        // If number was purchased through app (has telnyxNumberSid), release from Telnyx
+        // If manually linked (no telnyxNumberSid), just clear from database
+        if (church.telnyxNumberSid) {
+            await releasePhoneNumber(church.telnyxNumberSid, churchId, {
+                softDelete: true,
+                deletedBy: adminId,
+            });
+        }
+        else {
+            // Manually linked number - just clear from database
+            console.log(`[DELETE_NUMBER] Manually linked number, clearing from database only`);
+            await registryPrisma.church.update({
+                where: { id: churchId },
+                data: {
+                    telnyxPhoneNumber: null,
+                    telnyxNumberSid: null,
+                    telnyxVerified: false,
+                    telnyxWebhookId: null,
+                    telnyxPurchasedAt: null,
+                },
+            });
+        }
         res.json({
             success: true,
             message: 'Phone number deleted (30-day recovery window)',

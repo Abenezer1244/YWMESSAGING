@@ -13,17 +13,63 @@ const ALGORITHM = 'aes-256-gcm';
 const SALT_LENGTH = 16; // 128 bits
 const TAG_LENGTH = 16;  // 128 bits for GCM authentication tag
 
-// Validate encryption key at startup
+// ============================================================================
+// ENCRYPTION KEY VALIDATION (CRITICAL - Runs at startup)
+// ============================================================================
+// This validation ensures the encryption key is properly configured before
+// the application starts accepting requests. If validation fails, the app
+// will crash immediately rather than corrupting data or exposing EINs.
+// ============================================================================
+
 if (!ENCRYPTION_KEY) {
+  console.error('❌ FATAL: ENCRYPTION_KEY environment variable is not set');
+  console.error('');
+  console.error('The ENCRYPTION_KEY is required to encrypt/decrypt sensitive data (EINs, phone numbers, emails).');
+  console.error('');
+  console.error('🔧 How to fix:');
+  console.error('  1. Check Render Dashboard → Environment → ENCRYPTION_KEY');
+  console.error('  2. Ensure it is set and marked as "Restricted"');
+  console.error('  3. Redeploy the service');
+  console.error('');
+  console.error('⚠️  DO NOT set ENCRYPTION_KEY in .env file (security risk)');
+  console.error('⚠️  The key should ONLY be in Render environment variables');
+  console.error('');
   throw new Error('ENCRYPTION_KEY environment variable is required for data encryption');
 }
 
 if (ENCRYPTION_KEY.length !== 64) {
+  console.error('❌ FATAL: ENCRYPTION_KEY is invalid length');
+  console.error('');
+  console.error(`Expected: 64 hex characters (32 bytes)`);
+  console.error(`Received: ${ENCRYPTION_KEY.length} characters`);
+  console.error('');
+  console.error('🔧 How to fix:');
+  console.error('  Generate new key: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+  console.error('  Then update in Render Dashboard → Environment → ENCRYPTION_KEY');
+  console.error('');
   throw new Error('ENCRYPTION_KEY must be 32 bytes (64 hex characters)');
+}
+
+// Validate it's a valid hex string
+if (!/^[0-9a-f]{64}$/i.test(ENCRYPTION_KEY)) {
+  console.error('❌ FATAL: ENCRYPTION_KEY is not valid hex format');
+  console.error('');
+  console.error('The key must contain only hexadecimal characters (0-9, a-f)');
+  console.error('');
+  console.error('🔧 How to fix:');
+  console.error('  Generate new key: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+  console.error('  Then update in Render Dashboard → Environment → ENCRYPTION_KEY');
+  console.error('');
+  throw new Error('ENCRYPTION_KEY must be 64 hexadecimal characters');
 }
 
 // Type assertion - validated above
 const KEY = ENCRYPTION_KEY as string;
+
+console.log('✅ ENCRYPTION_KEY validated successfully');
+console.log(`   Length: ${KEY.length} characters`);
+console.log(`   Format: Valid hexadecimal`);
+console.log(`   First 8 chars: ${KEY.substring(0, 8)}... (masked for security)`);
 
 /**
  * Encrypt sensitive data using AES-256-GCM
@@ -199,4 +245,91 @@ export function verifySignature(message: string, signature: string, secret: stri
   } catch {
     return false;
   }
+}
+
+/**
+ * ============================================================================
+ * EIN-SPECIFIC ENCRYPTION UTILITIES
+ * ============================================================================
+ *
+ * SECURITY: EIN (Employer Identification Number) is highly sensitive PII
+ * - 9-digit federal tax ID used by IRS
+ * - Can be used for identity theft, fraudulent tax returns, credit fraud
+ * - Must be encrypted at rest and masked in UI
+ * - Access must be audited
+ */
+
+/**
+ * Encrypt EIN for secure storage
+ * Uses existing AES-256-GCM encryption
+ */
+export function encryptEIN(ein: string): string {
+  // Validate EIN format before encryption
+  const cleanEIN = ein.replace(/\D/g, ''); // Remove non-digits
+  if (cleanEIN.length !== 9) {
+    throw new Error('EIN must be exactly 9 digits');
+  }
+  return encrypt(cleanEIN);
+}
+
+/**
+ * Decrypt EIN from database
+ * Uses existing AES-256-GCM decryption
+ */
+export function decryptEIN(encryptedEIN: string): string {
+  return decrypt(encryptedEIN);
+}
+
+/**
+ * Create searchable hash of EIN (for validation without decryption)
+ * Uses SHA-256 hash for consistency checking
+ */
+export function hashEIN(ein: string): string {
+  const cleanEIN = ein.replace(/\D/g, '');
+  if (cleanEIN.length !== 9) {
+    throw new Error('EIN must be exactly 9 digits');
+  }
+  return crypto
+    .createHash('sha256')
+    .update(cleanEIN)
+    .digest('hex');
+}
+
+/**
+ * Safely decrypt EIN, handling both encrypted and plain text formats
+ * Legacy data may have plain text EINs before encryption was added
+ */
+export function decryptEINSafe(einData: string): string {
+  try {
+    // Check if it looks encrypted: format is iv:salt:encrypted:tag (4 parts)
+    const parts = einData.split(':');
+    if (parts.length === 4) {
+      // Encrypted format - decrypt it
+      return decryptEIN(einData);
+    }
+
+    // Plain text format (legacy data) - return as-is
+    // Validate it's 9 digits
+    const cleanEIN = einData.replace(/\D/g, '');
+    if (cleanEIN.length === 9) {
+      return cleanEIN;
+    }
+
+    throw new Error('Invalid EIN format');
+  } catch (error) {
+    throw new Error(`Failed to decrypt EIN: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
+ * Mask EIN for display in logs/UI
+ * Shows only last 4 digits: XX-XXX5678
+ */
+export function maskEIN(ein: string): string {
+  const cleanEIN = ein.replace(/\D/g, '');
+  if (cleanEIN.length !== 9) {
+    return 'XX-XXXXXXX'; // Completely masked if invalid
+  }
+  const lastFour = cleanEIN.slice(-4);
+  return `XX-XXX${lastFour}`;
 }
