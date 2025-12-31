@@ -75,7 +75,7 @@ setInterval(() => {
 export function recordEINAccess(
   userId: string,
   action: string,
-  req: Request,
+  req: Request | any,
   churchId?: string
 ): void {
   const record: AccessRecord = {
@@ -84,7 +84,7 @@ export function recordEINAccess(
     action,
     churchId,
     ipAddress: getClientIP(req),
-    userAgent: req.headers['user-agent'],
+    userAgent: req?.headers?.['user-agent'],
   };
 
   accessLog.push(record);
@@ -98,11 +98,16 @@ export function recordEINAccess(
 /**
  * Get client IP address from request
  */
-function getClientIP(req: Request): string {
+function getClientIP(req: Request | any): string {
+  // Handle cases where req might be undefined or not a real Request object
+  if (!req || !req.headers) {
+    return 'unknown';
+  }
+
   return (
     (req.headers['x-forwarded-for'] as string)?.split(',')[0] ||
     (req.headers['x-real-ip'] as string) ||
-    req.socket.remoteAddress ||
+    req.socket?.remoteAddress ||
     'unknown'
   );
 }
@@ -110,7 +115,7 @@ function getClientIP(req: Request): string {
 /**
  * Check for anomalous access patterns
  */
-async function checkForAnomalies(userId: string, req: Request): Promise<void> {
+async function checkForAnomalies(userId: string, req: Request | any): Promise<void> {
   const now = new Date();
   const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
   const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
