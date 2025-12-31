@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Phone, Loader, Check, AlertCircle, Trash2, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { linkPhoneNumber } from '../../api/admin';
@@ -20,6 +20,12 @@ export function PhoneNumberManager({
   const [showForm, setShowForm] = useState(!currentPhoneNumber);
   const [linkedPhoneNumber, setLinkedPhoneNumber] = useState(currentPhoneNumber);
   const [webhookStatus, setWebhookStatus] = useState<'auto' | 'manual' | null>(null);
+
+  // Sync linkedPhoneNumber with currentPhoneNumber prop when it changes
+  useEffect(() => {
+    setLinkedPhoneNumber(currentPhoneNumber);
+    setShowForm(!currentPhoneNumber);
+  }, [currentPhoneNumber]);
 
   // Delete modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
