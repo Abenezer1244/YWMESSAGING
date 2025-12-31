@@ -618,7 +618,8 @@ export function AdminSettingsPage() {
                           currentPhoneNumber={currentPhoneNumber}
                           onSuccess={(phoneNumber, webhookId) => {
                             setCurrentPhoneNumber(phoneNumber);
-                            loadPhoneNumber();
+                            // Don't call loadPhoneNumber() here - we already have the number from the link response
+                            // Calling it could overwrite the number if the API call fails
                             if (phoneNumber) {
                               toast.success('Phone number linked successfully!');
                             } else {
