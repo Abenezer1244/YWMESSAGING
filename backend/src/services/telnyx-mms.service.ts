@@ -220,8 +220,29 @@ export async function handleInboundMMS(
 
     const tenantPrisma = await getTenantPrisma(churchId);
 
-    // 1. Find or create member by phone
-    const member = await findOrCreateMemberByPhone(churchId, senderPhone);
+    // 1. Find member by phone (already verified as registered member in webhook handler)
+    let formattedPhone: string;
+    try {
+      formattedPhone = formatToE164(senderPhone);
+    } catch (error) {
+      const digits = senderPhone.replace(/\D/g, '');
+      if (digits.length === 11 && digits.startsWith('1')) {
+        formattedPhone = `+${digits}`;
+      } else if (digits.length === 10) {
+        formattedPhone = `+1${digits}`;
+      } else {
+        formattedPhone = `+${digits}`;
+      }
+    }
+    const phoneHash = hashForSearch(formattedPhone);
+
+    const member = await tenantPrisma.member.findFirst({
+      where: { phoneHash }
+    });
+
+    if (!member) {
+      throw new Error(`Member not found for phone: ${senderPhone}`);
+    }
 
     // 2. Find or create conversation
     let conversation = await tenantPrisma.conversation.findFirst({
@@ -349,23 +370,21 @@ export async function broadcastInboundToMembers(
   try {
     const tenantPrisma = await getTenantPrisma(churchId);
 
-    // Get all members through conversations (members don't have churchId anymore)
-    const conversations = await tenantPrisma.conversation.findMany({
+    // Get all members from member table (tenant database isolation)
+    // CRITICAL FIX: Query member table directly, not through conversations
+    // This ensures ALL registered members receive broadcasts, even if they haven't
+    // texted yet and don't have a conversation record
+    const members = await tenantPrisma.member.findMany({
+      where: {
+        optInSms: true,
+      },
       select: {
-        member: {
-          select: {
-            id: true,
-            firstName: true,
-            phone: true,
-            optInSms: true,
-          },
-        },
+        id: true,
+        firstName: true,
+        phone: true,
+        optInSms: true,
       },
     });
-
-    const members = conversations
-      .map(conv => conv.member)
-      .filter(member => member.optInSms);
 
     // Get sender info (phone + name)
     const sender = await tenantPrisma.member.findUnique({
