@@ -478,6 +478,7 @@ export async function linkPhoneNumberHandler(req: Request, res: Response) {
 
     // Update tenant with phone number and webhook ID
     // Initialize 10DLC fields: start with shared brand for immediate use
+    console.log(`[linkPhoneNumber] Updating registry database for tenantId: ${tenantId} with phone: ${formattedPhone}`);
     const updated = await registryPrisma.church.update({
       where: { id: tenantId },
       data: {
@@ -499,6 +500,11 @@ export async function linkPhoneNumberHandler(req: Request, res: Response) {
         usingSharedBrand: true,
         deliveryRate: true,
       },
+    });
+    console.log(`[linkPhoneNumber] ✅ Successfully saved phone number to registry database:`, {
+      tenantId: updated.id,
+      phone: updated.telnyxPhoneNumber,
+      webhookId: updated.telnyxWebhookId,
     });
 
     // Only trigger 10DLC registration if tenant opted-in to premium delivery

@@ -472,11 +472,14 @@ export async function getCurrentNumber(req: Request, res: Response) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
+    console.log(`[getCurrentNumber] Querying registry database for churchId: ${churchId}`);
+
     // Query registry database (same as linkPhoneNumber uses)
     const registryPrisma = getRegistryPrisma();
     const church = await registryPrisma.church.findUnique({
       where: { id: churchId },
       select: {
+        id: true,
         telnyxPhoneNumber: true,
         telnyxNumberSid: true,
         telnyxVerified: true,
@@ -484,13 +487,21 @@ export async function getCurrentNumber(req: Request, res: Response) {
       },
     });
 
+    console.log(`[getCurrentNumber] Found church:`, {
+      id: church?.id,
+      hasPhone: !!church?.telnyxPhoneNumber,
+      phone: church?.telnyxPhoneNumber || 'none',
+    });
+
     if (!church?.telnyxPhoneNumber) {
+      console.log(`[getCurrentNumber] No phone number found for church ${churchId}`);
       return res.status(404).json({ error: 'No phone number configured' });
     }
 
+    console.log(`[getCurrentNumber] Returning phone number: ${church.telnyxPhoneNumber}`);
     res.json({ success: true, data: church });
   } catch (error) {
-    console.error('Failed to get current number:', error);
+    console.error('[getCurrentNumber] ERROR:', error);
     res.status(500).json({ error: 'Failed to get current number' });
   }
 }
