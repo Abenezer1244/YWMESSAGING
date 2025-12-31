@@ -45,6 +45,21 @@ export async function register(req, res) {
             'req.get(host)': req.get('host'),
             'hostname.includes(koinoniasms.com)': hostname.includes('koinoniasms.com'),
         });
+        // ✅ CRITICAL FIX: Clear any existing cookies before setting new ones
+        // This prevents tenant isolation breach where old user's cookies persist
+        // when a new user registers/logs in on the same browser
+        res.clearCookie('accessToken', {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: sameSite,
+            domain: cookieDomain,
+        });
+        res.clearCookie('refreshToken', {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: sameSite,
+            domain: cookieDomain,
+        });
         // Set httpOnly cookies for tokens (secure, cannot be accessed via JavaScript)
         res.cookie('accessToken', result.accessToken, {
             httpOnly: true,
@@ -129,6 +144,21 @@ export async function loginHandler(req, res) {
             NODE_ENV: process.env.NODE_ENV,
             nodeHost: req.hostname,
             hostHeader: req.get('host'),
+        });
+        // ✅ CRITICAL FIX: Clear any existing cookies before setting new ones
+        // This prevents tenant isolation breach where old user's cookies persist
+        // when a new user logs in on the same browser
+        res.clearCookie('accessToken', {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: sameSite,
+            domain: cookieDomain,
+        });
+        res.clearCookie('refreshToken', {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: sameSite,
+            domain: cookieDomain,
         });
         // Set httpOnly cookies for tokens
         res.cookie('accessToken', result.accessToken, {
