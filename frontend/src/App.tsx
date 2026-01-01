@@ -49,7 +49,7 @@ const PageLoader = () => (
 );
 
 function App() {
-  const { isAuthenticated, church, setAuth } = useAuthStore();
+  const { isAuthenticated, church } = useAuthStore();
   const { setBranches } = useBranchStore();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
@@ -73,11 +73,26 @@ function App() {
     // First, try to restore from sessionStorage (survives page refresh)
     setIsCheckingAuth(true);
 
+    // ✅ CRITICAL FIX: Only restore from sessionStorage if user is NOT already authenticated
+    // This prevents stale sessionStorage data from overwriting fresh login data
+    // When user logs in, LoginPage/RegisterPage sets auth state directly
+    // We should NOT overwrite that with potentially stale sessionStorage data
+    const currentAuthState = useAuthStore.getState();
+    if (currentAuthState.isAuthenticated && currentAuthState.church) {
+      // User is already authenticated (from fresh login), skip sessionStorage restore
+      setIsCheckingAuth(false);
+      if (import.meta.env.DEV) {
+        console.debug('Auth already set, skipping sessionStorage restore');
+      }
+      return;
+    }
+
     try {
       const savedAuthState = sessionStorage.getItem('authState');
       if (savedAuthState) {
         const authState = JSON.parse(savedAuthState);
-        // Restore from sessionStorage
+        // Restore from sessionStorage ONLY if user is not already authenticated
+        const { setAuth } = useAuthStore.getState();
         setAuth(authState.user, authState.church, authState.accessToken, authState.refreshToken, authState.tokenExpiresAt ? Math.ceil((authState.tokenExpiresAt - Date.now()) / 1000) : 3600);
         setIsCheckingAuth(false);
         if (import.meta.env.DEV) {
@@ -108,6 +123,7 @@ function App() {
             role: response.data.role,
           };
           // Tokens come from HTTPOnly cookies, only pass placeholder tokens for state
+          const { setAuth } = useAuthStore.getState();
           setAuth(admin, response.data.church, 'cookie-based', 'cookie-based');
           setIsCheckingAuth(false);
         }
@@ -149,6 +165,7 @@ function App() {
             // Use refreshed tokens if available, otherwise use cookies
             const newAccessToken = refreshResponse.data?.accessToken || 'cookie-based';
             const newRefreshToken = refreshResponse.data?.refreshToken || 'cookie-based';
+            const { setAuth } = useAuthStore.getState();
             setAuth(admin, retryResponse.data.church, newAccessToken, newRefreshToken);
           }
         } catch (err) {
@@ -161,7 +178,7 @@ function App() {
 
         setIsCheckingAuth(false);
       });
-  }, [setAuth]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load branches when user is authenticated
   useEffect(() => {
