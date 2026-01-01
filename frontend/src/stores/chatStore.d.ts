@@ -19,6 +19,7 @@ interface ChatState {
     openChat: () => void;
     closeChat: () => void;
     clearChat: () => void;
+    reset: () => void;
 }
 export declare const useChatStore: {
     (): ChatState;
@@ -40,6 +41,7 @@ export declare const useChatStore: {
         openChat: () => () => void;
         closeChat: () => () => void;
         clearChat: () => () => void;
+        reset: () => () => void;
     };
 };
 export {};

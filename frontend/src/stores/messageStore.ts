@@ -30,6 +30,7 @@ interface MessageState {
   setSelectedRecipients: (recipients: MessageRecipient | null) => void;
   setLoading: (loading: boolean) => void;
   addMessage: (message: SentMessage) => void;
+  reset: () => void;
 }
 
 const useMessageStoreBase = create<MessageState>()((set) => ({
@@ -55,6 +56,15 @@ const useMessageStoreBase = create<MessageState>()((set) => ({
     set((state) => ({
       messages: [message, ...state.messages],
     }));
+  },
+
+  // ✅ Reset all message data (used on logout/login to prevent data leakage)
+  reset: () => {
+    set({
+      messages: [],
+      selectedRecipients: null,
+      isLoading: false,
+    });
   },
 }));
 

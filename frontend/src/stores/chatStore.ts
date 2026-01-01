@@ -26,6 +26,7 @@ interface ChatState {
   openChat: () => void;
   closeChat: () => void;
   clearChat: () => void;
+  reset: () => void;
 }
 
 const useChatStoreBase = create<ChatState>((set) => ({
@@ -55,6 +56,15 @@ const useChatStoreBase = create<ChatState>((set) => ({
   closeChat: () => set({ isOpen: false }),
 
   clearChat: () => set({ messages: [], conversationId: null, error: null }),
+
+  // ✅ Reset all chat data (used on logout/login to prevent data leakage)
+  reset: () => set({
+    conversationId: null,
+    messages: [],
+    isLoading: false,
+    error: null,
+    isOpen: false,
+  }),
 }));
 
 export const useChatStore = createSelectors(useChatStoreBase);

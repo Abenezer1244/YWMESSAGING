@@ -22,6 +22,7 @@ interface MessageState {
     setSelectedRecipients: (recipients: MessageRecipient | null) => void;
     setLoading: (loading: boolean) => void;
     addMessage: (message: SentMessage) => void;
+    reset: () => void;
 }
 export declare const useMessageStore: {
     (): MessageState;
@@ -36,6 +37,7 @@ export declare const useMessageStore: {
         setSelectedRecipients: () => (recipients: MessageRecipient | null) => void;
         setLoading: () => (loading: boolean) => void;
         addMessage: () => (message: SentMessage) => void;
+        reset: () => () => void;
     };
 };
 export {};

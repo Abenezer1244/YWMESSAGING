@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { logout as logoutApi } from '../api/auth';
 import { createSelectors } from '../hooks/createSelectors';
 import { useBranchStore } from './branchStore';
+import { useChatStore } from './chatStore';
+import { useMessageStore } from './messageStore';
 
 export interface Admin {
   id: string;
@@ -81,6 +83,17 @@ const useAuthStoreBase = create<AuthState>()((set, get) => ({
   },
 
   clearAuth: () => {
+    // ✅ CRITICAL: Clear all data stores to prevent tenant isolation breach
+    // When switching between accounts (login/register), ALL previous user's data must be cleared
+    // This prevents the new user from seeing the previous user's branches/messages/chat/data
+    try {
+      useBranchStore.getState().reset();
+      useChatStore.getState().reset();
+      useMessageStore.getState().reset();
+    } catch (e) {
+      console.warn('Failed to clear data stores:', e);
+    }
+
     // Clear from state and sessionStorage
     set({
       user: null,
@@ -110,9 +123,11 @@ const useAuthStoreBase = create<AuthState>()((set, get) => ({
 
     // ✅ CRITICAL: Clear all data stores to prevent data leakage
     // When user logs out, ALL previous user's data must be cleared
-    // This prevents a new user from seeing the previous user's branches/data
+    // This prevents a new user from seeing the previous user's branches/messages/chat/data
     try {
       useBranchStore.getState().reset();
+      useChatStore.getState().reset();
+      useMessageStore.getState().reset();
     } catch (e) {
       console.warn('Failed to clear store data:', e);
     }
