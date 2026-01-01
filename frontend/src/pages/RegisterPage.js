@@ -13,7 +13,7 @@ import Card from '../components/ui/Card';
 import AnimatedBlobs from '../components/AnimatedBlobs';
 export function RegisterPage() {
     const navigate = useNavigate();
-    const { setAuth } = useAuthStore();
+    const { setAuth, clearAuth } = useAuthStore();
     const [isLoading, setIsLoading] = useState(false);
     // Fetch CSRF token on component mount
     useEffect(() => {
@@ -80,6 +80,9 @@ export function RegisterPage() {
                 setIsLoading(false);
                 return;
             }
+            // ✅ CRITICAL FIX: Clear any old auth state (from previous user) before setting new auth
+            // This prevents tenant isolation breach where old user's data persists in sessionStorage
+            clearAuth();
             setAuth(admin, church, accessToken, refreshToken);
             // Navigate immediately - setAuth is synchronous (Zustand)
             navigate('/dashboard', { replace: true });

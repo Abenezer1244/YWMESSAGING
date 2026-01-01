@@ -17,6 +17,14 @@ const useChatStoreBase = create((set) => ({
     openChat: () => set({ isOpen: true }),
     closeChat: () => set({ isOpen: false }),
     clearChat: () => set({ messages: [], conversationId: null, error: null }),
+    // ✅ Reset all chat data (used on logout/login to prevent data leakage)
+    reset: () => set({
+        conversationId: null,
+        messages: [],
+        isLoading: false,
+        error: null,
+        isOpen: false,
+    }),
 }));
 export const useChatStore = createSelectors(useChatStoreBase);
 //# sourceMappingURL=chatStore.js.map

@@ -20,6 +20,14 @@ const useMessageStoreBase = create()((set) => ({
             messages: [message, ...state.messages],
         }));
     },
+    // ✅ Reset all message data (used on logout/login to prevent data leakage)
+    reset: () => {
+        set({
+            messages: [],
+            selectedRecipients: null,
+            isLoading: false,
+        });
+    },
 }));
 export const useMessageStore = createSelectors(useMessageStoreBase);
 //# sourceMappingURL=messageStore.js.map
