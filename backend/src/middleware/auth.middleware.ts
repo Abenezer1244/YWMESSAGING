@@ -34,26 +34,34 @@ declare global {
  */
 export async function authenticateToken(req: Request, res: Response, next: NextFunction): Promise<void> {
   // ============================================
-  // STEP 1: Get token from cookie or header
+  // STEP 1: Get token from header or cookie
   // ============================================
-  let token = req.cookies.accessToken;
+  // CRITICAL FIX: Prefer Authorization header over cookies
+  // The Authorization header is always fresh from the frontend Zustand store
+  // Cookies may contain stale tokens from previous sessions that weren't properly cleared
+  // This prevents tenant isolation bugs where User A's cookie persists when User B logs in
+  let token: string | undefined = undefined;
 
-  // DEBUG: Log cookie situation
-  if (!token) {
-    console.log('🔍 AUTH_MIDDLEWARE - No token in cookies', {
-      cookiesReceived: req.cookies,
-      cookieHeader: req.headers['cookie'],
-      allCookies: Object.keys(req.cookies),
-      origin: req.get('origin'),
-      referer: req.get('referer'),
-      host: req.get('host'),
-    });
+  // First, check Authorization header (always fresh from authStore)
+  const authHeader = req.headers['authorization'];
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
   }
 
-  // Fall back to Authorization header
+  // Fall back to cookie only if no Authorization header
   if (!token) {
-    const authHeader = req.headers['authorization'];
-    token = authHeader && authHeader.split(' ')[1]; // "Bearer TOKEN"
+    token = req.cookies.accessToken;
+
+    // DEBUG: Log when falling back to cookie
+    if (token) {
+      console.log('🔍 AUTH_MIDDLEWARE - Using cookie token (no Authorization header)');
+    } else {
+      console.log('🔍 AUTH_MIDDLEWARE - No token found', {
+        hasAuthHeader: !!authHeader,
+        hasCookie: !!req.cookies.accessToken,
+        origin: req.get('origin'),
+      });
+    }
   }
 
   if (!token) {
