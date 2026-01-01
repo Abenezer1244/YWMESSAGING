@@ -234,46 +234,15 @@ export async function registerPersonal10DLCAsync(churchId, phoneNumber) {
             console.log(`📊 Church ${churchId} opted for shared brand - skipping 10DLC registration`);
             return;
         }
-        // Validate church data before sending to Telnyx
-        try {
-            validateBrandData(church);
-            console.log(`✅ Church data validation passed`);
-        }
-        catch (validationError) {
-            console.error(`❌ Validation error: ${validationError.message}`);
-            await registryPrisma.church.update({
-                where: { id: churchId },
-                data: {
-                    dlcStatus: 'rejected',
-                    dlcRejectionReason: `Validation error: ${validationError.message}`,
-                },
-            }).catch(err => {
-                console.error('Failed to update church status:', err);
-            });
-            return;
-        }
-        const client = getTelnyxClient();
-        const webhooks = getWebhookURLs();
-        // Register brand with Telnyx using retry logic
-        console.log(`📤 Submitting 10DLC brand to Telnyx: "${church.name}"`);
-        // CRITICAL FIX: Validate entityType - only supported types allowed
-        // Telnyx support confirmed SOLE_PROPRIETOR is NOT supported (20 Nov 2025)
-        let validatedEntityType = church.entityType || 'NON_PROFIT';
-        if (!SUPPORTED_ENTITY_TYPES.includes(validatedEntityType)) {
-            console.warn(`⚠️ Entity type "${validatedEntityType}" is not supported by Telnyx. ` +
-                `Defaulting to "NON_PROFIT" for church registration.`);
-            validatedEntityType = 'NON_PROFIT'; // Default to NON_PROFIT for churches
-        }
-        // 🔒 SECURITY: Decrypt EIN for Telnyx API call
-        // EIN is stored encrypted in database, must decrypt before sending to Telnyx
-        // This is the ONLY place where decrypted EIN exists in memory
+        // 🔒 SECURITY: Decrypt EIN FIRST before validation
+        // EIN is stored encrypted in database, must decrypt before validating/sending to Telnyx
         let decryptedEIN = null;
         try {
             decryptedEIN = await getEIN(churchId, 'SYSTEM', '10DLC_REGISTRATION');
             if (!decryptedEIN) {
                 throw new Error('EIN not found or could not be decrypted');
             }
-            console.log(`🔓 [10DLC_REGISTRATION] Decrypted EIN for Telnyx API call`);
+            console.log(`🔓 [10DLC_REGISTRATION] Decrypted EIN for validation and API call`);
         }
         catch (error) {
             console.error(`❌ Failed to decrypt EIN for church ${churchId}:`, error);
@@ -288,6 +257,45 @@ export async function registerPersonal10DLCAsync(churchId, phoneNumber) {
             });
             return;
         }
+        // Validate church data with DECRYPTED EIN before sending to Telnyx
+        try {
+            // Create validation object with decrypted EIN
+            const churchDataForValidation = {
+                ...church,
+                ein: decryptedEIN, // ✅ Use decrypted EIN for validation
+            };
+            validateBrandData(churchDataForValidation);
+            console.log(`✅ Church data validation passed`);
+        }
+        catch (validationError) {
+            console.error(`❌ Validation error: ${validationError.message}`);
+            await registryPrisma.church.update({
+                where: { id: churchId },
+                data: {
+                    dlcStatus: 'rejected',
+                    dlcRejectionReason: `Validation error: ${validationError.message}`,
+                },
+            }).catch(err => {
+                console.error('Failed to update church status:', err);
+            });
+            // Clear decrypted EIN from memory
+            decryptedEIN = null;
+            return;
+        }
+        const client = getTelnyxClient();
+        const webhooks = getWebhookURLs();
+        // Register brand with Telnyx using retry logic
+        console.log(`📤 Submitting 10DLC brand to Telnyx: "${church.name}"`);
+        // CRITICAL FIX: Validate entityType - only supported types allowed
+        // Telnyx support confirmed SOLE_PROPRIETOR is NOT supported (20 Nov 2025)
+        let validatedEntityType = church.entityType || 'NON_PROFIT';
+        if (!SUPPORTED_ENTITY_TYPES.includes(validatedEntityType)) {
+            console.warn(`⚠️ Entity type "${validatedEntityType}" is not supported by Telnyx. ` +
+                `Defaulting to "NON_PROFIT" for church registration.`);
+            validatedEntityType = 'NON_PROFIT'; // Default to NON_PROFIT for churches
+        }
+        // ✅ EIN already decrypted earlier for validation (line 282)
+        // Now use decryptedEIN for Telnyx API call
         const brandResponse = await retryWithBackoff(async () => {
             return await client.post('/10dlc/brand', {
                 // Required fields
