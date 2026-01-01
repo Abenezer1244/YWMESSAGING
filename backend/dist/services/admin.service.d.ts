@@ -2,7 +2,6 @@ import { TenantPrismaClient } from '../lib/tenant-prisma.js';
 export interface UpdateChurchInput {
     name?: string;
     email?: string;
-    description?: string;
     wantsPremiumDelivery?: boolean;
     ein?: string;
     brandPhoneNumber?: string;

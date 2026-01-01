@@ -18,6 +18,21 @@
  */
 import { encryptEIN, decryptEINSafe, hashEIN, maskEIN } from '../utils/encryption.utils.js';
 import { getRegistryPrisma } from '../lib/tenant-prisma.js';
+// ============================================================================
+// SECURITY: Track all EIN access for anomaly detection
+// ============================================================================
+let recordEINAccessForMonitoring = null;
+// Import dynamically to avoid circular dependencies
+(async () => {
+    try {
+        const securityModule = await import('../middleware/security-monitoring.middleware.js');
+        recordEINAccessForMonitoring = securityModule.recordEINAccess;
+        console.log('✅ [EIN_SERVICE] Security monitoring enabled');
+    }
+    catch (error) {
+        console.warn('⚠️ [EIN_SERVICE] Security monitoring not available:', error.message);
+    }
+})();
 /**
  * ============================================================================
  * STORE EIN - Encrypt and save to database with audit trail
@@ -48,6 +63,10 @@ export async function storeEIN(churchId, plainEIN, accessedBy, reason = 'ADMIN_U
         });
         // Audit log (NEVER log decrypted EIN)
         logEINAccess(churchId, accessedBy, 'STORE', reason, maskEIN(cleanEIN));
+        // Security monitoring (track for anomaly detection)
+        if (recordEINAccessForMonitoring) {
+            recordEINAccessForMonitoring(accessedBy, 'EIN_STORE', {}, churchId);
+        }
         console.log(`✅ [EIN_SERVICE] Encrypted and stored EIN for church ${churchId} by ${accessedBy}`);
     }
     catch (error) {
@@ -87,6 +106,10 @@ export async function getEIN(churchId, accessedBy, reason) {
         });
         // Audit log (with masked EIN)
         logEINAccess(churchId, accessedBy, 'READ', reason, maskEIN(decrypted));
+        // Security monitoring (track for anomaly detection)
+        if (recordEINAccessForMonitoring) {
+            recordEINAccessForMonitoring(accessedBy, 'EIN_DECRYPT', {}, churchId);
+        }
         console.log(`🔓 [EIN_SERVICE] Decrypted EIN for church ${churchId} by ${accessedBy} (reason: ${reason})`);
         return decrypted;
     }

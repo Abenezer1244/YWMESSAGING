@@ -6,7 +6,6 @@ import { getRegistryPrisma, TenantPrismaClient } from '../lib/tenant-prisma.js';
 export interface UpdateChurchInput {
   name?: string;
   email?: string;
-  description?: string;
   // 10DLC Delivery Option
   wantsPremiumDelivery?: boolean;
   // 10DLC Brand Information
@@ -34,7 +33,19 @@ export async function updateChurchProfile(
       where: { id: tenantId },
       data: {
         // Basic profile
-        ...(input.name && { name: input.name }),
+        ...(input.name !== undefined && { name: input.name }),
+        ...(input.email !== undefined && { email: input.email }),
+        // 10DLC Delivery Option
+        ...(input.wantsPremiumDelivery !== undefined && { wantsPremiumDelivery: input.wantsPremiumDelivery }),
+        // 10DLC Brand Information (ein is handled separately in controller for encryption)
+        ...(input.brandPhoneNumber !== undefined && { brandPhoneNumber: input.brandPhoneNumber }),
+        ...(input.streetAddress !== undefined && { streetAddress: input.streetAddress }),
+        ...(input.city !== undefined && { city: input.city }),
+        ...(input.state !== undefined && { state: input.state }),
+        ...(input.postalCode !== undefined && { postalCode: input.postalCode }),
+        ...(input.website !== undefined && { website: input.website }),
+        ...(input.entityType !== undefined && { entityType: input.entityType }),
+        ...(input.vertical !== undefined && { vertical: input.vertical }),
       },
     });
 
@@ -67,8 +78,26 @@ export async function getChurchProfile(tenantId: string) {
       select: {
         id: true,
         name: true,
+        email: true,
         createdAt: true,
         updatedAt: true,
+        // 10DLC Delivery Option
+        wantsPremiumDelivery: true,
+        dlcStatus: true,
+        dlcBrandId: true,
+        dlcCampaignId: true,
+        dlcRegisteredAt: true,
+        dlcApprovedAt: true,
+        // 10DLC Brand Information
+        ein: true,
+        brandPhoneNumber: true,
+        streetAddress: true,
+        city: true,
+        state: true,
+        postalCode: true,
+        website: true,
+        entityType: true,
+        vertical: true,
       },
     });
 

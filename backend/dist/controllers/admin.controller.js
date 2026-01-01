@@ -107,7 +107,7 @@ export async function updateProfileHandler(req, res) {
         if (!tenantId) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
-        const { name, email, description, 
+        const { name, email, 
         // 10DLC Delivery Option
         wantsPremiumDelivery, 
         // 10DLC Brand Information
@@ -127,7 +127,6 @@ export async function updateProfileHandler(req, res) {
         const updated = await updateChurchProfile(tenantId, {
             name,
             email,
-            description,
             // 10DLC Delivery Option
             wantsPremiumDelivery,
             // 10DLC Brand Information

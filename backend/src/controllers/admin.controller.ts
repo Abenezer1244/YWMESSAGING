@@ -136,7 +136,6 @@ export async function updateProfileHandler(req: Request, res: Response) {
     const {
       name,
       email,
-      description,
       // 10DLC Delivery Option
       wantsPremiumDelivery,
       // 10DLC Brand Information
@@ -167,7 +166,6 @@ export async function updateProfileHandler(req: Request, res: Response) {
     const updated = await updateChurchProfile(tenantId, {
       name,
       email,
-      description,
       // 10DLC Delivery Option
       wantsPremiumDelivery,
       // 10DLC Brand Information

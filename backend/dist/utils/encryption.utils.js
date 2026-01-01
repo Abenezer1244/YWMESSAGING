@@ -10,15 +10,58 @@ const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
 const ALGORITHM = 'aes-256-gcm';
 const SALT_LENGTH = 16; // 128 bits
 const TAG_LENGTH = 16; // 128 bits for GCM authentication tag
-// Validate encryption key at startup
+// ============================================================================
+// ENCRYPTION KEY VALIDATION (CRITICAL - Runs at startup)
+// ============================================================================
+// This validation ensures the encryption key is properly configured before
+// the application starts accepting requests. If validation fails, the app
+// will crash immediately rather than corrupting data or exposing EINs.
+// ============================================================================
 if (!ENCRYPTION_KEY) {
+    console.error('❌ FATAL: ENCRYPTION_KEY environment variable is not set');
+    console.error('');
+    console.error('The ENCRYPTION_KEY is required to encrypt/decrypt sensitive data (EINs, phone numbers, emails).');
+    console.error('');
+    console.error('🔧 How to fix:');
+    console.error('  1. Check Render Dashboard → Environment → ENCRYPTION_KEY');
+    console.error('  2. Ensure it is set and marked as "Restricted"');
+    console.error('  3. Redeploy the service');
+    console.error('');
+    console.error('⚠️  DO NOT set ENCRYPTION_KEY in .env file (security risk)');
+    console.error('⚠️  The key should ONLY be in Render environment variables');
+    console.error('');
     throw new Error('ENCRYPTION_KEY environment variable is required for data encryption');
 }
 if (ENCRYPTION_KEY.length !== 64) {
+    console.error('❌ FATAL: ENCRYPTION_KEY is invalid length');
+    console.error('');
+    console.error(`Expected: 64 hex characters (32 bytes)`);
+    console.error(`Received: ${ENCRYPTION_KEY.length} characters`);
+    console.error('');
+    console.error('🔧 How to fix:');
+    console.error('  Generate new key: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+    console.error('  Then update in Render Dashboard → Environment → ENCRYPTION_KEY');
+    console.error('');
     throw new Error('ENCRYPTION_KEY must be 32 bytes (64 hex characters)');
+}
+// Validate it's a valid hex string
+if (!/^[0-9a-f]{64}$/i.test(ENCRYPTION_KEY)) {
+    console.error('❌ FATAL: ENCRYPTION_KEY is not valid hex format');
+    console.error('');
+    console.error('The key must contain only hexadecimal characters (0-9, a-f)');
+    console.error('');
+    console.error('🔧 How to fix:');
+    console.error('  Generate new key: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+    console.error('  Then update in Render Dashboard → Environment → ENCRYPTION_KEY');
+    console.error('');
+    throw new Error('ENCRYPTION_KEY must be 64 hexadecimal characters');
 }
 // Type assertion - validated above
 const KEY = ENCRYPTION_KEY;
+console.log('✅ ENCRYPTION_KEY validated successfully');
+console.log(`   Length: ${KEY.length} characters`);
+console.log(`   Format: Valid hexadecimal`);
+console.log(`   First 8 chars: ${KEY.substring(0, 8)}... (masked for security)`);
 /**
  * Encrypt sensitive data using AES-256-GCM
  * Returns: iv:salt:encrypted:tag in hex format
