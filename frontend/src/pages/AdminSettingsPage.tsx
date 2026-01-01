@@ -311,32 +311,77 @@ export function AdminSettingsPage() {
                             Required for SMS messaging approval. Fill in your church's legal information.
                           </p>
 
-                          {/* EIN - MASKED by default for security */}
+                          {/* EIN - Professional Format with Auto-Masking */}
                           <div className="mb-6">
+                            <label className="block text-sm font-medium text-foreground mb-2">
+                              EIN (Employer Identification Number) *
+                            </label>
                             <div className="relative">
-                              <Input
-                                label="EIN (Employer Identification Number)"
-                                type={showEIN ? "text" : "password"}
-                                value={formData.ein}
+                              <input
+                                type="text"
+                                value={
+                                  formData.ein
+                                    ? showEIN
+                                      ? // Show formatted: XX-XXXXXXX
+                                        formData.ein.length >= 2
+                                        ? `${formData.ein.slice(0, 2)}-${formData.ein.slice(2)}`
+                                        : formData.ein
+                                      : // Hide with clean masking: ••-•••••••
+                                        formData.ein.length >= 2
+                                        ? `••-${formData.ein.slice(2).replace(/./g, '•')}`
+                                        : formData.ein.replace(/./g, '•')
+                                    : ''
+                                }
                                 onChange={(e) => {
-                                  // Only allow digits, max 9 characters
-                                  const value = e.target.value.replace(/\D/g, '').slice(0, 9);
-                                  setFormData({ ...formData, ein: value });
+                                  // Remove all non-digits and limit to 9
+                                  const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 9);
+                                  setFormData({ ...formData, ein: digitsOnly });
                                 }}
-                                placeholder={showEIN ? "123456789" : "•••••••••"}
-                                maxLength={9}
+                                placeholder={showEIN ? "12-3456789" : "••-•••••••"}
+                                maxLength={10} // 10 includes dash
                                 required
-                                helperText="9-digit federal tax ID. This information is encrypted and stored securely."
+                                className="w-full pl-10 pr-20 py-2.5 border border-border/40 rounded-lg bg-card/50 text-foreground font-mono text-base tracking-wider focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-normal backdrop-blur-sm"
+                                style={{ letterSpacing: '0.1em' }}
                               />
+
+                              {/* Lock Icon */}
+                              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                              </div>
+
+                              {/* Professional Show/Hide Button */}
                               <button
                                 type="button"
                                 onClick={() => setShowEIN(!showEIN)}
-                                className="absolute right-3 top-9 text-sm text-blue-600 hover:text-blue-800 focus:outline-none"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50 flex items-center gap-1.5 text-foreground/70 hover:text-foreground"
                                 aria-label={showEIN ? "Hide EIN" : "Show EIN"}
                               >
-                                {showEIN ? '🔒 Hide' : '👁️ Show'}
+                                {showEIN ? (
+                                  <>
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                    </svg>
+                                    <span>Hide</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    <span>Show</span>
+                                  </>
+                                )}
                               </button>
                             </div>
+                            <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1.5">
+                              <svg className="w-3.5 h-3.5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                              </svg>
+                              <span>9-digit federal tax ID • AES-256 encrypted • Securely stored</span>
+                            </p>
                           </div>
 
                           {/* Brand Phone Number */}
