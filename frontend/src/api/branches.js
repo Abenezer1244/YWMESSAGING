@@ -3,14 +3,14 @@ import client from './client';
  * Get all branches for a church
  */
 export async function getBranches(churchId) {
-    const response = await client.get(`/branches/churches/${churchId}/branches`);
+    const response = await client.get(`/branches`);
     return response.data.data;
 }
 /**
  * Create a new branch
  */
 export async function createBranch(churchId, data) {
-    const response = await client.post(`/branches/churches/${churchId}/branches`, data);
+    const response = await client.post(`/branches`, data);
     return response.data.data;
 }
 /**
