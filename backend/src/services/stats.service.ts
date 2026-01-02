@@ -169,32 +169,37 @@ export async function getBranchStats(tenantPrisma: TenantPrismaClient): Promise<
  * so we return basic branch stats without message counts per branch.
  */
 async function getBranchStatsUncached(tenantPrisma: TenantPrismaClient): Promise<BranchStat[]> {
+  console.log('[getBranchStats] Starting branch stats query (v2 - no raw SQL)');
   try {
     // Get all branches
+    console.log('[getBranchStats] Fetching branches...');
     const branches = await tenantPrisma.branch.findMany({
       select: {
         id: true,
         name: true,
       },
     });
+    console.log(`[getBranchStats] Found ${branches.length} branches`);
 
     // Get total member count (members are not associated with branches in current schema)
+    console.log('[getBranchStats] Counting members...');
     const totalMembers = await tenantPrisma.member.count();
+    console.log(`[getBranchStats] Found ${totalMembers} members`);
 
     // Get overall message stats for delivery rate calculation
+    console.log('[getBranchStats] Counting messages...');
     const totalMessages = await tenantPrisma.message.count();
     const deliveredRecipients = await tenantPrisma.messageRecipient.count({
       where: { status: 'delivered' },
     });
     const totalRecipients = await tenantPrisma.messageRecipient.count();
+    console.log(`[getBranchStats] Messages: ${totalMessages}, Recipients: ${totalRecipients}, Delivered: ${deliveredRecipients}`);
 
     const overallDeliveryRate = totalRecipients > 0
       ? Math.round((deliveredRecipients / totalRecipients) * 100)
       : 0;
 
     // Build stats for each branch
-    // Note: Members are not associated with branches in current schema,
-    // so we distribute total members evenly or show 0
     const stats: BranchStat[] = branches.map((branch) => ({
       id: branch.id,
       name: branch.name,
@@ -203,9 +208,11 @@ async function getBranchStatsUncached(tenantPrisma: TenantPrismaClient): Promise
       deliveryRate: overallDeliveryRate,
     }));
 
+    console.log(`[getBranchStats] Returning ${stats.length} branch stats`);
     return stats;
-  } catch (error) {
-    console.error('Error in getBranchStatsUncached database query:', error);
+  } catch (error: any) {
+    console.error('[getBranchStats] ERROR:', error.message || error);
+    console.error('[getBranchStats] Stack:', error.stack);
     throw error;
   }
 }
