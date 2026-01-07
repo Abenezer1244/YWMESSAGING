@@ -29,6 +29,8 @@ export declare function exportChurchData(churchId: string): Promise<{
         telnyxNumberDeletedAt: Date | null;
         telnyxNumberDeletedBy: string | null;
         telnyxNumberRecoveryDeadline: Date | null;
+        rcsAgentId: string | null;
+        rcsAgentWebhookConfigured: boolean;
         dlcBrandId: string | null;
         tcrBrandId: string | null;
         dlcStatus: string;
@@ -145,6 +147,11 @@ export declare function exportChurchData(churchId: string): Promise<{
             direction: string;
             providerMessageId: string | null;
             deliveryStatus: string | null;
+            channel: string;
+            rcsReadAt: Date | null;
+            rcsFallbackReason: string | null;
+            replyToId: string | null;
+            sendEffect: string | null;
             mediaUrl: string | null;
             mediaType: string | null;
             mediaName: string | null;
@@ -165,6 +172,9 @@ export declare function exportChurchData(churchId: string): Promise<{
         unreadCount: number;
         createdAt: Date;
         updatedAt: Date;
+        recipientRcsCapable: boolean;
+        isTyping: boolean;
+        lastTypingAt: Date | null;
     })[];
     subscriptions: {
         id: string;

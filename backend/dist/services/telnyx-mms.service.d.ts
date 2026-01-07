@@ -12,10 +12,10 @@ export declare function sendMMS(to: string, message: string, churchId: string, m
     success: boolean;
 }>;
 /**
- * Handle inbound MMS webhook
- * Called when member sends photo/video/audio/document to church number
+ * Handle inbound message webhook (SMS/MMS/RCS)
+ * Called when member sends message to church number
  */
-export declare function handleInboundMMS(churchId: string, senderPhone: string, messageText: string, mediaUrls: string[], telnyxMessageId?: string): Promise<{
+export declare function handleInboundMMS(churchId: string, senderPhone: string, messageText: string, mediaUrls: string[], telnyxMessageId?: string, channel?: 'sms' | 'mms' | 'rcs'): Promise<{
     conversationId: string;
     messageIds: string[];
 }>;

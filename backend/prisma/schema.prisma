@@ -62,6 +62,10 @@ model Church {
   telnyxNumberDeletedBy        String?
   telnyxNumberRecoveryDeadline DateTime?
 
+  // RCS (Rich Communication Services) Configuration
+  rcsAgentId                   String?   // Telnyx RCS Agent ID for iMessage-style messaging
+  rcsAgentWebhookConfigured    Boolean   @default(false)
+
   // 10DLC Registration
   dlcBrandId                   String?
   tcrBrandId                   String?
@@ -76,9 +80,9 @@ model Church {
   dlcCampaignSuspended         Boolean  @default(false)
   dlcCampaignSuspendedAt       DateTime?
   dlcCampaignSuspendedReason   String?
-  usingSharedBrand             Boolean  @default(true)
-  wantsPremiumDelivery         Boolean  @default(false)
-  deliveryRate                 Float    @default(0.65)
+  usingSharedBrand             Boolean  @default(false)  // DEPRECATED: Premium only, no shared brand
+  wantsPremiumDelivery         Boolean  @default(true)   // All churches use premium 10DLC
+  deliveryRate                 Float    @default(0.99)   // Premium 10DLC delivery rate
 
   // 10DLC Brand Information
   // SECURITY: EIN is encrypted at rest using AES-256-GCM

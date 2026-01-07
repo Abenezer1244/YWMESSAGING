@@ -26,8 +26,12 @@ export declare function getConversation(tenantId: string, tenantPrisma: TenantPr
 }): Promise<any>;
 /**
  * Create text-only reply message
+ * Supports reply threading (replyToId) and send effects (sendEffect)
  */
-export declare function createReply(tenantId: string, tenantPrisma: TenantPrismaClient, conversationId: string, content: string): Promise<any>;
+export declare function createReply(tenantId: string, tenantPrisma: TenantPrismaClient, conversationId: string, content: string, options?: {
+    replyToId?: string;
+    sendEffect?: string;
+}): Promise<any>;
 /**
  * Create reply with media attachment
  */

@@ -1,1 +1,0 @@
-import{c as t}from"./index-BN2KEnXV.js";async function a(a){return(await t.post("/messages/send",a)).data.data}async function s(a={}){const s=new URLSearchParams;a.page&&s.append("page",a.page.toString()),a.limit&&s.append("limit",a.limit.toString()),a.status&&s.append("status",a.status);return(await t.get(`/messages/history?${s.toString()}`)).data}export{s as g,a as s};

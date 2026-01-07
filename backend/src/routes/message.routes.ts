@@ -72,6 +72,36 @@ router.get('/history', authenticateToken, messageLimiter(), messageController.ge
 // Get single message details
 router.get('/:messageId', authenticateToken, messageController.getMessageDetails);
 
+// ============ RCS RICH MESSAGING ============
+
+// Send rich card announcement
+router.post(
+  '/rcs/announcement',
+  authenticateToken,
+  messageController.sendRichAnnouncement
+);
+
+// Send event invitation with RSVP
+router.post(
+  '/rcs/event',
+  authenticateToken,
+  messageController.sendEventInvitation
+);
+
+// Send weekly schedule carousel
+router.post(
+  '/rcs/schedule',
+  authenticateToken,
+  messageController.sendWeeklySchedule
+);
+
+// Check RCS configuration status
+router.get(
+  '/rcs/status',
+  authenticateToken,
+  messageController.getRCSStatus
+);
+
 // ============ CONVERSATIONS (New - SMS/MMS with media) ============
 
 // Get all conversations
@@ -119,6 +149,22 @@ router.patch(
   validateParams(ConversationParamSchema),
   validateBody(UpdateConversationStatusSchema),
   conversationController.updateStatus
+);
+
+// ============ MESSAGE REACTIONS (iMessage-style) ============
+
+// Add reaction to message
+router.post(
+  '/conversations/:conversationId/messages/:messageId/reactions',
+  authenticateToken,
+  conversationController.addReaction
+);
+
+// Remove reaction from message
+router.delete(
+  '/conversations/:conversationId/messages/:messageId/reactions/:emoji',
+  authenticateToken,
+  conversationController.removeReaction
 );
 
 // ============ WEBHOOKS (No authentication) ============

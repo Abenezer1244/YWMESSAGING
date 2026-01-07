@@ -27,9 +27,14 @@ export async function getConversation(conversationId, options = {}) {
 }
 /**
  * Reply to conversation with text only
+ * Supports reply threading (replyToId) and send effects (sendEffect)
  */
-export async function replyToConversation(conversationId, content) {
-    const response = await client.post(`/messages/conversations/${conversationId}/reply`, { content });
+export async function replyToConversation(conversationId, content, options) {
+    const response = await client.post(`/messages/conversations/${conversationId}/reply`, {
+        content,
+        replyToId: options?.replyToId,
+        sendEffect: options?.sendEffect,
+    });
     return response.data;
 }
 /**
@@ -60,5 +65,18 @@ export async function markConversationAsRead(conversationId) {
 export async function updateConversationStatus(conversationId, status) {
     const response = await client.patch(`/messages/conversations/${conversationId}/status`, { status });
     return response.data;
+}
+/**
+ * Add reaction to a message (iMessage-style)
+ */
+export async function addReaction(conversationId, messageId, emoji) {
+    const response = await client.post(`/messages/conversations/${conversationId}/messages/${messageId}/reactions`, { emoji });
+    return response.data;
+}
+/**
+ * Remove reaction from a message (iMessage-style)
+ */
+export async function removeReaction(conversationId, messageId, emoji) {
+    await client.delete(`/messages/conversations/${conversationId}/messages/${messageId}/reactions/${encodeURIComponent(emoji)}`);
 }
 //# sourceMappingURL=conversations.js.map

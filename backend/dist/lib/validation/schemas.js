@@ -61,10 +61,28 @@ export const SendMessageSchema = z.object({
         .min(1, 'Message content is required')
         .max(160, 'Message is too long (max 160 characters)')
         .trim(),
-    recipientIds: z.array(z.string().uuid('Invalid recipient ID')).min(1, 'At least one recipient is required'),
+    // Support both recipientIds (original) and targetType/targetIds (current)
+    recipientIds: z.array(z.string().uuid('Invalid recipient ID')).optional(),
+    targetType: z.enum(['individual', 'all']).optional(),
+    targetIds: z.array(z.string().uuid()).optional(),
     scheduleTime: z.string()
         .datetime('Invalid schedule time format')
         .optional(),
+    // RCS Rich Card data (optional) - for iMessage-style messaging
+    richCard: z.object({
+        title: z.string().min(1).max(200),
+        description: z.string().max(2000).optional(),
+        imageUrl: z.string().url().optional(),
+        rsvpUrl: z.string().url().optional(),
+        websiteUrl: z.string().url().optional(),
+        phoneNumber: z.string().optional(),
+        location: z.object({
+            latitude: z.number(),
+            longitude: z.number(),
+            label: z.string(),
+        }).optional(),
+        quickReplies: z.array(z.string().max(50)).max(5).optional(),
+    }).optional(),
 });
 export const MessageFilterSchema = z.object({
     status: z.enum(['draft', 'scheduled', 'sending', 'sent', 'failed']).optional(),
@@ -167,6 +185,9 @@ export const ReplyToConversationSchema = z.object({
         .min(1, 'Message content is required')
         .max(160, 'Message is too long (max 160 characters)')
         .trim(),
+    // iMessage-style features
+    replyToId: z.string().optional(),
+    sendEffect: z.enum(['slam', 'loud', 'gentle', 'invisibleInk', 'none']).optional(),
 });
 export const ReplyWithMediaSchema = z.object({
     content: z.string()

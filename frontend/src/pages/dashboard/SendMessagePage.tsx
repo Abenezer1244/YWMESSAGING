@@ -1,16 +1,20 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Loader, Send, FileText } from 'lucide-react';
+import { Loader, Send, FileText, Sparkles, MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useMessageStore } from '../../stores/messageStore';
 import { sendMessage } from '../../api/messages';
 import { getTemplates, MessageTemplate } from '../../api/templates';
 import TemplateFormModal from '../../components/templates/TemplateFormModal';
+import { RichCardComposer, EventInvitationComposer } from '../../components/rcs';
 import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
+
+type MessageMode = 'sms' | 'rich-card' | 'event';
 
 export function SendMessagePage() {
   const { addMessage } = useMessageStore();
 
+  const [messageMode, setMessageMode] = useState<MessageMode>('sms');
   const [content, setContent] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(false);
@@ -84,12 +88,73 @@ export function SendMessagePage() {
             <h1 className="text-4xl font-bold text-foreground mb-2">
               <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Send Message</span>
             </h1>
-            <p className="text-muted-foreground">Reach your congregation with direct SMS messages</p>
+            <p className="text-muted-foreground">Reach your congregation with SMS or rich messages</p>
           </div>
+        </motion.div>
+
+        {/* Message Mode Selector */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.05 }}
+          className="mb-6"
+        >
+          <div className="flex gap-2 flex-wrap">
+            <SoftButton
+              variant={messageMode === 'sms' ? 'primary' : 'secondary'}
+              size="md"
+              onClick={() => setMessageMode('sms')}
+              icon={<MessageSquare className="w-4 h-4" />}
+            >
+              Text SMS
+            </SoftButton>
+            <SoftButton
+              variant={messageMode === 'rich-card' ? 'primary' : 'secondary'}
+              size="md"
+              onClick={() => setMessageMode('rich-card')}
+              icon={<Sparkles className="w-4 h-4" />}
+            >
+              Rich Announcement
+            </SoftButton>
+            <SoftButton
+              variant={messageMode === 'event' ? 'primary' : 'secondary'}
+              size="md"
+              onClick={() => setMessageMode('event')}
+              icon={<FileText className="w-4 h-4" />}
+            >
+              Event Invitation
+            </SoftButton>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            {messageMode === 'sms' && 'Standard text message - works on all phones'}
+            {messageMode === 'rich-card' && 'iMessage-style card with image, buttons & quick replies (requires RCS setup)'}
+            {messageMode === 'event' && 'Event invitation with "Add to Calendar" button (requires RCS setup)'}
+          </p>
         </motion.div>
 
         {/* Main Content */}
         <SoftCard className="space-y-6">
+          {/* Rich Card Composer */}
+          {messageMode === 'rich-card' && (
+            <RichCardComposer
+              onSuccess={() => {
+                // Optionally switch back to SMS mode after sending
+              }}
+            />
+          )}
+
+          {/* Event Invitation Composer */}
+          {messageMode === 'event' && (
+            <EventInvitationComposer
+              onSuccess={() => {
+                // Optionally switch back to SMS mode after sending
+              }}
+            />
+          )}
+
+          {/* SMS Composer */}
+          {messageMode === 'sms' && (
+            <>
           {/* Template Selector */}
           {templates.length > 0 && (
             <motion.div
@@ -239,6 +304,8 @@ export function SendMessagePage() {
               {isLoading ? 'Sending...' : 'Send Message'}
             </SoftButton>
           </motion.div>
+            </>
+          )}
         </SoftCard>
       </div>
 

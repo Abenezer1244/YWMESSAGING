@@ -183,6 +183,105 @@ export function broadcastMessageRead(
   });
 }
 
+// ============================================================================
+// RCS (iMessage-style) Events
+// ============================================================================
+
+/**
+ * RCS typing indicator event payload
+ */
+export interface RCSTypingEvent {
+  type: 'rcs:typing';
+  conversationId: string;
+  isTyping: boolean;
+  timestamp: string;
+}
+
+/**
+ * RCS read receipt event payload
+ */
+export interface RCSReadReceiptEvent {
+  type: 'rcs:read_receipt';
+  messageId: string;
+  conversationId: string;
+  readAt: string;
+}
+
+/**
+ * Broadcast RCS typing indicator to church room
+ * Called when member starts/stops typing (RCS feature)
+ */
+export function broadcastRCSTyping(
+  churchId: string,
+  conversationId: string,
+  isTyping: boolean
+): void {
+  if (!io) {
+    console.warn('⚠️ WebSocket not initialized, skipping RCS typing broadcast');
+    return;
+  }
+
+  const room = getChurchRoom(churchId);
+  const event: RCSTypingEvent = {
+    type: 'rcs:typing',
+    conversationId,
+    isTyping,
+    timestamp: new Date().toISOString(),
+  };
+
+  console.log(`📱 RCS typing indicator → ${room}: ${isTyping ? 'typing...' : 'stopped'}`);
+  io.to(room).emit('rcs:typing', event);
+}
+
+/**
+ * Broadcast RCS read receipt to church room
+ * Called when member reads message (RCS feature)
+ */
+export function broadcastRCSReadReceipt(
+  churchId: string,
+  messageId: string,
+  conversationId: string,
+  readAt: string
+): void {
+  if (!io) {
+    console.warn('⚠️ WebSocket not initialized, skipping RCS read receipt broadcast');
+    return;
+  }
+
+  const room = getChurchRoom(churchId);
+  const event: RCSReadReceiptEvent = {
+    type: 'rcs:read_receipt',
+    messageId,
+    conversationId,
+    readAt,
+  };
+
+  console.log(`✓✓ RCS read receipt → ${room}: message ${messageId} read at ${readAt}`);
+  io.to(room).emit('rcs:read_receipt', event);
+}
+
+/**
+ * Generic broadcast to a tenant/church room
+ * Used for custom events like RCS typing/read receipts
+ */
+export function broadcastToTenant(
+  churchId: string,
+  eventType: string,
+  payload: Record<string, any>
+): void {
+  if (!io) {
+    console.warn('⚠️ WebSocket not initialized, skipping broadcast');
+    return;
+  }
+
+  const room = getChurchRoom(churchId);
+  console.log(`📢 Broadcasting ${eventType} to ${room}`);
+  io.to(room).emit(eventType, {
+    ...payload,
+    timestamp: new Date().toISOString(),
+  });
+}
+
 /**
  * Get current Socket.io instance
  * Useful for accessing io in other modules

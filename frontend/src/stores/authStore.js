@@ -65,6 +65,18 @@ const useAuthStoreBase = create()((set, get) => ({
         catch (e) {
             console.warn('Failed to clear auth state from sessionStorage');
         }
+        // ✅ CRITICAL: Clear tenant-specific localStorage items
+        // Onboarding data is tenant-specific and must be cleared on account switch
+        try {
+            localStorage.removeItem('onboarding:completed');
+            localStorage.removeItem('onboarding:preferences');
+            localStorage.removeItem('onboarding:profile');
+            localStorage.removeItem('onboarding:team');
+            localStorage.removeItem('onboarding_progress');
+        }
+        catch (e) {
+            console.warn('Failed to clear onboarding data from localStorage');
+        }
     },
     logout: async () => {
         // Call backend logout endpoint to clear HTTPOnly cookies
@@ -101,6 +113,17 @@ const useAuthStoreBase = create()((set, get) => ({
         }
         catch (e) {
             console.warn('Failed to clear auth state from sessionStorage');
+        }
+        // ✅ Clear tenant-specific localStorage items
+        try {
+            localStorage.removeItem('onboarding:completed');
+            localStorage.removeItem('onboarding:preferences');
+            localStorage.removeItem('onboarding:profile');
+            localStorage.removeItem('onboarding:team');
+            localStorage.removeItem('onboarding_progress');
+        }
+        catch (e) {
+            console.warn('Failed to clear onboarding data from localStorage');
         }
     },
     isTokenExpired: () => {

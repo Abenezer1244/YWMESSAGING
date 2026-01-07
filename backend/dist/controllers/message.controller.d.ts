@@ -16,6 +16,58 @@ export declare function getMessageHistory(req: Request, res: Response): Promise<
  */
 export declare function getMessageDetails(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 /**
+ * POST /api/messages/rcs/announcement
+ * Send a rich card announcement to all members
+ *
+ * Request body:
+ * {
+ *   title: string,
+ *   description: string,
+ *   imageUrl?: string,
+ *   rsvpUrl?: string,
+ *   websiteUrl?: string,
+ *   phoneNumber?: string,
+ *   location?: { latitude, longitude, label },
+ *   quickReplies?: string[]
+ * }
+ */
+export declare function sendRichAnnouncement(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+/**
+ * POST /api/messages/rcs/event
+ * Send an event invitation to all members
+ *
+ * Request body:
+ * {
+ *   title: string,
+ *   description: string,
+ *   imageUrl?: string,
+ *   startTime: string (ISO 8601),
+ *   endTime: string (ISO 8601),
+ *   location?: { latitude, longitude, label }
+ * }
+ */
+export declare function sendEventInvitation(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+/**
+ * POST /api/messages/rcs/schedule
+ * Send weekly schedule as a carousel
+ *
+ * Request body:
+ * {
+ *   events: Array<{
+ *     title: string,
+ *     description: string,
+ *     imageUrl?: string,
+ *     location?: { latitude, longitude, label }
+ *   }>
+ * }
+ */
+export declare function sendWeeklySchedule(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+/**
+ * GET /api/messages/rcs/status
+ * Check RCS configuration status for the church
+ */
+export declare function getRCSStatus(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+/**
  * POST /api/webhooks/telnyx/status
  * Webhook for Telnyx delivery status updates (DLR - Delivery Receipt)
  *

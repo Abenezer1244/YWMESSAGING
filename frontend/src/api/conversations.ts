@@ -15,7 +15,22 @@ export interface Conversation {
   unreadCount: number;
   createdAt: string;
   updatedAt: string;
+  // RCS (iMessage-style) fields
+  recipientRcsCapable?: boolean;  // Whether recipient supports RCS
+  isTyping?: boolean;             // Typing indicator from member
+  lastTypingAt?: string | null;   // When typing indicator was last received
 }
+
+// Message reaction (iMessage-style)
+export interface MessageReaction {
+  id: string;
+  emoji: string;  // ❤️ 👍 👎 😂 😮 😢
+  reactedBy: string;  // "church" or member ID
+  createdAt: string;
+}
+
+// Send effect types (iMessage-style)
+export type SendEffect = 'slam' | 'loud' | 'gentle' | 'invisibleInk' | 'none';
 
 export interface ConversationMessage {
   id: string;
@@ -30,6 +45,20 @@ export interface ConversationMessage {
   mediaSizeBytes?: number | null;
   mediaDuration?: number | null;
   createdAt: string;
+  // RCS (iMessage-style) fields
+  channel?: 'sms' | 'mms' | 'rcs';  // Message delivery channel
+  rcsReadAt?: string | null;        // When recipient read the message (RCS only)
+  // Reply threading (iMessage-style)
+  replyToId?: string | null;        // ID of message being replied to
+  replyTo?: {                       // Preview of replied message
+    id: string;
+    content: string;
+    direction: 'inbound' | 'outbound';
+  } | null;
+  // Reactions (iMessage-style)
+  reactions?: MessageReaction[];
+  // Send effect animation (iMessage-style)
+  sendEffect?: SendEffect | null;
 }
 
 /**
@@ -85,14 +114,23 @@ export async function getConversation(
 
 /**
  * Reply to conversation with text only
+ * Supports reply threading (replyToId) and send effects (sendEffect)
  */
 export async function replyToConversation(
   conversationId: string,
-  content: string
+  content: string,
+  options?: {
+    replyToId?: string;
+    sendEffect?: SendEffect;
+  }
 ): Promise<ConversationMessage> {
   const response = await client.post(
     `/messages/conversations/${conversationId}/reply`,
-    { content }
+    {
+      content,
+      replyToId: options?.replyToId,
+      sendEffect: options?.sendEffect,
+    }
   );
   return response.data;
 }
@@ -146,4 +184,32 @@ export async function updateConversationStatus(
     { status }
   );
   return response.data;
+}
+
+/**
+ * Add reaction to a message (iMessage-style)
+ */
+export async function addReaction(
+  conversationId: string,
+  messageId: string,
+  emoji: string
+): Promise<MessageReaction> {
+  const response = await client.post(
+    `/messages/conversations/${conversationId}/messages/${messageId}/reactions`,
+    { emoji }
+  );
+  return response.data;
+}
+
+/**
+ * Remove reaction from a message (iMessage-style)
+ */
+export async function removeReaction(
+  conversationId: string,
+  messageId: string,
+  emoji: string
+): Promise<void> {
+  await client.delete(
+    `/messages/conversations/${conversationId}/messages/${messageId}/reactions/${encodeURIComponent(emoji)}`
+  );
 }

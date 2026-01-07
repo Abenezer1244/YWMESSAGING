@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { MessageSquare, Phone, Search, Loader, ChevronLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -10,6 +10,7 @@ import {
   getConversation,
   markConversationAsRead,
   updateConversationStatus,
+  addReaction,
 } from '../../api/conversations';
 import { SoftLayout, SoftCard, SoftButton } from '../../components/SoftUI';
 import Input from '../../components/ui/Input';
@@ -18,6 +19,7 @@ import { MessageThread } from '../../components/conversations/MessageThread';
 import { ReplyComposer } from '../../components/conversations/ReplyComposer';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
 import { designTokens } from '../../utils/designTokens';
+import { useConversationSocket, RCSTypingEvent, RCSReadReceiptEvent } from '../../hooks/useConversationSocket';
 
 export function ConversationsPage() {
   const auth = useAuthStore();
@@ -40,6 +42,43 @@ export function ConversationsPage() {
 
   // Mobile navigation state - on mobile, show either list or messages
   const [showMessages, setShowMessages] = useState(false);
+
+  // RCS typing indicator state (iMessage-style)
+  const [isTyping, setIsTyping] = useState(false);
+
+  // Reply-to message state (iMessage-style)
+  const [replyToMessage, setReplyToMessage] = useState<ConversationMessage | null>(null);
+
+  // Handle RCS typing events from WebSocket
+  const handleTypingEvent = useCallback((event: RCSTypingEvent) => {
+    // Only update typing state if it's for the currently selected conversation
+    if (event.conversationId === selectedConversationId) {
+      setIsTyping(event.isTyping);
+
+      // Auto-clear typing indicator after 5 seconds (in case we miss the stop event)
+      if (event.isTyping) {
+        setTimeout(() => setIsTyping(false), 5000);
+      }
+    }
+  }, [selectedConversationId]);
+
+  // Handle RCS read receipt events from WebSocket
+  const handleReadReceiptEvent = useCallback((event: RCSReadReceiptEvent) => {
+    // Update message in current thread if it's in the selected conversation
+    if (event.conversationId === selectedConversationId) {
+      setMessages(prev => prev.map(msg =>
+        msg.id === event.messageId
+          ? { ...msg, rcsReadAt: event.readAt }
+          : msg
+      ));
+    }
+  }, [selectedConversationId]);
+
+  // Connect to WebSocket for real-time RCS features
+  const { isConnected } = useConversationSocket({
+    onTyping: handleTypingEvent,
+    onReadReceipt: handleReadReceiptEvent,
+  });
 
   // Load conversations on mount and when page/search changes
   useEffect(() => {
@@ -77,6 +116,7 @@ export function ConversationsPage() {
       setSelectedConversationId(conversationId);
       setIsLoadingMessages(true);
       setMessagesPage(1);
+      setIsTyping(false); // Clear typing state when switching conversations
 
       const data = await getConversation(conversationId, {
         page: 1,
@@ -126,6 +166,9 @@ export function ConversationsPage() {
     if (!selectedConversationId) return;
 
     try {
+      // Clear reply-to state
+      setReplyToMessage(null);
+
       // Reload conversation to get new messages
       const data = await getConversation(selectedConversationId, {
         page: messagesPages,
@@ -161,6 +204,36 @@ export function ConversationsPage() {
     } catch (error) {
       toast.error((error as Error).message || 'Failed to update conversation');
     }
+  };
+
+  // Handle adding reaction to a message (iMessage-style)
+  const handleReaction = async (messageId: string, emoji: string) => {
+    if (!selectedConversationId) return;
+
+    try {
+      const reaction = await addReaction(selectedConversationId, messageId, emoji);
+      // Update message in local state
+      setMessages(prev => prev.map(msg =>
+        msg.id === messageId
+          ? { ...msg, reactions: [...(msg.reactions || []), reaction] }
+          : msg
+      ));
+    } catch (error) {
+      toast.error((error as Error).message || 'Failed to add reaction');
+    }
+  };
+
+  // Handle selecting a message to reply to (iMessage-style)
+  const handleSelectReplyMessage = (messageId: string) => {
+    const message = messages.find(m => m.id === messageId);
+    if (message) {
+      setReplyToMessage(message);
+    }
+  };
+
+  // Handle canceling reply
+  const handleCancelReply = () => {
+    setReplyToMessage(null);
   };
 
   return (
@@ -327,12 +400,17 @@ export function ConversationsPage() {
                   page={messagesPage}
                   pages={messagesPages}
                   onLoadMore={handleLoadMoreMessages}
+                  isTyping={isTyping}
+                  onReact={handleReaction}
+                  onSelectReplyMessage={handleSelectReplyMessage}
                 />
 
                 {/* Reply Composer */}
                 <ReplyComposer
                   conversationId={selectedConversation.id}
                   onReply={handleReply}
+                  replyToMessage={replyToMessage}
+                  onCancelReply={handleCancelReply}
                 />
               </SoftCard>
               ) : (

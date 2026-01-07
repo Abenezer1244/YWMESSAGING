@@ -34,6 +34,8 @@ export declare function updateChurchProfile(tenantId: string, input: UpdateChurc
     telnyxNumberDeletedAt: Date | null;
     telnyxNumberDeletedBy: string | null;
     telnyxNumberRecoveryDeadline: Date | null;
+    rcsAgentId: string | null;
+    rcsAgentWebhookConfigured: boolean;
     dlcBrandId: string | null;
     tcrBrandId: string | null;
     dlcStatus: string;

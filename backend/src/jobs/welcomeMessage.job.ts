@@ -31,7 +31,8 @@ export async function sendWelcomeMessage(
       return;
     }
 
-    const welcomeText = `Welcome to ${church.name}!`;
+    // 10DLC Compliant welcome message with opt-out instructions
+    const welcomeText = `KoinoniaSMS: You're now subscribed to ${church.name} updates! Reply HELP for help, STOP to opt out. Msg&data rates may apply. Msg frequency varies.`;
 
     // Send SMS via Telnyx
     await telnyxService.sendSMS(member.phone, welcomeText, churchId);

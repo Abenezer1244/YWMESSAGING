@@ -171,7 +171,6 @@ export async function sendSMS(
     where: { id: churchId },
     select: {
       telnyxPhoneNumber: true,
-      usingSharedBrand: true,
       dlcBrandId: true,
       deliveryRate: true,
     },
@@ -182,16 +181,15 @@ export async function sendSMS(
   }
 
   try {
-    // Log outbound SMS attempt with delivery rate
-    const brandType = church.usingSharedBrand ? 'shared' : 'personal';
-    const deliveryPercent = Math.round((church.deliveryRate || 0.65) * 100);
+    // Log outbound SMS attempt with delivery rate (premium 10DLC only)
+    const deliveryPercent = Math.round((church.deliveryRate || 0.99) * 100);
     console.log(`📤 Sending SMS: from ${church.telnyxPhoneNumber} to ${to}`);
-    console.log(`   Brand: ${brandType} (${deliveryPercent}% delivery rate)`);
+    console.log(`   Brand: premium 10DLC (${deliveryPercent}% delivery rate)`);
     console.log(`   Message: "${message.substring(0, 80)}${message.length > 80 ? '...' : ''}"`);
 
     const client = getTelnyxClient();
 
-    // Build payload with optional brand ID
+    // Build payload with brand ID (premium 10DLC only)
     const payload: any = {
       from: church.telnyxPhoneNumber,
       to: to,
@@ -202,20 +200,10 @@ export async function sendSMS(
       webhook_failover_url: `${process.env.BACKEND_URL || 'https://api.koinoniasms.com'}/api/webhooks/telnyx/status`,
     };
 
-    // Add brand ID based on delivery tier
-    if (church.usingSharedBrand) {
-      // Using platform's shared brand (65% delivery)
-      const platformBrandId = process.env.TELNYX_PLATFORM_BRAND_ID;
-      if (platformBrandId) {
-        payload.brand_id = platformBrandId;
-        console.log(`   Using shared platform brand: ${platformBrandId}`);
-      } else {
-        console.warn(`   ⚠️ Platform brand ID not configured. Sending without brand ID.`);
-      }
-    } else if (!church.usingSharedBrand && church.dlcBrandId) {
-      // Using church's personal 10DLC brand (99% delivery)
+    // Add church's 10DLC brand ID (premium delivery)
+    if (church.dlcBrandId) {
       payload.brand_id = church.dlcBrandId;
-      console.log(`   Using personal 10DLC brand: ${church.dlcBrandId}`);
+      console.log(`   Using 10DLC brand: ${church.dlcBrandId}`);
     }
 
     const response = await telnyxCircuitBreaker.execute(async () => {

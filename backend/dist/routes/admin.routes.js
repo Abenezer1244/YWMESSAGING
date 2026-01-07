@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticateToken } from '../middleware/auth.middleware.js';
-import { getProfileHandler, updateProfileHandler, getDeliveryTierStatusHandler, getCoAdminsHandler, inviteCoAdminHandler, removeCoAdminHandler, getActivityLogsHandler, logActivityHandler, linkPhoneNumberHandler, } from '../controllers/admin.controller.js';
+import { getProfileHandler, updateProfileHandler, getDeliveryTierStatusHandler, getCoAdminsHandler, inviteCoAdminHandler, removeCoAdminHandler, getActivityLogsHandler, logActivityHandler, linkPhoneNumberHandler, registerRCSAgentHandler, } from '../controllers/admin.controller.js';
 import cacheMonitoringRoutes from './cache-monitoring.routes.js';
 import queueMonitoringRoutes from './queue-monitoring.routes.js';
 const router = Router();
@@ -19,6 +19,8 @@ router.get('/activity-logs', getActivityLogsHandler);
 router.post('/activity-log', logActivityHandler);
 // Phone number endpoints
 router.post('/phone-numbers/link', linkPhoneNumberHandler);
+// RCS (Rich Communication Services) endpoints
+router.post('/rcs/register', registerRCSAgentHandler);
 // Cache monitoring endpoints (production monitoring)
 router.use('/cache', cacheMonitoringRoutes);
 // Queue monitoring endpoints (✅ PHASE 1: SMS queue monitoring)

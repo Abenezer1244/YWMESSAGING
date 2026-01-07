@@ -54,4 +54,10 @@ export declare function logActivityHandler(req: Request, res: Response): Promise
  * Link a phone number and auto-create webhook
  */
 export declare function linkPhoneNumberHandler(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+/**
+ * POST /api/admin/rcs/register
+ * Register RCS Agent ID for the church
+ * This enables iMessage-style rich messaging features
+ */
+export declare function registerRCSAgentHandler(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 //# sourceMappingURL=admin.controller.d.ts.map

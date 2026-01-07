@@ -7,6 +7,20 @@ export interface CreateMessageData {
     content: string;
     targetType: 'individual' | 'all';
     targetIds?: string[];
+    richCard?: {
+        title: string;
+        description?: string;
+        imageUrl?: string;
+        rsvpUrl?: string;
+        websiteUrl?: string;
+        phoneNumber?: string;
+        location?: {
+            latitude: number;
+            longitude: number;
+            label: string;
+        };
+        quickReplies?: string[];
+    };
 }
 /**
  * Resolve recipients based on target type

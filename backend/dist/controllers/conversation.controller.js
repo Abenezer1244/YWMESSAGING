@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import * as conversationService from '../services/conversation.service.js';
 import * as telnyxMMSService from '../services/telnyx-mms.service.js';
 import * as s3MediaService from '../services/s3-media.service.js';
+import * as websocketService from '../services/websocket.service.js';
 import { hashForSearch } from '../utils/encryption.utils.js';
 import { sendSMS } from '../services/telnyx.service.js';
 import { formatToE164 } from '../utils/phone.utils.js';
@@ -109,8 +110,8 @@ export async function replyToConversation(req, res) {
                 details: bodyValidation.errors,
             });
         }
-        const { content } = bodyValidation.data;
-        const message = await conversationService.createReply(conversationId, tenantId, tenantPrisma, content);
+        const { content, replyToId, sendEffect } = bodyValidation.data;
+        const message = await conversationService.createReply(tenantId, tenantPrisma, conversationId, content, { replyToId, sendEffect });
         res.status(201).json({
             success: true,
             data: message,
@@ -402,7 +403,11 @@ export async function handleTelnyxInboundMMS(req, res) {
             console.warn('⚠️ Invalid payload in webhook');
             return res.status(400).json({ error: 'Invalid payload' });
         }
-        const { id: telnyxMessageId, from, to, text, media } = payload;
+        const { id: telnyxMessageId, from, to, text, media, type: messageType } = payload;
+        // Detect channel: RCS, MMS, or SMS
+        const channel = messageType?.toUpperCase() === 'RCS' ? 'rcs'
+            : (media && media.length > 0) ? 'mms'
+                : 'sms';
         // Extract phone numbers from Telnyx webhook format
         const senderPhone = from?.phone_number;
         const recipientPhone = to?.[0]?.phone_number;
@@ -434,7 +439,7 @@ export async function handleTelnyxInboundMMS(req, res) {
                 return res.json({ received: true });
             }
         }
-        console.log(`📨 Telnyx MMS webhook: from=${senderPhone}, to=${recipientPhone}, media=${media?.length || 0}`);
+        console.log(`📨 Telnyx ${channel.toUpperCase()} webhook: from=${senderPhone}, to=${recipientPhone}, media=${media?.length || 0}`);
         // SECURITY: Verify sender is a registered member of the tenant
         console.log(`🔐 Verifying member: ${senderPhone} for tenant ${tenantId}`);
         // Format phone number to match how it's stored in the database
@@ -482,9 +487,10 @@ export async function handleTelnyxInboundMMS(req, res) {
         console.log(`✅ Member verified: ${member.id} (${member.firstName} ${member.lastName})`);
         // Extract media URLs
         const mediaUrls = media?.map((m) => m.url) || [];
-        console.log(`✅ Processing MMS for tenant: ${tenant.name} (${tenantId})`);
-        // Process inbound MMS
-        const result = await telnyxMMSService.handleInboundMMS(tenantId, senderPhone, text || '', mediaUrls, telnyxMessageId);
+        console.log(`✅ Processing ${channel.toUpperCase()} for tenant: ${tenant.name} (${tenantId})`);
+        // Process inbound message (SMS/MMS/RCS)
+        const result = await telnyxMMSService.handleInboundMMS(tenantId, senderPhone, text || '', mediaUrls, telnyxMessageId, channel // Pass channel type for RCS tracking
+        );
         console.log(`✅ MMS processed: conversation=${result.conversationId}, messages=${result.messageIds.length}`);
         return res.json({ received: true });
     }
@@ -609,6 +615,371 @@ export async function handleTelnyxWebhook(req, res) {
     catch (error) {
         console.error('❌ Telnyx webhook error:', error);
         res.status(500).json({ error: 'Failed to process webhook' });
+    }
+}
+/**
+ * POST /api/webhooks/telnyx/rcs
+ * Handle RCS-specific webhooks:
+ * - Read receipts (message.read)
+ * - Typing indicators (user_typing_started, user_typing_stopped)
+ * - RCS delivery status
+ * ✅ SECURITY: Verify Telnyx webhook signature using ED25519
+ */
+export async function handleTelnyxRCSWebhook(req, res) {
+    try {
+        // ✅ CRITICAL SECURITY: Verify webhook signature before processing
+        const signature = req.headers['telnyx-signature-ed25519'];
+        const timestamp = req.headers['telnyx-timestamp'];
+        let rawBody;
+        if (Buffer.isBuffer(req.body)) {
+            rawBody = req.body.toString('utf-8');
+        }
+        else if (typeof req.body === 'string') {
+            rawBody = req.body;
+        }
+        else {
+            console.error('❌ RCS Webhook req.body is neither Buffer nor string:', typeof req.body);
+            return res.status(400).json({ error: 'Invalid request format' });
+        }
+        if (!rawBody || !signature || !timestamp) {
+            console.error('❌ Missing required RCS webhook data:', {
+                hasRawBody: !!rawBody,
+                hasSignature: !!signature,
+                hasTimestamp: !!timestamp,
+            });
+            return res.status(400).json({ error: 'Missing required webhook headers or body' });
+        }
+        const publicKey = process.env.TELNYX_WEBHOOK_PUBLIC_KEY;
+        if (!publicKey) {
+            console.error('❌ CRITICAL: TELNYX_WEBHOOK_PUBLIC_KEY not configured');
+            return res.status(500).json({ error: 'Server configuration error' });
+        }
+        const isValidSignature = verifyTelnyxInboundWebhookSignature(rawBody, signature, timestamp, publicKey);
+        if (!isValidSignature) {
+            console.error('❌ RCS WEBHOOK SIGNATURE VERIFICATION FAILED - REJECTING');
+            return res.status(401).json({ error: 'Invalid webhook signature' });
+        }
+        console.log('✅ RCS webhook signature verified (ED25519) - processing');
+        let webhookData;
+        try {
+            webhookData = JSON.parse(rawBody);
+        }
+        catch (parseError) {
+            console.error('❌ Invalid JSON in RCS webhook payload:', parseError);
+            return res.status(400).json({ error: 'Invalid JSON payload' });
+        }
+        const { data } = webhookData;
+        const eventType = data?.event_type;
+        const payload = data?.payload;
+        console.log(`📨 RCS Webhook: event_type=${eventType}`);
+        if (!payload) {
+            console.warn('⚠️ Invalid RCS webhook payload');
+            return res.status(400).json({ error: 'Invalid payload' });
+        }
+        // Handle different RCS event types
+        switch (eventType) {
+            case 'message.read': {
+                // Read receipt - member opened the message
+                const messageId = payload.message_id || payload.id;
+                const readAt = new Date(payload.read_at || payload.occurred_at || Date.now());
+                console.log(`📖 RCS Read Receipt: message=${messageId}, readAt=${readAt.toISOString()}`);
+                // Find and update the message across tenant databases
+                await updateMessageReadReceipt(messageId, readAt);
+                break;
+            }
+            case 'user_typing_started':
+            case 'message.typing_started': {
+                // Typing indicator - member started typing
+                const phoneNumber = payload.from?.phone_number || payload.phone_number;
+                console.log(`⌨️ RCS Typing Started: ${phoneNumber}`);
+                await updateTypingIndicator(phoneNumber, true);
+                break;
+            }
+            case 'user_typing_stopped':
+            case 'message.typing_stopped': {
+                // Typing indicator - member stopped typing
+                const phoneNumber = payload.from?.phone_number || payload.phone_number;
+                console.log(`⌨️ RCS Typing Stopped: ${phoneNumber}`);
+                await updateTypingIndicator(phoneNumber, false);
+                break;
+            }
+            case 'message.finalized': {
+                // RCS delivery status
+                const messageId = payload.id;
+                const status = payload.status;
+                console.log(`📬 RCS Delivery Status: message=${messageId}, status=${status}`);
+                if (status === 'delivered' || status === 'failed') {
+                    await updateMessageDeliveryStatus(messageId, status);
+                }
+                break;
+            }
+            default:
+                console.log(`⏭️ Unhandled RCS event type: ${eventType}`);
+        }
+        return res.json({ received: true });
+    }
+    catch (error) {
+        console.error('❌ RCS webhook error:', error);
+        res.status(500).json({ error: 'Failed to process RCS webhook' });
+    }
+}
+/**
+ * Helper: Update message read receipt across tenant databases
+ */
+async function updateMessageReadReceipt(messageId, readAt) {
+    const registryPrisma = getRegistryPrisma();
+    const churches = await registryPrisma.church.findMany({
+        select: { id: true },
+    });
+    for (const church of churches) {
+        try {
+            const tenantPrisma = await getTenantPrisma(church.id);
+            const message = await tenantPrisma.conversationMessage.findFirst({
+                where: { providerMessageId: messageId },
+            });
+            if (message) {
+                await tenantPrisma.conversationMessage.update({
+                    where: { id: message.id },
+                    data: { rcsReadAt: readAt },
+                });
+                console.log(`✅ Updated read receipt for message ${messageId} in tenant ${church.id}`);
+                // Broadcast read receipt via WebSocket
+                websocketService.broadcastToTenant(church.id, 'rcs:read_receipt', {
+                    messageId: message.id,
+                    conversationId: message.conversationId,
+                    readAt: readAt.toISOString(),
+                });
+                return;
+            }
+        }
+        catch (error) {
+            console.warn(`⚠️ Error updating read receipt in tenant ${church.id}: ${error.message}`);
+        }
+    }
+}
+/**
+ * Helper: Update typing indicator for a conversation
+ */
+async function updateTypingIndicator(phoneNumber, isTyping) {
+    if (!phoneNumber)
+        return;
+    let formattedPhone;
+    try {
+        formattedPhone = formatToE164(phoneNumber);
+    }
+    catch (error) {
+        const digits = phoneNumber.replace(/\D/g, '');
+        if (digits.length === 11 && digits.startsWith('1')) {
+            formattedPhone = `+${digits}`;
+        }
+        else if (digits.length === 10) {
+            formattedPhone = `+1${digits}`;
+        }
+        else {
+            formattedPhone = `+${digits}`;
+        }
+    }
+    const phoneHash = hashForSearch(formattedPhone);
+    const registryPrisma = getRegistryPrisma();
+    const churches = await registryPrisma.church.findMany({
+        select: { id: true },
+    });
+    for (const church of churches) {
+        try {
+            const tenantPrisma = await getTenantPrisma(church.id);
+            // Find member by phone hash
+            const member = await tenantPrisma.member.findFirst({
+                where: { phoneHash },
+            });
+            if (member) {
+                // Find conversation for this member
+                const conversation = await tenantPrisma.conversation.findFirst({
+                    where: { memberId: member.id },
+                });
+                if (conversation) {
+                    // Update typing state
+                    await tenantPrisma.conversation.update({
+                        where: { id: conversation.id },
+                        data: {
+                            isTyping,
+                            lastTypingAt: isTyping ? new Date() : null,
+                        },
+                    });
+                    console.log(`✅ Updated typing indicator for conversation ${conversation.id}: ${isTyping}`);
+                    // Broadcast typing indicator via WebSocket
+                    websocketService.broadcastToTenant(church.id, 'rcs:typing', {
+                        conversationId: conversation.id,
+                        memberId: member.id,
+                        isTyping,
+                    });
+                    return;
+                }
+            }
+        }
+        catch (error) {
+            console.warn(`⚠️ Error updating typing indicator in tenant ${church.id}: ${error.message}`);
+        }
+    }
+}
+/**
+ * Helper: Update message delivery status
+ */
+async function updateMessageDeliveryStatus(messageId, status) {
+    const registryPrisma = getRegistryPrisma();
+    const churches = await registryPrisma.church.findMany({
+        select: { id: true },
+    });
+    for (const church of churches) {
+        try {
+            const tenantPrisma = await getTenantPrisma(church.id);
+            const message = await tenantPrisma.conversationMessage.findFirst({
+                where: { providerMessageId: messageId },
+            });
+            if (message) {
+                await tenantPrisma.conversationMessage.update({
+                    where: { id: message.id },
+                    data: { deliveryStatus: status },
+                });
+                console.log(`✅ Updated delivery status for message ${messageId} to ${status}`);
+                return;
+            }
+        }
+        catch (error) {
+            console.warn(`⚠️ Error updating delivery status in tenant ${church.id}: ${error.message}`);
+        }
+    }
+}
+/**
+ * POST /api/conversations/:conversationId/messages/:messageId/reactions
+ * Add reaction to a message (iMessage-style)
+ */
+export async function addReaction(req, res) {
+    try {
+        const { conversationId, messageId } = req.params;
+        const tenantId = req.tenantId;
+        const tenantPrisma = req.prisma;
+        if (!tenantId || !tenantPrisma) {
+            return res.status(401).json({
+                success: false,
+                error: 'Unauthorized',
+            });
+        }
+        const { emoji } = req.body;
+        // Validate emoji (only allow specific emojis)
+        const allowedEmojis = ['❤️', '👍', '👎', '😂', '😮', '😢'];
+        if (!emoji || !allowedEmojis.includes(emoji)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid emoji. Allowed: ' + allowedEmojis.join(', '),
+            });
+        }
+        // Verify message belongs to this conversation
+        const message = await tenantPrisma.conversationMessage.findFirst({
+            where: {
+                id: messageId,
+                conversationId,
+            },
+        });
+        if (!message) {
+            return res.status(404).json({
+                success: false,
+                error: 'Message not found',
+            });
+        }
+        // Add reaction (upsert to prevent duplicates)
+        const reaction = await tenantPrisma.messageReaction.upsert({
+            where: {
+                messageId_emoji_reactedBy: {
+                    messageId,
+                    emoji,
+                    reactedBy: 'church',
+                },
+            },
+            update: {},
+            create: {
+                messageId,
+                emoji,
+                reactedBy: 'church',
+            },
+        });
+        console.log(`✅ Added reaction ${emoji} to message ${messageId}`);
+        // Broadcast reaction via WebSocket
+        websocketService.broadcastToTenant(tenantId, 'message:reaction', {
+            conversationId,
+            messageId,
+            reaction,
+            action: 'add',
+        });
+        res.status(201).json({
+            success: true,
+            data: reaction,
+        });
+    }
+    catch (error) {
+        console.error('Error adding reaction:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}
+/**
+ * DELETE /api/conversations/:conversationId/messages/:messageId/reactions/:emoji
+ * Remove reaction from a message (iMessage-style)
+ */
+export async function removeReaction(req, res) {
+    try {
+        const { conversationId, messageId, emoji } = req.params;
+        const tenantId = req.tenantId;
+        const tenantPrisma = req.prisma;
+        if (!tenantId || !tenantPrisma) {
+            return res.status(401).json({
+                success: false,
+                error: 'Unauthorized',
+            });
+        }
+        // Decode emoji from URL
+        const decodedEmoji = decodeURIComponent(emoji);
+        // Verify message belongs to this conversation
+        const message = await tenantPrisma.conversationMessage.findFirst({
+            where: {
+                id: messageId,
+                conversationId,
+            },
+        });
+        if (!message) {
+            return res.status(404).json({
+                success: false,
+                error: 'Message not found',
+            });
+        }
+        // Remove reaction
+        await tenantPrisma.messageReaction.deleteMany({
+            where: {
+                messageId,
+                emoji: decodedEmoji,
+                reactedBy: 'church',
+            },
+        });
+        console.log(`✅ Removed reaction ${decodedEmoji} from message ${messageId}`);
+        // Broadcast reaction removal via WebSocket
+        websocketService.broadcastToTenant(tenantId, 'message:reaction', {
+            conversationId,
+            messageId,
+            emoji: decodedEmoji,
+            action: 'remove',
+        });
+        res.json({
+            success: true,
+            message: 'Reaction removed',
+        });
+    }
+    catch (error) {
+        console.error('Error removing reaction:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+        });
     }
 }
 //# sourceMappingURL=conversation.controller.js.map

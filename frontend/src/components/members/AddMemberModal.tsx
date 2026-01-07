@@ -14,6 +14,7 @@ interface FormData {
   lastName: string;
   phone: string;
   email: string;
+  smsConsent: boolean;
 }
 
 export function AddMemberModal({ isOpen, onClose, onSuccess }: AddMemberModalProps) {
@@ -23,6 +24,7 @@ export function AddMemberModal({ isOpen, onClose, onSuccess }: AddMemberModalPro
       lastName: '',
       phone: '',
       email: '',
+      smsConsent: false,
     }
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -38,6 +40,11 @@ export function AddMemberModal({ isOpen, onClose, onSuccess }: AddMemberModalPro
 
       if (!firstName || !lastName || !phone) {
         toast.error('First name, last name, and phone are required');
+        return;
+      }
+
+      if (!data.smsConsent) {
+        toast.error('Please confirm the member has consented to receive SMS messages');
         return;
       }
 
@@ -118,6 +125,25 @@ export function AddMemberModal({ isOpen, onClose, onSuccess }: AddMemberModalPro
               className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="john@example.com"
             />
+          </div>
+
+          {/* SMS Consent Notice - Required for 10DLC Compliance */}
+          <div className="bg-blue-50 dark:bg-slate-700/50 border border-blue-200 dark:border-slate-600 rounded-lg p-4">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                {...register('smsConsent', { required: true })}
+                className="mt-1 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700 dark:text-gray-300">
+                <strong>SMS Consent Confirmation *</strong>
+                <br />
+                By adding this member, I confirm they have agreed to receive SMS notifications from our church through KoinoniaSMS. Message frequency may vary. Standard message and data rates may apply. Members can reply STOP to opt out or HELP for assistance.
+              </span>
+            </label>
+            {errors.smsConsent && (
+              <p className="text-red-500 text-xs mt-2">You must confirm SMS consent</p>
+            )}
           </div>
 
           <div className="flex gap-3 pt-4">

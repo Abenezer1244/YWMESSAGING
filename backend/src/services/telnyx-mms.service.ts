@@ -105,7 +105,6 @@ export async function sendMMS(
       where: { id: churchId },
       select: {
         telnyxPhoneNumber: true,
-        usingSharedBrand: true,
         dlcBrandId: true,
         deliveryRate: true,
       },
@@ -130,15 +129,8 @@ export async function sendMMS(
       }/api/webhooks/telnyx/status`,
     };
 
-    // Add brand ID based on delivery tier
-    if (church.usingSharedBrand) {
-      // Using platform's shared brand (65% delivery)
-      const platformBrandId = process.env.TELNYX_PLATFORM_BRAND_ID;
-      if (platformBrandId) {
-        payload.brand_id = platformBrandId;
-      }
-    } else if (!church.usingSharedBrand && church.dlcBrandId) {
-      // Using church's personal 10DLC brand (99% delivery)
+    // Add church's 10DLC brand ID (premium delivery)
+    if (church.dlcBrandId) {
       payload.brand_id = church.dlcBrandId;
     }
 
@@ -148,11 +140,10 @@ export async function sendMMS(
       console.log(`📎 Attaching media: ${mediaS3Url}`);
     }
 
-    // Log outbound attempt with delivery rate
-    const brandType = church.usingSharedBrand ? 'shared' : 'personal';
-    const deliveryPercent = Math.round((church.deliveryRate || 0.65) * 100);
+    // Log outbound attempt with delivery rate (premium 10DLC only)
+    const deliveryPercent = Math.round((church.deliveryRate || 0.99) * 100);
     console.log(`📤 Sending ${mediaS3Url ? 'MMS' : 'SMS'}: from ${church.telnyxPhoneNumber} to ${to}`);
-    console.log(`   Brand: ${brandType} (${deliveryPercent}% delivery rate)`);
+    console.log(`   Brand: premium 10DLC (${deliveryPercent}% delivery rate)`);
     console.log(`   Message: "${message.substring(0, 80)}${message.length > 80 ? '...' : ''}"`);
 
     // Send via Telnyx
@@ -200,22 +191,23 @@ export async function sendMMS(
 }
 
 /**
- * Handle inbound MMS webhook
- * Called when member sends photo/video/audio/document to church number
+ * Handle inbound message webhook (SMS/MMS/RCS)
+ * Called when member sends message to church number
  */
 export async function handleInboundMMS(
   churchId: string,
   senderPhone: string,
   messageText: string,
   mediaUrls: string[],
-  telnyxMessageId?: string
+  telnyxMessageId?: string,
+  channel: 'sms' | 'mms' | 'rcs' = 'sms' // Channel type for RCS tracking
 ): Promise<{
   conversationId: string;
   messageIds: string[];
 }> {
   try {
     console.log(
-      `📱 Inbound MMS: ${senderPhone} → Church (${mediaUrls.length} media files)`
+      `📱 Inbound ${channel.toUpperCase()}: ${senderPhone} → Church (${mediaUrls.length} media files)`
     );
 
     const tenantPrisma = await getTenantPrisma(churchId);
@@ -275,11 +267,12 @@ export async function handleInboundMMS(
           content: messageText,
           direction: 'inbound',
           providerMessageId: telnyxMessageId, // Store Telnyx ID for idempotency
+          channel, // Track SMS/MMS/RCS for iMessage-style features
         },
       });
 
       messageIds.push(textMessage.id);
-      console.log(`📝 Created text message: ${textMessage.id}`);
+      console.log(`📝 Created text message: ${textMessage.id} (${channel})`);
     }
 
     // 4. Process each media attachment
@@ -305,6 +298,7 @@ export async function handleInboundMMS(
             content: messageText || `[${uploadResult.metadata.type}]`,
             direction: 'inbound',
             providerMessageId: telnyxMessageId, // Store Telnyx ID for idempotency
+            channel, // Track SMS/MMS/RCS for iMessage-style features
             mediaUrl: uploadResult.s3Url,
             mediaType: uploadResult.metadata.type,
             mediaName: fileName,
@@ -318,7 +312,7 @@ export async function handleInboundMMS(
         });
 
         messageIds.push(mediaMessage.id);
-        console.log(`🖼️ Created media message: ${mediaMessage.id}`);
+        console.log(`🖼️ Created media message: ${mediaMessage.id} (${channel})`);
       } catch (error: any) {
         console.error(`❌ Failed to process media: ${error.message}`);
         // Continue with next media instead of failing entire webhook

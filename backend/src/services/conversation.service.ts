@@ -1,5 +1,5 @@
 import type { TenantPrismaClient } from '../lib/tenant-prisma.js';
-import * as telnyxService from './telnyx.service.js';
+import { sendRCSWithFallback } from './telnyx-rcs.service.js';
 import { decrypt, decryptPhoneSafe } from '../utils/encryption.utils.js';
 import { getCached, setCached, invalidateCache } from './cache.service.js';
 
@@ -145,22 +145,35 @@ export async function getConversation(
       throw new Error('Conversation not found');
     }
 
-    // Get messages (paginated)
+    // Get messages (paginated) with reactions and reply info
+    // Note: reactions and replyTo relations require Prisma client regeneration after migration
+    const includeOptions: any = {
+      member: {
+        select: {
+          firstName: true,
+          lastName: true,
+        },
+      },
+      // Include reactions (iMessage-style) - available after migration
+      reactions: true,
+      // Include replied-to message preview (iMessage-style) - available after migration
+      replyTo: {
+        select: {
+          id: true,
+          content: true,
+          direction: true,
+        },
+      },
+    };
+
     const [messages, total] = await Promise.all([
       tenantPrisma.conversationMessage.findMany({
         where: { conversationId },
-        include: {
-          member: {
-            select: {
-              firstName: true,
-              lastName: true,
-            },
-          },
-        },
+        include: includeOptions,
         orderBy: { createdAt: 'asc' },
         skip,
         take: limit,
-      }),
+      }) as Promise<any[]>,
       tenantPrisma.conversationMessage.count({
         where: { conversationId },
       }),
@@ -172,7 +185,7 @@ export async function getConversation(
       status: conversation.status,
       unreadCount: conversation.unreadCount,
       createdAt: conversation.createdAt,
-      messages: messages.map((msg) => ({
+      messages: messages.map((msg: any) => ({
         id: msg.id,
         content: msg.content,
         direction: msg.direction,
@@ -187,6 +200,16 @@ export async function getConversation(
         mediaHeight: msg.mediaHeight,
         mediaDuration: msg.mediaDuration,
         createdAt: msg.createdAt,
+        // RCS fields (iMessage-style)
+        channel: msg.channel,
+        rcsReadAt: msg.rcsReadAt,
+        // Reply threading (iMessage-style)
+        replyToId: msg.replyToId,
+        replyTo: msg.replyTo,
+        // Reactions (iMessage-style)
+        reactions: msg.reactions || [],
+        // Send effect (iMessage-style)
+        sendEffect: msg.sendEffect,
       })),
       pagination: {
         page,
@@ -203,14 +226,15 @@ export async function getConversation(
 
 /**
  * Broadcast outbound reply to all congregation members
- * ✅ OPTIMIZED: Parallel SMS sending instead of sequential
- * Before: 10s (sequential, 1000 members * 10ms per SMS)
- * After: 1s (parallel, limited by slowest single SMS)
+ * ✅ OPTIMIZED: Parallel RCS/SMS sending instead of sequential
+ * ✅ RCS: HD media, read receipts, typing indicators (iMessage-style)
+ * Falls back to SMS automatically when RCS not available
  */
 async function broadcastOutboundToMembers(
   tenantId: string,
   tenantPrisma: TenantPrismaClient,
-  content: string
+  content: string,
+  mediaUrl?: string  // Optional media URL for HD images/videos via RCS
 ): Promise<void> {
   try {
     // Get all members through conversations
@@ -249,15 +273,18 @@ async function broadcastOutboundToMembers(
 
     console.log(`📢 Broadcasting reply to ${uniqueMembers.length} members`);
 
-    // ✅ Send SMS in PARALLEL to all members (instead of sequential)
+    // ✅ Send via RCS with SMS fallback in PARALLEL to all members
     const messageText = `Church: ${content}`;
     const sendPromises = uniqueMembers.map(async (member) => {
       try {
         // Decrypt phone number (stored encrypted in database, or plain text for legacy records)
         const decryptedPhone = decryptPhoneSafe(member.phone);
-        await telnyxService.sendSMS(decryptedPhone, messageText, tenantId);
-        console.log(`   ✓ Sent to ${member.firstName}`);
-        return { success: true, member: member.firstName };
+
+        // Use RCS with automatic SMS fallback for iMessage-style delivery
+        const result = await sendRCSWithFallback(decryptedPhone, messageText, tenantId, { mediaUrl });
+
+        console.log(`   ✓ Sent to ${member.firstName} via ${result.channel.toUpperCase()}`);
+        return { success: true, member: member.firstName, channel: result.channel };
       } catch (error: any) {
         console.error(`   ✗ Failed to send to ${member.firstName}: ${error.message}`);
         return { success: false, member: member.firstName, error: error.message };
@@ -267,12 +294,17 @@ async function broadcastOutboundToMembers(
     // Wait for all SMS sends to complete (don't fail if any individual send fails)
     const results = await Promise.allSettled(sendPromises);
 
-    // Count successes
-    const successCount = results.filter(
+    // Count successes and channel breakdown
+    const successResults = results.filter(
       (r) => r.status === 'fulfilled' && r.value.success
+    );
+    const rcsCount = successResults.filter(
+      (r) => r.status === 'fulfilled' && r.value.channel === 'rcs'
     ).length;
+    const smsCount = successResults.length - rcsCount;
 
-    console.log(`✅ Broadcast sent to ${successCount}/${uniqueMembers.length} members`);
+    console.log(`✅ Broadcast sent to ${successResults.length}/${uniqueMembers.length} members`);
+    console.log(`   📱 RCS: ${rcsCount} | SMS fallback: ${smsCount}`);
   } catch (error: any) {
     console.error('❌ Error broadcasting outbound reply:', error);
     // Don't throw - continue processing even if broadcast fails
@@ -281,12 +313,17 @@ async function broadcastOutboundToMembers(
 
 /**
  * Create text-only reply message
+ * Supports reply threading (replyToId) and send effects (sendEffect)
  */
 export async function createReply(
   tenantId: string,
   tenantPrisma: TenantPrismaClient,
   conversationId: string,
-  content: string
+  content: string,
+  options?: {
+    replyToId?: string;
+    sendEffect?: string;
+  }
 ): Promise<any> {
   try {
     const conversation = await tenantPrisma.conversation.findUnique({
@@ -298,15 +335,19 @@ export async function createReply(
       throw new Error('Conversation not found');
     }
 
-    // Create message
-    const message = await tenantPrisma.conversationMessage.create({
-      data: {
-        conversationId,
-        memberId: conversation.memberId,
-        content,
-        direction: 'outbound',
-      },
-    });
+    // Create message with optional reply threading and send effects
+    const messageData: any = {
+      conversationId,
+      memberId: conversation.memberId,
+      content,
+      direction: 'outbound',
+    };
+    if (options?.replyToId) messageData.replyToId = options.replyToId;
+    if (options?.sendEffect) messageData.sendEffect = options.sendEffect;
+
+    const message = await (tenantPrisma.conversationMessage.create({
+      data: messageData,
+    }) as Promise<any>);
 
     // Update conversation
     await tenantPrisma.conversation.update({
@@ -326,6 +367,9 @@ export async function createReply(
       direction: message.direction,
       deliveryStatus: message.deliveryStatus,
       createdAt: message.createdAt,
+      replyToId: message.replyToId,
+      replyTo: (message as any).replyTo,
+      sendEffect: message.sendEffect,
     };
   } catch (error: any) {
     console.error('Error creating reply:', error);
@@ -388,9 +432,9 @@ export async function createReplyWithMedia(
       data: { lastMessageAt: new Date() },
     });
 
-    // Broadcast to all members
+    // Broadcast to all members with HD media via RCS
     const displayText = content || `[${mediaData.type}]`;
-    await broadcastOutboundToMembers(tenantId, tenantPrisma, displayText);
+    await broadcastOutboundToMembers(tenantId, tenantPrisma, displayText, mediaData.s3Url);
 
     return {
       id: message.id,

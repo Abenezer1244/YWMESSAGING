@@ -56,16 +56,98 @@ export declare const NewPasswordSchema: z.ZodObject<{
 }>;
 export declare const SendMessageSchema: z.ZodObject<{
     content: z.ZodString;
-    recipientIds: z.ZodArray<z.ZodString, "many">;
+    recipientIds: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    targetType: z.ZodOptional<z.ZodEnum<["individual", "all"]>>;
+    targetIds: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     scheduleTime: z.ZodOptional<z.ZodString>;
+    richCard: z.ZodOptional<z.ZodObject<{
+        title: z.ZodString;
+        description: z.ZodOptional<z.ZodString>;
+        imageUrl: z.ZodOptional<z.ZodString>;
+        rsvpUrl: z.ZodOptional<z.ZodString>;
+        websiteUrl: z.ZodOptional<z.ZodString>;
+        phoneNumber: z.ZodOptional<z.ZodString>;
+        location: z.ZodOptional<z.ZodObject<{
+            latitude: z.ZodNumber;
+            longitude: z.ZodNumber;
+            label: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            latitude: number;
+            longitude: number;
+            label: string;
+        }, {
+            latitude: number;
+            longitude: number;
+            label: string;
+        }>>;
+        quickReplies: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    }, "strip", z.ZodTypeAny, {
+        title: string;
+        description?: string | undefined;
+        phoneNumber?: string | undefined;
+        imageUrl?: string | undefined;
+        rsvpUrl?: string | undefined;
+        websiteUrl?: string | undefined;
+        location?: {
+            latitude: number;
+            longitude: number;
+            label: string;
+        } | undefined;
+        quickReplies?: string[] | undefined;
+    }, {
+        title: string;
+        description?: string | undefined;
+        phoneNumber?: string | undefined;
+        imageUrl?: string | undefined;
+        rsvpUrl?: string | undefined;
+        websiteUrl?: string | undefined;
+        location?: {
+            latitude: number;
+            longitude: number;
+            label: string;
+        } | undefined;
+        quickReplies?: string[] | undefined;
+    }>>;
 }, "strip", z.ZodTypeAny, {
     content: string;
-    recipientIds: string[];
+    recipientIds?: string[] | undefined;
+    targetType?: "individual" | "all" | undefined;
+    targetIds?: string[] | undefined;
     scheduleTime?: string | undefined;
+    richCard?: {
+        title: string;
+        description?: string | undefined;
+        phoneNumber?: string | undefined;
+        imageUrl?: string | undefined;
+        rsvpUrl?: string | undefined;
+        websiteUrl?: string | undefined;
+        location?: {
+            latitude: number;
+            longitude: number;
+            label: string;
+        } | undefined;
+        quickReplies?: string[] | undefined;
+    } | undefined;
 }, {
     content: string;
-    recipientIds: string[];
+    recipientIds?: string[] | undefined;
+    targetType?: "individual" | "all" | undefined;
+    targetIds?: string[] | undefined;
     scheduleTime?: string | undefined;
+    richCard?: {
+        title: string;
+        description?: string | undefined;
+        phoneNumber?: string | undefined;
+        imageUrl?: string | undefined;
+        rsvpUrl?: string | undefined;
+        websiteUrl?: string | undefined;
+        location?: {
+            latitude: number;
+            longitude: number;
+            label: string;
+        } | undefined;
+        quickReplies?: string[] | undefined;
+    } | undefined;
 }>;
 export declare const MessageFilterSchema: z.ZodObject<{
     status: z.ZodOptional<z.ZodEnum<["draft", "scheduled", "sending", "sent", "failed"]>>;
@@ -202,16 +284,98 @@ export declare const newPasswordSchema: z.ZodObject<{
 }>;
 export declare const sendMessageSchema: z.ZodObject<{
     content: z.ZodString;
-    recipientIds: z.ZodArray<z.ZodString, "many">;
+    recipientIds: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    targetType: z.ZodOptional<z.ZodEnum<["individual", "all"]>>;
+    targetIds: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     scheduleTime: z.ZodOptional<z.ZodString>;
+    richCard: z.ZodOptional<z.ZodObject<{
+        title: z.ZodString;
+        description: z.ZodOptional<z.ZodString>;
+        imageUrl: z.ZodOptional<z.ZodString>;
+        rsvpUrl: z.ZodOptional<z.ZodString>;
+        websiteUrl: z.ZodOptional<z.ZodString>;
+        phoneNumber: z.ZodOptional<z.ZodString>;
+        location: z.ZodOptional<z.ZodObject<{
+            latitude: z.ZodNumber;
+            longitude: z.ZodNumber;
+            label: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            latitude: number;
+            longitude: number;
+            label: string;
+        }, {
+            latitude: number;
+            longitude: number;
+            label: string;
+        }>>;
+        quickReplies: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    }, "strip", z.ZodTypeAny, {
+        title: string;
+        description?: string | undefined;
+        phoneNumber?: string | undefined;
+        imageUrl?: string | undefined;
+        rsvpUrl?: string | undefined;
+        websiteUrl?: string | undefined;
+        location?: {
+            latitude: number;
+            longitude: number;
+            label: string;
+        } | undefined;
+        quickReplies?: string[] | undefined;
+    }, {
+        title: string;
+        description?: string | undefined;
+        phoneNumber?: string | undefined;
+        imageUrl?: string | undefined;
+        rsvpUrl?: string | undefined;
+        websiteUrl?: string | undefined;
+        location?: {
+            latitude: number;
+            longitude: number;
+            label: string;
+        } | undefined;
+        quickReplies?: string[] | undefined;
+    }>>;
 }, "strip", z.ZodTypeAny, {
     content: string;
-    recipientIds: string[];
+    recipientIds?: string[] | undefined;
+    targetType?: "individual" | "all" | undefined;
+    targetIds?: string[] | undefined;
     scheduleTime?: string | undefined;
+    richCard?: {
+        title: string;
+        description?: string | undefined;
+        phoneNumber?: string | undefined;
+        imageUrl?: string | undefined;
+        rsvpUrl?: string | undefined;
+        websiteUrl?: string | undefined;
+        location?: {
+            latitude: number;
+            longitude: number;
+            label: string;
+        } | undefined;
+        quickReplies?: string[] | undefined;
+    } | undefined;
 }, {
     content: string;
-    recipientIds: string[];
+    recipientIds?: string[] | undefined;
+    targetType?: "individual" | "all" | undefined;
+    targetIds?: string[] | undefined;
     scheduleTime?: string | undefined;
+    richCard?: {
+        title: string;
+        description?: string | undefined;
+        phoneNumber?: string | undefined;
+        imageUrl?: string | undefined;
+        rsvpUrl?: string | undefined;
+        websiteUrl?: string | undefined;
+        location?: {
+            latitude: number;
+            longitude: number;
+            label: string;
+        } | undefined;
+        quickReplies?: string[] | undefined;
+    } | undefined;
 }>;
 export declare const messageFilterSchema: z.ZodObject<{
     status: z.ZodOptional<z.ZodEnum<["draft", "scheduled", "sending", "sent", "failed"]>>;
@@ -311,10 +475,16 @@ export declare const GetConversationsSchema: z.ZodObject<{
 }>;
 export declare const ReplyToConversationSchema: z.ZodObject<{
     content: z.ZodString;
+    replyToId: z.ZodOptional<z.ZodString>;
+    sendEffect: z.ZodOptional<z.ZodEnum<["slam", "loud", "gentle", "invisibleInk", "none"]>>;
 }, "strip", z.ZodTypeAny, {
     content: string;
+    replyToId?: string | undefined;
+    sendEffect?: "none" | "slam" | "loud" | "gentle" | "invisibleInk" | undefined;
 }, {
     content: string;
+    replyToId?: string | undefined;
+    sendEffect?: "none" | "slam" | "loud" | "gentle" | "invisibleInk" | undefined;
 }>;
 export declare const ReplyWithMediaSchema: z.ZodObject<{
     content: z.ZodOptional<z.ZodString>;

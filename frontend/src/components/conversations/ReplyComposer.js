@@ -1,15 +1,25 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState, useRef } from 'react';
-import { Send, Paperclip, X, AlertCircle } from 'lucide-react';
+import { Send, Paperclip, X, AlertCircle, Reply, Sparkles } from 'lucide-react';
 import { SoftButton } from '../SoftUI';
 import Input from '../ui/Input';
 import { Spinner } from '../ui';
-export function ReplyComposer({ conversationId, onReply, isLoading, }) {
+// Available send effects (iMessage-style)
+const SEND_EFFECTS = [
+    { value: 'none', label: 'Normal', icon: '💬' },
+    { value: 'slam', label: 'Slam', icon: '💥' },
+    { value: 'loud', label: 'Loud', icon: '📢' },
+    { value: 'gentle', label: 'Gentle', icon: '🌸' },
+    { value: 'invisibleInk', label: 'Invisible Ink', icon: '🔮' },
+];
+export function ReplyComposer({ conversationId, onReply, isLoading, replyToMessage, onCancelReply, }) {
     const [message, setMessage] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
     const [filePreview, setFilePreview] = useState(null);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState(null);
+    const [sendEffect, setSendEffect] = useState('none');
+    const [showEffectPicker, setShowEffectPicker] = useState(false);
     const fileInputRef = useRef(null);
     const handleFileSelect = async (e) => {
         const file = e.target.files?.[0];
@@ -105,7 +115,11 @@ export function ReplyComposer({ conversationId, onReply, isLoading, }) {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ content: message }),
+                    body: JSON.stringify({
+                        content: message,
+                        replyToId: replyToMessage?.id,
+                        sendEffect: sendEffect !== 'none' ? sendEffect : undefined,
+                    }),
                 });
                 if (!response.ok) {
                     const errorData = await response.json();
@@ -113,7 +127,12 @@ export function ReplyComposer({ conversationId, onReply, isLoading, }) {
                 }
                 // Clear state
                 setMessage('');
-                await onReply('');
+                setSendEffect('none');
+                onCancelReply?.();
+                await onReply('', {
+                    replyToId: replyToMessage?.id,
+                    sendEffect: sendEffect !== 'none' ? sendEffect : undefined,
+                });
             }
             catch (err) {
                 console.error('Send error:', err);
@@ -127,7 +146,7 @@ export function ReplyComposer({ conversationId, onReply, isLoading, }) {
         const mb = bytes / 1024 / 1024;
         return mb > 1 ? `${mb.toFixed(1)}MB` : `${(bytes / 1024).toFixed(0)}KB`;
     };
-    return (_jsxs("div", { className: "bg-card border-t border-border p-4", children: [error && (_jsxs("div", { className: "mb-3 flex items-center gap-2 p-3 bg-red-500/10 text-red-600 rounded-lg", children: [_jsx(AlertCircle, { size: 16, className: "flex-shrink-0" }), _jsx("p", { className: "text-sm", children: error }), _jsx("button", { onClick: () => setError(null), className: "ml-auto text-red-600 hover:text-red-700", children: _jsx(X, { size: 16 }) })] })), filePreview && (_jsxs("div", { className: "mb-3 relative inline-block", children: [_jsx("img", { src: filePreview, alt: "Preview", className: "max-h-40 rounded-lg border border-border" }), _jsx("button", { onClick: () => {
+    return (_jsxs("div", { className: "bg-card border-t border-border p-4", children: [replyToMessage && (_jsxs("div", { className: "mb-3 flex items-center gap-2 p-2 bg-muted/50 rounded-lg border-l-4 border-primary", children: [_jsx(Reply, { size: 14, className: "text-primary flex-shrink-0" }), _jsxs("div", { className: "flex-1 min-w-0", children: [_jsxs("p", { className: "text-xs font-medium text-muted-foreground", children: ["Replying to ", replyToMessage.direction === 'outbound' ? 'yourself' : 'member'] }), _jsx("p", { className: "text-sm truncate", children: replyToMessage.content })] }), _jsx("button", { onClick: onCancelReply, className: "text-muted-foreground hover:text-foreground flex-shrink-0", children: _jsx(X, { size: 16 }) })] })), error && (_jsxs("div", { className: "mb-3 flex items-center gap-2 p-3 bg-red-500/10 text-red-600 rounded-lg", children: [_jsx(AlertCircle, { size: 16, className: "flex-shrink-0" }), _jsx("p", { className: "text-sm", children: error }), _jsx("button", { onClick: () => setError(null), className: "ml-auto text-red-600 hover:text-red-700", children: _jsx(X, { size: 16 }) })] })), filePreview && (_jsxs("div", { className: "mb-3 relative inline-block", children: [_jsx("img", { src: filePreview, alt: "Preview", className: "max-h-40 rounded-lg border border-border" }), _jsx("button", { onClick: () => {
                             setSelectedFile(null);
                             setFilePreview(null);
                             if (fileInputRef.current)
@@ -143,6 +162,11 @@ export function ReplyComposer({ conversationId, onReply, isLoading, }) {
                                 e.preventDefault();
                                 handleSend();
                             }
-                        }, className: "flex-1" }), _jsx(SoftButton, { variant: "primary", size: "md", onClick: handleSend, disabled: !message && !selectedFile || uploading || isLoading, className: "flex-shrink-0", children: uploading || isLoading ? _jsx(Spinner, { size: "sm" }) : _jsx(Send, { size: 18 }) })] }), selectedFile && (_jsxs("div", { className: "text-xs text-muted-foreground mt-2", children: [formatFileSize(selectedFile.size), " \u2022 Will be sent at full quality"] }))] }));
+                        }, className: "flex-1" }), _jsxs("div", { className: "relative flex-shrink-0", children: [_jsx("button", { onClick: () => setShowEffectPicker(!showEffectPicker), className: `p-2 rounded-lg transition-colors ${sendEffect !== 'none'
+                                    ? 'bg-primary/20 text-primary'
+                                    : 'hover:bg-muted text-muted-foreground'}`, title: "Send with effect", children: _jsx(Sparkles, { size: 18 }) }), showEffectPicker && (_jsxs("div", { className: "absolute bottom-full right-0 mb-2 bg-background border border-border rounded-lg shadow-lg p-2 min-w-[150px] z-10", children: [_jsx("p", { className: "text-xs font-medium text-muted-foreground px-2 mb-2", children: "Send with effect" }), SEND_EFFECTS.map((effect) => (_jsxs("button", { onClick: () => {
+                                            setSendEffect(effect.value);
+                                            setShowEffectPicker(false);
+                                        }, className: `w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm hover:bg-muted ${sendEffect === effect.value ? 'bg-primary/10 text-primary' : ''}`, children: [_jsx("span", { children: effect.icon }), _jsx("span", { children: effect.label })] }, effect.value)))] }))] }), _jsx(SoftButton, { variant: "primary", size: "md", onClick: handleSend, disabled: !message && !selectedFile || uploading || isLoading, className: "flex-shrink-0", children: uploading || isLoading ? _jsx(Spinner, { size: "sm" }) : _jsx(Send, { size: 18 }) })] }), selectedFile && (_jsxs("div", { className: "text-xs text-muted-foreground mt-2", children: [formatFileSize(selectedFile.size), " \u2022 Will be sent at full quality"] }))] }));
 }
 //# sourceMappingURL=ReplyComposer.js.map

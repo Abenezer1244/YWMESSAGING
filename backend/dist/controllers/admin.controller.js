@@ -494,4 +494,57 @@ export async function linkPhoneNumberHandler(req, res) {
         res.status(500).json({ error: errorMessage || 'Failed to link phone number' });
     }
 }
+/**
+ * POST /api/admin/rcs/register
+ * Register RCS Agent ID for the church
+ * This enables iMessage-style rich messaging features
+ */
+export async function registerRCSAgentHandler(req, res) {
+    try {
+        const tenantId = req.tenantId;
+        if (!tenantId) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        const { agentId } = req.body;
+        if (!agentId || typeof agentId !== 'string') {
+            return res.status(400).json({ error: 'RCS Agent ID is required' });
+        }
+        // Validate format (basic check)
+        if (agentId.length < 5 || agentId.length > 100) {
+            return res.status(400).json({ error: 'Invalid RCS Agent ID format' });
+        }
+        const registryPrisma = getRegistryPrisma();
+        // Update church with RCS agent ID
+        const updated = await registryPrisma.church.update({
+            where: { id: tenantId },
+            data: {
+                rcsAgentId: agentId.trim(),
+                rcsAgentWebhookConfigured: false, // Will be set to true when webhook is configured
+            },
+            select: {
+                id: true,
+                rcsAgentId: true,
+                rcsAgentWebhookConfigured: true,
+            },
+        });
+        // Log activity
+        await logActivity(tenantId, req.user?.adminId || '', 'Register RCS Agent', {
+            agentId: agentId.trim(),
+        });
+        console.log(`✅ RCS Agent registered for tenant ${tenantId}: ${agentId}`);
+        res.json({
+            success: true,
+            message: 'RCS Agent registered successfully',
+            data: {
+                agentId: updated.rcsAgentId,
+                webhookConfigured: updated.rcsAgentWebhookConfigured,
+            },
+        });
+    }
+    catch (error) {
+        console.error('Failed to register RCS agent:', error);
+        const errorMessage = error.message;
+        res.status(500).json({ error: errorMessage || 'Failed to register RCS agent' });
+    }
+}
 //# sourceMappingURL=admin.controller.js.map

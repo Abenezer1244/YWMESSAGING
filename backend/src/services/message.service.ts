@@ -10,6 +10,23 @@ export interface CreateMessageData {
   content: string;
   targetType: 'individual' | 'all';
   targetIds?: string[];
+  // RCS Rich Card data (optional) - for iMessage-style rich messages
+  richCard?: {
+    title: string;
+    description?: string;
+    imageUrl?: string;
+    // Action buttons
+    rsvpUrl?: string;
+    websiteUrl?: string;
+    phoneNumber?: string;
+    location?: {
+      latitude: number;
+      longitude: number;
+      label: string;
+    };
+    // Quick reply buttons
+    quickReplies?: string[];
+  };
 }
 
 /**

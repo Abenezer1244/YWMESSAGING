@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { getRegistryPrisma, getTenantPrisma } from '../lib/tenant-prisma.js';
 import Stripe from 'stripe';
-import { handleTelnyxInboundMMS, handleTelnyxWebhook } from '../controllers/conversation.controller.js';
+import { handleTelnyxInboundMMS, handleTelnyxWebhook, handleTelnyxRCSWebhook } from '../controllers/conversation.controller.js';
 import { handleTelnyx10DLCWebhook } from '../jobs/10dlc-webhooks.js';
 
 const router = Router();
@@ -577,6 +577,7 @@ async function checkTelnyx10DLCHealth(req: Request, res: Response) {
 router.post('/webhooks/stripe', handleStripeWebhook);
 router.post('/webhooks/telnyx/mms', handleTelnyxInboundMMS);
 router.post('/webhooks/telnyx/status', handleTelnyxWebhook);
+router.post('/webhooks/telnyx/rcs', handleTelnyxRCSWebhook); // RCS read receipts, typing indicators
 
 // 10DLC Webhook routes (raw body is captured by app-level middleware before express.json())
 router.post('/webhooks/10dlc/status', handleTelnyx10DLCStatus);

@@ -55,6 +55,39 @@ export declare function broadcastMessageFailed(churchId: string, messageId: stri
  */
 export declare function broadcastMessageRead(churchId: string, messageId: string, conversationId?: string): void;
 /**
+ * RCS typing indicator event payload
+ */
+export interface RCSTypingEvent {
+    type: 'rcs:typing';
+    conversationId: string;
+    isTyping: boolean;
+    timestamp: string;
+}
+/**
+ * RCS read receipt event payload
+ */
+export interface RCSReadReceiptEvent {
+    type: 'rcs:read_receipt';
+    messageId: string;
+    conversationId: string;
+    readAt: string;
+}
+/**
+ * Broadcast RCS typing indicator to church room
+ * Called when member starts/stops typing (RCS feature)
+ */
+export declare function broadcastRCSTyping(churchId: string, conversationId: string, isTyping: boolean): void;
+/**
+ * Broadcast RCS read receipt to church room
+ * Called when member reads message (RCS feature)
+ */
+export declare function broadcastRCSReadReceipt(churchId: string, messageId: string, conversationId: string, readAt: string): void;
+/**
+ * Generic broadcast to a tenant/church room
+ * Used for custom events like RCS typing/read receipts
+ */
+export declare function broadcastToTenant(churchId: string, eventType: string, payload: Record<string, any>): void;
+/**
  * Get current Socket.io instance
  * Useful for accessing io in other modules
  */

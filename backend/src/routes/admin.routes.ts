@@ -10,6 +10,7 @@ import {
   getActivityLogsHandler,
   logActivityHandler,
   linkPhoneNumberHandler,
+  registerRCSAgentHandler,
 } from '../controllers/admin.controller.js';
 import cacheMonitoringRoutes from './cache-monitoring.routes.js';
 import queueMonitoringRoutes from './queue-monitoring.routes.js';
@@ -35,6 +36,9 @@ router.post('/activity-log', logActivityHandler);
 
 // Phone number endpoints
 router.post('/phone-numbers/link', linkPhoneNumberHandler);
+
+// RCS (Rich Communication Services) endpoints
+router.post('/rcs/register', registerRCSAgentHandler);
 
 // Cache monitoring endpoints (production monitoring)
 router.use('/cache', cacheMonitoringRoutes);

@@ -3,6 +3,7 @@ import { prisma } from '../lib/prisma.js';
 import * as messageService from '../services/message.service.js';
 import * as telnyxService from '../services/telnyx.service.js';
 import * as websocketService from '../services/websocket.service.js';
+import * as rcsService from '../services/telnyx-rcs.service.js';
 import { decrypt, decryptPhoneSafe } from '../utils/encryption.utils.js';
 import { sendMessageSchema, getMessageHistorySchema } from '../lib/validation/schemas.js';
 import { safeValidate } from '../lib/validation/schemas.js';
@@ -38,13 +39,14 @@ export async function sendMessage(req: Request, res: Response) {
       });
     }
 
-    const { content, targetType, targetIds } = validationResult.data as any;
+    const { content, targetType, targetIds, richCard } = validationResult.data as any;
 
-    // Create message record
+    // Create message record (with optional rich card data)
     const message = await messageService.createMessage(tenantId, tenantPrisma, {
       content,
       targetType,
       targetIds,
+      richCard,
     });
 
     // 🔔 Emit WebSocket event: Message sent (broadcasting to all users in this church)
@@ -86,6 +88,8 @@ export async function sendMessage(req: Request, res: Response) {
                   content,
                   recipientId: recipient.id,
                   messageId: message.id,
+                  // RCS rich card data (optional) - for iMessage-style messaging
+                  richCard: richCard || undefined,
                 },
                 {
                   attempts: 3, // Automatic retry up to 3 times
@@ -101,25 +105,49 @@ export async function sendMessage(req: Request, res: Response) {
               console.log(`   ✓ Queued SMS to ${recipient.member.firstName} ${recipient.member.lastName}`);
             } else {
               // Fallback: Send directly if queue is disabled
-              const result = await withRetry(
-                () => telnyxService.sendSMS(
+              let result: { messageSid: string } | { messageId: string; channel: string };
+              let messageId: string;
+
+              // ✅ RCS: Use rich card if data provided (iMessage-style)
+              if (richCard && richCard.title) {
+                const rcsResult = await rcsService.sendChurchAnnouncement(
                   decryptedPhone,
-                  content,
-                  churchId!
-                ),
-                `sendSMS:${recipient.id}`,
-                TELNYX_RETRY_CONFIG
-              );
+                  churchId!,
+                  {
+                    title: richCard.title,
+                    description: richCard.description || content,
+                    imageUrl: richCard.imageUrl,
+                    rsvpUrl: richCard.rsvpUrl,
+                    websiteUrl: richCard.websiteUrl,
+                    phoneNumber: richCard.phoneNumber,
+                    location: richCard.location,
+                    quickReplies: richCard.quickReplies,
+                  }
+                );
+                messageId = rcsResult.messageId;
+                console.log(`   ✓ Sent rich card to ${recipient.member.firstName} via ${rcsResult.channel.toUpperCase()}`);
+              } else {
+                // Standard SMS
+                const smsResult = await withRetry(
+                  () => telnyxService.sendSMS(
+                    decryptedPhone,
+                    content,
+                    churchId!
+                  ),
+                  `sendSMS:${recipient.id}`,
+                  TELNYX_RETRY_CONFIG
+                );
+                messageId = smsResult.messageSid;
+                console.log(`   ✓ Sent SMS to ${recipient.member.firstName} ${recipient.member.lastName}`);
+              }
 
               await tenantPrisma.messageRecipient.update({
                 where: { id: recipient.id },
                 data: {
-                  providerMessageId: result.messageSid,
+                  providerMessageId: messageId,
                   status: 'pending',
                 },
               });
-
-              console.log(`   ✓ Sent to ${recipient.member.firstName} ${recipient.member.lastName}`);
             }
           } catch (error: any) {
             // Mark as failed but continue with other recipients
@@ -243,6 +271,314 @@ export async function getMessageDetails(req: Request, res: Response) {
   }
 }
 
+// ============================================================================
+// RCS RICH MESSAGING ENDPOINTS
+// ============================================================================
+
+/**
+ * POST /api/messages/rcs/announcement
+ * Send a rich card announcement to all members
+ *
+ * Request body:
+ * {
+ *   title: string,
+ *   description: string,
+ *   imageUrl?: string,
+ *   rsvpUrl?: string,
+ *   websiteUrl?: string,
+ *   phoneNumber?: string,
+ *   location?: { latitude, longitude, label },
+ *   quickReplies?: string[]
+ * }
+ */
+export async function sendRichAnnouncement(req: Request, res: Response) {
+  try {
+    const tenantId = req.tenantId;
+    const tenantPrisma = req.prisma;
+
+    if (!tenantId || !tenantPrisma) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized',
+      });
+    }
+
+    const {
+      title,
+      description,
+      imageUrl,
+      rsvpUrl,
+      websiteUrl,
+      phoneNumber,
+      location,
+      quickReplies,
+    } = req.body;
+
+    // Validate required fields
+    if (!title || !description) {
+      return res.status(400).json({
+        success: false,
+        error: 'Title and description are required',
+      });
+    }
+
+    // Get all members with SMS opt-in
+    const members = await tenantPrisma.member.findMany({
+      where: { optInSms: true },
+      select: { id: true, firstName: true, phone: true },
+    });
+
+    if (members.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'No members with SMS opt-in found',
+      });
+    }
+
+    console.log(`📢 Sending RCS announcement "${title}" to ${members.length} members`);
+
+    // Send to each member
+    const results = {
+      total: members.length,
+      rcs: 0,
+      sms: 0,
+      mms: 0,
+      failed: 0,
+    };
+
+    for (const member of members) {
+      try {
+        const decryptedPhone = decryptPhoneSafe(member.phone);
+        if (!decryptedPhone) {
+          results.failed++;
+          continue;
+        }
+
+        const result = await rcsService.sendChurchAnnouncement(
+          decryptedPhone,
+          tenantId,
+          {
+            title,
+            description,
+            imageUrl,
+            rsvpUrl,
+            websiteUrl,
+            phoneNumber,
+            location,
+            quickReplies,
+          }
+        );
+
+        if (result.success) {
+          results[result.channel]++;
+        } else {
+          results.failed++;
+        }
+      } catch (error: any) {
+        console.error(`Failed to send to ${member.firstName}:`, error.message);
+        results.failed++;
+      }
+    }
+
+    console.log(`📢 Announcement results: RCS=${results.rcs}, SMS=${results.sms}, MMS=${results.mms}, Failed=${results.failed}`);
+
+    res.json({
+      success: true,
+      data: {
+        message: `Announcement sent to ${results.total} members`,
+        results,
+      },
+    });
+  } catch (error: any) {
+    console.error('Error sending announcement:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+}
+
+/**
+ * POST /api/messages/rcs/event
+ * Send an event invitation to all members
+ *
+ * Request body:
+ * {
+ *   title: string,
+ *   description: string,
+ *   imageUrl?: string,
+ *   startTime: string (ISO 8601),
+ *   endTime: string (ISO 8601),
+ *   location?: { latitude, longitude, label }
+ * }
+ */
+export async function sendEventInvitation(req: Request, res: Response) {
+  try {
+    const tenantId = req.tenantId;
+    const tenantPrisma = req.prisma;
+
+    if (!tenantId || !tenantPrisma) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized',
+      });
+    }
+
+    const { title, description, imageUrl, startTime, endTime, location } = req.body;
+
+    if (!title || !description || !startTime || !endTime) {
+      return res.status(400).json({
+        success: false,
+        error: 'Title, description, startTime, and endTime are required',
+      });
+    }
+
+    // Get all members
+    const members = await tenantPrisma.member.findMany({
+      where: { optInSms: true },
+      select: { id: true, firstName: true, phone: true },
+    });
+
+    console.log(`📅 Sending event invitation "${title}" to ${members.length} members`);
+
+    const results = { total: members.length, rcs: 0, sms: 0, mms: 0, failed: 0 };
+
+    for (const member of members) {
+      try {
+        const decryptedPhone = decryptPhoneSafe(member.phone);
+        if (!decryptedPhone) {
+          results.failed++;
+          continue;
+        }
+
+        const result = await rcsService.sendEventInvitation(
+          decryptedPhone,
+          tenantId,
+          { title, description, imageUrl, startTime, endTime, location }
+        );
+
+        if (result.success) {
+          results[result.channel]++;
+        } else {
+          results.failed++;
+        }
+      } catch (error: any) {
+        results.failed++;
+      }
+    }
+
+    res.json({
+      success: true,
+      data: { message: `Event invitation sent`, results },
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+}
+
+/**
+ * POST /api/messages/rcs/schedule
+ * Send weekly schedule as a carousel
+ *
+ * Request body:
+ * {
+ *   events: Array<{
+ *     title: string,
+ *     description: string,
+ *     imageUrl?: string,
+ *     location?: { latitude, longitude, label }
+ *   }>
+ * }
+ */
+export async function sendWeeklySchedule(req: Request, res: Response) {
+  try {
+    const tenantId = req.tenantId;
+    const tenantPrisma = req.prisma;
+
+    if (!tenantId || !tenantPrisma) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized',
+      });
+    }
+
+    const { events } = req.body;
+
+    if (!events || !Array.isArray(events) || events.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Events array is required',
+      });
+    }
+
+    // Get all members
+    const members = await tenantPrisma.member.findMany({
+      where: { optInSms: true },
+      select: { id: true, firstName: true, phone: true },
+    });
+
+    console.log(`📆 Sending weekly schedule (${events.length} events) to ${members.length} members`);
+
+    const results = { total: members.length, rcs: 0, sms: 0, mms: 0, failed: 0 };
+
+    for (const member of members) {
+      try {
+        const decryptedPhone = decryptPhoneSafe(member.phone);
+        if (!decryptedPhone) {
+          results.failed++;
+          continue;
+        }
+
+        const result = await rcsService.sendWeeklySchedule(
+          decryptedPhone,
+          tenantId,
+          events
+        );
+
+        if (result.success) {
+          results[result.channel]++;
+        } else {
+          results.failed++;
+        }
+      } catch (error: any) {
+        results.failed++;
+      }
+    }
+
+    res.json({
+      success: true,
+      data: { message: `Weekly schedule sent`, results },
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+}
+
+/**
+ * GET /api/messages/rcs/status
+ * Check RCS configuration status for the church
+ */
+export async function getRCSStatus(req: Request, res: Response) {
+  try {
+    const tenantId = req.tenantId;
+
+    if (!tenantId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized',
+      });
+    }
+
+    const status = await rcsService.validateRCSSetup(tenantId);
+
+    res.json({
+      success: true,
+      data: status,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+}
 
 /**
  * POST /api/webhooks/telnyx/status

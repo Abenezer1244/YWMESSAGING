@@ -235,6 +235,11 @@ model Conversation {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+  // RCS (Rich Communication Services) fields
+  recipientRcsCapable Boolean  @default(false)  // Whether member's phone supports RCS
+  isTyping            Boolean  @default(false)  // Typing indicator state
+  lastTypingAt        DateTime?                 // When typing indicator was last updated
+
   // Relations
   member          Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
   messages        ConversationMessage[]
@@ -259,6 +264,19 @@ model ConversationMessage {
   providerMessageId String?  // Telnyx message ID
   deliveryStatus  String?    // pending | delivered | failed
 
+  // RCS (Rich Communication Services) fields
+  channel         String   @default("sms")  // sms | mms | rcs
+  rcsReadAt       DateTime?                 // When recipient read the message (RCS only)
+  rcsFallbackReason String?                 // Why message fell back to SMS/MMS
+
+  // Reply threading (iMessage-style)
+  replyToId       String?                   // ID of message being replied to
+  replyTo         ConversationMessage? @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies         ConversationMessage[] @relation("MessageReplies")
+
+  // Send effect animation (iMessage-style)
+  sendEffect      String?                   // slam | loud | gentle | invisibleInk | none
+
   // S3 Media fields
   mediaUrl        String?
   mediaType       String?    // image | video | audio | document
@@ -276,6 +294,7 @@ model ConversationMessage {
   // Relations
   conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   member          Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  reactions       MessageReaction[]
 
   @@index([conversationId])
   @@index([createdAt])
@@ -284,6 +303,25 @@ model ConversationMessage {
   @@index([providerMessageId])
   @@index([conversationId, createdAt])
   @@index([direction, conversationId])
+  @@index([channel])
+  @@index([replyToId])
+}
+
+// ============================================================================
+// MESSAGE REACTIONS (iMessage-style)
+// ============================================================================
+model MessageReaction {
+  id              String   @id @default(cuid())
+  messageId       String
+  emoji           String   // ❤️ 👍 👎 😂 😮 😢
+  reactedBy       String   // "church" or member ID
+  createdAt       DateTime @default(now())
+
+  // Relations
+  message         ConversationMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, emoji, reactedBy])
+  @@index([messageId])
 }
 
 // ============================================================================

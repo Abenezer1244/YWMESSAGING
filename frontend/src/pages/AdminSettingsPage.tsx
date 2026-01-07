@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Settings, Loader, Phone } from 'lucide-react';
+import { Settings, Loader, Phone, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getProfile, updateProfile } from '../api/admin';
 import { getCurrentNumber } from '../api/numbers';
@@ -8,6 +8,7 @@ import CoAdminPanel from '../components/admin/CoAdminPanel';
 import ActivityLogsPanel from '../components/admin/ActivityLogsPanel';
 import { PhoneNumberManager } from '../components/admin/PhoneNumberManager';
 import PhoneNumberPurchaseModal from '../components/PhoneNumberPurchaseModal';
+import { RCSSettingsPanel } from '../components/rcs';
 import { SoftLayout, SoftCard, SoftButton } from '../components/SoftUI';
 import Input from '../components/ui/Input';
 import { MobileTabs, Tab } from '../components/responsive';
@@ -31,7 +32,7 @@ interface ChurchProfile {
 }
 
 export function AdminSettingsPage() {
-  const [activeTab, setActiveTab] = useState<'profile' | 'coadmins' | 'logs' | 'numbers'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'coadmins' | 'logs' | 'numbers' | 'rcs'>('profile');
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [profile, setProfile] = useState<ChurchProfile | null>(null);
@@ -235,10 +236,11 @@ export function AdminSettingsPage() {
                 { label: 'Church Profile', value: 'profile' },
                 { label: 'Co-Admins', value: 'coadmins' },
                 { label: 'Phone Numbers', value: 'numbers' },
+                { label: 'RCS Messaging', value: 'rcs' },
                 { label: 'Activity Logs', value: 'logs' },
               ] as Tab[]}
               value={activeTab}
-              onChange={(value) => setActiveTab(value as 'profile' | 'coadmins' | 'logs' | 'numbers')}
+              onChange={(value) => setActiveTab(value as 'profile' | 'coadmins' | 'logs' | 'numbers' | 'rcs')}
               variant="auto"
               className="p-0"
             />
@@ -643,6 +645,17 @@ export function AdminSettingsPage() {
                       </SoftCard>
                     </div>
                   )}
+                </motion.div>
+              )}
+
+              {/* RCS Messaging Tab */}
+              {activeTab === 'rcs' && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <RCSSettingsPanel />
                 </motion.div>
               )}
 

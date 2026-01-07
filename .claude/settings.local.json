@@ -202,7 +202,11 @@
       "Bash(timeout 20 npx tsx:*)",
       "Bash(NODE_PATH=./node_modules timeout 20 node:*)",
       "Bash(NODE_PATH=./node_modules node:*)",
-      "Bash(to be added as a member. Only registered members can send messages.\"\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(to be added as a member. Only registered members can send messages.\"\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "WebSearch",
+      "WebFetch(domain:telnyx.com)",
+      "WebFetch(domain:developers.telnyx.com)",
+      "Bash(timeout 120 npx tsc:*)"
     ],
     "deny": [],
     "ask": []

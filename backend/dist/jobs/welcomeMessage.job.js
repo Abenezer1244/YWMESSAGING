@@ -25,7 +25,8 @@ export async function sendWelcomeMessage(memberId, churchId // Actually tenantId
         if (!member || !church) {
             return;
         }
-        const welcomeText = `Welcome to ${church.name}!`;
+        // 10DLC Compliant welcome message with opt-out instructions
+        const welcomeText = `KoinoniaSMS: You're now subscribed to ${church.name} updates! Reply HELP for help, STOP to opt out. Msg&data rates may apply. Msg frequency varies.`;
         // Send SMS via Telnyx
         await telnyxService.sendSMS(member.phone, welcomeText, churchId);
         // Record SMS usage for billing (Option 3: $0.02 per SMS)

@@ -1,25 +1,42 @@
 import React, { useState, useRef } from 'react';
-import { Send, Paperclip, X, AlertCircle } from 'lucide-react';
+import { Send, Paperclip, X, AlertCircle, Reply, Sparkles, ChevronDown } from 'lucide-react';
 import { SoftButton } from '../SoftUI';
 import Input from '../ui/Input';
 import { Spinner } from '../ui';
+import { SendEffect, ConversationMessage } from '../../api/conversations';
+
+// Available send effects (iMessage-style)
+const SEND_EFFECTS: { value: SendEffect; label: string; icon: string }[] = [
+  { value: 'none', label: 'Normal', icon: '💬' },
+  { value: 'slam', label: 'Slam', icon: '💥' },
+  { value: 'loud', label: 'Loud', icon: '📢' },
+  { value: 'gentle', label: 'Gentle', icon: '🌸' },
+  { value: 'invisibleInk', label: 'Invisible Ink', icon: '🔮' },
+];
 
 interface ReplyComposerProps {
   conversationId: string;
-  onReply: (message: string) => Promise<void>;
+  onReply: (message: string, options?: { replyToId?: string; sendEffect?: SendEffect }) => Promise<void>;
   isLoading?: boolean;
+  // Reply-to message (iMessage-style)
+  replyToMessage?: ConversationMessage | null;
+  onCancelReply?: () => void;
 }
 
 export function ReplyComposer({
   conversationId,
   onReply,
   isLoading,
+  replyToMessage,
+  onCancelReply,
 }: ReplyComposerProps) {
   const [message, setMessage] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sendEffect, setSendEffect] = useState<SendEffect>('none');
+  const [showEffectPicker, setShowEffectPicker] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -135,7 +152,11 @@ export function ReplyComposer({
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ content: message }),
+            body: JSON.stringify({
+              content: message,
+              replyToId: replyToMessage?.id,
+              sendEffect: sendEffect !== 'none' ? sendEffect : undefined,
+            }),
           }
         );
 
@@ -146,7 +167,12 @@ export function ReplyComposer({
 
         // Clear state
         setMessage('');
-        await onReply('');
+        setSendEffect('none');
+        onCancelReply?.();
+        await onReply('', {
+          replyToId: replyToMessage?.id,
+          sendEffect: sendEffect !== 'none' ? sendEffect : undefined,
+        });
       } catch (err) {
         console.error('Send error:', err);
         setError(err instanceof Error ? err.message : 'Failed to send message');
@@ -162,6 +188,25 @@ export function ReplyComposer({
 
   return (
     <div className="bg-card border-t border-border p-4">
+      {/* Reply-to preview (iMessage-style) */}
+      {replyToMessage && (
+        <div className="mb-3 flex items-center gap-2 p-2 bg-muted/50 rounded-lg border-l-4 border-primary">
+          <Reply size={14} className="text-primary flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-medium text-muted-foreground">
+              Replying to {replyToMessage.direction === 'outbound' ? 'yourself' : 'member'}
+            </p>
+            <p className="text-sm truncate">{replyToMessage.content}</p>
+          </div>
+          <button
+            onClick={onCancelReply}
+            className="text-muted-foreground hover:text-foreground flex-shrink-0"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
       {/* Error message */}
       {error && (
         <div className="mb-3 flex items-center gap-2 p-3 bg-red-500/10 text-red-600 rounded-lg">
@@ -259,6 +304,41 @@ export function ReplyComposer({
           }}
           className="flex-1"
         />
+
+        {/* Send effect picker (iMessage-style) */}
+        <div className="relative flex-shrink-0">
+          <button
+            onClick={() => setShowEffectPicker(!showEffectPicker)}
+            className={`p-2 rounded-lg transition-colors ${
+              sendEffect !== 'none'
+                ? 'bg-primary/20 text-primary'
+                : 'hover:bg-muted text-muted-foreground'
+            }`}
+            title="Send with effect"
+          >
+            <Sparkles size={18} />
+          </button>
+          {showEffectPicker && (
+            <div className="absolute bottom-full right-0 mb-2 bg-background border border-border rounded-lg shadow-lg p-2 min-w-[150px] z-10">
+              <p className="text-xs font-medium text-muted-foreground px-2 mb-2">Send with effect</p>
+              {SEND_EFFECTS.map((effect) => (
+                <button
+                  key={effect.value}
+                  onClick={() => {
+                    setSendEffect(effect.value);
+                    setShowEffectPicker(false);
+                  }}
+                  className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm hover:bg-muted ${
+                    sendEffect === effect.value ? 'bg-primary/10 text-primary' : ''
+                  }`}
+                >
+                  <span>{effect.icon}</span>
+                  <span>{effect.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Send button */}
         <SoftButton

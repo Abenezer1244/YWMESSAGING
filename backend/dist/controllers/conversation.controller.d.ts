@@ -37,4 +37,23 @@ export declare function handleTelnyxInboundMMS(req: Request, res: Response): Pro
  * ✅ SECURITY: Verify Telnyx webhook signature using ED25519
  */
 export declare function handleTelnyxWebhook(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+/**
+ * POST /api/webhooks/telnyx/rcs
+ * Handle RCS-specific webhooks:
+ * - Read receipts (message.read)
+ * - Typing indicators (user_typing_started, user_typing_stopped)
+ * - RCS delivery status
+ * ✅ SECURITY: Verify Telnyx webhook signature using ED25519
+ */
+export declare function handleTelnyxRCSWebhook(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+/**
+ * POST /api/conversations/:conversationId/messages/:messageId/reactions
+ * Add reaction to a message (iMessage-style)
+ */
+export declare function addReaction(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+/**
+ * DELETE /api/conversations/:conversationId/messages/:messageId/reactions/:emoji
+ * Remove reaction from a message (iMessage-style)
+ */
+export declare function removeReaction(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 //# sourceMappingURL=conversation.controller.d.ts.map

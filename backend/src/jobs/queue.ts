@@ -2,6 +2,7 @@ import Bull from 'bull';
 import { getTenantPrisma } from '../lib/tenant-prisma.js';
 import * as telnyxService from '../services/telnyx.service.js';
 import * as telnyxMMSService from '../services/telnyx-mms.service.js';
+import * as rcsService from '../services/telnyx-rcs.service.js';
 const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
 
 // ✅ PHASE 1: SMS queue re-enabled for improved reliability and throughput
@@ -81,25 +82,51 @@ if (analyticsQueue) {
 // Only register if queues are enabled
 if (smsQueue) {
   smsQueue.process(async (job) => {
-  const { phone, churchId, content, recipientId, messageId, conversationMessageId, queueId } = job.data;
+  const { phone, churchId, content, recipientId, messageId, conversationMessageId, queueId, richCard } = job.data;
 
   try {
     console.log(`📤 SMS Queue: Processing job ${job.id}`);
     console.log(`   To: ${phone}`);
     console.log(`   Content: ${content.substring(0, 50)}...`);
     console.log(`   Attempt: ${job.attemptsMade + 1}/${job.opts.attempts}`);
+    if (richCard) {
+      console.log(`   RCS Rich Card: ${richCard.title}`);
+    }
 
     const tenantPrisma = await getTenantPrisma(churchId);
 
-    // Send via Telnyx
-    const result = await telnyxService.sendSMS(phone, content, churchId);
+    let providerMessageId: string;
 
-    // Update messageRecipient with Telnyx ID (for new broadcast messages)
+    // ✅ RCS: Use rich card if data provided (iMessage-style)
+    if (richCard && richCard.title) {
+      const rcsResult = await rcsService.sendChurchAnnouncement(
+        phone,
+        churchId,
+        {
+          title: richCard.title,
+          description: richCard.description || content,
+          imageUrl: richCard.imageUrl,
+          rsvpUrl: richCard.rsvpUrl,
+          websiteUrl: richCard.websiteUrl,
+          phoneNumber: richCard.phoneNumber,
+          location: richCard.location,
+          quickReplies: richCard.quickReplies,
+        }
+      );
+      providerMessageId = rcsResult.messageId;
+      console.log(`   ✓ Sent via ${rcsResult.channel.toUpperCase()}`);
+    } else {
+      // Standard SMS
+      const result = await telnyxService.sendSMS(phone, content, churchId);
+      providerMessageId = result.messageSid;
+    }
+
+    // Update messageRecipient with provider message ID (for new broadcast messages)
     if (recipientId) {
       await tenantPrisma.messageRecipient.update({
         where: { id: recipientId },
         data: {
-          providerMessageId: result.messageSid,
+          providerMessageId: providerMessageId,
           status: 'pending',
         },
       }).catch((err) => {
@@ -107,12 +134,12 @@ if (smsQueue) {
       });
     }
 
-    // Update conversationMessage with Telnyx ID (for legacy conversation messages)
+    // Update conversationMessage with provider message ID (for legacy conversation messages)
     if (conversationMessageId) {
       await tenantPrisma.conversationMessage.update({
         where: { id: conversationMessageId },
         data: {
-          providerMessageId: result.messageSid,
+          providerMessageId: providerMessageId,
           deliveryStatus: 'pending',
         },
       }).catch((err) => {
@@ -133,8 +160,8 @@ if (smsQueue) {
       });
     }
 
-    console.log(`✅ SMS sent: ${result.messageSid}`);
-    return { success: true, messageSid: result.messageSid };
+    console.log(`✅ Message sent: ${providerMessageId}`);
+    return { success: true, messageSid: providerMessageId };
   } catch (error: any) {
     console.error(`❌ SMS job ${job.id} failed (attempt ${job.attemptsMade + 1}): ${error.message}`);
 
