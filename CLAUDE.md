@@ -14,6 +14,19 @@ When read a files and make sure to read the whole lines chunk by chunk so you wo
 
 CRITICAL: When debugging, you MUST trace through the ENTIRE code flow step by step. No assumptions. No shortcuts.
 
+## ⚠️ DATABASE SAFETY RULES (CRITICAL)
+
+**NEVER** run these commands on production:
+- `npx prisma db push --accept-data-loss` ❌ - CAN DROP TABLES AND DELETE ALL DATA
+- `npx prisma migrate reset` ❌ - DELETES ALL DATA
+
+**ALWAYS** do this before schema changes:
+1. Ask user to confirm they have backups enabled on Render
+2. Use `npx prisma db push` WITHOUT `--accept-data-loss`
+3. If Prisma warns about data loss, STOP and ask user
+
+**For tenant schema:** NEVER run `prisma db push` with tenant-schema.prisma on the main DATABASE_URL - it will drop registry tables (Church, Tenant, AdminEmailIndex).
+
 
 
 ```

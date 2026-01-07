@@ -206,7 +206,8 @@
       "WebSearch",
       "WebFetch(domain:telnyx.com)",
       "WebFetch(domain:developers.telnyx.com)",
-      "Bash(timeout 120 npx tsc:*)"
+      "Bash(timeout 120 npx tsc:*)",
+      "Bash(TENANT_DATABASE_URL=\"postgresql://connect_yw_user:RkFG9qz5nL5wF22BuKEYngvLhsHVyfgP@dpg-d41af09r0fns73c9i010-a.oregon-postgres.render.com/connect_yw_production?sslmode=require\" npx prisma db push:*)"
     ],
     "deny": [],
     "ask": []
