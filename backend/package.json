@@ -32,8 +32,8 @@
     "loadtest:all": "npm run loadtest:smoke && npm run loadtest:load && npm run loadtest:spike && npm run loadtest:conversation"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.480.0",
-    "@aws-sdk/s3-request-presigner": "^3.480.0",
+    "@aws-sdk/client-s3": "^3.1166.0",
+    "@aws-sdk/s3-request-presigner": "^3.1166.0",
     "@paralleldrive/cuid2": "^2.3.1",
     "@prisma/client": "^5.13.0",
     "@sendgrid/mail": "^8.1.6",
